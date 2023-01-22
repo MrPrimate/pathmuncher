@@ -154,7 +154,8 @@ export class Pathmuncher {
         _id: this.actor.id,
         prototypeToken: {},
       },
-      items: {},
+      classes: [],
+      items: [],
     };
   }
 
@@ -173,6 +174,14 @@ export class Pathmuncher {
     } else {
       ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.NoId`));
     }
+  }
+
+  static getSlug(name) {
+    return name.toString().toLowerCase().replace(/[^a-z0-9]+/gi, " ").trim().replace(/\s+|-{2,}/g, "-");
+  }
+
+  static getSlugNoQuote(name) {
+    return name.toString().toLowerCase().replace(/[']+/gi, "").replace(/[^a-z0-9]+/gi, " ").trim().replace(/\s+|-{2,}/g, "-");
   }
 
   #processSpecialData(name) {
@@ -235,7 +244,6 @@ export class Pathmuncher {
     }
   }
 
-
   async #processSenses() {
     const senses = [];
     this.source.specials.forEach((special) => {
@@ -249,6 +257,43 @@ export class Pathmuncher {
     });
     setProperty(this.result.character, "system.traits.senses", senses);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  async #processGenericCompendiumLookup(compendiumLabel, name, target) {
+    const compendium = await game.packs.get(compendiumLabel);
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+
+    for (const element of index) {
+      if (element.slug === Pathmuncher.getSlug(name)
+        || element.slug === Pathmuncher.getSlugNoQuote(name)
+      ) {
+        // eslint-disable-next-line no-await-in-loop
+        const doc = await compendium.getDocument(element._id);
+        target.push(doc.toObject());
+      }
+    }
+  }
+
+  async #processBackground() {
+    if (this.actor.background?.name === this.source.background) return;
+    await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, this.result.items);
+  }
+
+  async #processClass() {
+    if (this.actor.class?.name === this.source.class) return;
+    await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, this.result.class);
+  }
+
+  async #processAncestry() {
+    if (this.actor.ancestry?.name === this.source.ancestry) return;
+    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, this.result.items);
+  }
+
+  async #processHeritage() {
+    if (this.actor.heritage?.name === this.source.heritage) return;
+    await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.ancestry, this.result.items);
+  }
+
 
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
@@ -310,11 +355,25 @@ export class Pathmuncher {
     if (!this.source) return;
     this.#prepare();
     this.#processCore();
+    this.#processBackground();
+    this.#processClass();
+    this.#processAncestry();
+    this.#processHeritage();
   }
 
   async updateActor() {
+    const moneyIds = this.options.delete.addMoney
+      ? []
+      : this.actor.items.filter((i) =>
+        i.type === "treasure"
+        && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name)
+      );
+
+    // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
+
     await this.actor.update(this.result.character);
+    await this.actor.createEmbeddedDocuments("Item", this.result.class);
     await this.actor.createEmbeddedDocuments("Item", this.result.items);
   }
 }
