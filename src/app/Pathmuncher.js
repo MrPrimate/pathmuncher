@@ -135,6 +135,114 @@ export class Pathmuncher {
     ];
   }
 
+  // specials that are handled by Foundry:
+  static FOUNDRY_SPECIALS = [
+    "Great Fortitude",
+    "Divine Spellcasting",
+    "Divine Ally (Blade)",
+    "Divine Ally (Shield)",
+    "Divine Ally (Steed)",
+    "Divine Smite (Antipaladin)",
+    "Divine Smite (Paladin)",
+    "Divine Smite (Desecrator)",
+    "Divine Smite (Liberator)",
+    "Divine Smite (Redeemer)",
+    "Divine Smite (Tyrant)",
+    "Exalt (Antipaladin)",
+    "Exalt (Paladin)",
+    "Exalt (Desecrator)",
+    "Exalt (Redeemer)",
+    "Exalt (Liberator)",
+    "Exalt (Tyrant)",
+    "Intimidation",
+    "Axe",
+    "Sword",
+    "Water",
+    "Sword Cane",
+    "Battle Axe",
+    "Bane",
+    "Air",
+    "Occultism",
+    "Performance",
+    "Alchemy",
+    "Nature",
+    "Red",
+    "Shark",
+    "Green",
+    "Divine",
+    "Sun",
+    "Fire",
+    "Might",
+    "Mace",
+    "Bronze",
+    "Spirit",
+    "Zeal",
+    "Battledancer",
+    "Light Armor Expertise",
+    "Religion",
+    "Polearm",
+    "Longsword",
+    "Moon",
+    "Hammer",
+    "Athletics",
+    "Deception",
+    "Society",
+    "Occultism",
+    "Arcane",
+    "Simple Weapon Expertise",
+    "Defensive Robes",
+    "Magical Fortitude",
+    "Occult",
+    "Acrobatics",
+    "Medicine",
+    "Diplomacy",
+    "Might",
+    "Reflex",
+    "Evasion",
+    "Vigilant Senses",
+    "Iron Will",
+    "Lightning Reflexes",
+    "Alertness",
+    "Shield Block",
+    "Anathema",
+    "Druidic Language",
+    "Weapon Expertise",
+    "Armor Expertise",
+    "Armor Mastery",
+    "Darkvision",
+    "Stealth",
+    "Divine",
+    "Shield",
+    "Survival",
+    "Arcana",
+    "Will",
+    "Fortitude",
+    "Signature Spells",
+    "Low-Light Vision",
+    "Powerful Fist",
+    "Mystic Strikes",
+    "Incredible Movement",
+    "Claws",
+    "Wild Empathy",
+    "Aquatic Adaptation",
+    "Resolve",
+    "Expert Spellcaster",
+    "Master Spellcaster",
+    "Legendary Spellcaster",
+    "Weapon Specialization",
+    "Mighty Rage",
+    "Deny Advantage",
+    "Critical Brutality",
+    "Juggernaut",
+    "Medium Armor Expertise",
+    "Weapon Specialization (Barbarian)",
+    "Greater Weapon Specialization",
+    "Diplomacy",
+    "Improved Evasion",
+    "Weapon Mastery",
+    "Incredible Senses",
+  ];
+
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true } = {}) {
     this.actor = actor;
     this.options = {
@@ -210,8 +318,10 @@ export class Pathmuncher {
     this.source.specials
       .filter((special) => special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
-        const newName = this.SPECIAL_MAP.find((map) => map.name == special);
-        if (!this.#processSpecialData(special)) this.parsed.specials.push(newName?.new ?? special);
+        const name = this.SPECIAL_MAP.find((map) => map.name == special) ?? special;
+        if (!this.#processSpecialData(name) && !Pathmuncher.FOUNDRY_SPECIALS.includes(name)) {
+          this.parsed.specials.push(name);
+        }
       });
     logger.debug("Finished Special Rename");
 
@@ -368,6 +478,20 @@ export class Pathmuncher {
         i.type === "treasure"
         && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name)
       );
+
+    const classIds = this.actor.items.filter((i) => i.type === "class");
+    const backgroundIds = this.actor.items.filter((i) => i.type === "background");
+    const heritageIds = this.actor.items.filter((i) => i.type === "heritage");
+    const ancestryIds = this.actor.items.filter((i) => i.type === "ancestry");
+    const treasureIds = this.actor.items.filter((i) => i.type === "treasure");
+    const featIds = this.actor.items.filter((i) => i.type === "feat");
+    const actionIds = this.actor.items.filter((i) => i.type === "action");
+    const equipmentIds = this.actor.items.filter((i) => i.type === "equipment");
+    const loreIds = this.actor.items.filter((i) => i.type === "lore");
+    const backpackIds = this.actor.items.filter((i) => i.type === "backpack");
+    const weaponIds = this.actor.items.filter((i) => i.type === "weapon");
+    const armorIds = this.actor.items.filter((i) => i.type === "armor");
+    const consumableIds = this.actor.items.filter((i) => i.type === "consumable");
 
     // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
