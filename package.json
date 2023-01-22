@@ -1,0 +1,22 @@
+{
+  "name": "pathmuncher",
+  "version": "0.0.1",
+  "author": "MrPrimate",
+  "description": "Foundry VTT module for integrating Pathfinder 2e Pathbuilder characters",
+  "private": true,
+  "scripts": {
+    "lint": "npx eslint src/",
+    "lint-fix": "npx eslint src/ --fix",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "2.3.2",
+    "terser": "^5.10.0",
+    "terser-webpack-plugin": "^5.3.0",
+    "webpack": "^5.49.0",
+    "webpack-cli": "^4.7.2"
+  }
+}
