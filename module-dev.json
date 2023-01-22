@@ -41,7 +41,7 @@
       }
     ]
   },
-  "esmodules": ["src/index.js"],
+  "esmodules": ["src/module.js"],
   "styles": [
     "./css/default.css"
   ],

@@ -6,8 +6,8 @@ const CONSTANTS = {
   FLAG_NAME: "pathmuncher",
   SETTINGS: {
     // Enable options
-    ENABLE_WOUNDS: "enable-wounds",
     LOG_LEVEL: "log-level",
+    RESTRICT_TO_TRUSTED: "restrict-to-trusted",
   },
 
   GET_DEFAULT_SETTINGS() {
@@ -22,9 +22,9 @@ const CONSTANTS = {
 
 CONSTANTS.DEFAULT_SETTINGS = {
   // Enable options
-  [CONSTANTS.SETTINGS.ENABLE_WOUNDS]: {
-    name: `${CONSTANTS.FLAG_NAME}.Settings.EnableWounds.Name`,
-    hint: `${CONSTANTS.FLAG_NAME}.Settings.EnableWounds.Hint`,
+  [CONSTANTS.SETTINGS.RESTRICT_TO_TRUSTED]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Hint`,
     scope: "world",
     config: true,
     type: Boolean,
@@ -51,6 +51,6 @@ CONSTANTS.DEFAULT_SETTINGS = {
 
 };
 
-CONSTANTS.PATH = `modules/${CONSTANTS.MODULE_NAME}/`;
+CONSTANTS.PATH = `modules/${CONSTANTS.MODULE_NAME}`;
 
 export default CONSTANTS;

@@ -1,0 +1,38 @@
+{
+  "pathmuncher": {
+    "ModuleName": "Pathmuncher",
+    "Settings": {
+      "Reset": {
+        "Title": "Reset settings to default",
+        "Label": "Reset Pathmuncher Settings",
+        "Hint": "This will reset all of the module's settings back to their defaults."
+      },
+      "RestrictToTrusted": {
+        "Name": "Restrict Import to trusted users?",
+        "Hint": "Only trusted users will be able to import"
+      },
+      "LogLevel": {
+        "Name": "Log Level",
+        "Hint": "The level of logs to place into the console.",
+        "debug": "DEBUG - Lots of details",
+        "info": "INFO - Informative messages",
+        "warn": "WARN - Warnings & warnings only",
+        "error": "ERROR - Errors only",
+        "off": "OFF"
+      }
+    },
+    "Dialogs": {
+      "ResetSettings": {
+          "Title": "Pathmuncher | Reset Settings",
+          "Content": "Are you sure you want to reset all of the Pathmuncher module settings' to their defaults?",
+          "Confirm": "Reset Module Settings",
+          "Cancel": "Cancel"
+      },
+      "Pathmuncher": {
+          "Title": "Pathmuncher | Import a character from Pathbuilder"
+      }
+    },
+    "Chat": {
+    }
+  }
+}
