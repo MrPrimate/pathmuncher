@@ -1,4 +1,4 @@
-import { Pathmuncher } from "../app/Pathmuncher.js";
+import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
 import CONSTANTS from "../constants.js";
 import utils from "../utils.js";
 
@@ -22,7 +22,7 @@ export function registerSheetButton() {
       const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-hat-wizard"></i> Pathmuncher</a>`);
 
       button.click(() => {
-        const muncher = new Pathmuncher(Pathmuncher.defaultOptions, data.actor);
+        const muncher = new PathmuncherImporter(PathmuncherImporter.defaultOptions, data.actor);
         muncher.render(true);
       });
 

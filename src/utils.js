@@ -20,7 +20,7 @@ const utils = {
     const flags = actor.flags[CONSTANTS.FLAG_NAME]
       ? actor.flags[CONSTANTS.FLAG_NAME]
       : {
-        pathbuilderId: "",
+        pathbuilderId: undefined,
       };
     return flags;
   },

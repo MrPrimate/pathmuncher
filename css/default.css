@@ -1,0 +1,79 @@
+.pathmuncher #textBoxBuildID {
+  border: 0px;
+  padding-left: 15px;
+  letter-spacing: 42px;
+  background-image: linear-gradient(to left, black 70%, rgba(255, 255, 255, 0) 0%);
+  background-position: bottom;
+  background-size: 50px 1px;
+  background-repeat: repeat-x;
+  background-position-x: 35px;
+  width: 330px;
+  min-width: 330px;
+}
+.pathmuncher #divInner{
+  left: 0;
+  position: sticky;
+}
+.pathmuncher #divOuter{
+  width: 285px;
+  overflow: hidden;
+}
+.pathmuncher #divCode{
+  border: 1px solid black;
+  width: 300px;
+  margin: 0 auto;
+  padding: 5px;
+}
+.pathmuncher #checkBoxMoney{
+  margin-left: 35px;
+}
+
+.pathmuncher .import-invalid {
+  display: none;
+}
+
+.pathmuncher .import-hidden {
+  visibility: hidden;
+}
+
+.pathmuncher .import-progress {
+  background-color: #f1f1f1;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.pathmuncher .import-progress .import-progress-bar {
+  max-width: 100%;
+  height: 24px;
+  background-color: green;
+  text-align: center;
+}
+
+.pathmuncher .import-progress .import-progress-bar span {
+  white-space: nowrap;
+  line-height: 24px;
+}
+
+.pathmuncher .pathmuncher-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.pathmuncher .pathmuncher-working {
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 135px;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.pathmuncher .pathmuncher-working i {
+  transform: rotate(360deg);
+  -webkit-animation: roll 3s infinite;
+  animation: roll 3s infinite;
+}

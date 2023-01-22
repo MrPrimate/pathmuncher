@@ -23,16 +23,29 @@
     },
     "Dialogs": {
       "ResetSettings": {
-          "Title": "Pathmuncher | Reset Settings",
-          "Content": "Are you sure you want to reset all of the Pathmuncher module settings' to their defaults?",
-          "Confirm": "Reset Module Settings",
-          "Cancel": "Cancel"
+        "Title": "Pathmuncher | Reset Settings",
+        "Content": "Are you sure you want to reset all of the Pathmuncher module settings' to their defaults?",
+        "Confirm": "Reset Module Settings",
+        "Cancel": "Cancel"
+      },
+      "PathmuncherImporter": {
+        "Title": "Pathmuncher | Import a character from Pathbuilder",
+        "Button": "Import",
+        "StepOne": "<b>Step 1:</b> Export your character using \"Export JSON\" from Pathbuilder via the burger menu",
+        "StepTwo": "<b>Step 2:</b> Enter the 6 digit user ID number from the pathbuilder export dialog below",
+        "Feats": "Feats and Specials?",
+        "Equipment": "Equipment?",
+        "Money": "Money?",
+        "Spells": "Spells?",
+        "DeleteAll": "Delete all?",
+        "PathBuilderId": "Your Pathbuilder ID number",
+        "Munching": "Munching..."
       },
       "Pathmuncher": {
-          "Title": "Pathmuncher | Import a character from Pathbuilder"
+        "FetchFailed": "Unable to fetch a character with Pathbuilder id {pathbuilderId}!",
+        "NoId": "No Pathbuilder Id detected!"
       }
     },
-    "Chat": {
-    }
+    "Chat": {}
   }
 }
