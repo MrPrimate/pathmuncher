@@ -1,0 +1,50 @@
+{
+  "id": "pathmuncher",
+  "author": "MrPrimate",
+  "title": "Pathmuncher",
+  "license": "MIT License",
+  "description": "Import your Pathfinder 2e characters from Pathbuilder into Foundry",
+  "version": "999.0.0",
+  "download": "",
+  "manifest": "https://raw.githubusercontent.com/MrPrimate/pathmuncher/main/module-dev.json",
+  "url": "https://github.com/mrprimate/pathmuncher",
+  "readme": "https://github.com/MrPrimate/pathmuncher/blob/main/README.md",
+  "changelog": "https://github.com/MrPrimate/pathmuncher/blob/main/CHANGELOG.md",
+  "compatibility": {
+    "minimum": "10.291",
+    "verified": 10
+  },
+  "authors": [
+    {
+      "name": "MrPrimate",
+      "email": "jack@mrprimate.co.uk",
+      "url": "https://mrprimate.co.uk",
+      "patreon": "https://www.patreon.com/MrPrimate",
+      "discord": "https://discord.gg/WzPuRuDJVP"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "compatibility": {
+          "verified": "4.6.8"
+        }
+      }
+    ]
+  },
+  "esmodules": ["dist/main.js"],
+  "styles": [
+    "./css/default.css"
+  ],
+  "packs": [],
+  "socket": true
+}
