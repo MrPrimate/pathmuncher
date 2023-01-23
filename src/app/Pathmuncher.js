@@ -632,36 +632,37 @@ export class Pathmuncher {
       w.added = true;
     }
 
-    for (const w of this.source.armor) {
-      const indexMatch = index.find((i) => i.system.slug === w.slug);
+    for (const a of this.source.armor) {
+      const indexMatch = index.find((i) => i.system.slug === a.slug);
       if (!indexMatch) {
-        logger.error(`Unable to match advetnurers kit item ${w.name}`, w);
+        logger.error(`Unable to match advetnurers kit item ${a.name}`, a);
         continue;
       }
-
 
       // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
-      itemData.system.quantity = w.qty;
-      itemData.system.damage.die = w.die;
-      itemData.system.potencyRune.value = w.pot;
-      itemData.system.strikingRune.value = w.str;
+      itemData.system.quantity = a.qty;
+      itemData.system.category = a.prof;
+      itemData.system.potencyRune.value = a.pot;
+      itemData.system.resiliencyRune.value = a.res;
+      itemData.system.equipped.value = a.worn ?? false;
 
-      if (w.runes[0]) itemData.system.propertyRune1.value = utils.camelCase(w.runes[0]);
-      if (w.runes[1]) itemData.system.propertyRune2.value = utils.camelCase(w.runes[1]);
-      if (w.runes[2]) itemData.system.propertyRune3.value = utils.camelCase(w.runes[2]);
-      if (w.runes[3]) itemData.system.propertyRune4.value = utils.camelCase(w.runes[3]);
-      if (w.mat) {
-        const material = w.mat.split(" (")[0];
+      if (a.runes[0]) itemData.system.propertyRune1.value = utils.camelCase(a.runes[0]);
+      if (a.runes[1]) itemData.system.propertyRune2.value = utils.camelCase(a.runes[1]);
+      if (a.runes[2]) itemData.system.propertyRune3.value = utils.camelCase(a.runes[2]);
+      if (a.runes[3]) itemData.system.propertyRune4.value = utils.camelCase(a.runes[3]);
+      if (a.mat) {
+        const material = a.mat.split(" (")[0];
         itemData.system.preciousMaterial.value = utils.camelCase(material);
-        itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(w.mat);
+        itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(a.mat);
       }
-      if (w.display) itemData.name = w.display;
+      if (a.display) itemData.name = a.display;
 
       this.result.items.push(itemData);
-      w.added = true;
+      a.added = true;
     }
+  }
 
   async #generateMoney() {
     if (!this.options.addMoney) return;
