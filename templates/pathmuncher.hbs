@@ -1,37 +1,32 @@
-<div>
+<form>
   <p>{{{localize "pathmuncher.Dialogs.PathmuncherImporter.StepOne"}}}</p>
   <p>{{{localize "pathmuncher.Dialogs.PathmuncherImporter.StepTwo"}}}</p>
   <div>
     <hr/>
-    <form>
-      <input type="checkbox" id="checkBoxFeats" name="checkBoxFeats" checked>
+      <input type="checkbox" id="checkBoxFeats" name="checkBoxFeats" {{#if flags.addFeats}}checked{{else}}{{/if}}>
       <label for="checkBoxFeats"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Feats"}}</label><br>
-      <input type="checkbox" id="checkBoxEquipment" name="checkBoxEquipment" checked>
+      <input type="checkbox" id="checkBoxEquipment" name="checkBoxEquipment" {{#if flags.addEquipment}}checked{{else}}{{/if}}>
       <label for="checkBoxEquipment"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Equipment"}}</label><br>
-      <input type="checkbox" id="checkBoxMoney" name="checkBoxMoney" checked>
+      <input type="checkbox" id="checkBoxMoney" name="checkBoxMoney" {{#if flags.addMoney}}checked{{else}}{{/if}}>
       <label for="checkBoxMoney"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Money"}}</label><br>
-      <input type="checkbox" id="checkBoxSpells" name="checkBoxSpells" checked>
+      <input type="checkbox" id="checkBoxSpells" name="checkBoxSpells" {{#if flags.addSpells}}checked{{else}}{{/if}}>
       <label for="checkBoxSpells"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Spells"}}</label><br>
-      <!--
-      <input type="checkbox" id="checkBoxDeleteAll" name="checkBoxDeleteAll" checked>
-      <label for="checkBoxDeleteAll"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.DeleteAll"}}</label><br> -->
     <hr/>
     <div id="divCode">
       {{localize "pathmuncher.Dialogs.PathmuncherImporter.PathBuilderId"}}<br>
       <div id="divOuter">
         <div id="divInner">
-          <input id="textBoxBuildID" type="number" maxlength="6" value="{{ id }}"/>
+          <input id="textBoxBuildID" name="textBoxBuildID" type="number" maxlength="6" value="{{ id }}"/>
         </div>
       </div>
     </div>
-    </form>
     <hr>
     <div class="import-progress import-hidden">
       <div class="pathmuncher import-progress-bar" style="width: 0%"></div>
     </div>
     <hr>
      <div>
-      <button class="pathmuncher-button" data-button="pathmuncher">
+      <button class="pathmuncher-button" type="submit" data-button="pathmuncher">
         <i class="fas fa-check"></i>
         {{localize "pathmuncher.Dialogs.PathmuncherImporter.Button"}}
       </button>
@@ -42,4 +37,4 @@
       <div style="font-size: 15px; text-align: center;">{{localize "pathmuncher.Dialogs.PathmuncherImporter.Munching"}}</div>
     </div>
   </div>
-</div>
+</form>

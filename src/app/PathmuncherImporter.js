@@ -7,6 +7,7 @@ export class PathmuncherImporter extends FormApplication {
   constructor(options, actor) {
     super(options);
     this.actor = game.actors.get(actor.id ? actor.id : actor._id);
+    this.backup = duplicate(this.actor);
   }
 
   static get defaultOptions() {
@@ -15,6 +16,7 @@ export class PathmuncherImporter extends FormApplication {
     options.template = `${CONSTANTS.PATH}/templates/pathmuncher.hbs`;
     options.classes = ["pathmuncher"];
     options.width = 400;
+    options.closeOnSubmit = false;
     return options;
   }
 
@@ -33,9 +35,6 @@ export class PathmuncherImporter extends FormApplication {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
-    this.html = html;
-
-    html.find(".pathmuncher-button").on("click", this.importCharacter.bind(this));
   }
 
   static _updateProgress(total, count, type) {
@@ -47,29 +46,29 @@ export class PathmuncherImporter extends FormApplication {
       );
   }
 
-  async importCharacter(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    const a = event.currentTarget;
-    const action = a.dataset.button;
+  async _updateObject(event, formData) {
+    const pathbuilderId = formData.textBoxBuildID;
 
-    if (action !== "pathmuncher") return;
+    const options = {
+      pathbuilderId,
+      addMoney: formData.checkBoxMoney,
+      addFeats: formData.checkBoxFeats,
+      addSpells: formData.checkBoxSpells,
+      addEquipment: formData.checkBoxEquipment,
+    };
+    console.warn(options)
 
-    console.warn(this.form);
-    const pathbuilderId = this.form[4].value;
+    await utils.setFlags(this.actor, options);
 
-    const flags = utils.getFlags(this.actor);
-    flags.pathbuilderId = pathbuilderId;
-    await utils.setFlags(this.actor, flags);
-
-    const pathmuncher = new Pathmuncher(this.actor);
+    const pathmuncher = new Pathmuncher(this.actor, options);
     await pathmuncher.fetchPathbuilder(pathbuilderId);
     console.warn(pathmuncher.source);
 
     await pathmuncher.processCharacter();
 
     console.warn(pathmuncher);
+
+    // this.close();
 
   }
 
