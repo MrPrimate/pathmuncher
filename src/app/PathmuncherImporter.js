@@ -68,6 +68,8 @@ export class PathmuncherImporter extends FormApplication {
 
     console.warn(pathmuncher);
 
+    await pathmuncher.updateActor();
+
     // this.close();
 
   }

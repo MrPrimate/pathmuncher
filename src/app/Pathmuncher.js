@@ -246,13 +246,20 @@ export class Pathmuncher {
 
   static RESTRICTED_ITEMS = ["Bracers of Armor"];
 
-  constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true } = {}) {
+  constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
+    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true } = {}
+  ) {
     this.actor = actor;
     this.options = {
-      addMoney: addMoney,
-      addFeats: addFeats,
-      addSpells: addSpells,
-      addEquipment: addEquipment,
+      addTreasure,
+      addMoney,
+      addFeats,
+      addSpells,
+      addEquipment,
+      addLores,
+      addWeapons,
+      addArmor,
+      addDeity,
     };
     this.source = null;
     this.parsed = {
@@ -266,13 +273,30 @@ export class Pathmuncher {
         _id: this.actor.id,
         prototypeToken: {},
       },
-      classes: [],
+      class: [],
+      deity: [],
+      heritage: [],
+      ancestory: [],
+      background: [],
+      casters: [],
+      spells: [],
       items: [],
       adventurersPack: {
         item: null,
-        contents: [],
-      }
+        contents: [
+          { slug: "bedroll", qty: 1 },
+          { slug: "chalk", qty: 10 },
+          { slug: "flint-and-steel", qty: 1 },
+          { slug: "rope", qty: 1 },
+          { slug: "rations", qty: 14 },
+          { slug: "torch", qty: 5 },
+          { slug: "waterskin", qty: 1 },
+        ],
+      },
+      focusPool: 0,
     };
+    this.check = [];
+    this.bad = [];
   }
 
   async fetchPathbuilder(pathbuilderId) {
@@ -354,7 +378,7 @@ export class Pathmuncher {
       .forEach((e) => {
         const name = e[0];
         const newName = Pathmuncher.EQUIPMENT_MAP.find((item) => item.name == name);
-        const item = { name: newName?.new ?? name, qty: e[1] };
+        const item = { name: newName?.new ?? name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
     logger.debug("Finished Equipment Rename");
@@ -363,9 +387,9 @@ export class Pathmuncher {
     this.source.specials
       .filter((special) => special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
-        const name = this.SPECIAL_MAP.find((map) => map.name == special) ?? special;
+        const name = this.SPECIAL_MAP.find((map) => map.name == special)?.new ?? special;
         if (!this.#processSpecialData(name) && !Pathmuncher.FOUNDRY_SPECIALS.includes(name)) {
-          this.parsed.specials.push(name);
+          this.parsed.specials.push({ name, added: false });
         }
       });
     logger.debug("Finished Special Rename");
@@ -374,10 +398,15 @@ export class Pathmuncher {
     this.source.feats
       .filter((feat) => feat[0] && feat[0] !== "undefined" && feat[0] !== this.source.heritage)
       .forEach((feat) => {
-        const name = feat[0];
-        const newName = this.SPECIAL_MAP.find((special) => special.name == name);
-        if (newName?.new) feat[0] = newName.new;
-        this.parsed.feats.push(feat);
+        const newName = this.SPECIAL_MAP.find((special) => special.name == feat[0]);
+        const data = {
+          name: newName?.new ?? feat[0],
+          extra: feat[1],
+          added: false,
+          type: feat[2],
+          level: feat[3],
+        };
+        this.parsed.feats.push(data);
       });
     logger.debug("Finished Feat Rename");
   }
@@ -418,27 +447,30 @@ export class Pathmuncher {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    for (const element of index) {
-      if (element.slug === Pathmuncher.getSlug(name)
-        || element.slug === Pathmuncher.getSlugNoQuote(name)
-      ) {
-        // eslint-disable-next-line no-await-in-loop
-        const doc = await compendium.getDocument(element._id);
-        target.push(doc.toObject());
-      }
+    const indexMatch = index.find((i) =>
+      i.system.slug === Pathmuncher.getSlug(name)
+      || i.system.slug === Pathmuncher.getSlugNoQuote(name)
+    );
+
+    console.warn({ compendiumLabel, name, target, indexMatch});
+    if (indexMatch) {
+      const doc = await compendium.getDocument(indexMatch._id);
+      this.result[target].push(doc.toObject());
+      return true;
+    } else {
+      return false;
     }
   }
 
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
     setProperty(this.result.character, "prototypeToken.name", this.source.name);
-    setProperty(this.result.character, "system.details.level", this.source.level);
+    setProperty(this.result.character, "system.details.level.value", this.source.level);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
     setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
     setProperty(this.result.character, "system.details.keyability.value", this.source.keyability);
-    setProperty(this.result.character, "system.details.deity.value", this.source.deity);
-
+    if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
     setProperty(this.result.character, "system.traits.size.value", Pathmuncher.getSizeValue(this.source.size));
     setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
 
@@ -486,85 +518,92 @@ export class Pathmuncher {
   }
 
   async #generateFeatItems(compendiumLabel) {
-    const featArray = this.parsed.specials.concat(this.parsed.feats);
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    for (const pBFeat of featArray) {
-      const name = pBFeat[0];
-      const extra = pBFeat[1];
-      const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(name)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(name)
-        || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(name))
-        || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(name))
-        || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(name))
-      );
-      const displayName = extra ? `${name} (${extra})` : name;
-      if (!indexMatch && !this.result.items.some((i) => i.name === displayName)) continue;
+    for (const featArray of [this.parsed.feats, this.parsed.specials]) {
+      for (const pBFeat of featArray) {
 
-      // eslint-disable-next-line no-await-in-loop
-      const doc = await compendium.getDocument(indexMatch._id);
-      const item = doc.toObject();
-      item.name = displayName;
+        const indexMatch = index.find((i) =>
+          i.system.slug === Pathmuncher.getSlug(pBFeat.name)
+          || i.system.slug === Pathmuncher.getSlugNoQuote(pBFeat.name)
+          || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(pBFeat.name))
+          || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(pBFeat.name))
+          || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(pBFeat.name))
+        );
+        const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
+        if (!indexMatch) {
+          logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
+          this.check.push({ name: displayName, type: "feat", details: { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel } });
+          continue;
+        }
+        if (this.result.items.some((i) => i.name === displayName)) {
+          logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
+          continue;
+        }
+        pBFeat.added = true;
+        // eslint-disable-next-line no-await-in-loop
+        const doc = await compendium.getDocument(indexMatch._id);
+        const item = doc.toObject();
+        item.name = displayName;
 
-      try {
-        if (pBFeat[2] && pBFeat[3]) {
-          const location = this.getFoundryFeatLocation(pBFeat[2], pBFeat[3]);
+        if (pBFeat.type && pBFeat.level) {
+          const location = Pathmuncher.getFoundryFeatLocation(pBFeat.type, pBFeat.level);
           if (!this.usedLocations.includes(location)) {
             item.system.location = location;
             this.usedLocations.push(location);
           }
         }
-      } catch (err) {
-        logger.error("Failed to parse pbFeat properly", { pBFeat, item, err });
+
+        this.result.items.push(item);
       }
-      this.result.items.push(item);
     }
   }
 
-  async #generateSpecialItems(compendiumLable) {
-    const compendium = await game.packs.get(compendiumLable);
+  async #generateSpecialItems(compendiumLabel) {
+    const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const special of this.parsed.specials) {
+      if (special.added) return;
       const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(special)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(special)
-        || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(special))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getClassAdjustedSpecialNameLowerCase(special))
-        || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(special))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getAncestryAdjustedSpecialNameLowerCase(special))
-        || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(special))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getHeritageAdjustedSpecialNameLowerCase(special))
+        i.system.slug === Pathmuncher.getSlug(special.name)
+        || i.system.slug === Pathmuncher.getSlugNoQuote(special.name)
+        || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getClassAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
       );
-      if (!indexMatch && !this.result.items.some((i) => i.name === special)) continue;
+      if (!indexMatch) {
+        logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
+        this.check.push({ name: special.name, type: "special", details: { special: special.name, compendiumLabel } });
+        continue;
+      }
+      if (this.result.items.some((i) => i.name === special.name)) {
+        logger.debug("Special already generated", { special: special.name, compendiumLabel });
+        continue;
+      }
+      special.added = true;
+
       // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
       this.result.items.push(doc.toObject());
     }
   }
 
-  // eslint-disable-next-line complexity
   async #generateEquipmentItems() {
     const compendium = game.packs.get("pf2e.equipment-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const compendiumBackpack = await compendium.getDocument("3lgwjrFEsQVKzhh7");
-    const backpackInstance = compendiumBackpack.toObject();
 
     const adventurersPack = this.parsed.equipment.find((e) => e.name === "Adventurer's Pack");
-    if (adventurersPack) {
+    const backpackInstance = adventurersPack ? compendiumBackpack.toObject() : null;
+    if (backpackInstance) {
       adventurersPack.added = true;
       this.result.adventurersPack.item = adventurersPack;
-      this.result.adventurersPack.contents.push(
-        { slug: "bedroll", qty: 1 },
-        { slug: "chalk", qty: 10 },
-        { slug: "flint-and-steel", qty: 1 },
-        { slug: "rope", qty: 1 },
-        { slug: "rations", qty: 14 },
-        { slug: "torch", qty: 5 },
-        { slug: "waterskin", qty: 1 },
-      );
+      this.result.items.push(backpackInstance);
     }
 
     for (const e of this.parsed.equipment.filter((e) => e.name !== "Adventurer's Pack")) {
@@ -574,12 +613,13 @@ export class Pathmuncher {
       );
       if (!indexMatch) {
         logger.error(`Unable to match ${e.name}`, e);
+        this.bad.push({ name: e.name, type: "equipment", details: { e } });
         continue;
       }
 
       // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
-      if (doc.type != "kit") {
+      if (doc.type != "kit" || (doc.type === "treasure" && !this.options.addTreasure)) {
         const itemData = doc.toObject();
         itemData.system.quantity = e.qty;
         this.result.items.push(itemData);
@@ -589,7 +629,7 @@ export class Pathmuncher {
     for (const e of this.result.adventurersPack.contents) {
       const indexMatch = index.find((i) => i.system.slug === e.slug);
       if (!indexMatch) {
-        logger.error(`Unable to match advetnurers kit item ${e.name}`, e);
+        logger.error(`Unable to match adventurers kit item ${e.name}`, e);
         continue;
       }
 
@@ -600,14 +640,22 @@ export class Pathmuncher {
       itemData.system.containerId = backpackInstance?._id;
       this.result.items.push(itemData);
     }
+  }
+
+  async #generateWeaponItems() {
+    const compendium = game.packs.get("pf2e.equipment-srd");
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const w of this.source.weapons) {
-      const indexMatch = index.find((i) => i.system.slug === w.slug);
+      const indexMatch = index.find((i) =>
+        i.system.slug === Pathmuncher.getSlug(w.name)
+        || i.system.slug === Pathmuncher.getSlugNoQuote(w.name)
+      );
       if (!indexMatch) {
-        logger.error(`Unable to match advetnurers kit item ${w.name}`, w);
+        logger.error(`Unable to match weapon item ${w.name}`, w);
+        this.bad.push({ name: w.name, type: "weapon", details: { w } });
         continue;
       }
-
 
       // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
@@ -631,11 +679,22 @@ export class Pathmuncher {
       this.result.items.push(itemData);
       w.added = true;
     }
+  }
+
+  async #generateArmorItems() {
+    const compendium = game.packs.get("pf2e.equipment-srd");
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const a of this.source.armor) {
-      const indexMatch = index.find((i) => i.system.slug === a.slug);
+      const indexMatch = index.find((i) =>
+        i.system.slug === Pathmuncher.getSlug(a.name)
+        || i.system.slug === Pathmuncher.getSlugNoQuote(a.name)
+        || i.system.slug === Pathmuncher.getSlug(`${a.name} Armor`)
+        || i.system.slug === Pathmuncher.getSlugNoQuote(`${a.name} Armor`)
+      );
       if (!indexMatch) {
-        logger.error(`Unable to match advetnurers kit item ${a.name}`, a);
+        logger.error(`Unable to match armor kit item ${a.name}`, a);
+        this.bad.push({ name: a.name, type: "armor", details: { a } });
         continue;
       }
 
@@ -661,6 +720,159 @@ export class Pathmuncher {
 
       this.result.items.push(itemData);
       a.added = true;
+    }
+  }
+
+  async #generateSpellCaster(caster) {
+    const magicTradition = caster.magicTradition === "focus" ? "divine" : caster.magicTradition;
+    const spellcastingType = caster.magicTradition === "focus" ? caster.magicTradition : caster.spellcastingType;
+
+    const spellcastingEntity = {
+      ability: {
+        value: caster.ability,
+      },
+      proficiency: {
+        value: caster.proficiency / 2,
+      },
+      spelldc: {
+        item: 0,
+      },
+      tradition: {
+        value: magicTradition,
+      },
+      prepared: {
+        value: spellcastingType,
+        flexible: false
+      },
+      slots: {
+        slot0: {
+          max: caster.perDay[0],
+          prepared: [],
+          value: caster.perDay[0],
+        },
+        slot1: {
+          max: caster.perDay[1],
+          prepared: [],
+          value: caster.perDay[1],
+        },
+        slot2: {
+          max: caster.perDay[2],
+          prepared: [],
+          value: caster.perDay[2],
+        },
+        slot3: {
+          max: caster.perDay[3],
+          prepared: [],
+          value: caster.perDay[3],
+        },
+        slot4: {
+          max: caster.perDay[4],
+          prepared: [],
+          value: caster.perDay[4],
+        },
+        slot5: {
+          max: caster.perDay[5],
+          prepared: [],
+          value: caster.perDay[5],
+        },
+        slot6: {
+          max: caster.perDay[6],
+          prepared: [],
+          value: caster.perDay[6],
+        },
+        slot7: {
+          max: caster.perDay[7],
+          prepared: [],
+          value: caster.perDay[7],
+        },
+        slot8: {
+          max: caster.perDay[8],
+          prepared: [],
+          value: caster.perDay[8],
+        },
+        slot9: {
+          max: caster.perDay[9],
+          prepared: [],
+          value: caster.perDay[9],
+        },
+        slot10: {
+          max: caster.perDay[10],
+          prepared: [],
+          value: caster.perDay[10],
+        },
+      },
+      showUnpreparedSpells: { value: true },
+    };
+    const data = {
+      _id: foundry.utils.randomID(),
+      name: caster.name,
+      type: "spellcastingEntry",
+      system: spellcastingEntity,
+    };
+    this.result.casters.push(data);
+    return data;
+  }
+
+  async #processSpells() {
+    if (!this.options.addSpells) return;
+
+    const compendium = game.packs.get("pf2e.spells-srd");
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+
+    for (const caster of this.source.spellCasters) {
+      if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
+      // eslint-disable-next-line no-await-in-loop
+      caster.instance = await this.#generateSpellCaster(caster);
+
+      for (const spellSelection of caster.spells) {
+        const level = spellSelection.level;
+
+        for (const spell of spellSelection.list) {
+          console.warn({spell, spellSelection, list: spellSelection.list})
+          const indexMatch = index.find((i) =>
+            i.system.slug === Pathmuncher.getSlug(spell)
+            || i.system.slug === Pathmuncher.getSlugNoQuote(spell)
+          );
+          if (!indexMatch) {
+            logger.error(`Unable to match spell ${spell}`, { spell, spellSelection, caster });
+            this.bad.push({ name: spell, type: "spell", details: { spell, spellSelection, caster } });
+            continue;
+          }
+
+          // eslint-disable-next-line no-await-in-loop
+          const doc = await compendium.getDocument(indexMatch._id);
+          const itemData = doc.toObject();
+          itemData.system.location.heightenedLevel = level;
+          itemData.system.location.value = caster.instance._id;
+          this.result.spells.push(itemData);
+        }
+      }
+    }
+
+    setProperty(this.result.character, "system.resources.focus.max", this.result.focusPool);
+    setProperty(this.result.character, "system.resources.focus.value", this.result.focusPool);
+  }
+
+  async #generateLores() {
+    if (!this.options.addLores) return;
+    for (const lore of this.source.lores) {
+      const data = {
+        name: lore[0],
+        type: "lore",
+        system: {
+          proficient: {
+            value: lore[1] / 2,
+          },
+          featType: "",
+          mod: {
+            value: 0,
+          },
+          item: {
+            value: 0,
+          },
+        },
+      };
+      this.result.items.push(data);
     }
   }
 
@@ -697,22 +909,25 @@ export class Pathmuncher {
   }
 
   async #processEquipment() {
-    if (!this.options.addEquipment) return;
-    await this.#generateEquipmentItems("");
-
+    if (this.options.addEquipment) await this.#generateEquipmentItems();
+    if (this.options.addWeapons) await this.#generateWeaponItems();
+    if (this.options.addArmor) await this.#generateArmorItems();
   }
 
   async processCharacter() {
     if (!this.source) return;
     this.#prepare();
     await this.#processCore();
-    await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, this.result.items);
-    await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, this.result.class);
-    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, this.result.items);
-    await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.ancestry, this.result.items);
+    await this.#processGenericCompendiumLookup("pf2e.deities", this.source.deity, "deity");
+    await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, "background");
+    await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
+    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestory");
+    await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
     await this.#processFeats();
     await this.#processEquipment();
     await this.#generateMoney();
+    await this.#processSpells();
+    await this.#generateLores();
   }
 
   async updateActor() {
@@ -732,6 +947,7 @@ export class Pathmuncher {
       || i.type === "weapon" || i.type === "armor"
     );
     const loreIds = this.actor.items.filter((i) => i.type === "lore");
+    const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry");
 
     console.warn("ids", {
       moneyIds,
@@ -744,13 +960,20 @@ export class Pathmuncher {
       actionIds,
       equipmentIds,
       loreIds,
+      spellIds,
     });
     // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
+    console.warn(duplicate(this.result));
     await this.actor.update(this.result.character);
-    await this.actor.createEmbeddedDocuments("Item", [this.result.adventurersPack.item]);
+    await this.actor.createEmbeddedDocuments("Item", this.result.ancestory);
+    await this.actor.createEmbeddedDocuments("Item", this.result.heritage);
+    await this.actor.createEmbeddedDocuments("Item", this.result.background);
+    await this.actor.createEmbeddedDocuments("Item", this.result.deity);
     await this.actor.createEmbeddedDocuments("Item", this.result.class);
     await this.actor.createEmbeddedDocuments("Item", this.result.items);
+    await this.actor.createEmbeddedDocuments("Item", this.result.casters);
+    await this.actor.createEmbeddedDocuments("Item", this.result.spells);
   }
 }
