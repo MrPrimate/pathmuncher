@@ -1,4 +1,5 @@
 import CONSTANTS from "../constants.js";
+import logger from "../logger.js";
 import utils from "../utils.js";
 import { Pathmuncher } from "./Pathmuncher.js";
 
@@ -56,22 +57,17 @@ export class PathmuncherImporter extends FormApplication {
       addSpells: formData.checkBoxSpells,
       addEquipment: formData.checkBoxEquipment,
     };
-    console.warn(options)
+    logger.debug("Pathmuncher options", options);
 
     await utils.setFlags(this.actor, options);
 
     const pathmuncher = new Pathmuncher(this.actor, options);
     await pathmuncher.fetchPathbuilder(pathbuilderId);
-    console.warn(pathmuncher.source);
-
+    logger.debug("Pathmuncher Source", pathmuncher.source);
     await pathmuncher.processCharacter();
-
-    console.warn(pathmuncher);
-
+    logger.debug("Post processed character", pathmuncher);
     await pathmuncher.updateActor();
-
-    // this.close();
-
+    this.close();
   }
 
 }

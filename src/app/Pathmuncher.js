@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
@@ -247,9 +248,10 @@ export class Pathmuncher {
   static RESTRICTED_ITEMS = ["Bracers of Armor"];
 
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
-    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true } = {}
+    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true } = {}
   ) {
     this.actor = actor;
+    // note not all these options do anything yet!
     this.options = {
       addTreasure,
       addMoney,
@@ -260,6 +262,8 @@ export class Pathmuncher {
       addWeapons,
       addArmor,
       addDeity,
+      addName,
+      addClass,
     };
     this.source = null;
     this.parsed = {
@@ -268,6 +272,7 @@ export class Pathmuncher {
       equipment: [],
     };
     this.usedLocations = [];
+    this.autoAddedFeatureIds = [];
     this.result = {
       character: {
         _id: this.actor.id,
@@ -280,7 +285,13 @@ export class Pathmuncher {
       background: [],
       casters: [],
       spells: [],
-      items: [],
+      feats: [],
+      weapons: [],
+      armor: [],
+      equipment: [],
+      lores: [],
+      money: [],
+      treasure: [],
       adventurersPack: {
         item: null,
         contents: [
@@ -452,7 +463,6 @@ export class Pathmuncher {
       || i.system.slug === Pathmuncher.getSlugNoQuote(name)
     );
 
-    console.warn({ compendiumLabel, name, target, indexMatch});
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
       this.result[target].push(doc.toObject());
@@ -462,8 +472,28 @@ export class Pathmuncher {
     }
   }
 
+  async #detectGrantedClassFeatures() {
+    for (const grantedFeature of Object.values(this.result.class[0].system.items)) {
+      const feature = await fromUuid(grantedFeature.uuid);
+      if (!feature) {
+        logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
+        continue;
+      }
+      this.autoAddedFeatureIds.push(feature.id);
+      if (!feature.system?.rules) continue;
+      for (const grantedSubFeature of feature.system.rules.filter((f) => f.key === "GrantItem")) {
+        const subFeature = await fromUuid(grantedSubFeature.uuid);
+        if (subFeature) {
+          this.autoAddedFeatureIds.push(subFeature.id);
+        } else {
+          logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature, grantedSubFeature });
+        }
+      }
+    }
+  }
+
   async #processCore() {
-    setProperty(this.result.character, "name", this.source.name);
+    if (!this.options.addName) setProperty(this.result.character, "name", this.source.name);
     setProperty(this.result.character, "prototypeToken.name", this.source.name);
     setProperty(this.result.character, "system.details.level.value", this.source.level);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
@@ -537,12 +567,16 @@ export class Pathmuncher {
           this.check.push({ name: displayName, type: "feat", details: { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel } });
           continue;
         }
-        if (this.result.items.some((i) => i.name === displayName)) {
+        if (this.result.feats.some((i) => i.name === displayName)) {
           logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
           continue;
         }
         pBFeat.added = true;
-        // eslint-disable-next-line no-await-in-loop
+        if (this.autoAddedFeatureIds.includes(indexMatch._id)) {
+          logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
+          continue;
+        }
+
         const doc = await compendium.getDocument(indexMatch._id);
         const item = doc.toObject();
         item.name = displayName;
@@ -555,7 +589,7 @@ export class Pathmuncher {
           }
         }
 
-        this.result.items.push(item);
+        this.result.feats.push(item);
       }
     }
   }
@@ -581,15 +615,18 @@ export class Pathmuncher {
         this.check.push({ name: special.name, type: "special", details: { special: special.name, compendiumLabel } });
         continue;
       }
-      if (this.result.items.some((i) => i.name === special.name)) {
+      if (this.result.feats.some((i) => i.name === special.name)) {
         logger.debug("Special already generated", { special: special.name, compendiumLabel });
         continue;
       }
       special.added = true;
+      if (this.autoAddedFeatureIds.includes(indexMatch._id)) {
+        logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
+        continue;
+      }
 
-      // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
-      this.result.items.push(doc.toObject());
+      this.result.feats.push(doc.toObject());
     }
   }
 
@@ -603,7 +640,7 @@ export class Pathmuncher {
     if (backpackInstance) {
       adventurersPack.added = true;
       this.result.adventurersPack.item = adventurersPack;
-      this.result.items.push(backpackInstance);
+      this.result.equipment.push(backpackInstance);
     }
 
     for (const e of this.parsed.equipment.filter((e) => e.name !== "Adventurer's Pack")) {
@@ -617,12 +654,12 @@ export class Pathmuncher {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
-      if (doc.type != "kit" || (doc.type === "treasure" && !this.options.addTreasure)) {
+      if (doc.type != "kit") {
         const itemData = doc.toObject();
         itemData.system.quantity = e.qty;
-        this.result.items.push(itemData);
+        const type = doc.type === "treasure" ? "treasure" : "equipment";
+        this.result[type].push(itemData);
       }
     }
 
@@ -633,12 +670,11 @@ export class Pathmuncher {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
       itemData.system.quantity = e.qty;
       itemData.system.containerId = backpackInstance?._id;
-      this.result.items.push(itemData);
+      this.result.equipment.push(itemData);
     }
   }
 
@@ -657,7 +693,6 @@ export class Pathmuncher {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
       itemData.system.quantity = w.qty;
@@ -676,7 +711,7 @@ export class Pathmuncher {
       }
       if (w.display) itemData.name = w.display;
 
-      this.result.items.push(itemData);
+      this.result.weapons.push(itemData);
       w.added = true;
     }
   }
@@ -698,7 +733,6 @@ export class Pathmuncher {
         continue;
       }
 
-      // eslint-disable-next-line no-await-in-loop
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
       itemData.system.quantity = a.qty;
@@ -718,7 +752,7 @@ export class Pathmuncher {
       }
       if (a.display) itemData.name = a.display;
 
-      this.result.items.push(itemData);
+      this.result.armor.push(itemData);
       a.added = true;
     }
   }
@@ -821,7 +855,6 @@ export class Pathmuncher {
 
     for (const caster of this.source.spellCasters) {
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
-      // eslint-disable-next-line no-await-in-loop
       caster.instance = await this.#generateSpellCaster(caster);
 
       for (const spellSelection of caster.spells) {
@@ -839,7 +872,6 @@ export class Pathmuncher {
             continue;
           }
 
-          // eslint-disable-next-line no-await-in-loop
           const doc = await compendium.getDocument(indexMatch._id);
           const itemData = doc.toObject();
           itemData.system.location.heightenedLevel = level;
@@ -872,7 +904,7 @@ export class Pathmuncher {
           },
         },
       };
-      this.result.items.push(data);
+      this.result.lores.push(data);
     }
   }
 
@@ -890,17 +922,14 @@ export class Pathmuncher {
     for (const lookup of moneyLookup) {
       const indexMatch = index.find((i) => i.system.slug === lookup.slug);
       if (indexMatch) {
-        // eslint-disable-next-line no-await-in-loop
         const doc = await compendium.getDocument(indexMatch._id);
         doc.system.quantity = this.source.money[lookup.type];
-        this.result.items.push(doc.toObject());
+        this.result.money.push(doc.toObject());
       }
     }
   }
 
   async #processFeats() {
-    if (!this.options.addFeats) return;
-
     await this.#generateFeatItems("pf2e.feats-srd");
     await this.#generateFeatItems("pf2e.ancestryfeatures");
     await this.#generateSpecialItems("pf2e.actionspf2e");
@@ -909,9 +938,10 @@ export class Pathmuncher {
   }
 
   async #processEquipment() {
-    if (this.options.addEquipment) await this.#generateEquipmentItems();
-    if (this.options.addWeapons) await this.#generateWeaponItems();
-    if (this.options.addArmor) await this.#generateArmorItems();
+    await this.#generateEquipmentItems();
+    await this.#generateWeaponItems();
+    await this.#generateArmorItems();
+    await this.#generateMoney();
   }
 
   async processCharacter() {
@@ -923,9 +953,9 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
     await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestory");
     await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
+    await this.#detectGrantedClassFeatures();
     await this.#processFeats();
     await this.#processEquipment();
-    await this.#generateMoney();
     await this.#processSpells();
     await this.#generateLores();
   }
@@ -972,8 +1002,14 @@ export class Pathmuncher {
     await this.actor.createEmbeddedDocuments("Item", this.result.background);
     await this.actor.createEmbeddedDocuments("Item", this.result.deity);
     await this.actor.createEmbeddedDocuments("Item", this.result.class);
-    await this.actor.createEmbeddedDocuments("Item", this.result.items);
-    await this.actor.createEmbeddedDocuments("Item", this.result.casters);
+    await this.actor.createEmbeddedDocuments("Item", this.result.feats);
+    await this.actor.createEmbeddedDocuments("Item", this.result.lores);
+    await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.spells);
+    await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
+    await this.actor.createEmbeddedDocuments("Item", this.result.weapons);
+    await this.actor.createEmbeddedDocuments("Item", this.result.armor);
+    await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
+    await this.actor.createEmbeddedDocuments("Item", this.result.money);
   }
 }
