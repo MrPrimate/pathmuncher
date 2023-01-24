@@ -138,7 +138,9 @@ export class Pathmuncher {
   }
 
   // specials that are handled by Foundry:
-  static FOUNDRY_SPECIALS = [
+  static FOUNDRY_SPECIALS = [];
+
+  static FOUNDRY_SPECIALS2 = [
     "Great Fortitude",
     "Divine Spellcasting",
     "Divine Ally (Blade)",
@@ -472,24 +474,61 @@ export class Pathmuncher {
     }
   }
 
-  async #detectGrantedClassFeatures() {
-    for (const grantedFeature of Object.values(this.result.class[0].system.items)) {
-      const feature = await fromUuid(grantedFeature.uuid);
-      if (!feature) {
-        logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
-        continue;
-      }
-      this.autoAddedFeatureIds.push(feature.id);
-      if (!feature.system?.rules) continue;
-      for (const grantedSubFeature of feature.system.rules.filter((f) => f.key === "GrantItem")) {
-        const subFeature = await fromUuid(grantedSubFeature.uuid);
-        if (subFeature) {
-          this.autoAddedFeatureIds.push(subFeature.id);
-        } else {
-          logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature, grantedSubFeature });
-        }
+  async #addGrantedRules(document) {
+    if (!document.system?.rules?.length > 0) return;
+    for (const grantedSubFeature of document.system.rules.filter((f) => f.key === "GrantItem")) {
+      const subFeature = await fromUuid(grantedSubFeature.uuid);
+      if (subFeature) {
+        this.autoAddedFeatureIds.push(subFeature.id);
+        if (subFeature.system?.rules?.length > 0) this.#addGrantedRules(subFeature);
+      } else {
+        logger.debug("Unable to determine granted feature, needs better parser", { document, grantedSubFeature });
       }
     }
+  }
+
+  async #addGrantedItems(document) {
+    console.warn("addGrantedItems", document)
+    if (document.system.items) {
+      for (const grantedFeature of Object.values(document.system.items)) {
+        const feature = await fromUuid(grantedFeature.uuid);
+        if (!feature) {
+          logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
+          continue;
+        }
+        this.autoAddedFeatureIds.push(feature.id);
+        if (!feature.system?.rules) continue;
+        await this.#addGrantedRules(feature);
+      }
+    }
+    if (document.system.rules?.length > 0) {
+      await this.#addGrantedRules(document);
+    }
+
+  }
+
+  async #detectGrantedFeatures() {
+    if (this.result.class.length > 0) await this.#addGrantedItems(this.result.class[0]);
+    if (this.result.ancestory.length > 0) await this.#addGrantedItems(this.result.ancestory[0]);
+    if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
+    if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
+    // for (const grantedFeature of Object.values(this.result.class[0].system.items)) {
+    //   const feature = await fromUuid(grantedFeature.uuid);
+    //   if (!feature) {
+    //     logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
+    //     continue;
+    //   }
+    //   this.autoAddedFeatureIds.push(feature.id);
+    //   if (!feature.system?.rules) continue;
+    //   for (const grantedSubFeature of feature.system.rules.filter((f) => f.key === "GrantItem")) {
+    //     const subFeature = await fromUuid(grantedSubFeature.uuid);
+    //     if (subFeature) {
+    //       this.autoAddedFeatureIds.push(subFeature.id);
+    //     } else {
+    //       logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature, grantedSubFeature });
+    //     }
+    //   }
+    // }
   }
 
   async #processCore() {
@@ -953,7 +992,7 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
     await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestory");
     await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
-    await this.#detectGrantedClassFeatures();
+    await this.#detectGrantedFeatures();
     await this.#processFeats();
     await this.#processEquipment();
     await this.#processSpells();
