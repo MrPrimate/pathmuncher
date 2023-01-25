@@ -130,114 +130,7 @@ export class Pathmuncher {
   // specials that are handled by Foundry:
   static FOUNDRY_SPECIALS = [];
 
-  static FOUNDRY_SPECIALS2 = [
-    "Great Fortitude",
-    "Divine Spellcasting",
-    "Divine Ally (Blade)",
-    "Divine Ally (Shield)",
-    "Divine Ally (Steed)",
-    "Divine Smite (Antipaladin)",
-    "Divine Smite (Paladin)",
-    "Divine Smite (Desecrator)",
-    "Divine Smite (Liberator)",
-    "Divine Smite (Redeemer)",
-    "Divine Smite (Tyrant)",
-    "Exalt (Antipaladin)",
-    "Exalt (Paladin)",
-    "Exalt (Desecrator)",
-    "Exalt (Redeemer)",
-    "Exalt (Liberator)",
-    "Exalt (Tyrant)",
-    "Intimidation",
-    "Axe",
-    "Sword",
-    "Water",
-    "Sword Cane",
-    "Battle Axe",
-    "Bane",
-    "Air",
-    "Occultism",
-    "Performance",
-    "Alchemy",
-    "Nature",
-    "Red",
-    "Shark",
-    "Green",
-    "Divine",
-    "Sun",
-    "Fire",
-    "Might",
-    "Mace",
-    "Bronze",
-    "Spirit",
-    "Zeal",
-    "Battledancer",
-    "Light Armor Expertise",
-    "Religion",
-    "Polearm",
-    "Longsword",
-    "Moon",
-    "Hammer",
-    "Athletics",
-    "Deception",
-    "Society",
-    "Occultism",
-    "Arcane",
-    "Simple Weapon Expertise",
-    "Defensive Robes",
-    "Magical Fortitude",
-    "Occult",
-    "Acrobatics",
-    "Medicine",
-    "Diplomacy",
-    "Might",
-    "Reflex",
-    "Evasion",
-    "Vigilant Senses",
-    "Iron Will",
-    "Lightning Reflexes",
-    "Alertness",
-    "Shield Block",
-    "Anathema",
-    "Druidic Language",
-    "Weapon Expertise",
-    "Armor Expertise",
-    "Armor Mastery",
-    "Darkvision",
-    "Stealth",
-    "Divine",
-    "Shield",
-    "Survival",
-    "Arcana",
-    "Will",
-    "Fortitude",
-    "Signature Spells",
-    "Low-Light Vision",
-    "Powerful Fist",
-    "Mystic Strikes",
-    "Incredible Movement",
-    "Claws",
-    "Wild Empathy",
-    "Aquatic Adaptation",
-    "Resolve",
-    "Expert Spellcaster",
-    "Master Spellcaster",
-    "Legendary Spellcaster",
-    "Weapon Specialization",
-    "Mighty Rage",
-    "Deny Advantage",
-    "Critical Brutality",
-    "Juggernaut",
-    "Medium Armor Expertise",
-    "Weapon Specialization (Barbarian)",
-    "Greater Weapon Specialization",
-    "Diplomacy",
-    "Improved Evasion",
-    "Weapon Mastery",
-    "Incredible Senses",
-  ];
-
-  static RESTRICTED_ITEMS = ["Bracers of Armor"];
+  static RESTRICTED_EQUIPMENT = ["Bracers of Armor"];
 
   getChampionType() {
     if (this.source.alignment == "LG") return "Paladin";
@@ -775,7 +668,6 @@ export class Pathmuncher {
 
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
-        console.error("Generating feature for", pBFeat);
         if (pBFeat.added) continue;
         logger.debug("Generating feature for", pBFeat);
 
@@ -822,9 +714,7 @@ export class Pathmuncher {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    console.warn("specials", { specials: duplicate(this.parsed.specials), compendiumLabel });
     for (const special of this.parsed.specials) {
-      console.error("Generating special for", special);
       if (special.added) continue;
       logger.debug("Generating special for", special);
       const indexMatch = index.find((i) =>
@@ -865,6 +755,20 @@ export class Pathmuncher {
       backpackInstance._id = foundry.utils.randomID();
       this.result.adventurersPack.item = adventurersPack;
       this.result.equipment.push(backpackInstance);
+      for (const content of this.result.adventurersPack.contents) {
+        const indexMatch = index.find((i) => i.system.slug === content.slug);
+        if (!indexMatch) {
+          logger.error(`Unable to match adventurers kit item ${content.name}`, content);
+          continue;
+        }
+
+        const doc = await compendium.getDocument(indexMatch._id);
+        const itemData = doc.toObject();
+        itemData._id = foundry.utils.randomID();
+        itemData.system.quantity = content.qty;
+        itemData.system.containerId = backpackInstance?._id;
+        this.result.equipment.push(itemData);
+      }
     }
 
     for (const e of this.parsed.equipment.filter((e) => e.pbName !== "Adventurer's Pack")) {
@@ -884,21 +788,6 @@ export class Pathmuncher {
         const type = doc.type === "treasure" ? "treasure" : "equipment";
         this.result[type].push(itemData);
       }
-    }
-
-    for (const content of this.result.adventurersPack.contents) {
-      const indexMatch = index.find((i) => i.system.slug === content.slug);
-      if (!indexMatch) {
-        logger.error(`Unable to match adventurers kit item ${content.name}`, content);
-        continue;
-      }
-
-      const doc = await compendium.getDocument(indexMatch._id);
-      const itemData = doc.toObject();
-      itemData._id = foundry.utils.randomID();
-      itemData.system.quantity = content.qty;
-      itemData.system.containerId = backpackInstance?._id;
-      this.result.equipment.push(itemData);
     }
   }
 
@@ -958,24 +847,27 @@ export class Pathmuncher {
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
-      itemData.system.quantity = a.qty;
-      itemData.system.category = a.prof;
-      itemData.system.potencyRune.value = a.pot;
-      itemData.system.resiliencyRune.value = a.res;
       itemData.system.equipped.value = a.worn ?? false;
+      if (!Pathmuncher.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
+        itemData.system.quantity = a.qty;
+        itemData.system.category = a.prof;
+        itemData.system.potencyRune.value = a.pot;
+        itemData.system.resiliencyRune.value = a.res;
 
-      if (a.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(a.runes[0], { camel: "dromedary" });
-      if (a.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(a.runes[1], { camel: "dromedary" });
-      if (a.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(a.runes[2], { camel: "dromedary" });
-      if (a.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(a.runes[3], { camel: "dromedary" });
-      if (a.mat) {
-        const material = a.mat.split(" (")[0];
-        itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
-        itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(a.mat);
+        if (a.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(a.runes[0], { camel: "dromedary" });
+        if (a.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(a.runes[1], { camel: "dromedary" });
+        if (a.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(a.runes[2], { camel: "dromedary" });
+        if (a.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(a.runes[3], { camel: "dromedary" });
+        if (a.mat) {
+          const material = a.mat.split(" (")[0];
+          itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
+          itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(a.mat);
+        }
       }
       if (a.display) itemData.name = a.display;
 
       this.result.armor.push(itemData);
+      // eslint-disable-next-line require-atomic-updates
       a.added = true;
     }
   }
@@ -1194,8 +1086,9 @@ export class Pathmuncher {
     const actionIds = this.actor.items.filter((i) => i.type === "action");
     const equipmentIds = this.actor.items.filter((i) =>
       i.type === "equipment" || i.type === "backpack" || i.type === "consumable"
-      || i.type === "weapon" || i.type === "armor"
     );
+    const weaponIds = this.actor.items.filter((i) => i.type === "weapon");
+    const armorIds = this.actor.items.filter((i) => i.type === "armor");
     const loreIds = this.actor.items.filter((i) => i.type === "lore");
     const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry");
 
@@ -1209,6 +1102,8 @@ export class Pathmuncher {
       featIds,
       actionIds,
       equipmentIds,
+      weaponIds,
+      armorIds,
       loreIds,
       spellIds,
     });
@@ -1237,9 +1132,29 @@ export class Pathmuncher {
     await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
     await this.actor.createEmbeddedDocuments("Item", this.result.money);
 
-    // TODO: Loop back over items and add rule and item progression data back in.
+    // Loop back over items and add rule and item progression data back in.
     if (!this.options.askForChoices) {
-      // LOOPS HERE
+      const ruleUpdates = [];
+      for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
+        ruleUpdates.push({
+          _id: key,
+          system: {
+            rules: value,
+          },
+        });
+      }
+      await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
+
+      const itemUpdates = [];
+      for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
+        itemUpdates.push({
+          _id: key,
+          system: {
+            items: value,
+          },
+        });
+      }
+      await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }
   }
 }
