@@ -3,14 +3,31 @@
   <p>{{{localize "pathmuncher.Dialogs.PathmuncherImporter.StepTwo"}}}</p>
   <div>
     <hr/>
+      <input type="checkbox" id="checkBoxName" name="checkBoxName" {{#if flags.addName}}checked{{else}}{{/if}}>
+      <label for="checkBoxName"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Name"}}</label><br>
+      <input type="checkbox" id="checkBoxName" name="checkBoxClass" {{#if flags.addClass}}checked{{else}}{{/if}}>
+      <label for="checkBoxClass"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Class"}}</label><br>
       <input type="checkbox" id="checkBoxFeats" name="checkBoxFeats" {{#if flags.addFeats}}checked{{else}}{{/if}}>
       <label for="checkBoxFeats"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Feats"}}</label><br>
       <input type="checkbox" id="checkBoxEquipment" name="checkBoxEquipment" {{#if flags.addEquipment}}checked{{else}}{{/if}}>
       <label for="checkBoxEquipment"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Equipment"}}</label><br>
+      <input type="checkbox" id="checkBoxMoney" name="checkBoxWeapons" {{#if flags.addWeapons}}checked{{else}}{{/if}}>
+      <label for="checkBoxWeapons"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Weapons"}}</label><br>
+      <input type="checkbox" id="checkBoxMoney" name="checkBoxArmor" {{#if flags.addArmor}}checked{{else}}{{/if}}>
+      <label for="checkBoxArmor"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Armor"}}</label><br>
       <input type="checkbox" id="checkBoxMoney" name="checkBoxMoney" {{#if flags.addMoney}}checked{{else}}{{/if}}>
       <label for="checkBoxMoney"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Money"}}</label><br>
+      <input type="checkbox" id="checkBoxMoney" name="checkBoxTreasure" {{#if flags.addTreasure}}checked{{else}}{{/if}}>
+      <label for="checkBoxTreasure"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Treasure"}}</label><br>
       <input type="checkbox" id="checkBoxSpells" name="checkBoxSpells" {{#if flags.addSpells}}checked{{else}}{{/if}}>
       <label for="checkBoxSpells"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Spells"}}</label><br>
+      <input type="checkbox" id="checkBoxName" name="checkBoxLores" {{#if flags.addLores}}checked{{else}}{{/if}}>
+      <label for="checkBoxLores"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Lores"}}</label><br>
+      <input type="checkbox" id="checkBoxName" name="checkBoxDeity" {{#if flags.addDeity}}checked{{else}}{{/if}}>
+      <label for="checkBoxDeity"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Deity"}}</label><br>
+    <hr/>
+      <input type="checkbox" id="checkBoxName" name="checkBoxAskForChoices" {{#if flags.askForChoices}}checked{{else}}{{/if}}>
+      <label for="checkBoxAskForChoices"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.AskForChoices"}}</label><br>
     <hr/>
     <div id="divCode">
       {{localize "pathmuncher.Dialogs.PathmuncherImporter.PathBuilderId"}}<br>

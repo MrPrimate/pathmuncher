@@ -56,6 +56,14 @@ export class PathmuncherImporter extends FormApplication {
       addFeats: formData.checkBoxFeats,
       addSpells: formData.checkBoxSpells,
       addEquipment: formData.checkBoxEquipment,
+      addTreasure: formData.checkBoxTreasure,
+      addLores: formData.checkBoxLores,
+      addWeapons: formData.checkBoxWeapons,
+      addArmor: formData.checkBoxArmor,
+      addDeity: formData.checkBoxDeity,
+      addName: formData.checkBoxName,
+      addClass: formData.checkBoxClass,
+      askForChoices: formData.checkBoxAskForChoices,
     };
     logger.debug("Pathmuncher options", options);
 
@@ -67,6 +75,13 @@ export class PathmuncherImporter extends FormApplication {
     await pathmuncher.processCharacter();
     logger.debug("Post processed character", pathmuncher);
     await pathmuncher.updateActor();
+    logger.debug("Final import details", {
+      actor: this.actor,
+      pathmuncher,
+      options,
+      pathbuilderSource: pathmuncher.source,
+      pathbuilderId,
+    });
     this.close();
   }
 
