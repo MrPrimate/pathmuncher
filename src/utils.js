@@ -25,6 +25,14 @@ const utils = {
         addEquipment: true,
         addSpells: true,
         addMoney: true,
+        addTreasure: true,
+        addLores: true,
+        addWeapons: true,
+        addArmor: true,
+        addDeity: true,
+        addName: true,
+        addClass: true,
+        askForChoices: false,
       };
     return flags;
   },
@@ -38,14 +46,6 @@ const utils = {
 
   resetFlags: async (actor) => {
     return utils.setFlags(actor, null);
-  },
-
-  camelCase: (str) => {
-    return str
-      .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
-        return index == 0 ? word.toLowerCase() : word.toUpperCase();
-      })
-      .replace(/\s+/g, "");
   },
 
 };

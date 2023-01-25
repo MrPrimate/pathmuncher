@@ -6,134 +6,124 @@ import utils from "../utils.js";
 
 export class Pathmuncher {
 
-  static EQUIPMENT_MAP = [
-    { name: "Chain", new: "Chain (10 feet)" },
-    { name: "Oil", new: "Oil (1 pint)" },
-    { name: "Bracelets of Dashing", new: "Bracelet of Dashing" },
-    { name: "Fingerprinting Kit", new: "Fingerprint Kit" },
-    { name: "Greater Unmemorable Mantle", new: "Unmemorable Mantle (Greater)" },
-    { name: "Major Unmemorable Mantle", new: "Unmemorable Mantle (Major)" },
-    { name: "Ladder", new: "Ladder (10-foot)" },
-    { name: "Mezmerizing Opal", new: "Mesmerizing Opal" },
-    { name: "Explorer's Clothing", new: "Clothing (Explorer's)" },
-    { name: "Flaming Star (Greater)", new: "Greater Flaming Star" },
-    { name: "Potion of Lesser Darkvision", new: "Darkvision Elixir (Lesser)" },
-    { name: "Bottled Sunlight", new: "Formulated Sunlight" },
-    { name: "Magazine (Repeating Hand Crossbow)", new: "Magazine with 5 Bolts" },
-    { name: "Astrolabe (Standard)", new: "Standard Astrolabe" },
-    { name: "Greater Cloak of Repute", new: "Cloak of Repute (Greater)" },
-    { name: "Skinitch Salve", new: "Skinstitch Salve" },
-    { name: "Flawless Scale", new: "Abadar's Flawless Scale" },
-    { name: "Construct Key", new: "Cordelia's Construct Key" },
-    { name: "Construct Key (Greater)", new: "Cordelia's Greater Construct Key" },
-    { name: "Lesser Swapping Stone", new: "Lesser Bonmuan Swapping Stone" },
-    { name: "Major Swapping Stone", new: "Major Bonmuan Swapping Stone" },
-    { name: "Moderate Swapping Stone", new: "Moderate Bonmuan Swapping Stone" },
-    { name: "Greater Swapping Stone", new: "Greater Bonmuan Swapping Stone" },
-    { name: "Heartstone", new: "Skarja's Heartstone" },
-    { name: "Bullets (10 rounds)", new: "Sling Bullets" },
+  static EQUIPMENT_RENAME_MAP = [
+    { pbName: "Chain", foundryName: "Chain (10 feet)" },
+    { pbName: "Oil", foundryName: "Oil (1 pint)" },
+    { pbName: "Bracelets of Dashing", foundryName: "Bracelet of Dashing" },
+    { pbName: "Fingerprinting Kit", foundryName: "Fingerprint Kit" },
+    { pbName: "Greater Unmemorable Mantle", foundryName: "Unmemorable Mantle (Greater)" },
+    { pbName: "Major Unmemorable Mantle", foundryName: "Unmemorable Mantle (Major)" },
+    { pbName: "Ladder", foundryName: "Ladder (10-foot)" },
+    { pbName: "Mezmerizing Opal", foundryName: "Mesmerizing Opal" },
+    { pbName: "Explorer's Clothing", foundryName: "Clothing (Explorer's)" },
+    { pbName: "Flaming Star (Greater)", foundryName: "Greater Flaming Star" },
+    { pbName: "Potion of Lesser Darkvision", foundryName: "Darkvision Elixir (Lesser)" },
+    { pbName: "Bottled Sunlight", foundryName: "Formulated Sunlight" },
+    { pbName: "Magazine (Repeating Hand Crossbow)", foundryName: "Magazine with 5 Bolts" },
+    { pbName: "Astrolabe (Standard)", foundryName: "Standard Astrolabe" },
+    { pbName: "Greater Cloak of Repute", foundryName: "Cloak of Repute (Greater)" },
+    { pbName: "Skinitch Salve", foundryName: "Skinstitch Salve" },
+    { pbName: "Flawless Scale", foundryName: "Abadar's Flawless Scale" },
+    { pbName: "Construct Key", foundryName: "Cordelia's Construct Key" },
+    { pbName: "Construct Key (Greater)", foundryName: "Cordelia's Greater Construct Key" },
+    { pbName: "Lesser Swapping Stone", foundryName: "Lesser Bonmuan Swapping Stone" },
+    { pbName: "Major Swapping Stone", foundryName: "Major Bonmuan Swapping Stone" },
+    { pbName: "Moderate Swapping Stone", foundryName: "Moderate Bonmuan Swapping Stone" },
+    { pbName: "Greater Swapping Stone", foundryName: "Greater Bonmuan Swapping Stone" },
+    { pbName: "Heartstone", foundryName: "Skarja's Heartstone" },
+    { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
   ];
 
-  getChampionType() {
-    if (this.source.alignment == "LG") return "Paladin";
-    else if (this.source.alignment == "CG") return "Liberator";
-    else if (this.source.alignment == "NG") return "Redeemer";
-    else if (this.source.alignment == "LE") return "Tyrant";
-    else if (this.source.alignment == "CE") return "Antipaladin";
-    else if (this.source.alignment == "NE") return "Desecrator";
-    return "Unknown";
-  }
-
-  get SPECIAL_MAP () {
+  get FEAT_RENAME_MAP () {
     return [
-      { name: "Deflect Arrows", new: "Deflect Arrow" },
-      { name: "Maestro", new: "Maestro Muse" },
-      { name: "Tenets of Evil", new: "The Tenets of Evil" },
-      { name: "Antipaladin [Chaotic Evil]", new: "Antipaladin" },
-      { name: "Paladin [Lawful Good]", new: "Paladin" },
-      { name: "Redeemer [Neutral Good]", new: "Redeemer" },
-      { name: "Liberator [Chaotic Good]", new: "Liberator" },
-      { name: "Tyrant [Lawful Evil]", new: "Tyrant" },
-      { name: "Desecrator [Neutral Evil]", new: "Desecrator" },
-      { name: "Harmful Font", new: "Divine Font" },
-      { name: "Healing Font", new: "Divine Font" },
-      { name: "Deepvision", new: "Deep Vision" },
-      { name: "Wind God's Fan", new: "Wind God’s Fan" },
-      { name: "Redeemer [Neutral Good]", new: "Redeemer" },
-      { name: "Enigma", new: "Enigma Muse" },
-      { name: "Polymath", new: "Polymath Muse" },
-      { name: "Warrior", new: "Warrior Muse" },
-      { name: "Multifarious", new: "Multifarious Muse" },
-      { name: "Constructed (Android)", new: "Constructed" },
-      { name: "Wakizashi", new: "Wakizashi Weapon Familiarity" },
-      { name: "Katana", new: "Katana Weapon Familiarity" },
-      { name: "Marked for Death", new: "Mark for Death" },
-      { name: "Precise Debilitation", new: "Precise Debilitations" },
-      { name: "Major Lesson I", new: "Major Lesson" },
-      { name: "Major Lesson II", new: "Major Lesson" },
-      { name: "Major Lesson III", new: "Major Lesson" },
-      { name: "Eye of the Arcane Lords", new: "Eye of the Arclords" },
-      { name: "Aeromancer", new: "Shory Aeromancer" },
-      { name: "Heatwave", new: "Heat Wave" },
-      { name: "Bloodline: Genie (Efreeti)", new: "Bloodline: Genie" },
-      { name: "Bite (Gnoll)", new: "Bite" },
-      { name: "Shining Oath", new: `Shining Oath (${this.getChampionType()})` },
-      { name: "Cognative Mutagen (Greater)", new: "Cognitive Mutagen (Greater)" },
-      { name: "Cognative Mutagen (Lesser)", new: "Cognitive Mutagen (Lesser)" },
-      { name: "Cognative Mutagen (Major)", new: "Cognitive Mutagen (Major)" },
-      { name: "Cognative Mutagen (Moderate)", new: "Cognitive Mutagen (Moderate)" },
-      { name: "Recognise Threat", new: "Recognize Threat" },
-      { name: "Enhanced Familiar Feat", new: "Enhanced Familiar" },
-      { name: "Aquatic Eyes (Darkvision)", new: "Aquatic Eyes" },
-      { name: "Heir of the Astrologers", new: "Heir of the Saoc" },
-      { name: "Precise Debilitation", new: "Precise Debilitations" },
-      { name: "Heatwave", new: "Heat Wave" },
-      { name: "Detective Dedication", new: "Edgewatch Detective Dedication" },
-      { name: "Flip", new: "Farabellus Flip" },
-      { name: "Interrogation", new: "Bolera's Interrogation" },
-      { name: "Wind God’s Fan", new: "Wind God's Fan" },
-      { name: "Rkoan Arts", new: "Rokoan Arts" },
-      { name: "Virtue-Forged Tattooed", new: "Virtue-Forged Tattoos" },
-      { name: "Bloody Debilitations", new: "Bloody Debilitation" },
-      { name: "Cave Climber Kobold", new: "Caveclimber Kobold" },
-      { name: "Tribal Bond", new: "Quah Bond" },
-      { name: "Tongue of the Sun and Moon", new: "Tongue of Sun and Moon" },
-      { name: "Aerialist", new: "Shory Aerialist" },
-      { name: "Aeromancer", new: "Shory Aeromancer" },
-      { name: "Ganzi Gaze (Low-Light Vision)", new: "Ganzi Gaze" },
-      { name: "Saberteeth", new: "Saber Teeth" },
-      { name: "Vestigal Wings", new: "Vestigial Wings" },
-      { name: "Chosen One", new: "Chosen of Lamashtu" },
-      { name: "Ice-Witch", new: "Irriseni Ice-Witch" },
-      { name: "Construct Carver", new: "Tupilaq Carver" },
-      { name: "Deadly Hair", new: "Syu Tak-nwa's Deadly Hair" },
-      { name: "Revivification Protocall", new: "Revivification Protocol" },
-      { name: "Ember's Eyes (Darkvision)", new: "Ember's Eyes" },
-      { name: "Astrology", new: "Saoc Astrology" },
-      { name: "Ape", new: "Ape Animal Instinct" },
-      { name: "Duelist Dedication (LO)", new: "Aldori Duelist Dedication" },
-      { name: "Parry", new: "Aldori Parry" },
-      { name: "Riposte", new: "Aldori Riposte" },
-      { name: "Sentry Dedication", new: "Lastwall Sentry Dedication" },
-      { name: "Wary Eye", new: "Eye of Ozem" },
-      { name: "Warden", new: "Lastwall Warden" },
-      { name: "Heavenseeker Dedication", new: "Jalmeri Heavenseeker Dedication" },
-      { name: "Mantis God's Grip", new: "Achaekek's Grip" },
-      { name: "High Killer Training", new: "Vernai Training" },
-      { name: "Guild Agent Dedication", new: "Pathfinder Agent Dedication" },
-      { name: "Wayfinder Resonance Infiltrator", new: "Westyr's Wayfinder Repository" },
-      { name: "Collegiate Attendant Dedication", new: "Magaambyan Attendant Dedication" },
-      { name: "Scholarly Storytelling", new: "Uzunjati Storytelling" },
-      { name: "Scholarly Recollection", new: "Uzunjati Recollection" },
-      { name: "Secret Lesson", new: "Janatimo's Lessons" },
-      { name: "Lumberjack Dedication", new: "Turpin Rowe Lumberjack Dedication" },
-      { name: "Fourberie", new: "Fane's Fourberie" },
-      { name: "Incredible Beastmaster's Companion", new: "Incredible Beastmaster Companion" },
-      { name: "Polymath", new: "Polymath Muse" },
-      { name: "Escape", new: "Fane's Escape" },
-      { name: "Quick Climber", new: "Quick Climb" },
-      { name: "Stab and Snag", new: "Stella's Stab and Snag" },
-      { name: "Cognitive Crossover", new: "Kreighton's Cognitive Crossover" },
+      { pbName: "Deflect Arrows", foundryName: "Deflect Arrow" },
+      { pbName: "Maestro", foundryName: "Maestro Muse" },
+      { pbName: "Tenets of Evil", foundryName: "The Tenets of Evil" },
+      { pbName: "Antipaladin [Chaotic Evil]", foundryName: "Antipaladin" },
+      { pbName: "Paladin [Lawful Good]", foundryName: "Paladin" },
+      { pbName: "Redeemer [Neutral Good]", foundryName: "Redeemer" },
+      { pbName: "Liberator [Chaotic Good]", foundryName: "Liberator" },
+      { pbName: "Tyrant [Lawful Evil]", foundryName: "Tyrant" },
+      { pbName: "Desecrator [Neutral Evil]", foundryName: "Desecrator" },
+      { pbName: "Harmful Font", foundryName: "Divine Font" },
+      { pbName: "Healing Font", foundryName: "Divine Font" },
+      { pbName: "Deepvision", foundryName: "Deep Vision" },
+      { pbName: "Wind God's Fan", foundryName: "Wind God’s Fan" },
+      { pbName: "Redeemer [Neutral Good]", foundryName: "Redeemer" },
+      { pbName: "Enigma", foundryName: "Enigma Muse" },
+      { pbName: "Polymath", foundryName: "Polymath Muse" },
+      { pbName: "Warrior", foundryName: "Warrior Muse" },
+      { pbName: "Multifarious", foundryName: "Multifarious Muse" },
+      { pbName: "Constructed (Android)", foundryName: "Constructed" },
+      { pbName: "Wakizashi", foundryName: "Wakizashi Weapon Familiarity" },
+      { pbName: "Katana", foundryName: "Katana Weapon Familiarity" },
+      { pbName: "Marked for Death", foundryName: "Mark for Death" },
+      { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
+      { pbName: "Major Lesson I", foundryName: "Major Lesson" },
+      { pbName: "Major Lesson II", foundryName: "Major Lesson" },
+      { pbName: "Major Lesson III", foundryName: "Major Lesson" },
+      { pbName: "Eye of the Arcane Lords", foundryName: "Eye of the Arclords" },
+      { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
+      { pbName: "Heatwave", foundryName: "Heat Wave" },
+      { pbName: "Bloodline: Genie (Efreeti)", foundryName: "Bloodline: Genie" },
+      { pbName: "Bite (Gnoll)", foundryName: "Bite" },
+      { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
+      { pbName: "Cognative Mutagen (Greater)", foundryName: "Cognitive Mutagen (Greater)" },
+      { pbName: "Cognative Mutagen (Lesser)", foundryName: "Cognitive Mutagen (Lesser)" },
+      { pbName: "Cognative Mutagen (Major)", foundryName: "Cognitive Mutagen (Major)" },
+      { pbName: "Cognative Mutagen (Moderate)", foundryName: "Cognitive Mutagen (Moderate)" },
+      { pbName: "Recognise Threat", foundryName: "Recognize Threat" },
+      { pbName: "Enhanced Familiar Feat", foundryName: "Enhanced Familiar" },
+      { pbName: "Aquatic Eyes (Darkvision)", foundryName: "Aquatic Eyes" },
+      { pbName: "Heir of the Astrologers", foundryName: "Heir of the Saoc" },
+      { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
+      { pbName: "Heatwave", foundryName: "Heat Wave" },
+      { pbName: "Detective Dedication", foundryName: "Edgewatch Detective Dedication" },
+      { pbName: "Flip", foundryName: "Farabellus Flip" },
+      { pbName: "Interrogation", foundryName: "Bolera's Interrogation" },
+      { pbName: "Wind God’s Fan", foundryName: "Wind God's Fan" },
+      { pbName: "Rkoan Arts", foundryName: "Rokoan Arts" },
+      { pbName: "Virtue-Forged Tattooed", foundryName: "Virtue-Forged Tattoos" },
+      { pbName: "Bloody Debilitations", foundryName: "Bloody Debilitation" },
+      { pbName: "Cave Climber Kobold", foundryName: "Caveclimber Kobold" },
+      { pbName: "Tribal Bond", foundryName: "Quah Bond" },
+      { pbName: "Tongue of the Sun and Moon", foundryName: "Tongue of Sun and Moon" },
+      { pbName: "Aerialist", foundryName: "Shory Aerialist" },
+      { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
+      { pbName: "Ganzi Gaze (Low-Light Vision)", foundryName: "Ganzi Gaze" },
+      { pbName: "Saberteeth", foundryName: "Saber Teeth" },
+      { pbName: "Vestigal Wings", foundryName: "Vestigial Wings" },
+      { pbName: "Chosen One", foundryName: "Chosen of Lamashtu" },
+      { pbName: "Ice-Witch", foundryName: "Irriseni Ice-Witch" },
+      { pbName: "Construct Carver", foundryName: "Tupilaq Carver" },
+      { pbName: "Deadly Hair", foundryName: "Syu Tak-nwa's Deadly Hair" },
+      { pbName: "Revivification Protocall", foundryName: "Revivification Protocol" },
+      { pbName: "Ember's Eyes (Darkvision)", foundryName: "Ember's Eyes" },
+      { pbName: "Astrology", foundryName: "Saoc Astrology" },
+      { pbName: "Ape", foundryName: "Ape Animal Instinct" },
+      { pbName: "Duelist Dedication (LO)", foundryName: "Aldori Duelist Dedication" },
+      { pbName: "Parry", foundryName: "Aldori Parry" },
+      { pbName: "Riposte", foundryName: "Aldori Riposte" },
+      { pbName: "Sentry Dedication", foundryName: "Lastwall Sentry Dedication" },
+      { pbName: "Wary Eye", foundryName: "Eye of Ozem" },
+      { pbName: "Warden", foundryName: "Lastwall Warden" },
+      { pbName: "Heavenseeker Dedication", foundryName: "Jalmeri Heavenseeker Dedication" },
+      { pbName: "Mantis God's Grip", foundryName: "Achaekek's Grip" },
+      { pbName: "High Killer Training", foundryName: "Vernai Training" },
+      { pbName: "Guild Agent Dedication", foundryName: "Pathfinder Agent Dedication" },
+      { pbName: "Wayfinder Resonance Infiltrator", foundryName: "Westyr's Wayfinder Repository" },
+      { pbName: "Collegiate Attendant Dedication", foundryName: "Magaambyan Attendant Dedication" },
+      { pbName: "Scholarly Storytelling", foundryName: "Uzunjati Storytelling" },
+      { pbName: "Scholarly Recollection", foundryName: "Uzunjati Recollection" },
+      { pbName: "Secret Lesson", foundryName: "Janatimo's Lessons" },
+      { pbName: "Lumberjack Dedication", foundryName: "Turpin Rowe Lumberjack Dedication" },
+      { pbName: "Fourberie", foundryName: "Fane's Fourberie" },
+      { pbName: "Incredible Beastmaster's Companion", foundryName: "Incredible Beastmaster Companion" },
+      { pbName: "Polymath", foundryName: "Polymath Muse" },
+      { pbName: "Escape", foundryName: "Fane's Escape" },
+      { pbName: "Quick Climber", foundryName: "Quick Climb" },
+      { pbName: "Stab and Snag", foundryName: "Stella's Stab and Snag" },
+      { pbName: "Cognitive Crossover", foundryName: "Kreighton's Cognitive Crossover" },
     ];
   }
 
@@ -249,8 +239,19 @@ export class Pathmuncher {
 
   static RESTRICTED_ITEMS = ["Bracers of Armor"];
 
+  getChampionType() {
+    if (this.source.alignment == "LG") return "Paladin";
+    else if (this.source.alignment == "CG") return "Liberator";
+    else if (this.source.alignment == "NG") return "Redeemer";
+    else if (this.source.alignment == "LE") return "Tyrant";
+    else if (this.source.alignment == "CE") return "Antipaladin";
+    else if (this.source.alignment == "NE") return "Desecrator";
+    return "Unknown";
+  }
+
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
-    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true } = {}
+    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true,
+    askForChoices = false } = {}
   ) {
     this.actor = actor;
     // note not all these options do anything yet!
@@ -266,6 +267,7 @@ export class Pathmuncher {
       addDeity,
       addName,
       addClass,
+      askForChoices,
     };
     this.source = null;
     this.parsed = {
@@ -273,8 +275,11 @@ export class Pathmuncher {
       feats: [],
       equipment: [],
     };
-    this.usedLocations = [];
-    this.autoAddedFeatureIds = [];
+    this.usedLocations = new Set();
+    this.autoAddedFeatureIds = new Set();
+    this.autoAddedFeatureItems = {};
+    this.autoAddedFeatureRules = {};
+    this.grantItemLookUp = {};
     this.result = {
       character: {
         _id: this.actor.id,
@@ -327,14 +332,6 @@ export class Pathmuncher {
     } else {
       ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.NoId`));
     }
-  }
-
-  static getSlug(name) {
-    return name.toString().toLowerCase().replace(/[^a-z0-9]+/gi, " ").trim().replace(/\s+|-{2,}/g, "-");
-  }
-
-  static getSlugNoQuote(name) {
-    return name.toString().toLowerCase().replace(/[']+/gi, "").replace(/[^a-z0-9]+/gi, " ").trim().replace(/\s+|-{2,}/g, "-");
   }
 
   getClassAdjustedSpecialNameLowerCase(name) {
@@ -390,8 +387,8 @@ export class Pathmuncher {
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
         const name = e[0];
-        const newName = Pathmuncher.EQUIPMENT_MAP.find((item) => item.name == name);
-        const item = { name: newName?.new ?? name, qty: e[1], added: false };
+        const newName = Pathmuncher.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == name);
+        const item = { pbName: newName?.foundryName ?? name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
     logger.debug("Finished Equipment Rename");
@@ -400,7 +397,7 @@ export class Pathmuncher {
     this.source.specials
       .filter((special) => special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
-        const name = this.SPECIAL_MAP.find((map) => map.name == special)?.new ?? special;
+        const name = this.FEAT_RENAME_MAP.find((map) => map.pbName == special)?.foundryName ?? special;
         if (!this.#processSpecialData(name) && !Pathmuncher.FOUNDRY_SPECIALS.includes(name)) {
           this.parsed.specials.push({ name, added: false });
         }
@@ -411,7 +408,7 @@ export class Pathmuncher {
     this.source.feats
       .filter((feat) => feat[0] && feat[0] !== "undefined" && feat[0] !== this.source.heritage)
       .forEach((feat) => {
-        const newName = this.SPECIAL_MAP.find((special) => special.name == feat[0]);
+        const newName = this.FEAT_RENAME_MAP.find((special) => special.name == feat[0]);
         const data = {
           name: newName?.new ?? feat[0],
           extra: feat[1],
@@ -460,50 +457,253 @@ export class Pathmuncher {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    const indexMatch = index.find((i) =>
-      i.system.slug === Pathmuncher.getSlug(name)
-      || i.system.slug === Pathmuncher.getSlugNoQuote(name)
-    );
+    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(name));
 
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
-      this.result[target].push(doc.toObject());
+      const itemData = doc.toObject();
+      itemData._id = foundry.utils.randomID();
+      this.result[target].push(itemData);
       return true;
     } else {
       return false;
     }
   }
 
-  async #addGrantedRules(document) {
-    if (!document.system?.rules?.length > 0) return;
-    for (const grantedSubFeature of document.system.rules.filter((f) => f.key === "GrantItem")) {
-      const subFeature = await fromUuid(grantedSubFeature.uuid);
-      if (subFeature) {
-        this.autoAddedFeatureIds.push(subFeature.id);
-        if (subFeature.system?.rules?.length > 0) this.#addGrantedRules(subFeature);
+  // for grants, e.g. ont he champion "Deity and Cause" where there are choices.
+  // how do we determine and match these? should we?
+  // "pf2e": {
+  //   "itemGrants": {
+  //     "adanye": {
+  //       "id": "4GHcp3iaREfj2ZgN",
+  //       "onDelete": "detach"
+  //     },
+  //     "paladin": {
+  //       "id": "HGWkTEatliHgDaEu",
+  //       "onDelete": "detach"
+  //     }
+  //   }
+  // }
+
+  // "Paladin" (granted by deity and casue)
+  // "pf2e": {
+  //   "grantedBy": {
+  //     "id": "xnrkrJa2YE1UOAVy",
+  //     "onDelete": "cascade"
+  //   },
+  //   "itemGrants": {
+  //     "retributiveStrike": {
+  //       "id": "WVHbj9LljCTovdsv",
+  //       "onDelete": "detach"
+  //     }
+  //   }
+  // }
+
+  // retributive strike
+  //   "pf2e": {
+  //     "grantedBy": {
+  //       "id": "HGWkTEatliHgDaEu",
+  //       "onDelete": "cascade"
+  //     }
+
+  #parsedFeatureMatch(type, slug) {
+    const featMatch = this.parsed[type].find((f) =>
+      slug === game.pf2e.system.sluggify(f.name)
+      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
+      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
+      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
+    );
+    return featMatch;
+  }
+
+  #findAllFeatureMatch(slug) {
+    const featMatch = this.#parsedFeatureMatch("feats", slug);
+    if (featMatch) return featMatch;
+    const specialMatch = this.#parsedFeatureMatch("specials", slug);
+    return specialMatch;
+  }
+
+  #createGrantedItem(document, parent) {
+    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name})`);
+    const camelCase = game.pf2e.system.sluggify(document.system.slug, { camel: "dromedary" });
+    setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
+    setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+    if (!this.options.askForChoices) {
+      this.result.feats.push(document);
+    }
+
+    const featureMatch = this.#findAllFeatureMatch(document.system.slug);
+    if (featureMatch) {
+      featureMatch.added = true;
+      return;
+    }
+    logger.warn(`Unable to find parsed feature match for granted feature ${document.name}`, { document, parent });
+  }
+
+  async #evaluateChoices(choices) {
+    for (const choice of choices) {
+      const doc = await fromUuid(choice.value);
+      if (!doc) continue;
+      const featMatch = this.#findAllFeatureMatch(doc.system.slug);
+      if (featMatch) return choice.value;
+    }
+    return undefined;
+  }
+
+  async #resolveInjectedUuid(source, propertyData) {
+    if (source === null || typeof source === "number" || (typeof source === "string" && !source.includes("{"))) {
+      return source;
+    }
+
+    // Walk the object tree and resolve any string values found
+    if (Array.isArray(source)) {
+      for (let i = 0; i < source.length; i++) {
+        source[i] = this.#resolveInjectedUuid(source[i]);
+      }
+    } else if (typeof source === 'object' && source !== null) {
+      for (const [key, value] of Object.entries(source)) {
+        if (typeof value === "string" || (typeof value === 'object' && value !== null)) {
+          source[key] = this.#resolveInjectedUuid(value);
+        }
+      }
+      return source;
+    } else if (typeof source === "string") {
+      const match = source.match(/{(actor|item|rule)\|(.*?)}/);
+      if (match && match[1] === "actor") {
+        return String(getProperty(this.result.character, match[1]));
+      } else if (match) {
+        const value = this.grantItemLookUp[match[0]].uuid;
+        if (!value) {
+          logger.error("Failed to resolve injected property", {
+            source,
+            propertyData,
+            key: match[1],
+            prop: match[2],
+          });
+        }
+        return String(value);
       } else {
-        logger.debug("Unable to determine granted feature, needs better parser", { document, grantedSubFeature });
+        logger.error("Failed to resolve injected property", {
+          source,
+          propertyData,
+        });
+      }
+    }
+
+    return source;
+  }
+
+  async #generateGrantItemData(document) {
+    for (const rule of document.system.rules.filter((r) => r.key === "GrantItem" && r.uuid.includes("{"))) {
+      logger.debug("Generating rules for...", { document, rule });
+      const match = rule.uuid.match(/{(item|rule)\|(.*?)}/);
+      if (match) {
+        const flagName = match[2].split(".").pop();
+        const ruleData = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName);
+        const value = ruleData ? await this.#evaluateChoices(ruleData.choices) : undefined;
+        if (!value) {
+          logger.error("Failed to resolve injected uuid", {
+            ruleData,
+            flagName,
+            key: match[1],
+            prop: match[2],
+            value,
+          });
+        }
+        this.grantItemLookUp[rule.uuid] = {
+          docId: document.id,
+          key: rule.uuid,
+          uuid: value,
+          flag: flagName,
+          choiceSet: ruleData,
+        };
+        this.grantItemLookUp[`${document._id}-${flagName}`] = {
+          docId: document.id,
+          key: rule.uuid,
+          uuid: value,
+          flag: flagName,
+        };
+      } else {
+        logger.error("Failed to resolve injected uuid", {
+          document,
+          rule,
+        });
+      }
+    }
+  }
+
+  async #addGrantedRules(document) {
+    logger.debug("addGrantedRules", duplicate(document));
+    if (document.system.rules.length === 0) return;
+
+    if (hasProperty(document, "system.level.value")
+     && document.system.level.value > this.result.character.system.details.level.value
+    ) {
+      return;
+    }
+
+    this.autoAddedFeatureRules[document._id] = duplicate(document.system.rules);
+    const failedFeatureRules = [];
+
+    await this.#generateGrantItemData(document);
+    for (const [i, grantedRuleFeature] of document.system.rules.entries()) {
+      logger.debug(`Checking ${document.name} rule: ${i} - key: ${grantedRuleFeature.key}`);
+      if (grantedRuleFeature.key !== "GrantItem") {
+        if (grantedRuleFeature.key === "ChoiceSet" && this.grantItemLookUp[`${document._id}-${grantedRuleFeature.flag}`]) continue;
+        failedFeatureRules.push(grantedRuleFeature);
+        continue;
+      }
+      const uuid = await this.#resolveInjectedUuid(grantedRuleFeature.uuid, grantedRuleFeature);
+      const ruleFeature = await fromUuid(uuid);
+      if (ruleFeature) {
+        this.autoAddedFeatureIds.add(ruleFeature.id);
+        const featureDoc = ruleFeature.toObject();
+        featureDoc._id = foundry.utils.randomID();
+        this.#createGrantedItem(featureDoc, document);
+        if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
+      } else {
+        const data = { uuid: grantedRuleFeature.uuid, document, grantedSubFeature: grantedRuleFeature };
+        failedFeatureRules.push(failedFeatureRules);
+        if (this.grantItemLookUp[grantedRuleFeature.uuid]) {
+          failedFeatureRules.push(this.grantItemLookUp[grantedRuleFeature.uuid].choiceSet);
+        }
+        logger.debug("Unable to determine granted rule feature, needs better parser", data);
+      }
+      if (!this.options.askForChoices) {
+        // eslint-disable-next-line require-atomic-updates
+        document.system.rules = failedFeatureRules;
       }
     }
   }
 
   async #addGrantedItems(document) {
-    console.warn("addGrantedItems", document)
+    logger.debug("addGrantedItems", duplicate(document));
     if (document.system.items) {
-      for (const grantedFeature of Object.values(document.system.items)) {
-        const feature = await fromUuid(grantedFeature.uuid);
+      this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
+      const failedFeatureItems = {};
+      for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
+        logger.debug(`checking ${document.name} ${key}`, grantedItemFeature);
+        if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
+        const feature = await fromUuid(grantedItemFeature.uuid);
         if (!feature) {
-          logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
+          const data = { uuid: grantedItemFeature.uuid, grantedFeature: grantedItemFeature, feature };
+          logger.debug("Unable to determine granted item feature, needs better parser", data);
+          failedFeatureItems[key] = grantedItemFeature;
           continue;
         }
-        this.autoAddedFeatureIds.push(feature.id);
-        if (!feature.system?.rules) continue;
-        await this.#addGrantedRules(feature);
+        this.autoAddedFeatureIds.add(feature.id);
+        const featureDoc = feature.toObject();
+        featureDoc._id = foundry.utils.randomID();
+        setProperty(document.system, "location", document._id);
+        this.#createGrantedItem(featureDoc, document);
+        if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
+      }
+      if (!this.options.askForChoices) {
+        // eslint-disable-next-line require-atomic-updates
+        document.system.items = failedFeatureItems;
       }
     }
-    if (document.system.rules?.length > 0) {
-      await this.#addGrantedRules(document);
-    }
+    if (hasProperty(document.system.rules)) await this.#addGrantedRules(document);
 
   }
 
@@ -512,23 +712,6 @@ export class Pathmuncher {
     if (this.result.ancestory.length > 0) await this.#addGrantedItems(this.result.ancestory[0]);
     if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
     if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
-    // for (const grantedFeature of Object.values(this.result.class[0].system.items)) {
-    //   const feature = await fromUuid(grantedFeature.uuid);
-    //   if (!feature) {
-    //     logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature });
-    //     continue;
-    //   }
-    //   this.autoAddedFeatureIds.push(feature.id);
-    //   if (!feature.system?.rules) continue;
-    //   for (const grantedSubFeature of feature.system.rules.filter((f) => f.key === "GrantItem")) {
-    //     const subFeature = await fromUuid(grantedSubFeature.uuid);
-    //     if (subFeature) {
-    //       this.autoAddedFeatureIds.push(subFeature.id);
-    //     } else {
-    //       logger.debug("Unable to determine granted feature, needs better parser", { grantedFeature, feature, grantedSubFeature });
-    //     }
-    //   }
-    // }
   }
 
   async #processCore() {
@@ -592,18 +775,20 @@ export class Pathmuncher {
 
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
+        console.error("Generating feature for", pBFeat);
+        if (pBFeat.added) return;
+        logger.debug("Generating feature for", pBFeat);
 
         const indexMatch = index.find((i) =>
-          i.system.slug === Pathmuncher.getSlug(pBFeat.name)
-          || i.system.slug === Pathmuncher.getSlugNoQuote(pBFeat.name)
-          || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(pBFeat.name))
-          || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(pBFeat.name))
-          || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(pBFeat.name))
+          i.system.slug === game.pf2e.system.sluggify(pBFeat.name)
+          || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(pBFeat.name))
+          || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(pBFeat.name))
+          || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(pBFeat.name))
         );
         const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
         if (!indexMatch) {
           logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
-          this.check.push({ name: displayName, type: "feat", details: { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel } });
+          this.check.push({ pbName: displayName, type: "feat", details: { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel } });
           continue;
         }
         if (this.result.feats.some((i) => i.name === displayName)) {
@@ -611,7 +796,7 @@ export class Pathmuncher {
           continue;
         }
         pBFeat.added = true;
-        if (this.autoAddedFeatureIds.includes(indexMatch._id)) {
+        if (this.autoAddedFeatureIds.has(indexMatch._id)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
           continue;
         }
@@ -622,9 +807,9 @@ export class Pathmuncher {
 
         if (pBFeat.type && pBFeat.level) {
           const location = Pathmuncher.getFoundryFeatLocation(pBFeat.type, pBFeat.level);
-          if (!this.usedLocations.includes(location)) {
+          if (!this.usedLocations.has(location)) {
             item.system.location = location;
-            this.usedLocations.push(location);
+            this.usedLocations.add(location);
           }
         }
 
@@ -638,20 +823,18 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const special of this.parsed.specials) {
+      console.error("Generating special for", special);
       if (special.added) return;
+      logger.debug("Generating special for", special);
       const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(special.name)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(special.name)
-        || i.system.slug === Pathmuncher.getSlug(this.getClassAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getClassAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === Pathmuncher.getSlug(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === Pathmuncher.getSlug(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === Pathmuncher.getSlugNoQuote(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
+        i.system.slug === game.pf2e.system.sluggify(special.name)
+        || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
+        || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
       );
       if (!indexMatch) {
         logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
-        this.check.push({ name: special.name, type: "special", details: { special: special.name, compendiumLabel } });
+        this.check.push({ pbName: special.name, type: "special", details: { special: special.name, compendiumLabel } });
         continue;
       }
       if (this.result.feats.some((i) => i.name === special.name)) {
@@ -659,7 +842,7 @@ export class Pathmuncher {
         continue;
       }
       special.added = true;
-      if (this.autoAddedFeatureIds.includes(indexMatch._id)) {
+      if (this.autoAddedFeatureIds.has(indexMatch._id)) {
         logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
         continue;
       }
@@ -674,44 +857,45 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const compendiumBackpack = await compendium.getDocument("3lgwjrFEsQVKzhh7");
 
-    const adventurersPack = this.parsed.equipment.find((e) => e.name === "Adventurer's Pack");
+    const adventurersPack = this.parsed.equipment.find((e) => e.pbName === "Adventurer's Pack");
     const backpackInstance = adventurersPack ? compendiumBackpack.toObject() : null;
     if (backpackInstance) {
       adventurersPack.added = true;
+      backpackInstance._id = foundry.utils.randomID();
       this.result.adventurersPack.item = adventurersPack;
       this.result.equipment.push(backpackInstance);
     }
 
-    for (const e of this.parsed.equipment.filter((e) => e.name !== "Adventurer's Pack")) {
-      const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(e.name)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(e.name)
-      );
+    for (const e of this.parsed.equipment.filter((e) => e.pbName !== "Adventurer's Pack")) {
+      logger.debug("Generating item for", e);
+      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(e.pbName));
       if (!indexMatch) {
-        logger.error(`Unable to match ${e.name}`, e);
-        this.bad.push({ name: e.name, type: "equipment", details: { e } });
+        logger.error(`Unable to match ${e.pbName}`, e);
+        this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
         continue;
       }
 
       const doc = await compendium.getDocument(indexMatch._id);
       if (doc.type != "kit") {
         const itemData = doc.toObject();
+        itemData._id = foundry.utils.randomID();
         itemData.system.quantity = e.qty;
         const type = doc.type === "treasure" ? "treasure" : "equipment";
         this.result[type].push(itemData);
       }
     }
 
-    for (const e of this.result.adventurersPack.contents) {
-      const indexMatch = index.find((i) => i.system.slug === e.slug);
+    for (const content of this.result.adventurersPack.contents) {
+      const indexMatch = index.find((i) => i.system.slug === content.slug);
       if (!indexMatch) {
-        logger.error(`Unable to match adventurers kit item ${e.name}`, e);
+        logger.error(`Unable to match adventurers kit item ${content.name}`, content);
         continue;
       }
 
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
-      itemData.system.quantity = e.qty;
+      itemData._id = foundry.utils.randomID();
+      itemData.system.quantity = content.qty;
       itemData.system.containerId = backpackInstance?._id;
       this.result.equipment.push(itemData);
     }
@@ -722,30 +906,29 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const w of this.source.weapons) {
-      const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(w.name)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(w.name)
-      );
+      logger.debug("Generating weapon for", w);
+      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(w.name));
       if (!indexMatch) {
         logger.error(`Unable to match weapon item ${w.name}`, w);
-        this.bad.push({ name: w.name, type: "weapon", details: { w } });
+        this.bad.push({ pbName: w.name, type: "weapon", details: { w } });
         continue;
       }
 
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
+      itemData._id = foundry.utils.randomID();
       itemData.system.quantity = w.qty;
       itemData.system.damage.die = w.die;
       itemData.system.potencyRune.value = w.pot;
       itemData.system.strikingRune.value = w.str;
 
-      if (w.runes[0]) itemData.system.propertyRune1.value = utils.camelCase(w.runes[0]);
-      if (w.runes[1]) itemData.system.propertyRune2.value = utils.camelCase(w.runes[1]);
-      if (w.runes[2]) itemData.system.propertyRune3.value = utils.camelCase(w.runes[2]);
-      if (w.runes[3]) itemData.system.propertyRune4.value = utils.camelCase(w.runes[3]);
+      if (w.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(w.runes[0], { camel: "dromedary" });
+      if (w.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(w.runes[1], { camel: "dromedary" });
+      if (w.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(w.runes[2], { camel: "dromedary" });
+      if (w.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(w.runes[3], { camel: "dromedary" });
       if (w.mat) {
         const material = w.mat.split(" (")[0];
-        itemData.system.preciousMaterial.value = utils.camelCase(material);
+        itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
         itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(w.mat);
       }
       if (w.display) itemData.name = w.display;
@@ -760,33 +943,33 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const a of this.source.armor) {
+      logger.debug("Generating armor for", a);
       const indexMatch = index.find((i) =>
-        i.system.slug === Pathmuncher.getSlug(a.name)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(a.name)
-        || i.system.slug === Pathmuncher.getSlug(`${a.name} Armor`)
-        || i.system.slug === Pathmuncher.getSlugNoQuote(`${a.name} Armor`)
+        i.system.slug === game.pf2e.system.sluggify(a.name)
+        || i.system.slug === game.pf2e.system.sluggify(`${a.name} Armor`)
       );
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
-        this.bad.push({ name: a.name, type: "armor", details: { a } });
+        this.bad.push({ pbName: a.name, type: "armor", details: { a } });
         continue;
       }
 
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
+      itemData._id = foundry.utils.randomID();
       itemData.system.quantity = a.qty;
       itemData.system.category = a.prof;
       itemData.system.potencyRune.value = a.pot;
       itemData.system.resiliencyRune.value = a.res;
       itemData.system.equipped.value = a.worn ?? false;
 
-      if (a.runes[0]) itemData.system.propertyRune1.value = utils.camelCase(a.runes[0]);
-      if (a.runes[1]) itemData.system.propertyRune2.value = utils.camelCase(a.runes[1]);
-      if (a.runes[2]) itemData.system.propertyRune3.value = utils.camelCase(a.runes[2]);
-      if (a.runes[3]) itemData.system.propertyRune4.value = utils.camelCase(a.runes[3]);
+      if (a.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(a.runes[0], { camel: "dromedary" });
+      if (a.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(a.runes[1], { camel: "dromedary" });
+      if (a.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(a.runes[2], { camel: "dromedary" });
+      if (a.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(a.runes[3], { camel: "dromedary" });
       if (a.mat) {
         const material = a.mat.split(" (")[0];
-        itemData.system.preciousMaterial.value = utils.camelCase(material);
+        itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
         itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(a.mat);
       }
       if (a.display) itemData.name = a.display;
@@ -887,12 +1070,11 @@ export class Pathmuncher {
   }
 
   async #processSpells() {
-    if (!this.options.addSpells) return;
-
     const compendium = game.packs.get("pf2e.spells-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const caster of this.source.spellCasters) {
+      logger.debug("Generating caster for", caster);
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
       caster.instance = await this.#generateSpellCaster(caster);
 
@@ -900,19 +1082,17 @@ export class Pathmuncher {
         const level = spellSelection.level;
 
         for (const spell of spellSelection.list) {
-          console.warn({spell, spellSelection, list: spellSelection.list})
-          const indexMatch = index.find((i) =>
-            i.system.slug === Pathmuncher.getSlug(spell)
-            || i.system.slug === Pathmuncher.getSlugNoQuote(spell)
-          );
+          logger.debug("spell details", { spell, spellSelection, list: spellSelection.list });
+          const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spell));
           if (!indexMatch) {
             logger.error(`Unable to match spell ${spell}`, { spell, spellSelection, caster });
-            this.bad.push({ name: spell, type: "spell", details: { spell, spellSelection, caster } });
+            this.bad.push({ pbName: spell, type: "spell", details: { spell, spellSelection, caster } });
             continue;
           }
 
           const doc = await compendium.getDocument(indexMatch._id);
           const itemData = doc.toObject();
+          itemData._id = foundry.utils.randomID();
           itemData.system.location.heightenedLevel = level;
           itemData.system.location.value = caster.instance._id;
           this.result.spells.push(itemData);
@@ -925,7 +1105,6 @@ export class Pathmuncher {
   }
 
   async #generateLores() {
-    if (!this.options.addLores) return;
     for (const lore of this.source.lores) {
       const data = {
         name: lore[0],
@@ -948,7 +1127,6 @@ export class Pathmuncher {
   }
 
   async #generateMoney() {
-    if (!this.options.addMoney) return;
     const compendium = game.packs.get("pf2e.equipment-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const moneyLookup = [
@@ -963,7 +1141,9 @@ export class Pathmuncher {
       if (indexMatch) {
         const doc = await compendium.getDocument(indexMatch._id);
         doc.system.quantity = this.source.money[lookup.type];
-        this.result.money.push(doc.toObject());
+        const itemData = doc.toObject();
+        itemData._id = foundry.utils.randomID();
+        this.result.money.push(itemData);
       }
     }
   }
@@ -971,9 +1151,9 @@ export class Pathmuncher {
   async #processFeats() {
     await this.#generateFeatItems("pf2e.feats-srd");
     await this.#generateFeatItems("pf2e.ancestryfeatures");
-    await this.#generateSpecialItems("pf2e.actionspf2e");
     await this.#generateSpecialItems("pf2e.ancestryfeatures");
     await this.#generateSpecialItems("pf2e.classfeatures");
+    await this.#generateSpecialItems("pf2e.actionspf2e");
   }
 
   async #processEquipment() {
@@ -1031,18 +1211,23 @@ export class Pathmuncher {
       loreIds,
       spellIds,
     });
+    // TODO: Actually respect deletion choices.
     // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
     console.warn(duplicate(this.result));
     await this.actor.update(this.result.character);
-    await this.actor.createEmbeddedDocuments("Item", this.result.ancestory);
-    await this.actor.createEmbeddedDocuments("Item", this.result.heritage);
-    await this.actor.createEmbeddedDocuments("Item", this.result.background);
-    await this.actor.createEmbeddedDocuments("Item", this.result.deity);
-    await this.actor.createEmbeddedDocuments("Item", this.result.class);
-    await this.actor.createEmbeddedDocuments("Item", this.result.feats);
+    await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", this.result.ancestory, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.lores);
+    for (const feat of this.result.feats.reverse()) {
+      console.warn(`creating ${feat.name}`, feat);
+      await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
+    }
+    // await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.spells);
     await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
@@ -1050,5 +1235,10 @@ export class Pathmuncher {
     await this.actor.createEmbeddedDocuments("Item", this.result.armor);
     await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
     await this.actor.createEmbeddedDocuments("Item", this.result.money);
+
+    // TODO: Loop back over items and add rule and item progression data back in.
+    if (!this.options.askForChoices) {
+      // LOOPS HERE
+    }
   }
 }
