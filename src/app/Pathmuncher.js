@@ -776,7 +776,7 @@ export class Pathmuncher {
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
         console.error("Generating feature for", pBFeat);
-        if (pBFeat.added) return;
+        if (pBFeat.added) continue;
         logger.debug("Generating feature for", pBFeat);
 
         const indexMatch = index.find((i) =>
@@ -822,9 +822,10 @@ export class Pathmuncher {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
+    console.warn("specials", { specials: duplicate(this.parsed.specials), compendiumLabel });
     for (const special of this.parsed.specials) {
       console.error("Generating special for", special);
-      if (special.added) return;
+      if (special.added) continue;
       logger.debug("Generating special for", special);
       const indexMatch = index.find((i) =>
         i.system.slug === game.pf2e.system.sluggify(special.name)
