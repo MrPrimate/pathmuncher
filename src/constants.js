@@ -13,11 +13,6 @@ const CONSTANTS = {
   GET_DEFAULT_SETTINGS() {
     return foundry.utils.deepClone(CONSTANTS.DEFAULT_SETTINGS);
   },
-
-  WOUNDS: {
-    MINIMUM_OPEN_WOUNDS: 3,
-  },
-
 };
 
 CONSTANTS.DEFAULT_SETTINGS = {
