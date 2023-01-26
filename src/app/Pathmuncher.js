@@ -356,6 +356,7 @@ export class Pathmuncher {
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
+      this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
       return true;
     } else {
@@ -409,11 +410,27 @@ export class Pathmuncher {
     return featMatch;
   }
 
+  #generatedResultMatch(type, slug) {
+    const featMatch = this.result[type].find((f) =>
+      slug === game.pf2e.system.sluggify(f.name)
+      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
+      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
+      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
+    );
+    return featMatch;
+  }
+
   #findAllFeatureMatch(slug) {
     const featMatch = this.#parsedFeatureMatch("feats", slug);
     if (featMatch) return featMatch;
     const specialMatch = this.#parsedFeatureMatch("specials", slug);
-    return specialMatch;
+    if (specialMatch) return specialMatch;
+    const deityMatch = this.#generatedResultMatch("deity", slug);
+    return deityMatch;
+    // const classMatch = this.#generatedResultMatch("class", slug);
+    // return classMatch;
+    // const equipmentMatch = this.#generatedResultMatch("equipment", slug);
+    // return equipmentMatch;
   }
 
   #createGrantedItem(document, parent) {
@@ -426,7 +443,7 @@ export class Pathmuncher {
     }
 
     const featureMatch = this.#findAllFeatureMatch(document.system.slug);
-    if (featureMatch) {
+    if (featureMatch && !featureMatch._id) {
       featureMatch.added = true;
       return;
     }
@@ -434,12 +451,23 @@ export class Pathmuncher {
   }
 
   async #evaluateChoices(choices) {
-    for (const choice of choices) {
-      const doc = await fromUuid(choice.value);
-      if (!doc) continue;
-      const featMatch = this.#findAllFeatureMatch(doc.system.slug);
-      if (featMatch) return choice.value;
+    if (Array.isArray(choices)) {
+      for (const choice of choices) {
+        const doc = await fromUuid(choice.value);
+        if (!doc) continue;
+        const featMatch = this.#findAllFeatureMatch(doc.system.slug);
+        if (featMatch) return choice.value;
+      }
+    } else if (typeof choices === 'object' && choices !== null && choices.pack) {
+      const compendium = await game.packs.get(choices.pack);
+      let index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+      if (choices.itemType) index = index.filter((i) => i.type === choices.itemType);
+      for (const i of index) {
+        const featMatch = this.#findAllFeatureMatch(i.system.slug);
+        if (featMatch) return `Compendium.${choices.pack}.${i._id}`;
+      }
     }
+
     return undefined;
   }
 
@@ -555,17 +583,22 @@ export class Pathmuncher {
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
       } else {
-        const data = { uuid: grantedRuleFeature.uuid, document, grantedSubFeature: grantedRuleFeature };
-        failedFeatureRules.push(failedFeatureRules);
+        const data = {
+          uuid: grantedRuleFeature.uuid,
+          document,
+          grantedRuleFeature,
+          grandedFeatureLookup: this.grantItemLookUp[grantedRuleFeature.uuid],
+        };
+        failedFeatureRules.push(grantedRuleFeature);
         if (this.grantItemLookUp[grantedRuleFeature.uuid]) {
           failedFeatureRules.push(this.grantItemLookUp[grantedRuleFeature.uuid].choiceSet);
         }
-        logger.debug("Unable to determine granted rule feature, needs better parser", data);
+        logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
-      if (!this.options.askForChoices) {
-        // eslint-disable-next-line require-atomic-updates
-        document.system.rules = failedFeatureRules;
-      }
+    }
+    if (!this.options.askForChoices) {
+      // eslint-disable-next-line require-atomic-updates
+      document.system.rules = failedFeatureRules;
     }
   }
 
@@ -580,7 +613,7 @@ export class Pathmuncher {
         const feature = await fromUuid(grantedItemFeature.uuid);
         if (!feature) {
           const data = { uuid: grantedItemFeature.uuid, grantedFeature: grantedItemFeature, feature };
-          logger.debug("Unable to determine granted item feature, needs better parser", data);
+          logger.warn("Unable to determine granted item feature, needs better parser", data);
           failedFeatureItems[key] = grantedItemFeature;
           continue;
         }
@@ -1111,7 +1144,7 @@ export class Pathmuncher {
     // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
-    console.warn(duplicate(this.result));
+    console.warn(this.result);
     await this.actor.update(this.result.character);
     await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.ancestory, { keepId: true });
