@@ -10,6 +10,12 @@ Import characters from Pathbuilder to Foundry Pathfinder 2e
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
 
+## Known Issues
+
+- Pathbuilder JSON does not contain spell data at the moment.
+- Pathbuilder JSON does not contain any details about containers.
+- Pathbuilder JSON does not export the tradition of focus spells. These are set to `divine` by default.
+
 ## Bugs and Issues
 
 Please open bugs and issues on [github](https://github.com/MrPrimate/pathmuncher/issues/new/choose), or via the Discord channel [#pathmuncher](https://discord.gg/M6jvpfreNd).
