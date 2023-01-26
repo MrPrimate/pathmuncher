@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { EQUIPMENT_RENAME_MAP } from "../data/equipment.js";
-import { FEAT_RENAME_MAP } from "../data/features.js";
+import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT } from "../data/equipment.js";
+import { FEAT_RENAME_MAP, IGNORED_FEATS } from "../data/features.js";
 import { PredicatePF2e } from "../lib/PredicatePF2e.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -10,21 +10,27 @@ import utils from "../utils.js";
 export class Pathmuncher {
 
   // eslint-disable-next-line class-methods-use-this
-  get EQUIPMENT_RENAME_MAP () {
+  get EQUIPMENT_RENAME_MAP() {
     return EQUIPMENT_RENAME_MAP;
   }
 
-  get FEAT_RENAME_MAP () {
+  FEAT_RENAME_MAP(name) {
     const dynamicItems = [
       { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
     ];
-    return FEAT_RENAME_MAP.concat(dynamicItems);
+    return FEAT_RENAME_MAP(name).concat(dynamicItems);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get RESTRICTED_EQUIPMENT() {
+    return RESTRICTED_EQUIPMENT;
   }
 
   // specials that are handled by Foundry and shouldn't be added
-  static FOUNDRY_SPECIALS = [];
-
-  static RESTRICTED_EQUIPMENT = ["Bracers of Armor"];
+  // eslint-disable-next-line class-methods-use-this
+  get IGNORED_FEATURES () {
+    return IGNORED_FEATS;
+  };
 
   getChampionType() {
     if (this.source.alignment == "LG") return "Paladin";
@@ -173,9 +179,8 @@ export class Pathmuncher {
     this.source.equipment
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
-        const name = e[0];
-        const newName = this.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == name);
-        const item = { pbName: newName?.foundryName ?? name, qty: e[1], added: false };
+        const name = this.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == e[0])?.foundryName ?? e[0];
+        const item = { pbName: name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
     logger.debug("Finished Equipment Rename");
@@ -184,8 +189,8 @@ export class Pathmuncher {
     this.source.specials
       .filter((special) => special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
-        const name = this.FEAT_RENAME_MAP.find((map) => map.pbName == special)?.foundryName ?? special;
-        if (!this.#processSpecialData(name) && !Pathmuncher.FOUNDRY_SPECIALS.includes(name)) {
+        const name = this.FEAT_RENAME_MAP(special).find((map) => map.pbName == special)?.foundryName ?? special;
+        if (!this.#processSpecialData(name) && !this.IGNORED_FEATURES.includes(name)) {
           this.parsed.specials.push({ name, added: false });
         }
       });
@@ -195,9 +200,9 @@ export class Pathmuncher {
     this.source.feats
       .filter((feat) => feat[0] && feat[0] !== "undefined" && feat[0] !== this.source.heritage)
       .forEach((feat) => {
-        const newName = this.FEAT_RENAME_MAP.find((special) => special.name == feat[0]);
+        const name = this.FEAT_RENAME_MAP(feat[0]).find((map) => map.pbName == feat[0])?.foundryName ?? feat[0];
         const data = {
-          name: newName?.new ?? feat[0],
+          name,
           extra: feat[1],
           added: false,
           type: feat[2],
@@ -340,12 +345,17 @@ export class Pathmuncher {
   }
 
   async #evaluateChoices(choices) {
+    const choiceDocs = [];
     if (Array.isArray(choices)) {
       for (const choice of choices) {
         const doc = await fromUuid(choice.value);
         if (!doc) continue;
+        choiceDocs.push(doc);
         const featMatch = this.#findAllFeatureMatch(doc.system.slug);
-        if (featMatch) return choice.value;
+        if (featMatch) {
+          logger.debug("Choices evaluated", { choices, choiceDocs });
+          return choice.value;
+        }
       }
     } else if (typeof choices === 'object' && choices !== null && choices.pack) {
       const compendium = await game.packs.get(choices.pack);
@@ -353,10 +363,15 @@ export class Pathmuncher {
       if (choices.itemType) index = index.filter((i) => i.type === choices.itemType);
       for (const i of index) {
         const featMatch = this.#findAllFeatureMatch(i.system.slug);
-        if (featMatch) return `Compendium.${choices.pack}.${i._id}`;
+        if (featMatch) {
+          logger.debug("Choice index success", { index, choices });
+          return `Compendium.${choices.pack}.${i._id}`;
+        }
       }
+      logger.debug("Choice index failed, evaluated", { index, choices });
     }
 
+    logger.debug("Evaluate Choices failed", { choiceDocs, choices });
     return undefined;
   }
 
@@ -409,7 +424,8 @@ export class Pathmuncher {
       const match = rule.uuid.match(/{(item|rule)\|(.*?)}/);
       if (match) {
         const flagName = match[2].split(".").pop();
-        const ruleData = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName);
+        const ruleData = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
+          ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
         const value = ruleData ? await this.#evaluateChoices(ruleData.choices) : undefined;
         if (!value) {
           logger.error("Failed to resolve injected uuid", {
@@ -432,6 +448,14 @@ export class Pathmuncher {
           key: rule.uuid,
           uuid: value,
           flag: flagName,
+          choiceSet: ruleData,
+        };
+        this.grantItemLookUp[`${document._id}`] = {
+          docId: document.id,
+          key: rule.uuid,
+          uuid: value,
+          flag: flagName,
+          choiceSet: ruleData,
         };
       } else {
         logger.error("Failed to resolve injected uuid", {
@@ -475,7 +499,10 @@ export class Pathmuncher {
     for (const [i, grantedRuleFeature] of document.system.rules.entries()) {
       logger.debug(`Checking ${document.name} rule: ${i} - key: ${grantedRuleFeature.key}`);
       if (grantedRuleFeature.key !== "GrantItem") {
-        if (grantedRuleFeature.key === "ChoiceSet" && this.grantItemLookUp[`${document._id}-${grantedRuleFeature.flag}`]) continue;
+        if (grantedRuleFeature.key === "ChoiceSet"
+          && (this.grantItemLookUp[`${document._id}-${grantedRuleFeature.flag}`]
+          || (!grantedRuleFeature.flag && this.grantItemLookUp[`${document._id}`]))
+        ) continue;
         failedFeatureRules.push(grantedRuleFeature);
         continue;
       }
@@ -692,8 +719,8 @@ export class Pathmuncher {
     }
   }
 
-  async #generateEquipmentItems() {
-    const compendium = game.packs.get("pf2e.equipment-srd");
+  async #generateEquipmentItems(pack = "pf2e.equipment-srd") {
+    const compendium = game.packs.get(pack);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const compendiumBackpack = await compendium.getDocument("3lgwjrFEsQVKzhh7");
 
@@ -720,7 +747,9 @@ export class Pathmuncher {
       }
     }
 
-    for (const e of this.parsed.equipment.filter((e) => e.pbName !== "Adventurer's Pack")) {
+    for (const e of this.parsed.equipment) {
+      if (e.pbName === "Adventurer's Pack") continue;
+      if (e.added) continue;
       logger.debug("Generating item for", e);
       const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(e.pbName));
       if (!indexMatch) {
@@ -737,6 +766,8 @@ export class Pathmuncher {
         const type = doc.type === "treasure" ? "treasure" : "equipment";
         this.result[type].push(itemData);
       }
+      // eslint-disable-next-line require-atomic-updates
+      e.added = true;
     }
   }
 
@@ -797,7 +828,7 @@ export class Pathmuncher {
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
       itemData.system.equipped.value = a.worn ?? false;
-      if (!Pathmuncher.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
+      if (!this.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
         itemData.system.quantity = a.qty;
         itemData.system.category = a.prof;
         itemData.system.potencyRune.value = a.pot;
