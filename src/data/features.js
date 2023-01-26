@@ -1,5 +1,10 @@
 // these are features which are named differently in pathbuilder to foundry
-export const FEAT_RENAME_MAP = [
+
+const POSTFIX_PB_REMOVALS = [
+  /(.*) Racket$/
+];
+
+const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Deflect Arrows", foundryName: "Deflect Arrow" },
   { pbName: "Maestro", foundryName: "Maestro Muse" },
   { pbName: "Tenets of Evil", foundryName: "The Tenets of Evil" },
@@ -89,4 +94,24 @@ export const FEAT_RENAME_MAP = [
   { pbName: "Cognitive Crossover", foundryName: "Kreighton's Cognitive Crossover" },
   { pbName: "Heir of the Astrologers", foundryName: "Heir of the Saoc" },
   { pbName: "Astrology", foundryName: "Saoc Astrology" },
+];
+
+function generatePostfixNames(pbName) {
+  const result = [];
+  for (const reg of POSTFIX_PB_REMOVALS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[1] });
+    }
+  }
+  return result;
+}
+
+export function FEAT_RENAME_MAP(pbName = null) {
+  const postfixNames = pbName ? generatePostfixNames(pbName) : [];
+  return postfixNames.concat(FEAT_RENAME_STATIC_MAP);
+}
+
+export const IGNORED_FEATS = [
+  "Unarmored"
 ];
