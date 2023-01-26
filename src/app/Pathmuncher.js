@@ -1,133 +1,27 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
+import { EQUIPMENT_RENAME_MAP } from "../data/equipment.js";
+import { FEAT_RENAME_MAP } from "../data/features.js";
+import { PredicatePF2e } from "../lib/PredicatePF2e.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 
 export class Pathmuncher {
 
-  static EQUIPMENT_RENAME_MAP = [
-    { pbName: "Chain", foundryName: "Chain (10 feet)" },
-    { pbName: "Oil", foundryName: "Oil (1 pint)" },
-    { pbName: "Bracelets of Dashing", foundryName: "Bracelet of Dashing" },
-    { pbName: "Fingerprinting Kit", foundryName: "Fingerprint Kit" },
-    { pbName: "Greater Unmemorable Mantle", foundryName: "Unmemorable Mantle (Greater)" },
-    { pbName: "Major Unmemorable Mantle", foundryName: "Unmemorable Mantle (Major)" },
-    { pbName: "Ladder", foundryName: "Ladder (10-foot)" },
-    { pbName: "Mezmerizing Opal", foundryName: "Mesmerizing Opal" },
-    { pbName: "Explorer's Clothing", foundryName: "Clothing (Explorer's)" },
-    { pbName: "Flaming Star (Greater)", foundryName: "Greater Flaming Star" },
-    { pbName: "Potion of Lesser Darkvision", foundryName: "Darkvision Elixir (Lesser)" },
-    { pbName: "Bottled Sunlight", foundryName: "Formulated Sunlight" },
-    { pbName: "Magazine (Repeating Hand Crossbow)", foundryName: "Magazine with 5 Bolts" },
-    { pbName: "Astrolabe (Standard)", foundryName: "Standard Astrolabe" },
-    { pbName: "Greater Cloak of Repute", foundryName: "Cloak of Repute (Greater)" },
-    { pbName: "Skinitch Salve", foundryName: "Skinstitch Salve" },
-    { pbName: "Flawless Scale", foundryName: "Abadar's Flawless Scale" },
-    { pbName: "Construct Key", foundryName: "Cordelia's Construct Key" },
-    { pbName: "Construct Key (Greater)", foundryName: "Cordelia's Greater Construct Key" },
-    { pbName: "Lesser Swapping Stone", foundryName: "Lesser Bonmuan Swapping Stone" },
-    { pbName: "Major Swapping Stone", foundryName: "Major Bonmuan Swapping Stone" },
-    { pbName: "Moderate Swapping Stone", foundryName: "Moderate Bonmuan Swapping Stone" },
-    { pbName: "Greater Swapping Stone", foundryName: "Greater Bonmuan Swapping Stone" },
-    { pbName: "Heartstone", foundryName: "Skarja's Heartstone" },
-    { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
-  ];
-
-  get FEAT_RENAME_MAP () {
-    return [
-      { pbName: "Deflect Arrows", foundryName: "Deflect Arrow" },
-      { pbName: "Maestro", foundryName: "Maestro Muse" },
-      { pbName: "Tenets of Evil", foundryName: "The Tenets of Evil" },
-      { pbName: "Antipaladin [Chaotic Evil]", foundryName: "Antipaladin" },
-      { pbName: "Paladin [Lawful Good]", foundryName: "Paladin" },
-      { pbName: "Redeemer [Neutral Good]", foundryName: "Redeemer" },
-      { pbName: "Liberator [Chaotic Good]", foundryName: "Liberator" },
-      { pbName: "Tyrant [Lawful Evil]", foundryName: "Tyrant" },
-      { pbName: "Desecrator [Neutral Evil]", foundryName: "Desecrator" },
-      { pbName: "Harmful Font", foundryName: "Divine Font" },
-      { pbName: "Healing Font", foundryName: "Divine Font" },
-      { pbName: "Deepvision", foundryName: "Deep Vision" },
-      { pbName: "Wind God's Fan", foundryName: "Wind God’s Fan" },
-      { pbName: "Redeemer [Neutral Good]", foundryName: "Redeemer" },
-      { pbName: "Enigma", foundryName: "Enigma Muse" },
-      { pbName: "Polymath", foundryName: "Polymath Muse" },
-      { pbName: "Warrior", foundryName: "Warrior Muse" },
-      { pbName: "Multifarious", foundryName: "Multifarious Muse" },
-      { pbName: "Constructed (Android)", foundryName: "Constructed" },
-      { pbName: "Wakizashi", foundryName: "Wakizashi Weapon Familiarity" },
-      { pbName: "Katana", foundryName: "Katana Weapon Familiarity" },
-      { pbName: "Marked for Death", foundryName: "Mark for Death" },
-      { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
-      { pbName: "Major Lesson I", foundryName: "Major Lesson" },
-      { pbName: "Major Lesson II", foundryName: "Major Lesson" },
-      { pbName: "Major Lesson III", foundryName: "Major Lesson" },
-      { pbName: "Eye of the Arcane Lords", foundryName: "Eye of the Arclords" },
-      { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
-      { pbName: "Heatwave", foundryName: "Heat Wave" },
-      { pbName: "Bloodline: Genie (Efreeti)", foundryName: "Bloodline: Genie" },
-      { pbName: "Bite (Gnoll)", foundryName: "Bite" },
-      { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
-      { pbName: "Cognative Mutagen (Greater)", foundryName: "Cognitive Mutagen (Greater)" },
-      { pbName: "Cognative Mutagen (Lesser)", foundryName: "Cognitive Mutagen (Lesser)" },
-      { pbName: "Cognative Mutagen (Major)", foundryName: "Cognitive Mutagen (Major)" },
-      { pbName: "Cognative Mutagen (Moderate)", foundryName: "Cognitive Mutagen (Moderate)" },
-      { pbName: "Recognise Threat", foundryName: "Recognize Threat" },
-      { pbName: "Enhanced Familiar Feat", foundryName: "Enhanced Familiar" },
-      { pbName: "Aquatic Eyes (Darkvision)", foundryName: "Aquatic Eyes" },
-      { pbName: "Heir of the Astrologers", foundryName: "Heir of the Saoc" },
-      { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
-      { pbName: "Heatwave", foundryName: "Heat Wave" },
-      { pbName: "Detective Dedication", foundryName: "Edgewatch Detective Dedication" },
-      { pbName: "Flip", foundryName: "Farabellus Flip" },
-      { pbName: "Interrogation", foundryName: "Bolera's Interrogation" },
-      { pbName: "Wind God’s Fan", foundryName: "Wind God's Fan" },
-      { pbName: "Rkoan Arts", foundryName: "Rokoan Arts" },
-      { pbName: "Virtue-Forged Tattooed", foundryName: "Virtue-Forged Tattoos" },
-      { pbName: "Bloody Debilitations", foundryName: "Bloody Debilitation" },
-      { pbName: "Cave Climber Kobold", foundryName: "Caveclimber Kobold" },
-      { pbName: "Tribal Bond", foundryName: "Quah Bond" },
-      { pbName: "Tongue of the Sun and Moon", foundryName: "Tongue of Sun and Moon" },
-      { pbName: "Aerialist", foundryName: "Shory Aerialist" },
-      { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
-      { pbName: "Ganzi Gaze (Low-Light Vision)", foundryName: "Ganzi Gaze" },
-      { pbName: "Saberteeth", foundryName: "Saber Teeth" },
-      { pbName: "Vestigal Wings", foundryName: "Vestigial Wings" },
-      { pbName: "Chosen One", foundryName: "Chosen of Lamashtu" },
-      { pbName: "Ice-Witch", foundryName: "Irriseni Ice-Witch" },
-      { pbName: "Construct Carver", foundryName: "Tupilaq Carver" },
-      { pbName: "Deadly Hair", foundryName: "Syu Tak-nwa's Deadly Hair" },
-      { pbName: "Revivification Protocall", foundryName: "Revivification Protocol" },
-      { pbName: "Ember's Eyes (Darkvision)", foundryName: "Ember's Eyes" },
-      { pbName: "Astrology", foundryName: "Saoc Astrology" },
-      { pbName: "Ape", foundryName: "Ape Animal Instinct" },
-      { pbName: "Duelist Dedication (LO)", foundryName: "Aldori Duelist Dedication" },
-      { pbName: "Parry", foundryName: "Aldori Parry" },
-      { pbName: "Riposte", foundryName: "Aldori Riposte" },
-      { pbName: "Sentry Dedication", foundryName: "Lastwall Sentry Dedication" },
-      { pbName: "Wary Eye", foundryName: "Eye of Ozem" },
-      { pbName: "Warden", foundryName: "Lastwall Warden" },
-      { pbName: "Heavenseeker Dedication", foundryName: "Jalmeri Heavenseeker Dedication" },
-      { pbName: "Mantis God's Grip", foundryName: "Achaekek's Grip" },
-      { pbName: "High Killer Training", foundryName: "Vernai Training" },
-      { pbName: "Guild Agent Dedication", foundryName: "Pathfinder Agent Dedication" },
-      { pbName: "Wayfinder Resonance Infiltrator", foundryName: "Westyr's Wayfinder Repository" },
-      { pbName: "Collegiate Attendant Dedication", foundryName: "Magaambyan Attendant Dedication" },
-      { pbName: "Scholarly Storytelling", foundryName: "Uzunjati Storytelling" },
-      { pbName: "Scholarly Recollection", foundryName: "Uzunjati Recollection" },
-      { pbName: "Secret Lesson", foundryName: "Janatimo's Lessons" },
-      { pbName: "Lumberjack Dedication", foundryName: "Turpin Rowe Lumberjack Dedication" },
-      { pbName: "Fourberie", foundryName: "Fane's Fourberie" },
-      { pbName: "Incredible Beastmaster's Companion", foundryName: "Incredible Beastmaster Companion" },
-      { pbName: "Polymath", foundryName: "Polymath Muse" },
-      { pbName: "Escape", foundryName: "Fane's Escape" },
-      { pbName: "Quick Climber", foundryName: "Quick Climb" },
-      { pbName: "Stab and Snag", foundryName: "Stella's Stab and Snag" },
-      { pbName: "Cognitive Crossover", foundryName: "Kreighton's Cognitive Crossover" },
-    ];
+  // eslint-disable-next-line class-methods-use-this
+  get EQUIPMENT_RENAME_MAP () {
+    return EQUIPMENT_RENAME_MAP;
   }
 
-  // specials that are handled by Foundry:
+  get FEAT_RENAME_MAP () {
+    const dynamicItems = [
+      { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
+    ];
+    return FEAT_RENAME_MAP.concat(dynamicItems);
+  }
+
+  // specials that are handled by Foundry and shouldn't be added
   static FOUNDRY_SPECIALS = [];
 
   static RESTRICTED_EQUIPMENT = ["Bracers of Armor"];
@@ -280,7 +174,7 @@ export class Pathmuncher {
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
         const name = e[0];
-        const newName = Pathmuncher.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == name);
+        const newName = this.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == name);
         const item = { pbName: newName?.foundryName ?? name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
@@ -411,12 +305,7 @@ export class Pathmuncher {
   }
 
   #generatedResultMatch(type, slug) {
-    const featMatch = this.result[type].find((f) =>
-      slug === game.pf2e.system.sluggify(f.name)
-      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
-      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
-      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
-    );
+    const featMatch = this.result[type].find((f) => slug === f.system.slug);
     return featMatch;
   }
 
@@ -443,11 +332,11 @@ export class Pathmuncher {
     }
 
     const featureMatch = this.#findAllFeatureMatch(document.system.slug);
-    if (featureMatch && !featureMatch._id) {
-      featureMatch.added = true;
+    if (featureMatch) {
+      if (!featureMatch._id) featureMatch.added = true;
       return;
     }
-    logger.warn(`Unable to find parsed feature match for granted feature ${document.name}`, { document, parent });
+    logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
   async #evaluateChoices(choices) {
@@ -553,6 +442,22 @@ export class Pathmuncher {
     }
   }
 
+  async #checkRule(document, rule) {
+    const tempActor = await this.#generateTempActor([document]);
+    // const doc = new Item(document);
+    // const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, doc)
+
+    const predicateChecker = new PredicatePF2e(rule.predicate);
+    const optionSet = await tempActor.getRollOptions();
+    // console.warn("test", {
+    //   predicateChecker,
+    //   optionSet,
+    //   rule,
+    // })
+    await Actor.deleteDocuments([tempActor._id]);
+    return predicateChecker.test(optionSet);
+  }
+
   async #addGrantedRules(document) {
     logger.debug("addGrantedRules", duplicate(document));
     if (document.system.rules.length === 0) return;
@@ -563,7 +468,7 @@ export class Pathmuncher {
       return;
     }
 
-    this.autoAddedFeatureRules[document._id] = duplicate(document.system.rules);
+    this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules);
     const failedFeatureRules = [];
 
     await this.#generateGrantItemData(document);
@@ -577,8 +482,17 @@ export class Pathmuncher {
       const uuid = await this.#resolveInjectedUuid(grantedRuleFeature.uuid, grantedRuleFeature);
       const ruleFeature = await fromUuid(uuid);
       if (ruleFeature) {
-        this.autoAddedFeatureIds.add(ruleFeature.id);
         const featureDoc = ruleFeature.toObject();
+        if (grantedRuleFeature.predicate) {
+          const testResult = await this.#checkRule(featureDoc, grantedRuleFeature);
+          if (!testResult) {
+            const data = { document, grantedRuleFeature, featureDoc, testResult };
+            logger.debug(`The test failed for ${document.name} rule: ${i} - key: ${grantedRuleFeature.key}`, data);
+            continue;
+          }
+        }
+        this.autoAddedFeatureIds.add(ruleFeature.id);
+
         featureDoc._id = foundry.utils.randomID();
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
@@ -605,7 +519,7 @@ export class Pathmuncher {
   async #addGrantedItems(document) {
     logger.debug("addGrantedItems", duplicate(document));
     if (document.system.items) {
-      this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
+      this.autoAddedFeatureItems[document._id] = deepClone(document.system.items);
       const failedFeatureItems = {};
       for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
         logger.debug(`checking ${document.name} ${key}`, grantedItemFeature);
@@ -641,8 +555,10 @@ export class Pathmuncher {
   }
 
   async #processCore() {
-    if (!this.options.addName) setProperty(this.result.character, "name", this.source.name);
-    setProperty(this.result.character, "prototypeToken.name", this.source.name);
+    if (this.options.addName) {
+      setProperty(this.result.character, "name", this.source.name);
+      setProperty(this.result.character, "prototypeToken.name", this.source.name);
+    }
     setProperty(this.result.character, "system.details.level.value", this.source.level);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
@@ -1089,6 +1005,52 @@ export class Pathmuncher {
     await this.#generateMoney();
   }
 
+  async #generateTempActor(documents = []) {
+    const actorData = mergeObject({ type: "character" }, this.result.character);
+    actorData.name = "Mr Temp";
+    const actor = await Actor.create(actorData);
+
+    const items = documents.concat(
+      ...this.result.feats,
+      ...this.result.class,
+      ...this.result.background,
+      ...this.result.ancestory,
+      ...this.result.heritage,
+      ...this.result.deity,
+      ...this.result.lores,
+    ).map((i) => {
+      if (i.system.items) i.system.items = [];
+      if (i.system.rules) i.system.rules = [];
+      return i;
+    });
+
+    await actor.createEmbeddedDocuments("Item", items, { keepId: true });
+    const ruleUpdates = [];
+    for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
+      ruleUpdates.push({
+        _id: key,
+        system: {
+          rules: value,
+        },
+      });
+    }
+    await actor.updateEmbeddedDocuments("Item", ruleUpdates);
+
+    const itemUpdates = [];
+    for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
+      itemUpdates.push({
+        _id: key,
+        system: {
+          items: value,
+        },
+      });
+    }
+    await actor.updateEmbeddedDocuments("Item", itemUpdates);
+
+    logger.debug("Final temp actor", actor);
+    return actor;
+  }
+
   async processCharacter() {
     if (!this.source) return;
     this.#prepare();
@@ -1152,11 +1114,11 @@ export class Pathmuncher {
     await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.lores);
-    for (const feat of this.result.feats.reverse()) {
-      console.warn(`creating ${feat.name}`, feat);
-      await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
-    }
-    // await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
+    // for (const feat of this.result.feats.reverse()) {
+    //   console.warn(`creating ${feat.name}`, feat);
+    //   await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
+    // }
+    await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.spells);
     await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
