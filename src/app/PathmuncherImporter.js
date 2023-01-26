@@ -25,7 +25,6 @@ export class PathmuncherImporter extends FormApplication {
   async getData() {
     const flags = utils.getFlags(this.actor);
 
-    console.warn("actor", this.actor);
     return {
       flags,
       id: flags?.pathbuilderId ?? "",
