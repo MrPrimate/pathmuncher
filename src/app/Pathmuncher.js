@@ -266,6 +266,7 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
+      await this.#addGrantedItems(itemData);
       return true;
     } else {
       this.bad.push({ pbName: name, type: target, details: { name } });
@@ -309,9 +310,11 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
-  #parsedFeatureMatch(type, slug) {
+  #parsedFeatureMatch(type, slug, ignoreAdded) {
+    // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`);
     const featMatch = this.parsed[type].find((f) =>
-      slug === game.pf2e.system.sluggify(f.name)
+      (!ignoreAdded || (ignoreAdded && !f.added))
+      && (slug === game.pf2e.system.sluggify(f.name)
       || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
       || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
       || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
@@ -319,7 +322,9 @@ export class Pathmuncher {
       || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
       || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
       || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
+      )
     );
+    // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, featMatch);
     return featMatch;
   }
 
@@ -328,10 +333,10 @@ export class Pathmuncher {
     return featMatch;
   }
 
-  #findAllFeatureMatch(slug) {
-    const featMatch = this.#parsedFeatureMatch("feats", slug);
+  #findAllFeatureMatch(slug, ignoreAdded = false) {
+    const featMatch = this.#parsedFeatureMatch("feats", slug, ignoreAdded);
     if (featMatch) return featMatch;
-    const specialMatch = this.#parsedFeatureMatch("specials", slug);
+    const specialMatch = this.#parsedFeatureMatch("specials", slug, ignoreAdded);
     if (specialMatch) return specialMatch;
     const deityMatch = this.#generatedResultMatch("deity", slug);
     return deityMatch;
@@ -350,43 +355,34 @@ export class Pathmuncher {
       this.result.feats.push(document);
     }
 
-    const featureMatch = this.#findAllFeatureMatch(document.system.slug);
+    const featureMatch = this.#findAllFeatureMatch(document.system.slug, true);
     if (featureMatch) {
-      if (!featureMatch._id) featureMatch.added = true;
+      if (hasProperty(featureMatch, "added")) featureMatch.added = true;
       return;
     }
     logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
-  async #evaluateChoices(choices) {
-    const choiceDocs = [];
-    if (Array.isArray(choices)) {
-      for (const choice of choices) {
-        const doc = await fromUuid(choice.value);
-        if (!doc) continue;
-        choiceDocs.push(doc);
-        const featMatch = this.#findAllFeatureMatch(doc.system.slug);
-        if (featMatch) {
-          logger.debug("Choices evaluated", { choices, choiceDocs });
-          return choice.value;
-        }
-      }
-    } else if (typeof choices === 'object' && choices !== null && choices.pack) {
-      const compendium = await game.packs.get(choices.pack);
-      let index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-      if (choices.itemType) index = index.filter((i) => i.type === choices.itemType);
-      for (const i of index) {
-        const featMatch = this.#findAllFeatureMatch(i.system.slug);
-        if (featMatch) {
-          logger.debug("Choice index success", { index, choices });
-          return `Compendium.${choices.pack}.${i._id}`;
-        }
-      }
-      logger.debug("Choice index failed, evaluated", { index, choices });
-    }
+  async #evaluateChoices(document, choiceSet) {
+    const tempActor = await this.#generateTempActor();
+    const item = tempActor.getEmbeddedDocument("Item", document._id);
+    const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, item);
+    const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+    const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
+    await Actor.deleteDocuments([tempActor._id]);
 
-    logger.debug("Evaluate Choices failed", { choiceDocs, choices });
+    for (const choice of choices) {
+      const doc = await fromUuid(choice.value);
+      if (!doc) continue;
+      const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
+      if (featMatch) {
+        logger.debug("Choices evaluated", { choiceSet, choices, document });
+        return choice.value;
+      }
+    }
+    logger.debug("Evaluate Choices failed", { choiceSet, choices, document });
     return undefined;
+
   }
 
   async #resolveInjectedUuid(source, propertyData) {
@@ -433,17 +429,18 @@ export class Pathmuncher {
   }
 
   async #generateGrantItemData(document) {
+    logger.debug("Generating rules for...", { document: deepClone(document) });
     for (const rule of document.system.rules.filter((r) => r.key === "GrantItem" && r.uuid.includes("{"))) {
-      logger.debug("Generating rules for...", { document, rule });
+      logger.debug("Generating rule for...", { document: deepClone(document), rule });
       const match = rule.uuid.match(/{(item|rule)\|(.*?)}/);
       if (match) {
         const flagName = match[2].split(".").pop();
-        const ruleData = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
+        const choiceSet = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
           ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
-        const value = ruleData ? await this.#evaluateChoices(ruleData.choices) : undefined;
+        const value = choiceSet ? await this.#evaluateChoices(document, choiceSet) : undefined;
         if (!value) {
           logger.error("Failed to resolve injected uuid", {
-            ruleData,
+            ruleData: choiceSet,
             flagName,
             key: match[1],
             prop: match[2],
@@ -455,21 +452,21 @@ export class Pathmuncher {
           key: rule.uuid,
           uuid: value,
           flag: flagName,
-          choiceSet: ruleData,
+          choiceSet,
         };
         this.grantItemLookUp[`${document._id}-${flagName}`] = {
           docId: document.id,
           key: rule.uuid,
           uuid: value,
           flag: flagName,
-          choiceSet: ruleData,
+          choiceSet,
         };
         this.grantItemLookUp[`${document._id}`] = {
           docId: document.id,
           key: rule.uuid,
           uuid: value,
           flag: flagName,
-          choiceSet: ruleData,
+          choiceSet,
         };
       } else {
         logger.error("Failed to resolve injected uuid", {
@@ -482,16 +479,8 @@ export class Pathmuncher {
 
   async #checkRule(document, rule) {
     const tempActor = await this.#generateTempActor([document]);
-    // const doc = new Item(document);
-    // const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, doc)
-
     const predicateChecker = new PredicatePF2e(rule.predicate);
     const optionSet = await tempActor.getRollOptions();
-    // console.warn("test", {
-    //   predicateChecker,
-    //   optionSet,
-    //   rule,
-    // })
     await Actor.deleteDocuments([tempActor._id]);
     return predicateChecker.test(optionSet);
   }
@@ -558,8 +547,8 @@ export class Pathmuncher {
   }
 
   async #addGrantedItems(document) {
-    logger.debug("addGrantedItems", duplicate(document));
-    if (document.system.items) {
+    logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
+    if (hasProperty(document, "system.items")) {
       this.autoAddedFeatureItems[document._id] = deepClone(document.system.items);
       const failedFeatureItems = {};
       for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
@@ -584,7 +573,7 @@ export class Pathmuncher {
         document.system.items = failedFeatureItems;
       }
     }
-    if (hasProperty(document.system.rules)) await this.#addGrantedRules(document);
+    if (hasProperty(document, "system.rules")) await this.#addGrantedRules(document);
 
   }
 
@@ -678,14 +667,14 @@ export class Pathmuncher {
         const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
         if (!indexMatch) {
           logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
-          this.check[pBFeat.name] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
+          this.check[pBFeat.originalName] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
           continue;
         }
-        if (this.result.feats.some((i) => i.name === displayName)) {
-          logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
-          continue;
-        }
-        if (this.check[pBFeat.name]) delete this.check[pBFeat.name];
+        // if (this.result.feats.some((i) => i.name === displayName)) {
+        //   logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
+        //   continue;
+        // }
+        if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
         pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(indexMatch._id)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
@@ -694,6 +683,7 @@ export class Pathmuncher {
 
         const doc = await compendium.getDocument(indexMatch._id);
         const item = doc.toObject();
+        item._id = foundry.utils.randomID();
         item.name = displayName;
 
         if (pBFeat.type && pBFeat.level) {
@@ -705,6 +695,7 @@ export class Pathmuncher {
         }
 
         this.result.feats.push(item);
+        await this.#addGrantedItems(item);
       }
     }
   }
@@ -719,22 +710,25 @@ export class Pathmuncher {
       const indexMatch = this.#indexFind(index, [special.name, special.originalName]);
       if (!indexMatch) {
         logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
-        this.check[special.name] = { name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special } };
+        this.check[special.originalName] = { name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special } };
         continue;
       }
-      if (this.result.feats.some((i) => i.name === special.name)) {
-        logger.debug("Special already generated", { special: special.name, compendiumLabel });
-        continue;
-      }
+      // if (this.result.feats.some((i) => i.name === special.name)) {
+      //   logger.debug("Special already generated", { special: special.name, compendiumLabel });
+      //   continue;
+      // }
       special.added = true;
-      if (this.check[special.name]) delete this.check[special.name];
+      if (this.check[special.originalName]) delete this.check[special.originalName];
       if (this.autoAddedFeatureIds.has(indexMatch._id)) {
         logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
         continue;
       }
 
       const doc = await compendium.getDocument(indexMatch._id);
-      this.result.feats.push(doc.toObject());
+      const docData = doc.toObject();
+      docData._id = foundry.utils.randomID();
+      this.result.feats.push(docData);
+      await this.#addGrantedItems(docData);
     }
   }
 
@@ -1058,6 +1052,10 @@ export class Pathmuncher {
     await this.#generateSpecialItems("pf2e.ancestryfeatures");
     await this.#generateSpecialItems("pf2e.classfeatures");
     await this.#generateSpecialItems("pf2e.actionspf2e");
+    // for (const doc of this.result.feats) {
+    //   await this.#addGrantedItems(doc);
+    // }
+
   }
 
   async #processEquipment() {
@@ -1149,7 +1147,7 @@ export class Pathmuncher {
     const loreIds = this.actor.items.filter((i) => i.type === "lore");
     const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry");
 
-    console.warn("ids", {
+    logger.debug("ids", {
       moneyIds,
       classIds,
       backgroundIds,
@@ -1200,6 +1198,7 @@ export class Pathmuncher {
           },
         });
       }
+      logger.debug("Restoring rule logic", ruleUpdates);
       await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
@@ -1211,6 +1210,7 @@ export class Pathmuncher {
           },
         });
       }
+      logger.debug("Restoring granted item logic", itemUpdates);
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }
   }
