@@ -1,3 +1,4 @@
+/* eslint-disable no-void */
 /* eslint-disable default-param-last */
 import logger from "../logger.js";
 

@@ -1162,11 +1162,11 @@ export class Pathmuncher {
       loreIds,
       spellIds,
     });
-    // TODO: Actually respect deletion choices.
+    // TO DO: Actually respect deletion choices.
     // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
     await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
-    console.warn(this.result);
+    logger.debug("Generated result", this.result);
     await this.actor.update(this.result.character);
     await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
