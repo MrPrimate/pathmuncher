@@ -1,7 +1,16 @@
 // these are features which are named differently in pathbuilder to foundry
 
 const POSTFIX_PB_REMOVALS = [
-  /(.*) Racket$/
+  /(.*) Racket$/,
+];
+
+const PREFIX_PB_REMOVALS = [
+  /^Arcane Thesis: (.*)/,
+  /^Arcane School: (.*)/,
+];
+
+const SPLITS = [
+  /^(.*): (.*)/,
 ];
 
 const FEAT_RENAME_STATIC_MAP = [
@@ -98,10 +107,16 @@ const FEAT_RENAME_STATIC_MAP = [
 
 function generatePostfixNames(pbName) {
   const result = [];
-  for (const reg of POSTFIX_PB_REMOVALS) {
+  for (const reg of POSTFIX_PB_REMOVALS.concat(PREFIX_PB_REMOVALS)) {
     const match = pbName.match(reg);
     if (match) {
       result.push({ pbName, foundryName: match[1] });
+    }
+  }
+  for (const reg of SPLITS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[2] });
     }
   }
   return result;
