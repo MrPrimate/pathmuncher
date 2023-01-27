@@ -39,8 +39,6 @@ jobs:
     - run: npm ci
     - name: Webpack
       run: npm run build
-    - name: Build icon json
-      run: ./icon.sh
     - name: Create Release Zip
       run: zip -r ./pathmuncher.zip module.json dist templates css lang LICENSE.md       # Add folders/files here
     - name: Create Release                                # Create an additional release for this version
