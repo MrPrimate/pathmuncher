@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT } from "../data/equipment.js";
+import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT } from "../data/equipment.js";
 import { FEAT_RENAME_MAP, IGNORED_FEATS } from "../data/features.js";
 import { PredicatePF2e } from "../lib/PredicatePF2e.js";
 import logger from "../logger.js";
@@ -30,6 +30,11 @@ export class Pathmuncher {
   // eslint-disable-next-line class-methods-use-this
   get IGNORED_FEATURES () {
     return IGNORED_FEATS;
+  };
+
+  // eslint-disable-next-line class-methods-use-this
+  get IGNORED_EQUIPMENT () {
+    return IGNORED_EQUIPMENT;
   };
 
   getChampionType() {
@@ -109,7 +114,7 @@ export class Pathmuncher {
       },
       focusPool: 0,
     };
-    this.check = [];
+    this.check = {};
     this.bad = [];
   }
 
@@ -673,13 +678,14 @@ export class Pathmuncher {
         const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
         if (!indexMatch) {
           logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
-          this.check.push({ name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } });
+          this.check[pBFeat.name] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
           continue;
         }
         if (this.result.feats.some((i) => i.name === displayName)) {
           logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
           continue;
         }
+        if (this.check[pBFeat.name]) delete this.check[pBFeat.name];
         pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(indexMatch._id)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
@@ -713,7 +719,7 @@ export class Pathmuncher {
       const indexMatch = this.#indexFind(index, [special.name, special.originalName]);
       if (!indexMatch) {
         logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
-        this.check.push({ name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special, compendiumLabel } });
+        this.check[special.name] = { name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special } };
         continue;
       }
       if (this.result.feats.some((i) => i.name === special.name)) {
@@ -721,6 +727,7 @@ export class Pathmuncher {
         continue;
       }
       special.added = true;
+      if (this.check[special.name]) delete this.check[special.name];
       if (this.autoAddedFeatureIds.has(indexMatch._id)) {
         logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
         continue;
@@ -762,6 +769,10 @@ export class Pathmuncher {
     for (const e of this.parsed.equipment) {
       if (e.pbName === "Adventurer's Pack") continue;
       if (e.added) continue;
+      if (this.IGNORED_EQUIPMENT.includes(e.pbName)) {
+        e.added = true;
+        continue;
+      }
       logger.debug("Generating item for", e);
       const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(e.pbName));
       if (!indexMatch) {
@@ -788,6 +799,10 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const w of this.source.weapons) {
+      if (this.IGNORED_EQUIPMENT.includes(w.name)) {
+        w.added = true;
+        continue;
+      }
       logger.debug("Generating weapon for", w);
       const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(w.name));
       if (!indexMatch) {
@@ -825,6 +840,10 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     for (const a of this.source.armor) {
+      if (this.IGNORED_EQUIPMENT.includes(a.name)) {
+        a.added = true;
+        continue;
+      }
       logger.debug("Generating armor for", a);
       const indexMatch = index.find((i) =>
         i.system.slug === game.pf2e.system.sluggify(a.name)
@@ -1210,16 +1229,16 @@ export class Pathmuncher {
       ? this.bad.filter((b) => b.type === "background").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Background")}: ${b.pbName}</li>`)
       : [];
     const badDeity = this.options.addDeity
-      ? this.bad.filter((b) => b.type === "deity" && b.name !== "Not set").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "deity" && b.pbName !== "Not set").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
       : [];
     const badFeats = this.options.addFeats
       ? this.bad.filter((b) => b.type === "feat").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
       : [];
     const badFeats2 = this.options.addFeats
-      ? this.check.filter((b) =>
-        (b.type === "feat" || b.type === "feat")
+      ? Object.values(this.check).filter((b) =>
+        (b.type === "feat" || b.type === "special")
         && this.parsed.feats.concat(this.parsed.specials).some((f) => f.name === b.details.name && !f.added)
-      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
+      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
       : [];
     const badEquipment = this.options.addEquipment
       ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
@@ -1251,8 +1270,11 @@ export class Pathmuncher {
       ...badSpells,
     ];
 
-    let warning = `<p>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.MissingItemsOpen")}</p><ul>${totalBad.join("\n")}</ul><br>`;
+    let warning = "";
 
+    if (totalBad.length > 0) {
+      warning += `<p>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.MissingItemsOpen")}</p><ul>${totalBad.join("\n")}</ul><br>`;
+    }
     if (this.result.focusPool > 0) {
       warning += `<strong>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.FocusSpells")}</strong><br>`;
     }
@@ -1270,6 +1292,9 @@ export class Pathmuncher {
       badArmor,
       badSpellcasting,
       badSpells,
+      totalBad,
+      count: totalBad.length,
+      focusPool: this.result.focusPool,
       warning,
     });
 
