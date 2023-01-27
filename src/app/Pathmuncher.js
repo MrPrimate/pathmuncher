@@ -570,7 +570,7 @@ export class Pathmuncher {
         this.autoAddedFeatureIds.add(feature.id);
         const featureDoc = feature.toObject();
         featureDoc._id = foundry.utils.randomID();
-        setProperty(document.system, "location", document._id);
+        setProperty(featureDoc.system, "location", document._id);
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
       }
