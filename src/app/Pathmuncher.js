@@ -44,7 +44,7 @@ export class Pathmuncher {
 
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
     addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true,
-    askForChoices = false } = {}
+    addBackground = true, addHeritage = true, addAncestry = true, askForChoices = false } = {}
   ) {
     this.actor = actor;
     // note not all these options do anything yet!
@@ -60,6 +60,9 @@ export class Pathmuncher {
       addDeity,
       addName,
       addClass,
+      addBackground,
+      addHeritage,
+      addAncestry,
       askForChoices,
     };
     this.source = null;
@@ -81,7 +84,7 @@ export class Pathmuncher {
       class: [],
       deity: [],
       heritage: [],
-      ancestory: [],
+      ancestry: [],
       background: [],
       casters: [],
       spells: [],
@@ -167,7 +170,7 @@ export class Pathmuncher {
   #processSpecialData(name) {
     if (name.includes("Domain: ")) {
       const domainName = name.split(" ")[1];
-      this.parsed.feats.push({ 0: "Deity's Domain", 1: domainName });
+      this.parsed.feats.push({ name: "Deity's Domain", extra: domainName });
       return true;
     } else {
       return false;
@@ -187,11 +190,11 @@ export class Pathmuncher {
 
     logger.debug("Starting Special Rename");
     this.source.specials
-      .filter((special) => special !== "undefined" && special !== this.source.heritage)
+      .filter((special) => special && special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
         const name = this.FEAT_RENAME_MAP(special).find((map) => map.pbName == special)?.foundryName ?? special;
         if (!this.#processSpecialData(name) && !this.IGNORED_FEATURES.includes(name)) {
-          this.parsed.specials.push({ name, added: false });
+          this.parsed.specials.push({ name, originalName: special, added: false });
         }
       });
     logger.debug("Finished Special Rename");
@@ -207,6 +210,7 @@ export class Pathmuncher {
           added: false,
           type: feat[2],
           level: feat[3],
+          originalName: feat[0],
         };
         this.parsed.feats.push(data);
       });
@@ -259,6 +263,7 @@ export class Pathmuncher {
       this.result[target].push(itemData);
       return true;
     } else {
+      this.bad.push({ pbName: name, type: target, details: { name } });
       return false;
     }
   }
@@ -305,6 +310,10 @@ export class Pathmuncher {
       || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
       || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
       || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
+      || slug === game.pf2e.system.sluggify(f.originalName)
+      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
+      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
+      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
     );
     return featMatch;
   }
@@ -576,7 +585,7 @@ export class Pathmuncher {
 
   async #detectGrantedFeatures() {
     if (this.result.class.length > 0) await this.#addGrantedItems(this.result.class[0]);
-    if (this.result.ancestory.length > 0) await this.#addGrantedItems(this.result.ancestory[0]);
+    if (this.result.ancestry.length > 0) await this.#addGrantedItems(this.result.ancestry[0]);
     if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
     if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
   }
@@ -638,6 +647,19 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
   }
 
+  #indexFind(index, arrayOfNameMatches) {
+    for (const name of arrayOfNameMatches) {
+      const indexMatch = index.find((i) =>
+        i.system.slug === game.pf2e.system.sluggify(name)
+        || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(name))
+        || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(name))
+        || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(name))
+      );
+      if (indexMatch) return indexMatch;
+    }
+    return undefined;
+  }
+
   async #generateFeatItems(compendiumLabel) {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
@@ -647,16 +669,11 @@ export class Pathmuncher {
         if (pBFeat.added) continue;
         logger.debug("Generating feature for", pBFeat);
 
-        const indexMatch = index.find((i) =>
-          i.system.slug === game.pf2e.system.sluggify(pBFeat.name)
-          || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(pBFeat.name))
-          || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(pBFeat.name))
-          || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(pBFeat.name))
-        );
+        const indexMatch = this.#indexFind(index, [pBFeat.name, pBFeat.originalName]);
         const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
         if (!indexMatch) {
           logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
-          this.check.push({ pbName: displayName, type: "feat", details: { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel } });
+          this.check.push({ name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } });
           continue;
         }
         if (this.result.feats.some((i) => i.name === displayName)) {
@@ -693,15 +710,10 @@ export class Pathmuncher {
     for (const special of this.parsed.specials) {
       if (special.added) continue;
       logger.debug("Generating special for", special);
-      const indexMatch = index.find((i) =>
-        i.system.slug === game.pf2e.system.sluggify(special.name)
-        || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(special.name))
-        || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(special.name))
-      );
+      const indexMatch = this.#indexFind(index, [special.name, special.originalName]);
       if (!indexMatch) {
         logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
-        this.check.push({ pbName: special.name, type: "special", details: { special: special.name, compendiumLabel } });
+        this.check.push({ name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special, compendiumLabel } });
         continue;
       }
       if (this.result.feats.some((i) => i.name === special.name)) {
@@ -1045,7 +1057,7 @@ export class Pathmuncher {
       ...this.result.feats,
       ...this.result.class,
       ...this.result.background,
-      ...this.result.ancestory,
+      ...this.result.ancestry,
       ...this.result.heritage,
       ...this.result.deity,
       ...this.result.lores,
@@ -1089,7 +1101,7 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("pf2e.deities", this.source.deity, "deity");
     await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, "background");
     await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
-    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestory");
+    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestry");
     await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
     await this.#detectGrantedFeatures();
     await this.#processFeats();
@@ -1140,7 +1152,7 @@ export class Pathmuncher {
     console.warn(this.result);
     await this.actor.update(this.result.character);
     await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.ancestory, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
     await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
@@ -1181,6 +1193,101 @@ export class Pathmuncher {
         });
       }
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
+    }
+  }
+
+  async postImportCheck() {
+    const badClass = this.options.addClass
+      ? this.bad.filter((b) => b.type === "class").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Class")}: ${b.pbName}</li>`)
+      : [];
+    const badHeritage = this.options.addHeritage
+      ? this.bad.filter((b) => b.type === "heritage").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Heritage")}: ${b.pbName}</li>`)
+      : [];
+    const badAncestry = this.options.addAncestry
+      ? this.bad.filter((b) => b.type === "ancestry").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Ancestry")}: ${b.pbName}</li>`)
+      : [];
+    const badBackground = this.options.addBackground
+      ? this.bad.filter((b) => b.type === "background").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Background")}: ${b.pbName}</li>`)
+      : [];
+    const badDeity = this.options.addDeity
+      ? this.bad.filter((b) => b.type === "deity" && b.name !== "Not set").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
+      : [];
+    const badFeats = this.options.addFeats
+      ? this.bad.filter((b) => b.type === "feat").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
+      : [];
+    const badFeats2 = this.options.addFeats
+      ? this.check.filter((b) =>
+        (b.type === "feat" || b.type === "feat")
+        && this.parsed.feats.concat(this.parsed.specials).some((f) => f.name === b.details.name && !f.added)
+      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
+      : [];
+    const badEquipment = this.options.addEquipment
+      ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
+      : [];
+    const badWeapons = this.options.addWeapons
+      ? this.bad.filter((b) => b.type === "weapons").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Weapons")}: ${b.pbName}</li>`)
+      : [];
+    const badArmor = this.options.addArmor
+      ? this.bad.filter((b) => b.type === "armor").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Armor")}: ${b.pbName}</li>`)
+      : [];
+    const badSpellcasting = this.options.addSpells
+      ? this.bad.filter((b) => b.type === "spellcasting").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spellcasting")}: ${b.pbName}</li>`)
+      : [];
+    const badSpells = this.options.addSpells
+      ? this.bad.filter((b) => b.type === "spells").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
+      : [];
+    const totalBad = [
+      ...badClass,
+      ...badAncestry,
+      ...badHeritage,
+      ...badBackground,
+      ...badDeity,
+      ...badFeats,
+      ...badFeats2,
+      ...badEquipment,
+      ...badWeapons,
+      ...badArmor,
+      ...badSpellcasting,
+      ...badSpells,
+    ];
+
+    let warning = `<p>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.MissingItemsOpen")}</p><ul>${totalBad.join("\n")}</ul><br>`;
+
+    if (this.result.focusPool > 0) {
+      warning += `<strong>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.FocusSpells")}</strong><br>`;
+    }
+
+    logger.debug("Bad thing check", {
+      badClass,
+      badAncestry,
+      badHeritage,
+      badBackground,
+      badDeity,
+      badFeats,
+      badFeats2,
+      badEquipment,
+      badWeapons,
+      badArmor,
+      badSpellcasting,
+      badSpells,
+      warning,
+    });
+
+    if (totalBad.length > 0 || this.result.focusPool > 0) {
+      ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
+      new Dialog({
+        title: game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.ImportNotes"),
+        content: warning,
+        buttons: {
+          yes: {
+            icon: "<i class='fas fa-check'></i>",
+            label: game.i18n.localize("pathmuncher.Labels.Finished"),
+          },
+        },
+        default: "yes",
+      }).render(true);
+    } else {
+      ui.notifications.info(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedSuccess"));
     }
   }
 }

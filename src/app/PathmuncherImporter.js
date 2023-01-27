@@ -62,6 +62,9 @@ export class PathmuncherImporter extends FormApplication {
       addDeity: formData.checkBoxDeity,
       addName: formData.checkBoxName,
       addClass: formData.checkBoxClass,
+      addBackground: formData.checkBoxBackground,
+      addHeritage: formData.checkBoxHeritage,
+      addAncestry: formData.checkBoxAncestry,
       askForChoices: formData.checkBoxAskForChoices,
     };
     logger.debug("Pathmuncher options", options);
@@ -82,6 +85,7 @@ export class PathmuncherImporter extends FormApplication {
       pathbuilderId,
     });
     this.close();
+    await pathmuncher.postImportCheck();
   }
 
 }
