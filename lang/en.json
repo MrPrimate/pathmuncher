@@ -64,25 +64,25 @@
         "ImportNotes": "Pathmuncher Import Notes"
       }
     },
-    "Chat": {}
-  },
-  "Labels": {
-    "Feats": "Feats",
-    "Equipment": "Equipment",
-    "Money": "Money",
-    "Spells": "Spells",
-    "Name": "Name",
-    "Class": "Class",
-    "Weapons": "Weapons",
-    "Armor": "Armor",
-    "Treasure": "Treasure",
-    "Lores": "Lores",
-    "Deity": "Deity",
-    "Background": "Background",
-    "Heritage": "Heritage",
-    "Ancestry": "Ancestry",
-    "Spellcasting": "Spellcasting",
-    "Finished": "Finished",
-    "Cancel": "Cancel"
+    "Chat": {},
+    "Labels": {
+      "Feats": "Feats",
+      "Equipment": "Equipment",
+      "Money": "Money",
+      "Spells": "Spells",
+      "Name": "Name",
+      "Class": "Class",
+      "Weapons": "Weapons",
+      "Armor": "Armor",
+      "Treasure": "Treasure",
+      "Lores": "Lores",
+      "Deity": "Deity",
+      "Background": "Background",
+      "Heritage": "Heritage",
+      "Ancestry": "Ancestry",
+      "Spellcasting": "Spellcasting",
+      "Finished": "Finished",
+      "Cancel": "Cancel"
+    }
   }
 }
