@@ -31,3 +31,7 @@ export const EQUIPMENT_RENAME_MAP = [
 export const RESTRICTED_EQUIPMENT = [
   "Bracers of Armor",
 ];
+
+export const IGNORED_EQUIPMENT = [
+  "Unarmored"
+];
