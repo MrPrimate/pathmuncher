@@ -561,7 +561,7 @@ export class Pathmuncher {
       if (ruleFeature) {
         const featureDoc = ruleFeature.toObject();
         setProperty(featureDoc, "flags.pathmuncher.origin.uuid");
-        if (this.autoAddedFeatureIds.has(ruleFeature.id)) {
+        if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
           logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
           continue;
         }
@@ -575,7 +575,7 @@ export class Pathmuncher {
             continue;
           }
         }
-        this.autoAddedFeatureIds.add(ruleFeature.id);
+        this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
         featureDoc._id = foundry.utils.randomID();
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
@@ -621,7 +621,7 @@ export class Pathmuncher {
           failedFeatureItems[key] = grantedItemFeature;
           continue;
         }
-        this.autoAddedFeatureIds.add(feature.id);
+        this.autoAddedFeatureIds.add(`${feature.id}${feature.type}`);
         const featureDoc = feature.toObject();
         featureDoc._id = foundry.utils.randomID();
         setProperty(featureDoc.system, "location", document._id);
@@ -732,7 +732,7 @@ export class Pathmuncher {
         }
         if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
         pBFeat.added = true;
-        if (this.autoAddedFeatureIds.has(indexMatch._id)) {
+        if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
           continue;
         }
@@ -771,7 +771,7 @@ export class Pathmuncher {
       }
       special.added = true;
       if (this.check[special.originalName]) delete this.check[special.originalName];
-      if (this.autoAddedFeatureIds.has(indexMatch._id)) {
+      if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
         logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
         continue;
       }

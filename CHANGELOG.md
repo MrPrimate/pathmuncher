@@ -1,3 +1,7 @@
+# 0.0.5
+
+- In some cases, things like the Attack of Opportunity feat would grant an action with the same id, which could confuse the muncher.
+
 # 0.0.4
 
 - Fix a bug with choice selection options.
