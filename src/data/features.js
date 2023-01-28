@@ -7,6 +7,7 @@ const POSTFIX_PB_REMOVALS = [
 const PREFIX_PB_REMOVALS = [
   /^Arcane Thesis: (.*)/,
   /^Arcane School: (.*)/,
+  /^The (.*)/,
 ];
 
 const SPLITS = [

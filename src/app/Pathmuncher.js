@@ -312,20 +312,25 @@ export class Pathmuncher {
 
   #parsedFeatureMatch(type, slug, ignoreAdded) {
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`);
-    const featMatch = this.parsed[type].find((f) =>
+    const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
-      && (slug === game.pf2e.system.sluggify(f.name)
-      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
-      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
-      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
-      || slug === game.pf2e.system.sluggify(f.originalName)
-      || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
-      || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
-      || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
+      && (
+        slug === game.pf2e.system.sluggify(f.name)
+        || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
+        || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
+        || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
+        || slug === game.pf2e.system.sluggify(f.originalName)
+        || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
+        || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
+        || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
       )
     );
-    // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, featMatch);
-    return featMatch;
+    // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, {
+    //   slug,
+    //   parsedMatch,
+    //   parsed: duplicate(this.parsed),
+    // });
+    return parsedMatch;
   }
 
   #generatedResultMatch(type, slug) {
@@ -333,7 +338,7 @@ export class Pathmuncher {
     return featMatch;
   }
 
-  #findAllFeatureMatch(slug, ignoreAdded = false) {
+  #findAllFeatureMatch(slug, ignoreAdded) {
     const featMatch = this.#parsedFeatureMatch("feats", slug, ignoreAdded);
     if (featMatch) return featMatch;
     const specialMatch = this.#parsedFeatureMatch("specials", slug, ignoreAdded);
@@ -360,10 +365,11 @@ export class Pathmuncher {
       if (hasProperty(featureMatch, "added")) featureMatch.added = true;
       return;
     }
-    logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
+    if (document.type !== "action") logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
   async #evaluateChoices(document, choiceSet) {
+    logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
     const tempActor = await this.#generateTempActor();
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -376,7 +382,7 @@ export class Pathmuncher {
         if (!doc) continue;
         const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
         if (featMatch) {
-          logger.debug("Choices evaluated", { choiceSet, choices, document });
+          logger.debug("Choices evaluated", { choiceSet, choices, document, featMatch, choice });
           return choice.value;
         }
       }
@@ -433,7 +439,7 @@ export class Pathmuncher {
   }
 
   async #generateGrantItemData(document) {
-    logger.debug("Generating rules for...", { document: deepClone(document) });
+    logger.debug(`Generating grantItem rule lookups for ${document.name}...`, { document: deepClone(document) });
     for (const rule of document.system.rules.filter((r) => r.key === "GrantItem" && r.uuid.includes("{"))) {
       logger.debug("Generating rule for...", { document: deepClone(document), rule });
       const match = rule.uuid.match(/{(item|rule)\|(.*?)}/);
@@ -450,6 +456,8 @@ export class Pathmuncher {
             prop: match[2],
             value,
           });
+        } else {
+          logger.debug(`Generated lookup ${value} for key ${document.name}`);
         }
         this.grantItemLookUp[rule.uuid] = {
           docId: document.id,
@@ -493,8 +501,8 @@ export class Pathmuncher {
   }
 
   async #addGrantedRules(document) {
-    logger.debug("addGrantedRules", duplicate(document));
     if (document.system.rules.length === 0) return;
+    logger.debug(`addGrantedRules for ${document.name}`, duplicate(document));
 
     if (hasProperty(document, "system.level.value")
      && document.system.level.value > this.result.character.system.details.level.value
@@ -503,63 +511,71 @@ export class Pathmuncher {
     }
 
     this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules);
-    const failedFeatureRules = [];
-
     await this.#generateGrantItemData(document);
-    for (const [i, grantedRuleFeature] of document.system.rules.entries()) {
-      logger.debug(`Checking ${document.name} rule: ${i} - key: ${grantedRuleFeature.key}`);
-      if (grantedRuleFeature.key !== "GrantItem") {
-        if (grantedRuleFeature.key === "ChoiceSet"
-          && (this.grantItemLookUp[`${document._id}-${grantedRuleFeature.flag}`]
-          || (!grantedRuleFeature.flag && this.grantItemLookUp[`${document._id}`]))
-        ) continue;
-        failedFeatureRules.push(grantedRuleFeature);
-        continue;
-      }
-      const uuid = await this.#resolveInjectedUuid(grantedRuleFeature.uuid, grantedRuleFeature);
-      const ruleFeature = await fromUuid(uuid);
+
+    const rulesToKeep = document.system.rules.filter((r) => r.key !== "GrantItem" && r.key !== "ChoiceSet");
+    const grantRules = document.system.rules.filter((r) => r.key === "GrantItem");
+    const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
+
+    for (const ruleEntry of grantRules.concat(choiceRules)) {
+      logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
+
+      const uuid = ruleEntry.key === "GrantItem"
+        ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
+        : await this.#evaluateChoices(document, ruleEntry);
+
+      logger.debug(`UUID for ${document.name} ${uuid}`, document, ruleEntry);
+      const ruleFeature = uuid ? await fromUuid(uuid) : undefined;
       if (ruleFeature) {
         const featureDoc = ruleFeature.toObject();
-        if (grantedRuleFeature.predicate) {
-          const testResult = await this.#checkRule(featureDoc, grantedRuleFeature);
+        setProperty(featureDoc, "flags.pathmuncher.origin.uuid");
+        if (this.autoAddedFeatureIds.has(ruleFeature.id)) {
+          logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
+          continue;
+        }
+        logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
+
+        if (ruleEntry.predicate) {
+          const testResult = await this.#checkRule(featureDoc, ruleEntry);
           if (!testResult) {
-            const data = { document, grantedRuleFeature, featureDoc, testResult };
-            logger.debug(`The test failed for ${document.name} rule: ${i} - key: ${grantedRuleFeature.key}`, data);
+            const data = { document, ruleEntry, featureDoc, testResult };
+            logger.debug(`The test failed for ${document.name} rule key: ${ruleFeature.key} (This is probably not a problem).`, data);
             continue;
           }
         }
         this.autoAddedFeatureIds.add(ruleFeature.id);
-
         featureDoc._id = foundry.utils.randomID();
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
+
       } else {
         const data = {
-          uuid: grantedRuleFeature.uuid,
+          uuid: ruleEntry.uuid,
           document,
-          grantedRuleFeature,
-          grandedFeatureLookup: this.grantItemLookUp[grantedRuleFeature.uuid],
+          ruleEntry,
         };
-        failedFeatureRules.push(grantedRuleFeature);
-        if (this.grantItemLookUp[grantedRuleFeature.uuid]) {
-          failedFeatureRules.push(this.grantItemLookUp[grantedRuleFeature.uuid].choiceSet);
+        if (ruleEntry.key === "GrantItem" && this.grantItemLookUp[ruleEntry.uuid]) {
+          rulesToKeep.push(ruleEntry);
+          rulesToKeep.push(this.grantItemLookUp[ruleEntry.uuid].choiceSet);
+        } else if (ruleEntry.key === "ChoiceSet" && !ruleEntry.flag && choiceRules.length > 1) {
+          rulesToKeep.push(ruleEntry);
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
     }
     if (!this.options.askForChoices) {
       // eslint-disable-next-line require-atomic-updates
-      document.system.rules = failedFeatureRules;
+      document.system.rules = rulesToKeep;
     }
   }
 
   async #addGrantedItems(document) {
-    logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
     if (hasProperty(document, "system.items")) {
+      logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
       this.autoAddedFeatureItems[document._id] = deepClone(document.system.items);
       const failedFeatureItems = {};
       for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
-        logger.debug(`checking ${document.name} ${key}`, grantedItemFeature);
+        logger.debug(`Checking granted item ${document.name}, with key: ${key}`, grantedItemFeature);
         if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
         const feature = await fromUuid(grantedItemFeature.uuid);
         if (!feature) {
@@ -1077,15 +1093,16 @@ export class Pathmuncher {
     const actorData = mergeObject({ type: "character" }, this.result.character);
     actorData.name = "Mr Temp";
     const actor = await Actor.create(actorData);
+    const currentState = duplicate(this.result);
     try {
-      const items = documents.concat(
-        ...this.result.feats,
-        ...this.result.class,
-        ...this.result.background,
-        ...this.result.ancestry,
-        ...this.result.heritage,
-        ...this.result.deity,
-        ...this.result.lores,
+      const items = duplicate(documents).concat(
+        ...currentState.feats,
+        ...currentState.class,
+        ...currentState.background,
+        ...currentState.ancestry,
+        ...currentState.heritage,
+        ...currentState.deity,
+        ...currentState.lores,
       ).map((i) => {
         if (i.system.items) i.system.items = [];
         if (i.system.rules) i.system.rules = [];
