@@ -12,7 +12,6 @@ This is inspired by the previous [pathbuilder2e-import](https://github.com/kobse
 
 ## Known Issues
 
-- The checkboxes don't do anything, this will just completely replace everything on the character.
 - Pathbuilder JSON does not contain spell data at the moment.
 - Pathbuilder JSON does not contain any details about containers.
 - Pathbuilder JSON does not export the tradition of focus spells. These are set to `divine` by default.

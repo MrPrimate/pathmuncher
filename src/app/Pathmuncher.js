@@ -1147,23 +1147,25 @@ export class Pathmuncher {
       i.type === "treasure"
       && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name)
     );
-    const classIds = this.actor.items.filter((i) => i.type === "class");
-    const backgroundIds = this.actor.items.filter((i) => i.type === "background");
-    const heritageIds = this.actor.items.filter((i) => i.type === "heritage");
-    const ancestryIds = this.actor.items.filter((i) => i.type === "ancestry");
-    const treasureIds = this.actor.items.filter((i) => i.type === "treasure" && !moneyIds.includes(i.id));
-    const featIds = this.actor.items.filter((i) => i.type === "feat");
-    const actionIds = this.actor.items.filter((i) => i.type === "action");
+    const classIds = this.actor.items.filter((i) => i.type === "class").map((i) => i._id);
+    const deityIds = this.actor.items.filter((i) => i.type === "deity").map((i) => i._id);
+    const backgroundIds = this.actor.items.filter((i) => i.type === "background").map((i) => i._id);
+    const heritageIds = this.actor.items.filter((i) => i.type === "heritage").map((i) => i._id);
+    const ancestryIds = this.actor.items.filter((i) => i.type === "ancestry").map((i) => i._id);
+    const treasureIds = this.actor.items.filter((i) => i.type === "treasure" && !moneyIds.includes(i.id)).map((i) => i._id);
+    const featIds = this.actor.items.filter((i) => i.type === "feat").map((i) => i._id);
+    const actionIds = this.actor.items.filter((i) => i.type === "action").map((i) => i._id);
     const equipmentIds = this.actor.items.filter((i) =>
       i.type === "equipment" || i.type === "backpack" || i.type === "consumable"
-    );
-    const weaponIds = this.actor.items.filter((i) => i.type === "weapon");
-    const armorIds = this.actor.items.filter((i) => i.type === "armor");
-    const loreIds = this.actor.items.filter((i) => i.type === "lore");
-    const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry");
+    ).map((i) => i._id);
+    const weaponIds = this.actor.items.filter((i) => i.type === "weapon").map((i) => i._id);
+    const armorIds = this.actor.items.filter((i) => i.type === "armor").map((i) => i._id);
+    const loreIds = this.actor.items.filter((i) => i.type === "lore").map((i) => i._id);
+    const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry").map((i) => i._id);
 
     logger.debug("ids", {
       moneyIds,
+      deityIds,
       classIds,
       backgroundIds,
       heritageIds,
@@ -1177,30 +1179,53 @@ export class Pathmuncher {
       loreIds,
       spellIds,
     });
-    // TO DO: Actually respect deletion choices.
-    // await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
-    await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
+    // eslint-disable-next-line complexity
+    const keepIds = this.actor.items.filter((i) =>
+      (!this.options.addMoney && moneyIds.includes(i._id))
+      || (!this.options.addClass && classIds.includes(i._id))
+      || (!this.options.addDeity && deityIds.includes(i._id))
+      || (!this.options.addBackground && backgroundIds.includes(i._id))
+      || (!this.options.addHeritage && heritageIds.includes(i._id))
+      || (!this.options.addAncestry && ancestryIds.includes(i._id))
+      || (!this.options.addTreasure && treasureIds.includes(i._id))
+      || (!this.options.addFeats && (featIds.includes(i._id) || actionIds.includes(i._id)))
+      || (!this.options.addEquipment && equipmentIds.includes(i._id))
+      || (!this.options.addWeapons && weaponIds.includes(i._id))
+      || (!this.options.addArmor && armorIds.includes(i._id))
+      || (!this.options.addLores && loreIds.includes(i._id))
+      || (!this.options.addSpells && spellIds.includes(i._id))
+    ).map((i) => i._id);
+
+    const deleteIds = this.actor.items.filter((i) => !keepIds.includes(i._id)).map((i) => i._id);
+    logger.debug("ids", {
+      deleteIds,
+      keepIds,
+    });
+    await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
+    // await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
     logger.debug("Generated result", this.result);
     await this.actor.update(this.result.character);
-    await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.lores);
+    if (this.options.addDeity) await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
+    if (this.options.addAncestry) await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
+    if (this.options.addHeritage) await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
+    if (this.options.addBackground) await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
+    if (this.options.addClass) await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
+    if (this.options.addLores) await this.actor.createEmbeddedDocuments("Item", this.result.lores);
     // for (const feat of this.result.feats.reverse()) {
     //   console.warn(`creating ${feat.name}`, feat);
     //   await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
     // }
-    await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
-    await this.actor.createEmbeddedDocuments("Item", this.result.spells);
-    await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
-    await this.actor.createEmbeddedDocuments("Item", this.result.weapons);
-    await this.actor.createEmbeddedDocuments("Item", this.result.armor);
-    await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
-    await this.actor.createEmbeddedDocuments("Item", this.result.money);
+    if (this.options.addFeats) await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
+    if (this.options.addSpells) {
+      await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
+      await this.actor.createEmbeddedDocuments("Item", this.result.spells);
+    }
+    if (this.options.addEquipment) await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
+    if (this.options.addWeapons) await this.actor.createEmbeddedDocuments("Item", this.result.weapons);
+    if (this.options.addArmor) await this.actor.createEmbeddedDocuments("Item", this.result.armor);
+    if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
+    if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money);
 
     // Loop back over items and add rule and item progression data back in.
     if (!this.options.askForChoices) {

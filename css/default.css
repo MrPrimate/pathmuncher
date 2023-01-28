@@ -24,7 +24,7 @@
   margin: 0 auto;
   padding: 5px;
 }
-.pathmuncher #checkBoxMoney{
+.pathmuncher #checkBoxMoney, .pathmuncher #checkBoxTreasure, .pathmuncher #checkBoxArmor, .pathmuncher #checkBoxWeapons {
   margin-left: 35px;
 }
 
