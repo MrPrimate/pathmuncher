@@ -81,6 +81,7 @@ export class Pathmuncher {
     this.autoAddedFeatureItems = {};
     this.autoAddedFeatureRules = {};
     this.grantItemLookUp = {};
+    this.autoFeats = [];
     this.result = {
       character: {
         _id: this.actor.id,
@@ -356,6 +357,7 @@ export class Pathmuncher {
     const camelCase = game.pf2e.system.sluggify(document.system.slug, { camel: "dromedary" });
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+    this.autoFeats.push(document);
     if (!this.options.askForChoices) {
       this.result.feats.push(document);
     }
@@ -704,10 +706,6 @@ export class Pathmuncher {
           this.check[pBFeat.originalName] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
           continue;
         }
-        // if (this.result.feats.some((i) => i.name === displayName)) {
-        //   logger.debug("Feat already generated", { displayName, pBFeat, compendiumLabel });
-        //   continue;
-        // }
         if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
         pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(indexMatch._id)) {
@@ -747,10 +745,6 @@ export class Pathmuncher {
         this.check[special.originalName] = { name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special } };
         continue;
       }
-      // if (this.result.feats.some((i) => i.name === special.name)) {
-      //   logger.debug("Special already generated", { special: special.name, compendiumLabel });
-      //   continue;
-      // }
       special.added = true;
       if (this.check[special.originalName]) delete this.check[special.originalName];
       if (this.autoAddedFeatureIds.has(indexMatch._id)) {
@@ -1089,10 +1083,6 @@ export class Pathmuncher {
     await this.#generateSpecialItems("pf2e.ancestryfeatures");
     await this.#generateSpecialItems("pf2e.classfeatures");
     await this.#generateSpecialItems("pf2e.actionspf2e");
-    // for (const doc of this.result.feats) {
-    //   await this.#addGrantedItems(doc);
-    // }
-
   }
 
   async #processEquipment() {
@@ -1109,6 +1099,7 @@ export class Pathmuncher {
     const currentState = duplicate(this.result);
     try {
       const items = duplicate(documents).concat(
+        ...(this.options.askForChoices ? this.autoFeats : []),
         ...currentState.feats,
         ...currentState.class,
         ...currentState.background,
