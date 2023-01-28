@@ -362,7 +362,18 @@ export class Pathmuncher {
 
     const featureMatch = this.#findAllFeatureMatch(document.system.slug, true);
     if (featureMatch) {
-      if (hasProperty(featureMatch, "added")) featureMatch.added = true;
+      if (hasProperty(featureMatch, "added")) {
+        featureMatch.added = true;
+
+        if (featureMatch.type && featureMatch.level) {
+          const location = Pathmuncher.getFoundryFeatLocation(featureMatch.type, featureMatch.level);
+          if (!this.usedLocations.has(location)) {
+            document.system.location = location;
+            this.usedLocations.add(location);
+          }
+        }
+      }
+
       return;
     }
     if (document.type !== "action") logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
