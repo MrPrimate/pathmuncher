@@ -987,11 +987,12 @@ export class Pathmuncher {
         const level = spellSelection.level;
 
         for (const spell of spellSelection.list) {
-          logger.debug("spell details", { spell, spellSelection, list: spellSelection.list });
-          const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spell));
+          const spellName = spell.split("(")[0].trim();
+          logger.debug("spell details", { spell, spellName, spellSelection, list: spellSelection.list });
+          const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
           if (!indexMatch) {
-            logger.error(`Unable to match spell ${spell}`, { spell, spellSelection, caster });
-            this.bad.push({ pbName: spell, type: "spell", details: { spell, spellSelection, caster } });
+            logger.error(`Unable to match spell ${spell}`, { spell, spellName, spellSelection, caster });
+            this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, spellSelection, caster } });
             continue;
           }
 
