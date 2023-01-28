@@ -888,7 +888,7 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       itemData.system.equipped.value = a.worn ?? false;
       if (!this.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
-        itemData.system.equipped.inSlot = a.worn ?? true;
+        itemData.system.equipped.inSlot = a.worn ?? false;
         itemData.system.equipped.handsHeld = 0;
         itemData.system.quantity = a.qty;
         itemData.system.category = a.prof;

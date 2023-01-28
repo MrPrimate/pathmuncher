@@ -104,6 +104,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Cognitive Crossover", foundryName: "Kreighton's Cognitive Crossover" },
   { pbName: "Heir of the Astrologers", foundryName: "Heir of the Saoc" },
   { pbName: "Astrology", foundryName: "Saoc Astrology" },
+  { pbName: "Battle Ready", foundryName: "Battle-Ready Orc" },
 ];
 
 function generatePostfixNames(pbName) {
