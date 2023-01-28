@@ -396,9 +396,22 @@ export class Pathmuncher {
         const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
         if (featMatch) {
           logger.debug("Choices evaluated", { choiceSet, choices, document, featMatch, choice });
-          return choice.value;
+          return choice;
         }
       }
+
+      if (typeof choiceSet.choices === "string") {
+        for (const choice of choices) {
+          const featMatch = this.#findAllFeatureMatch(choice.value, true);
+          if (featMatch) {
+            logger.debug("Choices evaluated", { choiceSet, choices, document, featMatch, choice });
+            featMatch.added = true;
+            choice.nouuid = true;
+            return choice;
+          }
+        }
+      }
+
     } finally {
       await Actor.deleteDocuments([tempActor._id]);
     }
@@ -460,7 +473,7 @@ export class Pathmuncher {
         const flagName = match[2].split(".").pop();
         const choiceSet = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
           ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
-        const value = choiceSet ? await this.#evaluateChoices(document, choiceSet) : undefined;
+        const value = choiceSet ? await this.#evaluateChoices(document, choiceSet)?.value : undefined;
         if (!value) {
           logger.error("Failed to resolve injected uuid", {
             ruleData: choiceSet,
@@ -513,6 +526,7 @@ export class Pathmuncher {
     }
   }
 
+  // eslint-disable-next-line complexity
   async #addGrantedRules(document) {
     if (document.system.rules.length === 0) return;
     logger.debug(`addGrantedRules for ${document.name}`, duplicate(document));
@@ -523,19 +537,24 @@ export class Pathmuncher {
       return;
     }
 
-    this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules);
+    // const rulesToKeep = document.system.rules.filter((r) => !["GrantItem", "ChoiceSet", "MartialProficiency"].includes(r.key));
+    const rulesToKeep = [];
+    this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules.filter((r) => !["GrantItem", "ChoiceSet"].includes(r.key)));
     await this.#generateGrantItemData(document);
 
-    const rulesToKeep = document.system.rules.filter((r) => r.key !== "GrantItem" && r.key !== "ChoiceSet");
     const grantRules = document.system.rules.filter((r) => r.key === "GrantItem");
     const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
 
     for (const ruleEntry of grantRules.concat(choiceRules)) {
       logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
 
+      const choice = ruleEntry.key === "ChoiceSet"
+        ? await this.#evaluateChoices(document, ruleEntry)
+        : undefined;
+
       const uuid = ruleEntry.key === "GrantItem"
         ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
-        : await this.#evaluateChoices(document, ruleEntry);
+        : choice?.value;
 
       logger.debug(`UUID for ${document.name} ${uuid}`, document, ruleEntry);
       const ruleFeature = uuid ? await fromUuid(uuid) : undefined;
@@ -560,7 +579,11 @@ export class Pathmuncher {
         featureDoc._id = foundry.utils.randomID();
         this.#createGrantedItem(featureDoc, document);
         if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
-
+      } else if (choice?.nouuid) {
+        logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
+        ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+        ruleEntry.selection = choice.value;
+        if (choice.label) document.name = `${document.name} (${choice.label})`;
       } else {
         const data = {
           uuid: ruleEntry.uuid,
@@ -575,6 +598,7 @@ export class Pathmuncher {
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
+      this.autoAddedFeatureRules[document._id].push(ruleEntry);
     }
     if (!this.options.askForChoices) {
       // eslint-disable-next-line require-atomic-updates
@@ -1119,7 +1143,7 @@ export class Pathmuncher {
         ruleUpdates.push({
           _id: key,
           system: {
-            rules: value,
+            rules: value.reverse(),
           },
         });
       }
@@ -1259,7 +1283,7 @@ export class Pathmuncher {
           ruleUpdates.push({
             _id: key,
             system: {
-              rules: value,
+              rules: value.reverse(),
             },
           });
         }

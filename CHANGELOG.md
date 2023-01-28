@@ -1,6 +1,7 @@
 # 0.0.4
 
 - Fix a bug with choice selection options.
+- Improve parsing of selections like Fighter Weapon Mastery.
 
 # 0.0.3
 
