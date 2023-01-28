@@ -365,22 +365,26 @@ export class Pathmuncher {
 
   async #evaluateChoices(document, choiceSet) {
     const tempActor = await this.#generateTempActor();
-    const item = tempActor.getEmbeddedDocument("Item", document._id);
-    const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, item);
-    const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
-    const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
-    await Actor.deleteDocuments([tempActor._id]);
+    try {
+      const item = tempActor.getEmbeddedDocument("Item", document._id);
+      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, item);
+      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+      const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
 
-    for (const choice of choices) {
-      const doc = await fromUuid(choice.value);
-      if (!doc) continue;
-      const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
-      if (featMatch) {
-        logger.debug("Choices evaluated", { choiceSet, choices, document });
-        return choice.value;
+      for (const choice of choices) {
+        const doc = await fromUuid(choice.value);
+        if (!doc) continue;
+        const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
+        if (featMatch) {
+          logger.debug("Choices evaluated", { choiceSet, choices, document });
+          return choice.value;
+        }
       }
+    } finally {
+      await Actor.deleteDocuments([tempActor._id]);
     }
-    logger.debug("Evaluate Choices failed", { choiceSet, choices, document });
+
+    logger.debug("Evaluate Choices failed", { choiceSet, tempActor, document });
     return undefined;
 
   }
@@ -479,10 +483,13 @@ export class Pathmuncher {
 
   async #checkRule(document, rule) {
     const tempActor = await this.#generateTempActor([document]);
-    const predicateChecker = new PredicatePF2e(rule.predicate);
-    const optionSet = await tempActor.getRollOptions();
-    await Actor.deleteDocuments([tempActor._id]);
-    return predicateChecker.test(optionSet);
+    try {
+      const predicateChecker = new PredicatePF2e(rule.predicate);
+      const optionSet = await tempActor.getRollOptions();
+      return predicateChecker.test(optionSet);
+    } finally {
+      await Actor.deleteDocuments([tempActor._id]);
+    }
   }
 
   async #addGrantedRules(document) {
@@ -1069,45 +1076,53 @@ export class Pathmuncher {
     const actorData = mergeObject({ type: "character" }, this.result.character);
     actorData.name = "Mr Temp";
     const actor = await Actor.create(actorData);
+    try {
+      const items = documents.concat(
+        ...this.result.feats,
+        ...this.result.class,
+        ...this.result.background,
+        ...this.result.ancestry,
+        ...this.result.heritage,
+        ...this.result.deity,
+        ...this.result.lores,
+      ).map((i) => {
+        if (i.system.items) i.system.items = [];
+        if (i.system.rules) i.system.rules = [];
+        return i;
+      });
 
-    const items = documents.concat(
-      ...this.result.feats,
-      ...this.result.class,
-      ...this.result.background,
-      ...this.result.ancestry,
-      ...this.result.heritage,
-      ...this.result.deity,
-      ...this.result.lores,
-    ).map((i) => {
-      if (i.system.items) i.system.items = [];
-      if (i.system.rules) i.system.rules = [];
-      return i;
-    });
+      await actor.createEmbeddedDocuments("Item", items, { keepId: true });
+      const ruleUpdates = [];
+      for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
+        ruleUpdates.push({
+          _id: key,
+          system: {
+            rules: value,
+          },
+        });
+      }
+      await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
-    await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-    const ruleUpdates = [];
-    for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
-      ruleUpdates.push({
-        _id: key,
-        system: {
-          rules: value,
-        },
+      const itemUpdates = [];
+      for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
+        itemUpdates.push({
+          _id: key,
+          system: {
+            items: value,
+          },
+        });
+      }
+      await actor.updateEmbeddedDocuments("Item", itemUpdates);
+
+      logger.debug("Final temp actor", actor);
+    } catch (err) {
+      logger.error("Temp actor creation failed", {
+        actor,
+        documents,
+        thisData: deepClone(this.result),
+        actorData,
       });
     }
-    await actor.updateEmbeddedDocuments("Item", ruleUpdates);
-
-    const itemUpdates = [];
-    for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
-      itemUpdates.push({
-        _id: key,
-        system: {
-          items: value,
-        },
-      });
-    }
-    await actor.updateEmbeddedDocuments("Item", itemUpdates);
-
-    logger.debug("Final temp actor", actor);
     return actor;
   }
 
