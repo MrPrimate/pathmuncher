@@ -1227,28 +1227,34 @@ export class Pathmuncher {
     if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
     if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money);
 
+    const importedItems = this.actor.items.map((i) => i._id);
     // Loop back over items and add rule and item progression data back in.
     if (!this.options.askForChoices) {
+      logger.debug("Restoring logic", { currentActor: duplicate(this.actor) });
       const ruleUpdates = [];
       for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
-        ruleUpdates.push({
-          _id: key,
-          system: {
-            rules: value,
-          },
-        });
+        if (importedItems.includes(key)) {
+          ruleUpdates.push({
+            _id: key,
+            system: {
+              rules: value,
+            },
+          });
+        }
       }
       logger.debug("Restoring rule logic", ruleUpdates);
       await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
       for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
-        itemUpdates.push({
-          _id: key,
-          system: {
-            items: value,
-          },
-        });
+        if (importedItems.includes(key)) {
+          itemUpdates.push({
+            _id: key,
+            system: {
+              items: value,
+            },
+          });
+        }
       }
       logger.debug("Restoring granted item logic", itemUpdates);
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
