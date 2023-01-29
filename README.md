@@ -6,7 +6,7 @@
 
 Import characters from Pathbuilder to Foundry Pathfinder 2e.
 
-![webm-preview](./docs/demo.webm)
+![gif-preview](./docs/demo.gif)
 
 ## About
 
