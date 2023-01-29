@@ -1,3 +1,7 @@
+# 0.0.6
+
+- Armor would not import as equipped properly.
+
 # 0.0.5
 
 - In some cases, things like the Attack of Opportunity feat would grant an action with the same id, which could confuse the muncher.
