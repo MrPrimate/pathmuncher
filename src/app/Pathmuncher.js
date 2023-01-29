@@ -907,11 +907,14 @@ export class Pathmuncher {
       itemData.system.equipped.value = a.worn ?? false;
       if (!this.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
         itemData.system.equipped.inSlot = a.worn ?? false;
-        itemData.system.equipped.handsHeld = 0;
         itemData.system.quantity = a.qty;
         itemData.system.category = a.prof;
         itemData.system.potencyRune.value = a.pot;
         itemData.system.resiliencyRune.value = a.res;
+
+        const isShield = itemData.system.category === "shield";
+        itemData.system.equipped.handsHeld = isShield && a.worn ? 1 : 0;
+        itemData.system.equipped.carryType = isShield && a.worn ? "held" : "worn";
 
         if (a.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(a.runes[0], { camel: "dromedary" });
         if (a.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(a.runes[1], { camel: "dromedary" });
@@ -1257,7 +1260,7 @@ export class Pathmuncher {
     if (this.options.addHeritage) await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
     if (this.options.addBackground) await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
     if (this.options.addClass) await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
-    if (this.options.addLores) await this.actor.createEmbeddedDocuments("Item", this.result.lores);
+    if (this.options.addLores) await this.actor.createEmbeddedDocuments("Item", this.result.lores, { keepId: true });
     // for (const feat of this.result.feats.reverse()) {
     //   console.warn(`creating ${feat.name}`, feat);
     //   await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
@@ -1265,13 +1268,16 @@ export class Pathmuncher {
     if (this.options.addFeats) await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
     if (this.options.addSpells) {
       await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
-      await this.actor.createEmbeddedDocuments("Item", this.result.spells);
+      await this.actor.createEmbeddedDocuments("Item", this.result.spells, { keepId: true });
     }
-    if (this.options.addEquipment) await this.actor.createEmbeddedDocuments("Item", this.result.equipment);
-    if (this.options.addWeapons) await this.actor.createEmbeddedDocuments("Item", this.result.weapons);
-    if (this.options.addArmor) await this.actor.createEmbeddedDocuments("Item", this.result.armor);
-    if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure);
-    if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money);
+    if (this.options.addEquipment) await this.actor.createEmbeddedDocuments("Item", this.result.equipment, { keepId: true });
+    if (this.options.addWeapons) await this.actor.createEmbeddedDocuments("Item", this.result.weapons, { keepId: true });
+    if (this.options.addArmor) {
+      await this.actor.createEmbeddedDocuments("Item", this.result.armor, { keepId: true });
+      await this.actor.updateEmbeddedDocuments("Item", this.result.armor, { keepId: true });
+    }
+    if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure, { keepId: true });
+    if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money, { keepId: true });
 
     const importedItems = this.actor.items.map((i) => i._id);
     // Loop back over items and add rule and item progression data back in.
