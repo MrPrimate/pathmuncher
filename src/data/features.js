@@ -1,13 +1,17 @@
 // these are features which are named differently in pathbuilder to foundry
 
 const POSTFIX_PB_REMOVALS = [
-  /(.*) Racket$/,
+  /(.*) (Racket)$/,
 ];
 
 const PREFIX_PB_REMOVALS = [
-  /^Arcane Thesis: (.*)/,
-  /^Arcane School: (.*)/,
-  /^The (.*)/,
+  /^(Arcane Thesis): (.*)/,
+  /^(Arcane School): (.*)/,
+  /^(The) (.*)/,
+];
+
+const PARENTHESIS = [
+  /^(.*) \((.*)\)$/,
 ];
 
 const SPLITS = [
@@ -42,6 +46,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Desecrator [Neutral Evil]", foundryName: "Desecrator" },
   { pbName: "Detective Dedication", foundryName: "Edgewatch Detective Dedication" },
   { pbName: "Duelist Dedication (LO)", foundryName: "Aldori Duelist Dedication" },
+  { pbName: "Dwarven Hold Education", foundryName: "Dongun Education" },
   { pbName: "Ember's Eyes (Darkvision)", foundryName: "Ember's Eyes" },
   { pbName: "Enhanced Familiar Feat", foundryName: "Enhanced Familiar" },
   { pbName: "Enigma", foundryName: "Enigma Muse" },
@@ -58,6 +63,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Heir of the Astrologers", foundryName: "Heir of the Saoc" },
   { pbName: "High Killer Training", foundryName: "Vernai Training" },
   { pbName: "Ice-Witch", foundryName: "Irriseni Ice-Witch" },
+  { pbName: "Impeccable Crafter", foundryName: "Impeccable Crafting" },
   { pbName: "Incredible Beastmaster's Companion", foundryName: "Incredible Beastmaster Companion" },
   { pbName: "Interrogation", foundryName: "Bolera's Interrogation" },
   { pbName: "Katana", foundryName: "Katana Weapon Familiarity" },
@@ -101,28 +107,44 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Wind God’s Fan", foundryName: "Wind God's Fan" },
 ];
 
-function generatePostfixNames(pbName) {
+function generateDynamicNames(pbName) {
   const result = [];
-  for (const reg of POSTFIX_PB_REMOVALS.concat(PREFIX_PB_REMOVALS)) {
+  // if we have a hardcoded map, don't return here
+  if (FEAT_RENAME_STATIC_MAP.some((e) => e.pbName === pbName)) return result;
+  for (const reg of POSTFIX_PB_REMOVALS) {
     const match = pbName.match(reg);
     if (match) {
-      result.push({ pbName, foundryName: match[1] });
+      result.push({ pbName, foundryName: match[1], details: match[2] });
+    }
+  }
+  for (const reg of PREFIX_PB_REMOVALS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[2], details: match[1] });
     }
   }
   for (const reg of SPLITS) {
     const match = pbName.match(reg);
     if (match) {
-      result.push({ pbName, foundryName: match[2] });
+      result.push({ pbName, foundryName: match[2], details: match[1] });
+    }
+  }
+  for (const reg of PARENTHESIS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[1], details: match[2] });
     }
   }
   return result;
 }
 
 export function FEAT_RENAME_MAP(pbName = null) {
-  const postfixNames = pbName ? generatePostfixNames(pbName) : [];
+  const postfixNames = pbName ? generateDynamicNames(pbName) : [];
   return postfixNames.concat(FEAT_RENAME_STATIC_MAP);
 }
 
 export const IGNORED_FEATS = [
-  "Unarmored"
+  "Unarmored",
+  "Spellbook",
+  "Energy Emanation", // pathbuilder does not pass through a type for this
 ];
