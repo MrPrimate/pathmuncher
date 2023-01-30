@@ -15,7 +15,7 @@ export class Pathmuncher {
   }
 
   getFoundryEquipmentName(pbName) {
-    return this.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
+    return this.EQUIPMENT_RENAME_MAP.find((map) => map.pbName == pbName)?.foundryName ?? pbName;
   }
 
   FEAT_RENAME_MAP(name) {
