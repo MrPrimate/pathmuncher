@@ -414,6 +414,19 @@ export class Pathmuncher {
     if (document.type !== "action") logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
+  async #featureChoiceMatch(choices, ignoreAdded) {
+    for (const choice of choices) {
+      const doc = await fromUuid(choice.value);
+      if (!doc) continue;
+      const featMatch = this.#findAllFeatureMatch(doc.system.slug, ignoreAdded);
+      if (featMatch) {
+        logger.debug("Choices evaluated", { choices, document, featMatch, choice });
+        return choice;
+      }
+    }
+    return undefined;
+  }
+
   async #evaluateChoices(document, choiceSet) {
     logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
     const tempActor = await this.#generateTempActor();
@@ -432,17 +445,11 @@ export class Pathmuncher {
         choices,
       });
 
-      for (const choice of choices) {
-        const doc = await fromUuid(choice.value);
-        if (!doc) continue;
-        const featMatch = this.#findAllFeatureMatch(doc.system.slug, true);
-        if (featMatch) {
-          logger.debug("Choices evaluated", { choiceSet, choices, document, featMatch, choice });
-          return choice;
-        }
-      }
+      logger.debug("Evaluating choiceset", choiceSet);
+      const choiceMatch = this.#featureChoiceMatch(choices, true);
+      if (choiceMatch) return choiceMatch;
 
-      if (typeof choiceSet.choices === "string") {
+      if (typeof choiceSet.choices === "string" || Array.isArray(choices)) {
         for (const choice of choices) {
           const featMatch = this.#findAllFeatureMatch(choice.value, true);
           if (featMatch) {
