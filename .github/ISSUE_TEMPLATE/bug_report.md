@@ -33,5 +33,5 @@ If applicable, add screenshots to help explain your problem.
 **Additional context**
 Add any other context about the problem here.
 
- - A Pathbuilder export number
+ - In Pathbuilder please got to Export -> "Share Copy of Character" and provide the link.
  - Details of any errors in the browser console (press F12).
