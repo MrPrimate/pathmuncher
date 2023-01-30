@@ -27,7 +27,8 @@ export class Pathmuncher {
   }
 
   getFoundryFeatureName(pbName) {
-    return this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
+    const match = this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
+    return match ?? { pbName, foundryName: pbName, details: undefined };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -205,9 +206,13 @@ export class Pathmuncher {
 
     logger.debug("Starting Special Rename");
     this.source.specials
-      .filter((special) => special && special !== "undefined" && special !== this.source.heritage)
+      .filter((special) => special
+        && special !== "undefined"
+        && special !== "Not Selected"
+        && special !== this.source.heritage
+      )
       .forEach((special) => {
-        const name = this.getFoundryFeatureName(special);
+        const name = this.getFoundryFeatureName(special).foundryName;
         if (!this.#processSpecialData(name) && !this.IGNORED_FEATURES.includes(name)) {
           this.parsed.specials.push({ name, originalName: special, added: false });
         }
@@ -216,9 +221,13 @@ export class Pathmuncher {
 
     logger.debug("Starting Feat Rename");
     this.source.feats
-      .filter((feat) => feat[0] && feat[0] !== "undefined" && feat[0] !== this.source.heritage)
+      .filter((feat) => feat[0]
+        && feat[0] !== "undefined"
+        && feat[0] !== "Not Selected"
+        && feat[0] !== this.source.heritage
+      )
       .forEach((feat) => {
-        const name = this.getFoundryFeatureName(feat[0]);
+        const name = this.getFoundryFeatureName(feat[0]).foundryName;
         const data = {
           name,
           extra: feat[1],
@@ -265,10 +274,20 @@ export class Pathmuncher {
 
   // eslint-disable-next-line class-methods-use-this
   async #processGenericCompendiumLookup(compendiumLabel, name, target) {
+    logger.debug(`Checking for compendium documents for ${name} (${target}) in ${compendiumLabel}`);
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-    const foundryName = this.getFoundryFeatureName(name);
-    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName));
+    const foundryName = this.getFoundryFeatureName(name).foundryName;
+    // if (foundryName.details && !["The", ""].includes(foundryName.details)) {
+    //   this.parsed.feats.push({ })
+    // }
+    // console.warn("NAME MATCH", {
+    //   name,
+    //   foundryName,
+    //   result: name === foundryName,
+    // })
+    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName))
+     ?? index.find((i) => i.system.slug === game.pf2e.system.sluggify(name));
 
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
