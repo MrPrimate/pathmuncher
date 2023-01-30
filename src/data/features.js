@@ -75,6 +75,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Major Lesson III", foundryName: "Major Lesson" },
   { pbName: "Mantis God's Grip", foundryName: "Achaekek's Grip" },
   { pbName: "Marked for Death", foundryName: "Mark for Death" },
+  { pbName: "Miraculous Spells", foundryName: "Miraculous Spell" },
   { pbName: "Multifarious", foundryName: "Multifarious Muse" },
   { pbName: "Paladin [Lawful Good]", foundryName: "Paladin" },
   { pbName: "Parry", foundryName: "Aldori Parry" },
