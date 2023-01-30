@@ -88,6 +88,7 @@ export class Pathmuncher {
     this.usedLocations = new Set();
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
+    this.allFeatureRules = {};
     this.autoAddedFeatureRules = {};
     this.grantItemLookUp = {};
     this.autoFeats = [];
@@ -605,66 +606,86 @@ export class Pathmuncher {
 
     // const rulesToKeep = document.system.rules.filter((r) => !["GrantItem", "ChoiceSet", "MartialProficiency"].includes(r.key));
     const rulesToKeep = [];
+    this.allFeatureRules[document._id] = deepClone(document.system.rules);
     this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules.filter((r) => !["GrantItem", "ChoiceSet"].includes(r.key)));
     await this.#generateGrantItemData(document);
 
     const grantRules = document.system.rules.filter((r) => r.key === "GrantItem");
     const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
 
-    for (const ruleEntry of grantRules.concat(choiceRules)) {
-      logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
+    for (const ruleTypes of [choiceRules, grantRules]) {
+      for (const ruleEntry of ruleTypes) {
+        logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
 
-      const choice = ruleEntry.key === "ChoiceSet"
-        ? await this.#evaluateChoices(document, ruleEntry)
-        : undefined;
+        const choice = ruleEntry.key === "ChoiceSet"
+          ? await this.#evaluateChoices(document, ruleEntry)
+          : undefined;
 
-      const uuid = ruleEntry.key === "GrantItem"
-        ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
-        : choice?.value;
+        const uuid = ruleEntry.key === "GrantItem"
+          ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
+          : choice?.value;
 
-      logger.debug(`UUID for ${document.name} ${uuid}`, document, ruleEntry);
-      const ruleFeature = uuid ? await fromUuid(uuid) : undefined;
-      if (ruleFeature) {
-        const featureDoc = ruleFeature.toObject();
-        setProperty(featureDoc, "flags.pathmuncher.origin.uuid");
-        if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
-          logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
-          continue;
-        }
-        logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
-
-        if (ruleEntry.predicate) {
-          const testResult = await this.#checkRule(featureDoc, ruleEntry);
-          if (!testResult) {
-            const data = { document, ruleEntry, featureDoc, testResult };
-            logger.debug(`The test failed for ${document.name} rule key: ${ruleFeature.key} (This is probably not a problem).`, data);
+        logger.debug(`UUID for ${document.name}: "${uuid}"`, document, ruleEntry, choice);
+        const ruleFeature = uuid ? await fromUuid(uuid) : undefined;
+        if (ruleFeature) {
+          const featureDoc = ruleFeature.toObject();
+          featureDoc._id = foundry.utils.randomID();
+          if (featureDoc.system.rules) this.allFeatureRules[document._id] = deepClone(document.system.rules);
+          setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
+          if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
+            logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
             continue;
           }
+          logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
+
+          if (ruleEntry.predicate) {
+            const testResult = await this.#checkRule(featureDoc, ruleEntry);
+            // eslint-disable-next-line max-depth
+            if (!testResult) {
+              const data = { document, ruleEntry, featureDoc, testResult };
+              logger.debug(`The test failed for ${document.name} rule key: ${ruleFeature.key} (This is probably not a problem).`, data);
+              continue;
+            }
+          }
+          if (choice) {
+            ruleEntry.selection = choice.value;
+          }
+          this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
+          featureDoc._id = foundry.utils.randomID();
+          this.#createGrantedItem(featureDoc, document);
+          if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
+        } else if (choice?.nouuid) {
+          logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
+          if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+          ruleEntry.selection = choice.value;
+          if (choice.label) document.name = `${document.name} (${choice.label})`;
+        } else if (choice && uuid && !hasProperty(ruleEntry, "selection")) {
+          logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
+          if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+          ruleEntry.selection = choice.value;
+        } else {
+          const data = {
+            uuid: ruleEntry.uuid,
+            document,
+            ruleEntry,
+            choice,
+            lookup: this.grantItemLookUp[ruleEntry.uuid],
+          };
+          if (ruleEntry.key === "GrantItem" && this.grantItemLookUp[ruleEntry.uuid]) {
+            rulesToKeep.push(ruleEntry);
+            // const lookup = this.grantItemLookUp[ruleEntry.uuid].choiceSet
+            // eslint-disable-next-line max-depth
+            // if (!rulesToKeep.some((r) => r.key == lookup && r.prompt === lookup.prompt)) {
+            //   rulesToKeep.push(this.grantItemLookUp[ruleEntry.uuid].choiceSet);
+            // }
+          } else if (ruleEntry.key === "ChoiceSet" && !hasProperty(ruleEntry, "flag")) {
+            logger.debug("Prompting user for choices", ruleEntry);
+            rulesToKeep.push(ruleEntry);
+          }
+          logger.warn("Unable to determine granted rule feature, needs better parser", data);
         }
-        this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
-        featureDoc._id = foundry.utils.randomID();
-        this.#createGrantedItem(featureDoc, document);
-        if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
-      } else if (choice?.nouuid) {
-        logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
-        ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
-        ruleEntry.selection = choice.value;
-        if (choice.label) document.name = `${document.name} (${choice.label})`;
-      } else {
-        const data = {
-          uuid: ruleEntry.uuid,
-          document,
-          ruleEntry,
-        };
-        if (ruleEntry.key === "GrantItem" && this.grantItemLookUp[ruleEntry.uuid]) {
-          rulesToKeep.push(ruleEntry);
-          rulesToKeep.push(this.grantItemLookUp[ruleEntry.uuid].choiceSet);
-        } else if (ruleEntry.key === "ChoiceSet" && !ruleEntry.flag && choiceRules.length > 1) {
-          rulesToKeep.push(ruleEntry);
-        }
-        logger.warn("Unable to determine granted rule feature, needs better parser", data);
+        this.autoAddedFeatureRules[document._id].push(ruleEntry);
       }
-      this.autoAddedFeatureRules[document._id].push(ruleEntry);
     }
     if (!this.options.askForChoices) {
       // eslint-disable-next-line require-atomic-updates
