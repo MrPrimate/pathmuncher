@@ -93,6 +93,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Sentry Dedication", foundryName: "Lastwall Sentry Dedication" },
   { pbName: "Stab and Snag", foundryName: "Stella's Stab and Snag" },
   { pbName: "Tenets of Evil", foundryName: "The Tenets of Evil" },
+  { pbName: "Tenets of Good", foundryName: "The Tenets of Good" },
   { pbName: "Tongue of the Sun and Moon", foundryName: "Tongue of Sun and Moon" },
   { pbName: "Tribal Bond", foundryName: "Quah Bond" },
   { pbName: "Tyrant [Lawful Evil]", foundryName: "Tyrant" },

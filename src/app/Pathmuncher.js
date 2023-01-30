@@ -395,7 +395,10 @@ export class Pathmuncher {
         : undefined
       );
 
-    const featureMatch = this.#findAllFeatureMatch(document.system.slug, true);
+    // console.warn(`Matching feature for ${document.name}?`, {
+    //   featureMatch,
+    // });
+
     if (featureMatch) {
       if (hasProperty(featureMatch, "added")) {
         featureMatch.added = true;
@@ -446,7 +449,8 @@ export class Pathmuncher {
       });
 
       logger.debug("Evaluating choiceset", choiceSet);
-      const choiceMatch = this.#featureChoiceMatch(choices, true);
+      const choiceMatch = await this.#featureChoiceMatch(choices, true);
+      logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) return choiceMatch;
 
       if (typeof choiceSet.choices === "string" || Array.isArray(choices)) {
@@ -1026,6 +1030,7 @@ export class Pathmuncher {
     const type = classCaster?.spellcastingType;
     return type;
   }
+
   async #generateSpellCaster(caster) {
     const magicTradition = caster.magicTradition === "focus" ? "divine" : caster.magicTradition;
     const spellcastingType = caster.magicTradition === "focus" ? caster.magicTradition : caster.spellcastingType;
@@ -1216,32 +1221,44 @@ export class Pathmuncher {
     actorData.name = "Mr Temp";
     const actor = await Actor.create(actorData);
     const currentState = duplicate(this.result);
+
+    const currentItems = [
+      ...(this.options.askForChoices ? this.autoFeats : []),
+      ...currentState.feats,
+      ...currentState.class,
+      ...currentState.background,
+      ...currentState.ancestry,
+      ...currentState.heritage,
+      ...currentState.deity,
+      ...currentState.lores,
+    ];
+    for (const doc of documents) {
+      if (!currentItems.some((d) => d._id === doc._id)) {
+        currentItems.push(doc);
+      }
+    }
     try {
-      const items = duplicate(documents).concat(
-        ...(this.options.askForChoices ? this.autoFeats : []),
-        ...currentState.feats,
-        ...currentState.class,
-        ...currentState.background,
-        ...currentState.ancestry,
-        ...currentState.heritage,
-        ...currentState.deity,
-        ...currentState.lores,
-      ).map((i) => {
+      const items = duplicate(currentItems).map((i) => {
         if (i.system.items) i.system.items = [];
         if (i.system.rules) i.system.rules = [];
         return i;
       });
 
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
+      const ruleIds = currentItems.map((i) => i._id);
       const ruleUpdates = [];
-      for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
-        ruleUpdates.push({
-          _id: key,
-          system: {
-            rules: value.reverse(),
-          },
-        });
+      for (const [key, value] of Object.entries(this.allFeatureRules)) {
+        if (ruleIds.includes(key)) {
+          ruleUpdates.push({
+            _id: key,
+            system: {
+              // rules: value,
+              rules: value.filter((r) => ["GrantItem", "ChoiceSet", "RollOption"].includes(r.key)),
+            },
+          });
+        }
       }
+      // console.warn("rule updates", ruleUpdates);
       await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
@@ -1262,6 +1279,9 @@ export class Pathmuncher {
         documents,
         thisData: deepClone(this.result),
         actorData,
+        err,
+        currentItems,
+        this: this,
       });
     }
     return actor;

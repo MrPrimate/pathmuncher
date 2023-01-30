@@ -1,3 +1,8 @@
+# 0.0.8
+
+- Counterspell detection.
+- Improvements to valid feat detection.
+
 # 0.0.7
 
 - Choices would not evaluate in the case of classes like Barbarian.
