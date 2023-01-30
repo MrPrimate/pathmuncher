@@ -523,7 +523,7 @@ export class Pathmuncher {
           ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
         const value = choiceSet ? (await this.#evaluateChoices(document, choiceSet))?.value : undefined;
         if (!value) {
-          logger.error("Failed to resolve injected uuid", {
+          logger.warn("Failed to resolve injected uuid", {
             ruleData: choiceSet,
             flagName,
             key: match[1],
