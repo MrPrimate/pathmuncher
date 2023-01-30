@@ -389,6 +389,11 @@ export class Pathmuncher {
     if (!this.options.askForChoices) {
       this.result.feats.push(document);
     }
+    const featureMatch = this.#findAllFeatureMatch(document.system.slug, true)
+      ?? (document.name.includes("(")
+        ? this.#findAllFeatureMatch(game.pf2e.system.sluggify(document.name.split("(")[0].trim()), true)
+        : undefined
+      );
 
     const featureMatch = this.#findAllFeatureMatch(document.system.slug, true);
     if (featureMatch) {
