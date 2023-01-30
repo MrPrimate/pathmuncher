@@ -1,3 +1,8 @@
+# 0.0.7
+
+- Choices would not evaluate in the case of classes like Barbarian.
+- Ancient-Blooded Dwarf heritage map.
+
 # 0.0.6
 
 - Armor would not import as equipped properly.

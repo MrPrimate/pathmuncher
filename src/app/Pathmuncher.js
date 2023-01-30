@@ -14,11 +14,19 @@ export class Pathmuncher {
     return EQUIPMENT_RENAME_MAP;
   }
 
+  getFoundryEquipmentName(pbName) {
+    return this.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
+  }
+
   FEAT_RENAME_MAP(name) {
     const dynamicItems = [
       { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
     ];
     return FEAT_RENAME_MAP(name).concat(dynamicItems);
+  }
+
+  getFoundryFeatureName(pbName) {
+    return this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -188,7 +196,7 @@ export class Pathmuncher {
     this.source.equipment
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
-        const name = this.EQUIPMENT_RENAME_MAP.find((item) => item.pbName == e[0])?.foundryName ?? e[0];
+        const name = this.getFoundryEquipmentName(e[0]);
         const item = { pbName: name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
@@ -198,7 +206,7 @@ export class Pathmuncher {
     this.source.specials
       .filter((special) => special && special !== "undefined" && special !== this.source.heritage)
       .forEach((special) => {
-        const name = this.FEAT_RENAME_MAP(special).find((map) => map.pbName == special)?.foundryName ?? special;
+        const name = this.getFoundryFeatureName(special);
         if (!this.#processSpecialData(name) && !this.IGNORED_FEATURES.includes(name)) {
           this.parsed.specials.push({ name, originalName: special, added: false });
         }
@@ -209,7 +217,7 @@ export class Pathmuncher {
     this.source.feats
       .filter((feat) => feat[0] && feat[0] !== "undefined" && feat[0] !== this.source.heritage)
       .forEach((feat) => {
-        const name = this.FEAT_RENAME_MAP(feat[0]).find((map) => map.pbName == feat[0])?.foundryName ?? feat[0];
+        const name = this.getFoundryFeatureName(feat[0]);
         const data = {
           name,
           extra: feat[1],
@@ -258,8 +266,8 @@ export class Pathmuncher {
   async #processGenericCompendiumLookup(compendiumLabel, name, target) {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-
-    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(name));
+    const foundryName = this.getFoundryFeatureName(name);
+    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName));
 
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
@@ -398,6 +406,7 @@ export class Pathmuncher {
         rollOptions,
         choices,
       });
+
       for (const choice of choices) {
         const doc = await fromUuid(choice.value);
         if (!doc) continue;
