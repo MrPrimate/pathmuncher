@@ -3,7 +3,6 @@
 import CONSTANTS from "../constants.js";
 import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT } from "../data/equipment.js";
 import { FEAT_RENAME_MAP, IGNORED_FEATS } from "../data/features.js";
-import { PredicatePF2e } from "../lib/PredicatePF2e.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 
@@ -567,9 +566,27 @@ export class Pathmuncher {
   async #checkRule(document, rule) {
     const tempActor = await this.#generateTempActor([document]);
     try {
-      const predicateChecker = new PredicatePF2e(rule.predicate);
-      const optionSet = await tempActor.getRollOptions();
-      return predicateChecker.test(optionSet);
+      const item = tempActor.getEmbeddedDocument("Item", document._id);
+      const ruleElement = rule.key === "ChoiceSet"
+        ? new game.pf2e.RuleElements.all.ChoiceSet(rule, item)
+        : new game.pf2e.RuleElements.all.GrantItem(rule, item);
+      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+      const choices = rule.key === "ChoiceSet"
+        ? (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
+        : [ruleElement.resolveValue()];
+
+      const isGood = rule.key === "ChoiceSet"
+        ? (await this.#featureChoiceMatch(choices, false)) !== undefined
+        : ruleElement.test(rollOptions);
+      // console.warn("RuleChecker", {
+      //   choices,
+      //   ruleElement,
+      //   isGood,
+      //   optionSet,
+      //   rollOptions,
+      // });
+
+      return isGood;
     } finally {
       await Actor.deleteDocuments([tempActor._id]);
     }
