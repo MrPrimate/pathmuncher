@@ -21,6 +21,7 @@ export class Pathmuncher {
   FEAT_RENAME_MAP(name) {
     const dynamicItems = [
       { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
+      { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType() ?? "")})` },
     ];
     return FEAT_RENAME_MAP(name).concat(dynamicItems);
   }
