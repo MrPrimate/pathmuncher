@@ -390,6 +390,14 @@ export class Pathmuncher {
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
 
+      logger.debug("Starting choice evaluation", {
+        document,
+        choiceSet,
+        item,
+        choiceSetRules,
+        rollOptions,
+        choices,
+      });
       for (const choice of choices) {
         const doc = await fromUuid(choice.value);
         if (!doc) continue;
@@ -473,7 +481,7 @@ export class Pathmuncher {
         const flagName = match[2].split(".").pop();
         const choiceSet = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
           ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
-        const value = choiceSet ? await this.#evaluateChoices(document, choiceSet)?.value : undefined;
+        const value = choiceSet ? (await this.#evaluateChoices(document, choiceSet))?.value : undefined;
         if (!value) {
           logger.error("Failed to resolve injected uuid", {
             ruleData: choiceSet,
