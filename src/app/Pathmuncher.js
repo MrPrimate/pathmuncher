@@ -951,6 +951,11 @@ export class Pathmuncher {
     }
   }
 
+  getClassSpellCastingType() {
+    const classCaster = this.source.spellCasters.find((caster) => caster.name === this.source.class);
+    const type = classCaster?.spellcastingType;
+    return type;
+  }
   async #generateSpellCaster(caster) {
     const magicTradition = caster.magicTradition === "focus" ? "divine" : caster.magicTradition;
     const spellcastingType = caster.magicTradition === "focus" ? caster.magicTradition : caster.spellcastingType;
