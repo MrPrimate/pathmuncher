@@ -1030,12 +1030,22 @@ export class Pathmuncher {
   getClassSpellCastingType() {
     const classCaster = this.source.spellCasters.find((caster) => caster.name === this.source.class);
     const type = classCaster?.spellcastingType;
-    return type;
+    if (type || this.source.spellCasters.length === 0) return type ?? "spontaneous";
+    // if no type and multiple spell casters, then return the first spell casting type
+    return this.source.spellCasters[0].spellcastingType ?? "spontaneous";
+  }
+
+  getClassMagicTradition() {
+    const classCaster = this.source.spellCasters.find((caster) => caster.name === this.source.class);
+    const tradition = classCaster?.magicTradition;
+    if (tradition || this.source.spellCasters.length === 0) return tradition ?? "divine";
+    // if no type and multiple spell casters, then return the first spell casting type
+    return this.source.spellCasters[0].magicTradition ?? "divine";
   }
 
   async #generateSpellCaster(caster) {
-    const magicTradition = caster.magicTradition === "focus" ? "divine" : caster.magicTradition;
-    const spellcastingType = caster.magicTradition === "focus" ? caster.magicTradition : caster.spellcastingType;
+    const magicTradition = caster.magicTradition === "focus" ? this.getClassMagicTradition() : caster.magicTradition;
+    const spellcastingType = caster.magicTradition === "focus" ? this.getClassSpellCastingType() : caster.spellcastingType;
 
     const spellcastingEntity = {
       ability: {

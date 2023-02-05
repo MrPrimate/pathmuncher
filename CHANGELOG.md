@@ -1,3 +1,7 @@
+# 0.0.9
+
+- Thanks to @null#1055 for improving spellcasting type detection.
+
 # 0.0.8
 
 - Counterspell detection.
