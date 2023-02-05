@@ -1,3 +1,7 @@
+# 0.0.10
+
+- Money did not import correctly.
+
 # 0.0.9
 
 - Thanks to @null#1055 for improving spellcasting type detection.

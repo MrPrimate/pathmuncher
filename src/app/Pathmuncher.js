@@ -1205,9 +1205,9 @@ export class Pathmuncher {
       const indexMatch = index.find((i) => i.system.slug === lookup.slug);
       if (indexMatch) {
         const doc = await compendium.getDocument(indexMatch._id);
-        doc.system.quantity = this.source.money[lookup.type];
         const itemData = doc.toObject();
         itemData._id = foundry.utils.randomID();
+        itemData.system.quantity = this.source.money[lookup.type];
         this.result.money.push(itemData);
       }
     }
