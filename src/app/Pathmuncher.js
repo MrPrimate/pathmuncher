@@ -435,9 +435,10 @@ export class Pathmuncher {
   async #evaluateChoices(document, choiceSet) {
     logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
     const tempActor = await this.#generateTempActor();
+    const cleansedChoiceSet = deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(choiceSet, item);
+      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
 
@@ -450,16 +451,16 @@ export class Pathmuncher {
         choices,
       });
 
-      logger.debug("Evaluating choiceset", choiceSet);
+      logger.debug("Evaluating choiceset", cleansedChoiceSet);
       const choiceMatch = await this.#featureChoiceMatch(choices, true);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) return choiceMatch;
 
-      if (typeof choiceSet.choices === "string" || Array.isArray(choices)) {
+      if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
         for (const choice of choices) {
           const featMatch = this.#findAllFeatureMatch(choice.value, true);
           if (featMatch) {
-            logger.debug("Choices evaluated", { choiceSet, choices, document, featMatch, choice });
+            logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
             featMatch.added = true;
             choice.nouuid = true;
             return choice;
@@ -467,11 +468,19 @@ export class Pathmuncher {
         }
       }
 
+    } catch (err) {
+      logger.error("Whoa! Something went major bad wrong during choice evaluation", {
+        err,
+        tempActor: tempActor.toObject(),
+        document: duplicate(document),
+        choiceSet: duplicate(cleansedChoiceSet),
+      });
+      throw err;
     } finally {
       await Actor.deleteDocuments([tempActor._id]);
     }
 
-    logger.debug("Evaluate Choices failed", { choiceSet, tempActor, document });
+    logger.debug("Evaluate Choices failed", { choiceSet: cleansedChoiceSet, tempActor, document });
     return undefined;
 
   }
@@ -528,7 +537,8 @@ export class Pathmuncher {
         const flagName = match[2].split(".").pop();
         const choiceSet = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
           ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
-        const value = choiceSet ? (await this.#evaluateChoices(document, choiceSet))?.value : undefined;
+        const choice = choiceSet ? (await this.#evaluateChoices(document, choiceSet)) : undefined;
+        const value = choice?.value ?? undefined;
         if (!value) {
           logger.warn("Failed to resolve injected uuid", {
             ruleData: choiceSet,
@@ -543,6 +553,7 @@ export class Pathmuncher {
         this.grantItemLookUp[rule.uuid] = {
           docId: document.id,
           key: rule.uuid,
+          choice,
           uuid: value,
           flag: flagName,
           choiceSet,
@@ -550,6 +561,7 @@ export class Pathmuncher {
         this.grantItemLookUp[`${document._id}-${flagName}`] = {
           docId: document.id,
           key: rule.uuid,
+          choice,
           uuid: value,
           flag: flagName,
           choiceSet,
@@ -557,6 +569,15 @@ export class Pathmuncher {
         this.grantItemLookUp[`${document._id}`] = {
           docId: document.id,
           key: rule.uuid,
+          choice,
+          uuid: value,
+          flag: flagName,
+          choiceSet,
+        };
+        this.grantItemLookUp[`${document._id}-${flagName}`] = {
+          docId: document.id,
+          key: rule.uuid,
+          choice,
           uuid: value,
           flag: flagName,
           choiceSet,
@@ -572,28 +593,29 @@ export class Pathmuncher {
 
   async #checkRule(document, rule) {
     const tempActor = await this.#generateTempActor([document]);
+    const cleansedRule = deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const ruleElement = rule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(rule, item)
-        : new game.pf2e.RuleElements.all.GrantItem(rule, item);
+      const ruleElement = cleansedRule.key === "ChoiceSet"
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
-      const choices = rule.key === "ChoiceSet"
+      const choices = cleansedRule.key === "ChoiceSet"
         ? (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
         : [ruleElement.resolveValue()];
 
-      const isGood = rule.key === "ChoiceSet"
+      const isGood = cleansedRule.key === "ChoiceSet"
         ? (await this.#featureChoiceMatch(choices, false)) !== undefined
         : ruleElement.test(rollOptions);
-      // console.warn("RuleChecker", {
-      //   choices,
-      //   ruleElement,
-      //   isGood,
-      //   optionSet,
-      //   rollOptions,
-      // });
 
       return isGood;
+    } catch (err) {
+      logger.error("Something has gone most wrong during rule checking", {
+        document,
+        rule: cleansedRule,
+        tempActor,
+      });
+      throw err;
     } finally {
       await Actor.deleteDocuments([tempActor._id]);
     }
@@ -620,11 +642,25 @@ export class Pathmuncher {
     const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
 
     for (const ruleTypes of [choiceRules, grantRules]) {
-      for (const ruleEntry of ruleTypes) {
+      for (const rawRuleEntry of ruleTypes) {
+        const ruleEntry = deepClone(rawRuleEntry);
         logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
 
+        const lookupName = ruleEntry.flag ? `${document._id}-${ruleEntry.flag}` : document._id;
+
+        logger.debug("Rule check, looking up", {
+          id: `${document._id}-${ruleEntry.flag}`,
+          lookup: this.grantItemLookUp[lookupName],
+          lookups: this.grantItemLookUp,
+          ruleEntry,
+          lookupName,
+        });
+
+        // have we pre-evaluated this choice?
         const choice = ruleEntry.key === "ChoiceSet"
-          ? await this.#evaluateChoices(document, ruleEntry)
+          ? this.grantItemLookUp[lookupName]?.choice
+            ? this.grantItemLookUp[lookupName].choice
+            : await this.#evaluateChoices(document, ruleEntry)
           : undefined;
 
         const uuid = ruleEntry.key === "GrantItem"
@@ -1282,6 +1318,18 @@ export class Pathmuncher {
           },
         });
       }
+
+      for (const doc of documents) {
+        if (getProperty(doc, "system.rules")?.length > 0 && !ruleUpdates.some((r) => r._id === doc._id)) {
+          ruleUpdates.push({
+            _id: doc._id,
+            system: {
+              rules: doc.system.rules,
+            },
+          });
+        }
+      }
+
       await actor.updateEmbeddedDocuments("Item", itemUpdates);
 
       logger.debug("Final temp actor", actor);
