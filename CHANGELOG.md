@@ -1,3 +1,8 @@
+# 0.1.1
+
+- Swashbucker Styles matching.
+- Fix issue with importing some characters in Pathfinder system version 4.7.x
+
 # 0.1.0
 
 - Money did not import correctly.

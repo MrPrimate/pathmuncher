@@ -2,6 +2,7 @@
 
 const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
+  /(.*) (Style)$/,
 ];
 
 const PREFIX_PB_REMOVALS = [
