@@ -150,4 +150,5 @@ export const IGNORED_FEATS = [
   "Unarmored",
   "Spellbook",
   "Energy Emanation", // pathbuilder does not pass through a type for this
+  "Imprecise Sense", // this gets picked up and added by granted features
 ];

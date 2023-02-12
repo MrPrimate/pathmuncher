@@ -1,3 +1,7 @@
+# 0.1.2
+
+- Imprecise Sense would be added but would prompt that it was not.
+
 # 0.1.1
 
 - Swashbucker Styles matching.
