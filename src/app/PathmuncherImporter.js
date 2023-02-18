@@ -9,6 +9,7 @@ export class PathmuncherImporter extends FormApplication {
     super(options);
     this.actor = game.actors.get(actor.id ? actor.id : actor._id);
     this.backup = duplicate(this.actor);
+    this.mode = "number";
   }
 
   static get defaultOptions() {
@@ -18,6 +19,7 @@ export class PathmuncherImporter extends FormApplication {
     options.classes = ["pathmuncher"];
     options.width = 400;
     options.closeOnSubmit = false;
+    options.tabs = [{ navSelector: ".tabs", contentSelector: "form", initial: "number" }];
     return options;
   }
 
@@ -35,6 +37,15 @@ export class PathmuncherImporter extends FormApplication {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
+
+    $(html)
+      .find('.item')
+      .on("click", (event) => {
+        console.warn(event);
+        console.warn(event.target?.dataset?.tab);
+        if (!event.target?.dataset?.tab) return;
+        this.mode = event.target.dataset.tab;
+      });
   }
 
   static _updateProgress(total, count, type) {
@@ -48,6 +59,8 @@ export class PathmuncherImporter extends FormApplication {
 
   async _updateObject(event, formData) {
     const pathbuilderId = formData.textBoxBuildID;
+
+    console.warn({formData, this: this });
 
     const options = {
       pathbuilderId,
@@ -72,7 +85,18 @@ export class PathmuncherImporter extends FormApplication {
     await utils.setFlags(this.actor, options);
 
     const pathmuncher = new Pathmuncher(this.actor, options);
-    await pathmuncher.fetchPathbuilder(pathbuilderId);
+    if (this.mode === "number") {
+      await pathmuncher.fetchPathbuilder(pathbuilderId);
+    } else if (this.mode === "json") {
+      try {
+        const jsonData = JSON.parse(formData.textBoxBuildJSON);
+        pathmuncher.source = jsonData.build;
+      } catch (err) {
+        ui.notifications.error("Unable to parse JSON data");
+        return;
+      }
+    }
+
     logger.debug("Pathmuncher Source", pathmuncher.source);
     await pathmuncher.processCharacter();
     logger.debug("Post processed character", pathmuncher);

@@ -35,6 +35,11 @@
       <input type="checkbox" id="checkBoxAskForChoices" name="checkBoxAskForChoices" {{#if flags.askForChoices}}checked{{else}}{{/if}}>
       <label for="checkBoxAskForChoices"> {{localize "pathmuncher.Dialogs.PathmuncherImporter.Ask.Choices"}}</label><br>
     <hr/>
+      <nav class="sheet-tabs tabs">
+      <a class="item active" data-tab="number"><i class="fas fa-hashtag"></i> Use ID</a>
+      <a class="item" data-tab="json"><i class="fas fa-code"></i> Paste JSON</a>
+    </nav>
+    <section class="tab" data-tab="number">
     <div id="divCode">
       {{localize "pathmuncher.Dialogs.PathmuncherImporter.PathBuilderId"}}<br>
       <div id="divOuter">
@@ -43,6 +48,17 @@
         </div>
       </div>
     </div>
+    </section>
+    <section class="tab" data-tab="json">
+    <div id="divJson">
+      {{localize "pathmuncher.Dialogs.PathmuncherImporter.PathBuilderJSON"}}<br>
+      <div id="divOuter">
+        <div id="divInner">
+          <textarea rows="2" id="textBoxBuildJSON" name="textBoxBuildJSON"></textarea>
+        </div>
+      </div>
+    </div>
+    </section>
     <hr>
     <div class="import-progress import-hidden">
       <div class="pathmuncher import-progress-bar" style="width: 0%"></div>

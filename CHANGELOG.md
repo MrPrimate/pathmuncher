@@ -1,3 +1,9 @@
+# 0.1.3
+
+- Some JSON data now has spell lists again, improved spell detection.
+- Added a paste JSON option, rather than providing an ID.
+- Improved detection of Explorer's Clothing.
+
 # 0.1.2
 
 - Imprecise Sense would be added but would prompt that it was not.

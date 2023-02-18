@@ -18,7 +18,7 @@
   width: 285px;
   overflow: hidden;
 }
-.pathmuncher #divCode{
+.pathmuncher #divCode, .pathmuncher #divJson {
   border: 1px solid black;
   width: 300px;
   margin: 0 auto;
