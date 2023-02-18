@@ -41,8 +41,6 @@ export class PathmuncherImporter extends FormApplication {
     $(html)
       .find('.item')
       .on("click", (event) => {
-        console.warn(event);
-        console.warn(event.target?.dataset?.tab);
         if (!event.target?.dataset?.tab) return;
         this.mode = event.target.dataset.tab;
       });
@@ -59,9 +57,6 @@ export class PathmuncherImporter extends FormApplication {
 
   async _updateObject(event, formData) {
     const pathbuilderId = formData.textBoxBuildID;
-
-    console.warn({formData, this: this });
-
     const options = {
       pathbuilderId,
       addMoney: formData.checkBoxMoney,
