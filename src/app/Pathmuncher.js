@@ -86,6 +86,8 @@ export class Pathmuncher {
       specials: [],
       feats: [],
       equipment: [],
+      armor: [],
+      weapons: [],
     };
     this.usedLocations = new Set();
     this.autoAddedFeatureIds = new Set();
@@ -203,6 +205,20 @@ export class Pathmuncher {
         const name = this.getFoundryEquipmentName(e[0]);
         const item = { pbName: name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
+      });
+    this.source.armor
+      .filter((e) => e && e !== "undefined")
+      .forEach((e) => {
+        const name = this.getFoundryEquipmentName(e.name);
+        const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
+        this.parsed.armor.push(item);
+      });
+    this.source.weapons
+      .filter((e) => e && e !== "undefined")
+      .forEach((e) => {
+        const name = this.getFoundryEquipmentName(e.name);
+        const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
+        this.parsed.weapons.push(item);
       });
     logger.debug("Finished Equipment Rename");
 
@@ -973,16 +989,16 @@ export class Pathmuncher {
     const compendium = game.packs.get("pf2e.equipment-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    for (const w of this.source.weapons) {
-      if (this.IGNORED_EQUIPMENT.includes(w.name)) {
+    for (const w of this.parsed.weapons) {
+      if (this.IGNORED_EQUIPMENT.includes(w.pbName)) {
         w.added = true;
         continue;
       }
       logger.debug("Generating weapon for", w);
-      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(w.name));
+      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(w.pbName));
       if (!indexMatch) {
         logger.error(`Unable to match weapon item ${w.name}`, w);
-        this.bad.push({ pbName: w.name, type: "weapon", details: { w } });
+        this.bad.push({ pbName: w.pbName, type: "weapon", details: { w } });
         continue;
       }
 
@@ -1014,19 +1030,19 @@ export class Pathmuncher {
     const compendium = game.packs.get("pf2e.equipment-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
-    for (const a of this.source.armor) {
-      if (this.IGNORED_EQUIPMENT.includes(a.name)) {
+    for (const a of this.parsed.armor) {
+      if (this.IGNORED_EQUIPMENT.includes(a.pbName)) {
         a.added = true;
         continue;
       }
       logger.debug("Generating armor for", a);
       const indexMatch = index.find((i) =>
-        i.system.slug === game.pf2e.system.sluggify(a.name)
-        || i.system.slug === game.pf2e.system.sluggify(`${a.name} Armor`)
+        i.system.slug === game.pf2e.system.sluggify(a.pbName)
+        || i.system.slug === game.pf2e.system.sluggify(`${a.pbName} Armor`)
       );
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
-        this.bad.push({ pbName: a.name, type: "armor", details: { a } });
+        this.bad.push({ pbName: a.pbName, type: "armor", details: { a } });
         continue;
       }
 
