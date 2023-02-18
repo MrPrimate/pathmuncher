@@ -1080,8 +1080,13 @@ export class Pathmuncher {
   }
 
   async #generateSpellCaster(caster) {
-    const magicTradition = caster.magicTradition === "focus" ? this.getClassMagicTradition() : caster.magicTradition;
-    const spellcastingType = caster.magicTradition === "focus" ? this.getClassSpellCastingType() : caster.spellcastingType;
+    const isFocus = caster.magicTradition === "focus";
+    const classMagicTradition = this.getClassMagicTradition();
+    const magicTradition = isFocus ? classMagicTradition : caster.magicTradition;
+    const spellcastingType = isFocus ? caster.magicTradition : caster.spellcastingType;
+    const flexible = false; // placeholder
+
+    const name = isFocus ? `${utils.capitalize(classMagicTradition)} ${caster.name}` : caster.name;
 
     const spellcastingEntity = {
       ability: {
@@ -1098,62 +1103,62 @@ export class Pathmuncher {
       },
       prepared: {
         value: spellcastingType,
-        flexible: false
+        flexible,
       },
       slots: {
         slot0: {
           max: caster.perDay[0],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[0],
         },
         slot1: {
           max: caster.perDay[1],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[1],
         },
         slot2: {
           max: caster.perDay[2],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[2],
         },
         slot3: {
           max: caster.perDay[3],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[3],
         },
         slot4: {
           max: caster.perDay[4],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[4],
         },
         slot5: {
           max: caster.perDay[5],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[5],
         },
         slot6: {
           max: caster.perDay[6],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[6],
         },
         slot7: {
           max: caster.perDay[7],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[7],
         },
         slot8: {
           max: caster.perDay[8],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[8],
         },
         slot9: {
           max: caster.perDay[9],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[9],
         },
         slot10: {
           max: caster.perDay[10],
-          prepared: [],
+          prepared: {},
           value: caster.perDay[10],
         },
       },
@@ -1161,7 +1166,7 @@ export class Pathmuncher {
     };
     const data = {
       _id: foundry.utils.randomID(),
-      name: caster.name,
+      name,
       type: "spellcastingEntry",
       system: spellcastingEntity,
     };
@@ -1176,17 +1181,18 @@ export class Pathmuncher {
     for (const caster of this.source.spellCasters) {
       logger.debug("Generating caster for", caster);
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
-      caster.instance = await this.#generateSpellCaster(caster);
+      const instance = await this.#generateSpellCaster(caster);
+      logger.debug("Generated caster instance", instance);
 
       for (const spellSelection of caster.spells) {
-        const level = spellSelection.level;
+        const level = spellSelection.spellLevel;
 
-        for (const spell of spellSelection.list) {
+        for (const [i, spell] of spellSelection.list.entries()) {
           const spellName = spell.split("(")[0].trim();
           logger.debug("spell details", { spell, spellName, spellSelection, list: spellSelection.list });
           const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
           if (!indexMatch) {
-            logger.error(`Unable to match spell ${spell}`, { spell, spellName, spellSelection, caster });
+            logger.error(`Unable to match spell ${spell}`, { spell, spellName, spellSelection, caster, instance });
             this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, spellSelection, caster } });
             continue;
           }
@@ -1195,8 +1201,10 @@ export class Pathmuncher {
           const itemData = doc.toObject();
           itemData._id = foundry.utils.randomID();
           itemData.system.location.heightenedLevel = level;
-          itemData.system.location.value = caster.instance._id;
+          itemData.system.location.value = instance._id;
           this.result.spells.push(itemData);
+
+          instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
         }
       }
     }

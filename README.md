@@ -14,7 +14,8 @@ This is inspired by the previous [pathbuilder2e-import](https://github.com/kobse
 
 ## Known Issues
 
-- Pathbuilder JSON does not contain spell data at the moment.
+- Pathbuilder JSON does not always contain spell data at the moment.
+- Pathbuilder JSON does not contain ritual spell data at the moment.
 - Pathbuilder JSON does not contain any details about containers.
 - Pathbuilder JSON does not export the tradition of focus spells. The builder takes a good guess at these, but it's worth checking to make sure.
 - There are differences between Pathbuilder names and Foundry names. If you find any, please open an issue, or drop a note in Discord with as much detail as possible, ideally with a shared link to a pathbuilder character.
