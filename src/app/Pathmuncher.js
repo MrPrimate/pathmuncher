@@ -790,10 +790,8 @@ export class Pathmuncher {
   }
 
   async #processCore() {
-    if (this.options.addName) {
-      setProperty(this.result.character, "name", this.source.name);
-      setProperty(this.result.character, "prototypeToken.name", this.source.name);
-    }
+    setProperty(this.result.character, "name", this.source.name);
+    setProperty(this.result.character, "prototypeToken.name", this.source.name);
     setProperty(this.result.character, "system.details.level.value", this.source.level);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
@@ -1273,6 +1271,26 @@ export class Pathmuncher {
     }
   }
 
+  async #processFormulas() {
+    const compendium = game.packs.get("pf2e.equipment-srd");
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+    const uuids = [];
+
+    for (const formulaSource of this.source.formula) {
+      for (const formulaName of formulaSource.known) {
+        const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(formulaName));
+        if (!indexMatch) {
+          logger.error(`Unable to match formula ${formulaName}`, { formulaSource, name: formulaName });
+          this.bad.push({ pbName: formulaName, type: "formula", details: { formulaSource, name: formulaName } });
+          continue;
+        }
+        const doc = await compendium.getDocument(indexMatch._id);
+        uuids.push({ uuid: doc.uuid });
+      }
+    }
+    setProperty(this.result.character, "system.crafting.formulas", uuids);
+  }
+
   async #processFeats() {
     await this.#generateFeatItems("pf2e.feats-srd");
     await this.#generateFeatItems("pf2e.ancestryfeatures");
@@ -1375,6 +1393,7 @@ export class Pathmuncher {
     if (!this.source) return;
     this.#prepare();
     await this.#processCore();
+    await this.#processFormulas();
     await this.#processGenericCompendiumLookup("pf2e.deities", this.source.deity, "deity");
     await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, "background");
     await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
@@ -1387,7 +1406,7 @@ export class Pathmuncher {
     await this.#generateLores();
   }
 
-  async updateActor() {
+  async #removeDocumentsToBeUpdated() {
     const moneyIds = this.actor.items.filter((i) =>
       i.type === "treasure"
       && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name)
@@ -1407,6 +1426,7 @@ export class Pathmuncher {
     const armorIds = this.actor.items.filter((i) => i.type === "armor").map((i) => i._id);
     const loreIds = this.actor.items.filter((i) => i.type === "lore").map((i) => i._id);
     const spellIds = this.actor.items.filter((i) => i.type === "spell" || i.type === "spellcastingEntry").map((i) => i._id);
+    const formulaIds = this.actor.system.formulas;
 
     logger.debug("ids", {
       moneyIds,
@@ -1423,6 +1443,7 @@ export class Pathmuncher {
       armorIds,
       loreIds,
       spellIds,
+      formulaIds,
     });
     // eslint-disable-next-line complexity
     const keepIds = this.actor.items.filter((i) =>
@@ -1447,10 +1468,10 @@ export class Pathmuncher {
       keepIds,
     });
     await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
-    // await this.actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
 
-    logger.debug("Generated result", this.result);
-    await this.actor.update(this.result.character);
+  }
+
+  async #createActorEmbeddedDocuments() {
     if (this.options.addDeity) await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
     if (this.options.addAncestry) await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
     if (this.options.addHeritage) await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
@@ -1474,7 +1495,9 @@ export class Pathmuncher {
     }
     if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure, { keepId: true });
     if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money, { keepId: true });
+  }
 
+  async #restoreEmbeddedRuleLogic() {
     const importedItems = this.actor.items.map((i) => i._id);
     // Loop back over items and add rule and item progression data back in.
     if (!this.options.askForChoices) {
@@ -1507,6 +1530,23 @@ export class Pathmuncher {
       logger.debug("Restoring granted item logic", itemUpdates);
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }
+  }
+
+  async updateActor() {
+    await this.#removeDocumentsToBeUpdated();
+
+    if (!this.options.addName) {
+      delete this.result.character.name;
+      delete this.result.character.prototypeToken.name;
+    }
+    if (!this.options.addFormulas) {
+      delete this.result.character.system.formulas;
+    }
+
+    logger.debug("Generated result", this.result);
+    await this.actor.update(this.result.character);
+    await this.#createActorEmbeddedDocuments();
+    await this.#restoreEmbeddedRuleLogic();
   }
 
   async postImportCheck() {
@@ -1549,6 +1589,12 @@ export class Pathmuncher {
     const badSpells = this.options.addSpells
       ? this.bad.filter((b) => b.type === "spells").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
       : [];
+    const badPets = this.options.addPets
+      ? this.bad.filter((b) => b.type === "pets").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Pets")}: ${b.pbName}</li>`)
+      : [];
+    const badFormulas = this.options.addFormulas
+      ? this.bad.filter((b) => b.type === "formulas").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Formulas")}: ${b.pbName}</li>`)
+      : [];
     const totalBad = [
       ...badClass,
       ...badAncestry,
@@ -1562,6 +1608,8 @@ export class Pathmuncher {
       ...badArmor,
       ...badSpellcasting,
       ...badSpells,
+      ...badPets,
+      ...badFormulas,
     ];
 
     let warning = "";
@@ -1586,6 +1634,8 @@ export class Pathmuncher {
       badArmor,
       badSpellcasting,
       badSpells,
+      badPets,
+      badFormulas,
       totalBad,
       count: totalBad.length,
       focusPool: this.result.focusPool,

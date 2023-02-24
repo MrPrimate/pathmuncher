@@ -1,3 +1,7 @@
+# NEXT
+
+- Import known Formulas.
+
 # 0.1.3
 
 - Some JSON data now has spell lists again, improved spell detection.

@@ -40,6 +40,8 @@ const utils = {
         addDeity: true,
         addName: true,
         addClass: true,
+        addPets: true,
+        addFormulas: true,
         askForChoices: false,
       };
     return flags;
