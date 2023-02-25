@@ -1,3 +1,7 @@
+# 0.1.5
+
+- Correct and edge case where an unnamed familiar would break the importer.
+
 # 0.1.4
 
 - Import known Formulas.

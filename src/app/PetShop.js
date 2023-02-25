@@ -83,7 +83,9 @@ export class PetShop {
   }
 
   async buildPet(json) {
-    const name = json.name.split("(")[1].split(")")[0];
+    const name = json.name === json.type || !json.name.includes("(")
+      ? `${this.parent.name}'s ${json.type}`
+      : json.name.split("(")[1].split(")")[0];
     const petData = await this.#existingPetCheck(name, json.type);
     const pet = this.#buildCore(petData);
     await this.#generatePetFeatures(pet, json);
