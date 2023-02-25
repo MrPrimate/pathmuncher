@@ -92,10 +92,7 @@ export class PetShop {
 
   async updatePets() {
     for (const petData of this.result.pets) {
-      console.warn(petData);
       const actor = game.actors.get(petData._id);
-
-      console.warn(actor)
       await actor.deleteEmbeddedDocuments("Item", [], { deleteAll: true });
       await actor.update(petData);
       await actor.createEmbeddedDocuments("Item", this.result.features[petData._id], { keepId: true });
