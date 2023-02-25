@@ -2,6 +2,7 @@ import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { Pathmuncher } from "./Pathmuncher.js";
+import { PetShop } from "./PetShop.js";
 
 export class PathmuncherImporter extends FormApplication {
 
@@ -17,6 +18,7 @@ export class PathmuncherImporter extends FormApplication {
     options.title = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.PathmuncherImporter.Title`);
     options.template = `${CONSTANTS.PATH}/templates/pathmuncher.hbs`;
     options.classes = ["pathmuncher"];
+    options.id = "pathmuncher";
     options.width = 400;
     options.closeOnSubmit = false;
     options.tabs = [{ navSelector: ".tabs", contentSelector: "form", initial: "number" }];
@@ -37,6 +39,7 @@ export class PathmuncherImporter extends FormApplication {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
+    $("#pathmuncher").css("height", "auto");
 
     $(html)
       .find('.item')
@@ -73,6 +76,7 @@ export class PathmuncherImporter extends FormApplication {
       addBackground: formData.checkBoxBackground,
       addHeritage: formData.checkBoxHeritage,
       addAncestry: formData.checkBoxAncestry,
+      addFamiliars: formData.checkBoxFamiliars,
       addFormulas: formData.checkBoxFormulas,
       askForChoices: formData.checkBoxAskForChoices,
     };
@@ -104,6 +108,11 @@ export class PathmuncherImporter extends FormApplication {
       pathbuilderSource: pathmuncher.source,
       pathbuilderId,
     });
+
+    if (options.addFamiliars) {
+      const petShop = new PetShop({ parent: this.actor, pathbuilderJson: pathmuncher.source });
+      await petShop.processPets();
+    }
     this.close();
     await pathmuncher.postImportCheck();
   }

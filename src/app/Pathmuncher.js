@@ -1589,8 +1589,8 @@ export class Pathmuncher {
     const badSpells = this.options.addSpells
       ? this.bad.filter((b) => b.type === "spells").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
       : [];
-    const badPets = this.options.addPets
-      ? this.bad.filter((b) => b.type === "pets").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Pets")}: ${b.pbName}</li>`)
+    const badFamiliars = this.options.addFamiliars
+      ? this.bad.filter((b) => b.type === "familiars").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Familiars")}: ${b.pbName}</li>`)
       : [];
     const badFormulas = this.options.addFormulas
       ? this.bad.filter((b) => b.type === "formulas").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Formulas")}: ${b.pbName}</li>`)
@@ -1608,7 +1608,7 @@ export class Pathmuncher {
       ...badArmor,
       ...badSpellcasting,
       ...badSpells,
-      ...badPets,
+      ...badFamiliars,
       ...badFormulas,
     ];
 
@@ -1634,7 +1634,7 @@ export class Pathmuncher {
       badArmor,
       badSpellcasting,
       badSpells,
-      badPets,
+      badFamiliars,
       badFormulas,
       totalBad,
       count: totalBad.length,

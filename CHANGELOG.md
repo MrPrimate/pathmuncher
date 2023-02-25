@@ -1,6 +1,7 @@
-# NEXT
+# 0.1.4
 
 - Import known Formulas.
+- Familiars will import as actors.
 
 # 0.1.3
 
