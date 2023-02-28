@@ -1192,6 +1192,9 @@ export class Pathmuncher {
     const compendium = game.packs.get("pf2e.spells-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
+    const psiCompendium = game.packs.get("pf2e-psychic-amps.psychic-psi-cantrips");
+    const psiIndex = psiCompendium ? await psiCompendium.getIndex({ fields: ["name", "type", "system.slug"] }) : undefined;
+
     for (const caster of this.source.spellCasters) {
       logger.debug("Generating caster for", caster);
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
@@ -1204,14 +1207,18 @@ export class Pathmuncher {
         for (const [i, spell] of spellSelection.list.entries()) {
           const spellName = spell.split("(")[0].trim();
           logger.debug("spell details", { spell, spellName, spellSelection, list: spellSelection.list });
+
+          const psiMatch = psiIndex ? psiIndex.find((i) => i.name === spell) : undefined;
           const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
-          if (!indexMatch) {
+          if (!indexMatch && !psiMatch) {
             logger.error(`Unable to match spell ${spell}`, { spell, spellName, spellSelection, caster, instance });
             this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, spellSelection, caster } });
             continue;
           }
 
-          const doc = await compendium.getDocument(indexMatch._id);
+          const doc = psiMatch
+            ? await psiCompendium.getDocument(psiMatch._id)
+            : await compendium.getDocument(indexMatch._id);
           const itemData = doc.toObject();
           itemData._id = foundry.utils.randomID();
           itemData.system.location.heightenedLevel = level;
