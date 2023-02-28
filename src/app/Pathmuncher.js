@@ -39,12 +39,12 @@ export class Pathmuncher {
 
   // specials that are handled by Foundry and shouldn't be added
   // eslint-disable-next-line class-methods-use-this
-  get IGNORED_FEATURES () {
+  get IGNORED_FEATURES() {
     return IGNORED_FEATS;
   };
 
   // eslint-disable-next-line class-methods-use-this
-  get IGNORED_EQUIPMENT () {
+  get IGNORED_EQUIPMENT() {
     return IGNORED_EQUIPMENT;
   };
 
@@ -435,12 +435,18 @@ export class Pathmuncher {
     if (document.type !== "action") logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
-  async #featureChoiceMatch(choices, ignoreAdded) {
+  async #featureChoiceMatch(choices, ignoreAdded, adjustName) {
     for (const choice of choices) {
-      const doc = await fromUuid(choice.value);
+      const doc = adjustName
+        ? game.i18n.localize(choice.label)
+        : await fromUuid(choice.value);
       if (!doc) continue;
-      const featMatch = this.#findAllFeatureMatch(doc.system.slug, ignoreAdded);
+      const slug = adjustName
+        ? game.pf2e.system.sluggify(doc)
+        : doc.system.slug;
+      const featMatch = this.#findAllFeatureMatch(slug, ignoreAdded);
       if (featMatch) {
+        if (adjustName && hasProperty(featMatch, "added")) featMatch.added = true;
         logger.debug("Choices evaluated", { choices, document, featMatch, choice });
         return choice;
       }
@@ -468,13 +474,13 @@ export class Pathmuncher {
       });
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
-      const choiceMatch = await this.#featureChoiceMatch(choices, true);
+      const choiceMatch = await this.#featureChoiceMatch(choices, true, cleansedChoiceSet.adjustName);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) return choiceMatch;
 
       if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
         for (const choice of choices) {
-          const featMatch = this.#findAllFeatureMatch(choice.value, true);
+          const featMatch = this.#findAllFeatureMatch(choice.value, true, cleansedChoiceSet.adjustName);
           if (featMatch) {
             logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
             featMatch.added = true;
@@ -721,6 +727,15 @@ export class Pathmuncher {
           logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
           if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
           ruleEntry.selection = choice.value;
+          if (ruleEntry.adjustName && choice.label) {
+            const label = game.i18n.localize(choice.label);
+            const name = `${document.name} (${label})`;
+            const pattern = (() => {
+              const escaped = RegExp.escape(label);
+              return new RegExp(`\\(${escaped}\\) \\(${escaped}\\)$`);
+            })();
+            document.name = name.replace(pattern, `(${label})`);
+          }
         } else {
           const data = {
             uuid: ruleEntry.uuid,

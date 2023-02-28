@@ -2,6 +2,7 @@
 
 - If "PF2e Psychic Amps" module is installed, amped spells will be taken from this modules compendium.
 - Adds effects such as "Extra Reagents" onto the character sheet if the familiar has them.
+- For features like the Sorcerer Bloodline, detect selection and apply name.
 
 # 0.1.5
 

@@ -108,6 +108,26 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Wayfinder Resonance Infiltrator", foundryName: "Westyr's Wayfinder Repository" },
   { pbName: "Wind God's Fan", foundryName: "Wind God’s Fan" },
   { pbName: "Wind God’s Fan", foundryName: "Wind God's Fan" },
+  { pbName: "Black", foundryName: "Black Dragon" },
+  { pbName: "Brine", foundryName: "Brine Dragon" },
+  { pbName: "Copper", foundryName: "Copper Dragon" },
+  { pbName: "Blue", foundryName: "Blue Dragon" },
+  { pbName: "Bronze", foundryName: "Bronze Dragon" },
+  { pbName: "Cloud", foundryName: "Cloud Dragon" },
+  { pbName: "Sky", foundryName: "Sky Dragon" },
+  { pbName: "Brass", foundryName: "Brass Dragon" },
+  { pbName: "Underworld", foundryName: "Underworld Dragon" },
+  { pbName: "Crystal", foundryName: "Crystal Dragon" },
+  { pbName: "Forest", foundryName: "Forest Dragon" },
+  { pbName: "Green", foundryName: "Green Dragon" },
+  { pbName: "Sea", foundryName: "Sea Dragon" },
+  { pbName: "Silver", foundryName: "Silver Dragon" },
+  { pbName: "White", foundryName: "White Dragon" },
+  { pbName: "Sovereign", foundryName: "Sovereign Dragon" },
+  { pbName: "Umbral", foundryName: "Umbral Dragon" },
+  { pbName: "Red", foundryName: "Red Dragon" },
+  { pbName: "Gold", foundryName: "Gold Dragon" },
+  { pbName: "Magma", foundryName: "Magma Dragon" },
 ];
 
 function generateDynamicNames(pbName) {
@@ -152,3 +172,4 @@ export const IGNORED_FEATS = [
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
 ];
+
