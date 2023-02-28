@@ -1,3 +1,8 @@
+# 0.1.6
+
+- If "PF2e Psychic Amps" module is installed, amped spells will be taken from this modules compendium.
+- Adds effects such as "Extra Reagents" onto the character sheet if the familiar has them.
+
 # 0.1.5
 
 - Correct and edge case where an unnamed familiar would break the importer.

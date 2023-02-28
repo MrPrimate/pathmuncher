@@ -112,6 +112,7 @@ export class PathmuncherImporter extends FormApplication {
     if (options.addFamiliars) {
       const petShop = new PetShop({ parent: this.actor, pathbuilderJson: pathmuncher.source });
       await petShop.processPets();
+      await petShop.addPetEffects();
     }
     this.close();
     await pathmuncher.postImportCheck();

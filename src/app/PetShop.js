@@ -121,4 +121,16 @@ export class PetShop {
     });
   }
 
+  async addPetEffects() {
+    const features = [];
+    for (const petData of this.result.pets) {
+      for (const feature of this.result.features[petData._id].filter((f) => f.system.rules?.some((r) => r.key === "ActiveEffectLike"))) {
+        if (!this.parent.items.some((i) => i.type === "effect" && i.system.slug === feature.system.slug)) {
+          features.push(feature);
+        }
+      }
+    }
+    await this.parent.createEmbeddedDocuments("Item", features);
+  }
+
 }
