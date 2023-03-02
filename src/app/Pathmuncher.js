@@ -90,6 +90,7 @@ export class Pathmuncher {
       weapons: [],
     };
     this.usedLocations = new Set();
+    this.usedLocationsAlternateRules = new Set();
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.allFeatureRules = {};
@@ -182,8 +183,32 @@ export class Pathmuncher {
       return `general-${pathbuilderFeatLevel}`;
     } else if (pathbuilderFeatType === "Background Feat") {
       return `skill-${pathbuilderFeatLevel}`;
+    } else if (pathbuilderFeatType === "Archetype Feat") {
+      return `archetype-${pathbuilderFeatLevel}`;
     } else {
       return null;
+    }
+  }
+
+  #generateFoundryFeatLocation(document, feature) {
+    if (feature.type && feature.level) {
+      const ancestryParagonVariant = game.settings.get("pf2e", "ancestryParagonVariant");
+      // const freeArchetypeVariant = game.settings.get("pf2e", "freeArchetypeVariant");
+      const location = Pathmuncher.getFoundryFeatLocation(feature.type, feature.level);
+      if (location && !this.usedLocations.has(location)) {
+        document.system.location = location;
+        this.usedLocations.add(location);
+      } else if (location && this.usedLocations.has(location)) {
+        logger.debug("Variant feat location", { ancestryParagonVariant, location, feature });
+        // eslint-disable-next-line max-depth
+        if (ancestryParagonVariant && feature.type === "Ancestry Feat") {
+          document.system.location = "ancestry-bonus";
+          this.usedLocationsAlternateRules.add(location);
+        // } else if (freeArchetypeVariant && feature.type === "Class Feat") {
+        //   document.system.location = `archetype-${feature.level}`;
+        //   this.usedLocationsAlternateRules.add(location);
+        }
+      }
     }
   }
 
@@ -420,14 +445,7 @@ export class Pathmuncher {
     if (featureMatch) {
       if (hasProperty(featureMatch, "added")) {
         featureMatch.added = true;
-
-        if (featureMatch.type && featureMatch.level) {
-          const location = Pathmuncher.getFoundryFeatLocation(featureMatch.type, featureMatch.level);
-          if (!this.usedLocations.has(location)) {
-            document.system.location = location;
-            this.usedLocations.add(location);
-          }
-        }
+        this.#generateFoundryFeatLocation(document, featureMatch);
       }
 
       return;
@@ -900,14 +918,7 @@ export class Pathmuncher {
         item._id = foundry.utils.randomID();
         item.name = displayName;
 
-        if (pBFeat.type && pBFeat.level) {
-          const location = Pathmuncher.getFoundryFeatLocation(pBFeat.type, pBFeat.level);
-          if (!this.usedLocations.has(location)) {
-            item.system.location = location;
-            this.usedLocations.add(location);
-          }
-        }
-
+        this.#generateFoundryFeatLocation(item, pBFeat);
         this.result.feats.push(item);
         await this.#addGrantedItems(item);
       }

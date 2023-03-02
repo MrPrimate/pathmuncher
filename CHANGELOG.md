@@ -1,3 +1,7 @@
+# 0.1.7
+
+- Fix placement of Ancestry Paragon and Free Archetype feats.
+
 # 0.1.6
 
 - If "PF2e Psychic Amps" module is installed, amped spells will be taken from this modules compendium.
