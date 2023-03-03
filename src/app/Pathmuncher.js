@@ -787,7 +787,9 @@ export class Pathmuncher {
   async #addGrantedItems(document) {
     if (hasProperty(document, "system.items")) {
       logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
-      this.autoAddedFeatureItems[document._id] = deepClone(document.system.items);
+      if (!this.autoAddedFeatureItems[document._id]) {
+        this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
+      }
       const failedFeatureItems = {};
       for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
         logger.debug(`Checking granted item ${document.name}, with key: ${key}`, grantedItemFeature);
@@ -1387,9 +1389,9 @@ export class Pathmuncher {
       const itemUpdates = [];
       for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
         itemUpdates.push({
-          _id: key,
+          _id: `${key}`,
           system: {
-            items: value,
+            items: deepClone(value),
           },
         });
       }
@@ -1399,7 +1401,7 @@ export class Pathmuncher {
           ruleUpdates.push({
             _id: doc._id,
             system: {
-              rules: doc.system.rules,
+              rules: deepClone(doc.system.rules),
             },
           });
         }
@@ -1539,9 +1541,9 @@ export class Pathmuncher {
       for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
         if (importedItems.includes(key)) {
           ruleUpdates.push({
-            _id: key,
+            _id: `${key}`,
             system: {
-              rules: value.reverse(),
+              rules: deepClone(value),
             },
           });
         }
@@ -1553,9 +1555,9 @@ export class Pathmuncher {
       for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
         if (importedItems.includes(key)) {
           itemUpdates.push({
-            _id: key,
+            _id: `${key}`,
             system: {
-              items: value,
+              items: deepClone(value),
             },
           });
         }

@@ -1,3 +1,7 @@
+# 0.1.8
+
+- A bug prevented class features appearing that had not yet been reached, breaking levelling within Foundry.
+
 # 0.1.7
 
 - Fix placement of Ancestry Paragon and Free Archetype feats.
