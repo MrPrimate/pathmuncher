@@ -9,12 +9,12 @@ import utils from "../utils.js";
 export class Pathmuncher {
 
   // eslint-disable-next-line class-methods-use-this
-  get EQUIPMENT_RENAME_MAP() {
-    return EQUIPMENT_RENAME_MAP;
+  EQUIPMENT_RENAME_MAP(name) {
+    return EQUIPMENT_RENAME_MAP(name);
   }
 
   getFoundryEquipmentName(pbName) {
-    return this.EQUIPMENT_RENAME_MAP.find((map) => map.pbName == pbName)?.foundryName ?? pbName;
+    return this.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
   }
 
   FEAT_RENAME_MAP(name) {

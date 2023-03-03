@@ -19,6 +19,12 @@ const SPLITS = [
   /^(.*): (.*)/,
 ];
 
+const SWAPS = [
+  /^(Greater) (.*)/,
+  /^(Lesser) (.*)/,
+  /^(Major) (.*)/,
+];
+
 const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Aerialist", foundryName: "Shory Aerialist" },
   { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
@@ -158,6 +164,12 @@ function generateDynamicNames(pbName) {
       result.push({ pbName, foundryName: match[1], details: match[2] });
     }
   }
+  for (const reg of SWAPS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: `${match[2]} (${match[1]})`, details: match[2] });
+    }
+  }
   return result;
 }
 
@@ -168,8 +180,10 @@ export function FEAT_RENAME_MAP(pbName = null) {
 
 export const IGNORED_FEATS = [
   "Unarmored",
+  "Simple Weapon Expertise",
   "Spellbook",
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
+  // "Low-Light Vision", // people don't like this added
+  // "Darkvision", // people don't like this added
 ];
-

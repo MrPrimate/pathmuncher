@@ -1,3 +1,7 @@
+# COMING NEXT
+
+- Improved detection of Greater/Lesser/Major item detection etc.
+
 # 0.1.8
 
 - A bug prevented class features appearing that had not yet been reached, breaking levelling within Foundry.
