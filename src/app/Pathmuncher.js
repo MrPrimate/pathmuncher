@@ -896,6 +896,20 @@ export class Pathmuncher {
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
+    this.parsed.feats.sort((f1, f2) => {
+      const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String)
+      const f2RefUndefined = !(typeof f2.type === "string" || f2.type instanceof String);
+      if (f1RefUndefined || f2RefUndefined) {
+        if (f1RefUndefined && f2RefUndefined) {
+          return 0;
+        } else if (f1RefUndefined) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
+      return 0;
+    });
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
         if (pBFeat.added) continue;
