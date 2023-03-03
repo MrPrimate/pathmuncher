@@ -11,6 +11,10 @@
         "Name": "Restrict Import to trusted users?",
         "Hint": "Only trusted users will be able to import"
       },
+      "AddVisionFeats": {
+        "Name": "Add vision feats?",
+        "Hint": "If selected, Darkvision and Low-Light Vision will be added as feats to character sheet. Doesn't effect sense values."
+      },
       "LogLevel": {
         "Name": "Log Level",
         "Hint": "The level of logs to place into the console.",

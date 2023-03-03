@@ -8,6 +8,7 @@ const CONSTANTS = {
     // Enable options
     LOG_LEVEL: "log-level",
     RESTRICT_TO_TRUSTED: "restrict-to-trusted",
+    ADD_VISION_FEATS: "add-vision-feats",
   },
 
   GET_DEFAULT_SETTINGS() {
@@ -25,6 +26,15 @@ CONSTANTS.DEFAULT_SETTINGS = {
     type: Boolean,
     default: false,
     onChange: debouncedReload,
+  },
+
+  [CONSTANTS.SETTINGS.ADD_VISION_FEATS]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.AddVisionFeats.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.AddVisionFeats.Hint`,
+    scope: "player",
+    config: true,
+    type: Boolean,
+    default: true,
   },
 
   // debug

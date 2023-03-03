@@ -1,5 +1,8 @@
 // these are features which are named differently in pathbuilder to foundry
 
+import CONSTANTS from "../constants.js";
+import utils from "../utils.js";
+
 const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
   /(.*) (Style)$/,
@@ -178,12 +181,15 @@ export function FEAT_RENAME_MAP(pbName = null) {
   return postfixNames.concat(FEAT_RENAME_STATIC_MAP);
 }
 
-export const IGNORED_FEATS = [
+const IGNORED_FEATS_LIST = [
   "Unarmored",
   "Simple Weapon Expertise",
   "Spellbook",
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
-  // "Low-Light Vision", // people don't like this added
-  // "Darkvision", // people don't like this added
 ];
+
+export function IGNORED_FEATS() {
+  const visionFeats = utils.setting(CONSTANTS.SETTINGS.ADD_VISION_FEATS) ? [] : ["Low-Light Vision", "Darkvision"];
+  return IGNORED_FEATS_LIST.concat(visionFeats);
+}

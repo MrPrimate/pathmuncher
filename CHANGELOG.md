@@ -2,6 +2,7 @@
 
 - Improved detection of Greater/Lesser/Major item detection etc.
 - Some feats could be added twice if they were granted by a feature, typically backgrounds. e.g. Charming Liar from Callow May.
+- Option to ignore adding Vision feats to character sheet.
 
 # 0.1.8
 

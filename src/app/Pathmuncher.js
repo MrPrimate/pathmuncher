@@ -40,7 +40,7 @@ export class Pathmuncher {
   // specials that are handled by Foundry and shouldn't be added
   // eslint-disable-next-line class-methods-use-this
   get IGNORED_FEATURES() {
-    return IGNORED_FEATS;
+    return IGNORED_FEATS();
   };
 
   // eslint-disable-next-line class-methods-use-this
@@ -897,7 +897,7 @@ export class Pathmuncher {
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     this.parsed.feats.sort((f1, f2) => {
-      const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String)
+      const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String);
       const f2RefUndefined = !(typeof f2.type === "string" || f2.type instanceof String);
       if (f1RefUndefined || f2RefUndefined) {
         if (f1RefUndefined && f2RefUndefined) {
