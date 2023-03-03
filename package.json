@@ -1,6 +1,6 @@
 {
   "name": "pathmuncher",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "author": "MrPrimate",
   "description": "Foundry VTT module for integrating Pathfinder 2e Pathbuilder characters",
   "private": true,
