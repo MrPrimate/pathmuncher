@@ -1,6 +1,7 @@
 # 0.1.10
 
 - Experimental dual class support.
+- Improvements to focus tradition detection.
 
 # 0.1.9
 
