@@ -1,3 +1,7 @@
+# 0.1.10
+
+- Experimental dual class support.
+
 # 0.1.9
 
 - Improved detection of Greater/Lesser/Major item detection etc.

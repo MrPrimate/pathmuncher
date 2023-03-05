@@ -21,8 +21,11 @@ export class Pathmuncher {
     const dynamicItems = [
       { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
       { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType() ?? "")})` },
+      { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")})` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.class})` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.dualClass})` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType() ?? "")} Caster)` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")} Caster)` },
     ];
     return FEAT_RENAME_MAP(name).concat(dynamicItems);
   }
@@ -155,6 +158,10 @@ export class Pathmuncher {
     return `${name} (${this.source.class})`.toLowerCase();
   }
 
+  getDualClassAdjustedSpecialNameLowerCase(name) {
+    return `${name} (${this.source.dualClass})`.toLowerCase();
+  }
+
   getAncestryAdjustedSpecialNameLowerCase(name) {
     return `${name} (${this.source.ancestry})`.toLowerCase();
   }
@@ -193,6 +200,7 @@ export class Pathmuncher {
   #generateFoundryFeatLocation(document, feature) {
     if (feature.type && feature.level) {
       const ancestryParagonVariant = game.settings.get("pf2e", "ancestryParagonVariant");
+      const dualClassVariant = game.settings.get("pf2e", "dualClassVariant");
       // const freeArchetypeVariant = game.settings.get("pf2e", "freeArchetypeVariant");
       const location = Pathmuncher.getFoundryFeatLocation(feature.type, feature.level);
       if (location && !this.usedLocations.has(location)) {
@@ -204,9 +212,9 @@ export class Pathmuncher {
         if (ancestryParagonVariant && feature.type === "Ancestry Feat") {
           document.system.location = "ancestry-bonus";
           this.usedLocationsAlternateRules.add(location);
-        // } else if (freeArchetypeVariant && feature.type === "Class Feat") {
-        //   document.system.location = `archetype-${feature.level}`;
-        //   this.usedLocationsAlternateRules.add(location);
+        } else if (dualClassVariant && feature.type === "Class Feat") {
+          document.system.location = `dualclass-${feature.level}`;
+          this.usedLocationsAlternateRules.add(location);
         }
       }
     }
@@ -315,26 +323,177 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.traits.senses", senses);
   }
 
+  async #addDualClass(klass) {
+    if (!game.settings.get("pf2e", "dualClassVariant")) {
+      if (this.source.dualClass && this.source.dualClass !== "") {
+        logger.warn(`Imported character is dual class but system is not configured for dual class`, {
+          class: this.source.class,
+          dualClass: this.source.dualClass,
+        });
+        ui.notifications.warn(`Imported character is dual class but system is not configured for dual class`);
+      }
+      return;
+    }
+    if (!this.source.dualClass || this.source.dualClass === "") {
+      logger.warn(`Imported character not dual class but system is configured for dual class`, {
+        class: this.source.class,
+      });
+      ui.notifications.warn(`Imported character not dual class but system is configured for dual class`);
+      return;
+    }
+
+    // find the dual class
+    const compendium = await game.packs.get("pf2e.classes");
+    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+    const foundryName = this.getFoundryFeatureName(this.source.dualClass).foundryName;
+    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName))
+      ?? index.find((i) => i.system.slug === game.pf2e.system.sluggify(this.source.dualClass));
+
+    if (!indexMatch) return;
+    const doc = await compendium.getDocument(indexMatch._id);
+    const dualClass = doc.toObject();
+
+    logger.debug(`Dual Class ${dualClass.name} found, squashing things together.`);
+
+    klass.name = `${klass.name} - ${dualClass.name}`;
+    const ruleEntry = {
+      "domain": "all",
+      "key": "RollOption",
+      "option": `class:${dualClass.system.slug}`
+    };
+
+    // Attacks
+    ["advanced", "martial", "simple", "unarmed"].forEach((key) => {
+      if (dualClass.system.attacks[key] > klass.system.attacks[key]) {
+        klass.system.attacks[key] = dualClass.system.attacks[key];
+      }
+    });
+    if (klass.system.attacks.martial <= dualClass.system.attacks.other.rank) {
+      if (dualClass.system.attacks.other.rank === klass.system.attacks.other.rank) {
+        let mashed = `${klass.system.attacks.other.name}, ${dualClass.system.attacks.other.name}`;
+        mashed = mashed.replace("and ", "");
+        klass.system.attacks.other.name = [...new Set(mashed.split(','))].join(',');
+      }
+      if (dualClass.system.attacks.other.rank > klass.system.attacks.other.rank) {
+        klass.system.attacks.other.name = dualClass.system.attacks.other.name;
+        klass.system.attacks.other.rank = dualClass.system.attacks.other.rank;
+      }
+    }
+    if (klass.system.attacks.martial >= dualClass.system.attacks.other.rank
+      && klass.system.attacks.martial >= klass.system.attacks.other.rank
+    ) {
+      klass.system.attacks.other.rank = 0;
+      klass.system.attacks.other.name = "";
+    }
+
+    // Class DC
+    if (dualClass.system.classDC > klass.system.classDC) {
+      klass.system.classDC = dualClass.system.classDC;
+    }
+
+    // Defenses
+    ["heavy", "light", "medium", "unarmored"].forEach((key) => {
+      if (dualClass.system.defenses[key] > klass.system.defenses[key]) {
+        klass.system.defenses[key] = dualClass.system.defenses[key];
+      }
+    });
+
+    // Description
+    klass.system.description.value = `${klass.system.description.value} ${dualClass.system.description.value}`;
+
+    // HP
+    if (dualClass.system.hp > klass.system.hp) {
+      klass.system.hp = dualClass.system.hp;
+    }
+
+    // Items
+    Object.entries(dualClass.system.items).forEach((i) => {
+      if (Object.values(klass.system.items).some((x) => x.uuid === i[1].uuid && x.level > i[1].level)) {
+        Object.values(klass.system.items).find((x) => x.uuid === i[1].uuid).level = i[1].level;
+      } else if (!Object.values(klass.system.items).some((x) => x.uuid === i[1].uuid && x.level <= i[1].level)) {
+        klass.system.items[i[0]] = i[1];
+      }
+    });
+
+    // Key Ability
+    dualClass.system.keyAbility.value.forEach((v) => {
+      if (!klass.system.keyAbility.value.includes(v)) {
+        klass.system.keyAbility.value.push(v);
+      }
+    });
+
+    // Perception
+    if (dualClass.system.perception > klass.system.perception) klass.system.perception = dualClass.system.perception;
+
+    // Rules
+    klass.system.rules.push(ruleEntry);
+    dualClass.system.rules.forEach((r) => {
+      if (!klass.system.rules.includes(r)) {
+        klass.system.rules.push(r);
+      }
+    });
+    klass.system.rules.forEach((r, i) => {
+      if (r.path !== undefined) {
+        const check = r.path.split('.');
+        if (check.includes("data")
+          && check.includes("martial")
+          && check.includes("rank")
+          && klass.system.attacks.martial >= r.value
+        ) {
+          klass.system.rules.splice(i, 1);
+        }
+      }
+    });
+
+    // Saving Throws
+    ["fortitude", "reflex", "will"].forEach((key) => {
+      if (dualClass.system.savingThrows[key] > klass.system.savingThrows[key]) {
+        klass.system.savingThrows[key] = dualClass.system.savingThrows[key];
+      }
+    });
+
+    // Skill Feat Levels
+    dualClass.system.skillFeatLevels.value.forEach((v) => {
+      klass.system.skillFeatLevels.value.push(v);
+    });
+    klass.system.skillFeatLevels.value = [...new Set(klass.system.skillFeatLevels.value)].sort((a, b) => {
+      return a - b;
+    });
+
+    // Skill Increase Levels
+    dualClass.system.skillIncreaseLevels.value.forEach((v) => {
+      klass.system.skillIncreaseLevels.value.push(v);
+    });
+    klass.system.skillIncreaseLevels.value = [...new Set(klass.system.skillIncreaseLevels.value)].sort((a, b) => {
+      return a - b;
+    });
+
+    // Trained Skills
+    if (dualClass.system.trainedSkills.additional > klass.system.trainedSkills.additional) {
+      klass.system.trainedSkills.additional = dualClass.system.trainedSkills.additional;
+    }
+    dualClass.system.trainedSkills.value.forEach((v) => {
+      if (!klass.system.trainedSkills.value.includes(v)) {
+        klass.system.trainedSkills.value.push(v);
+      }
+    });
+
+    this.result.dualClass = dualClass;
+  }
+
   // eslint-disable-next-line class-methods-use-this
   async #processGenericCompendiumLookup(compendiumLabel, name, target) {
     logger.debug(`Checking for compendium documents for ${name} (${target}) in ${compendiumLabel}`);
     const compendium = await game.packs.get(compendiumLabel);
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const foundryName = this.getFoundryFeatureName(name).foundryName;
-    // if (foundryName.details && !["The", ""].includes(foundryName.details)) {
-    //   this.parsed.feats.push({ })
-    // }
-    // console.warn("NAME MATCH", {
-    //   name,
-    //   foundryName,
-    //   result: name === foundryName,
-    // })
     const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName))
      ?? index.find((i) => i.system.slug === game.pf2e.system.sluggify(name));
 
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
+      if (target === "class") await this.#addDualClass(itemData);
       itemData._id = foundry.utils.randomID();
       this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
@@ -395,6 +554,11 @@ export class Pathmuncher {
         || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
         || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
         || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
+        || (game.settings.get("pf2e", "dualClassVariant")
+          && (slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(f.name))
+            || slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(f.originalName))
+          )
+        )
       )
     );
     // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, {
@@ -886,6 +1050,10 @@ export class Pathmuncher {
         || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(name))
         || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(name))
         || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(name))
+        || (game.settings.get("pf2e", "dualClassVariant")
+          && (i.system.slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(name))
+          )
+        )
       );
       if (indexMatch) return indexMatch;
     }
@@ -1119,30 +1287,44 @@ export class Pathmuncher {
     }
   }
 
-  getClassSpellCastingType() {
-    const classCaster = this.source.spellCasters.find((caster) => caster.name === this.source.class);
+  getClassSpellCastingType(dual = false) {
+    const classCaster = dual
+      ? this.source.spellCasters.find((caster) => caster.name === this.source.dualClass)
+      : this.source.spellCasters.find((caster) => caster.name === this.source.class);
     const type = classCaster?.spellcastingType;
     if (type || this.source.spellCasters.length === 0) return type ?? "spontaneous";
     // if no type and multiple spell casters, then return the first spell casting type
     return this.source.spellCasters[0].spellcastingType ?? "spontaneous";
   }
 
-  getClassMagicTradition() {
-    const classCaster = this.source.spellCasters.find((caster) => caster.name === this.source.class);
-    const tradition = classCaster?.magicTradition;
+  // aims to determine the class magic tradition for a spellcasting block
+  getClassMagicTradition(caster) {
+    const classCaster = [this.source.class, this.source.dualClass].includes(caster.name);
+    const tradition = classCaster
+      ? caster?.magicTradition
+      : undefined;
+    // if a caster tradition or no spellcasters, return divine
     if (tradition || this.source.spellCasters.length === 0) return tradition ?? "divine";
+    // this spell caster type is not a class, determine class tradition based on ability
+    const abilityTradition = this.source.spellCasters.find((c) =>
+      [this.source.class, this.source.dualClass].includes(c.name)
+      && c.ability === caster.ability
+    );
+    if (abilityTradition) return abilityTradition.magicTradition;
+    // final fallback
     // if no type and multiple spell casters, then return the first spell casting type
-    return this.source.spellCasters[0].magicTradition ?? "divine";
+    return this.source.spellCasters[0].magicTradition && this.source.spellCasters[0].magicTradition !== "focus"
+      ? this.source.spellCasters[0].magicTradition
+      : "divine";
   }
 
   async #generateSpellCaster(caster) {
     const isFocus = caster.magicTradition === "focus";
-    const classMagicTradition = this.getClassMagicTradition();
-    const magicTradition = isFocus ? classMagicTradition : caster.magicTradition;
-    const spellcastingType = isFocus ? caster.magicTradition : caster.spellcastingType;
+    const magicTradition = this.getClassMagicTradition(caster);
+    const spellcastingType = isFocus ? "focus" : caster.spellcastingType;
     const flexible = false; // placeholder
 
-    const name = isFocus ? `${utils.capitalize(classMagicTradition)} ${caster.name}` : caster.name;
+    const name = isFocus ? `${utils.capitalize(magicTradition)} ${caster.name}` : caster.name;
 
     const spellcastingEntity = {
       ability: {
