@@ -493,7 +493,10 @@ export class Pathmuncher {
     if (indexMatch) {
       const doc = await compendium.getDocument(indexMatch._id);
       const itemData = doc.toObject();
-      if (target === "class") await this.#addDualClass(itemData);
+      if (target === "class") {
+        itemData.system.keyAbility.selected = this.source.keyability;
+        await this.#addDualClass(itemData);
+      }
       itemData._id = foundry.utils.randomID();
       this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);

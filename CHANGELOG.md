@@ -1,3 +1,7 @@
+# 0.1.11
+
+- The class keyability was not always set correctly.
+
 # 0.1.10
 
 - Experimental dual class support.
