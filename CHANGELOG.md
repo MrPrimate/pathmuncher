@@ -1,3 +1,7 @@
+# 0.1.12
+
+- Prepared spell caster spells are added to spell book only. (JSON does not contain which spells are prepared).
+
 # 0.1.11
 
 - The class keyability was not always set correctly.

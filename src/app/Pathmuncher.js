@@ -1452,7 +1452,10 @@ export class Pathmuncher {
           itemData.system.location.value = instance._id;
           this.result.spells.push(itemData);
 
-          instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
+          // if the caster is prepared we don't prepare spells as all known spells come through in JSON
+          if (instance.system.prepared.value !== "prepared") {
+            instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
+          }
         }
       }
     }
