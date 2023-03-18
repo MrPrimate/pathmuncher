@@ -1,6 +1,12 @@
+# COMING SOON
+
+- Better detection of skills listed as feats to prevent false positive error messages.
+- Slight tweak - parser is a bit more aggressive about asking user about missing features. There maybe some false positives, please report.
+
 # 0.1.12
 
-- Prepared spell caster spells are added to spell book only. (JSON does not contain which spells are prepared).
+- Prepared spell caster spells are added to spell book only. (JSON does not contain which spells are prepared, just all spells known).
+
 
 # 0.1.11
 

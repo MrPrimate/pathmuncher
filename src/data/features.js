@@ -137,6 +137,10 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Red", foundryName: "Red Dragon" },
   { pbName: "Gold", foundryName: "Gold Dragon" },
   { pbName: "Magma", foundryName: "Magma Dragon" },
+  // sizes for fleshwarp
+  { pbName: "Medium", foundryName: "med" },
+  { pbName: "Small", foundryName: "sm" },
+
 ];
 
 function generateDynamicNames(pbName) {
@@ -187,6 +191,27 @@ const IGNORED_FEATS_LIST = [
   "Spellbook",
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
+  // ignore skills listed as feats
+  "Acrobatics",
+  "Athletics",
+  "Deception",
+  "Intimidation",
+  "Nature",
+  "Performance",
+  "Society",
+  "Survival",
+  "Arcana",
+  "Crafting",
+  "Diplomacy",
+  "Medicine",
+  "Occultism",
+  "Religion",
+  "Stealth",
+  "Thievery",
+
+  // sizes
+  // "Medium",
+  // "Small",
 ];
 
 export function IGNORED_FEATS() {

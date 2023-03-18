@@ -939,6 +939,9 @@ export class Pathmuncher {
           } else if (ruleEntry.key === "ChoiceSet" && !hasProperty(ruleEntry, "flag")) {
             logger.debug("Prompting user for choices", ruleEntry);
             rulesToKeep.push(ruleEntry);
+          } else if (ruleEntry.key === "ChoiceSet" && !choice && !uuid) {
+            logger.warn("Unable to determine choicem asking", data);
+            rulesToKeep.push(ruleEntry);
           }
           logger.warn("Unable to determine granted rule feature, needs better parser", data);
         }
