@@ -1,4 +1,4 @@
-# COMING SOON
+# 0.1.13
 
 - Better detection of skills listed as feats to prevent false positive error messages.
 - Slight tweak - parser is a bit more aggressive about asking user about missing features. There maybe some false positives, please report. e.g. Fleshwarp weapons
