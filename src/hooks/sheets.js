@@ -19,11 +19,15 @@ export function registerSheetButton() {
       // only for GMs or the owner of this character
       if (!data.owner || !data.actor) return;
 
-      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-hat-wizard"></i> Pathmuncher</a>`);
+      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-hat-wizard"></i> ${CONSTANTS.MODULE_FULL_NAME}</a>`);
 
       button.click(() => {
-        const muncher = new PathmuncherImporter(PathmuncherImporter.defaultOptions, data.actor);
-        muncher.render(true);
+        if (game.user.can("CREATE_ACTOR")) {
+          const muncher = new PathmuncherImporter(PathmuncherImporter.defaultOptions, data.actor);
+          muncher.render(true);
+        } else {
+          ui.notifications.warn(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Notifications.CreateActorPermission`), { permanent: true });
+        }
       });
 
       html.closest('.app').find('.pathmuncher-open').remove();

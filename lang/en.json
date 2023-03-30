@@ -73,6 +73,9 @@
       }
     },
     "Chat": {},
+    "Notifications": {
+      "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user."
+    },
     "Labels": {
       "Feats": "Feats",
       "Equipment": "Equipment",

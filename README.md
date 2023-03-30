@@ -12,6 +12,8 @@ Import characters from Pathbuilder to Foundry Pathfinder 2e.
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
 
+To use this module the users must have the CREATE ACTOR ability, as it creates temporary actors as part of the import process.
+
 ## Known Issues
 
 - [Pathbuilder JSON does not distinguish between prepared spells and known spells for prepared spell casters like the Witch and Wizard.](https://gitlab.com/doctor.unspeakable/pathbuilder-2e-web-version/-/issues/794)
