@@ -1,3 +1,7 @@
+# 0.1.14
+
+- Restrict Pathmuncher to users with appropriate permissions.
+
 # 0.1.13
 
 - Better detection of skills listed as feats to prevent false positive error messages.
