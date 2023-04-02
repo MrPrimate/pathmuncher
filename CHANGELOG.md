@@ -1,3 +1,7 @@
+# 0.1.15
+
+- Correct typo breaking Pathmuncher for non-GM users with Create Actor permissions.
+
 # 0.1.14
 
 - Restrict Pathmuncher to users with appropriate permissions.
