@@ -1,3 +1,12 @@
+# 0.2.0
+
+- Draconic Rage no longer throws a warning.
+- Raider background matches.
+- Features such as Barbarians with Dragon Instinct, and other similar choice set values will now correctly import and not throw an exception.
+- Improvements to name adjustments for some features.
+- Better handling of injected property handling when updating the actors post import, should reduce warnings .
+- Improvements to features like Clan Dagger where they grant items, but Pathbuilder does not provide the choice. Pathmuncher will npw add the appropriate items/choices.
+
 # 0.1.15
 
 - Correct typo breaking Pathmuncher for non-GM users with Create Actor permissions.

@@ -828,6 +828,17 @@ export class Pathmuncher {
     }
   }
 
+  static adjustDocumentName(featureName, label) {
+    const localLabel = game.i18n.localize(label);
+    if (featureName.trim().toLowerCase() === localLabel.trim().toLowerCase()) return featureName;
+    const name = `${featureName} (${localLabel})`;
+    const pattern = (() => {
+      const escaped = RegExp.escape(localLabel);
+      return new RegExp(`\\(${escaped}\\) \\(${escaped}\\)$`);
+    })();
+    return name.replace(pattern, `(${localLabel})`);
+  }
+
   // eslint-disable-next-line complexity
   async #addGrantedRules(document) {
     if (document.system.rules.length === 0) return;
@@ -847,6 +858,9 @@ export class Pathmuncher {
 
     const grantRules = document.system.rules.filter((r) => r.key === "GrantItem");
     const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
+    const rollOptions = document.system.rules.filter((r) => r.key === "RollOption");
+    const appendElements = [];
+    const localFeatureDocs = [];
 
     for (const ruleTypes of [choiceRules, grantRules]) {
       for (const rawRuleEntry of ruleTypes) {
@@ -874,8 +888,10 @@ export class Pathmuncher {
           ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
           : choice?.value;
 
-        logger.debug(`UUID for ${document.name}: "${uuid}"`, document, ruleEntry, choice);
-        const ruleFeature = uuid ? await fromUuid(uuid) : undefined;
+        logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
+        const ruleFeature = uuid && (typeof uuid === "string")
+          ? await fromUuid(uuid)
+          : undefined;
         if (ruleFeature) {
           const featureDoc = ruleFeature.toObject();
           featureDoc._id = foundry.utils.randomID();
@@ -887,7 +903,7 @@ export class Pathmuncher {
           }
           logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
 
-          if (ruleEntry.predicate) {
+          if (ruleEntry.predicate) { // && featureDoc.type === "feat") {
             const testResult = await this.#checkRule(featureDoc, ruleEntry);
             // eslint-disable-next-line max-depth
             if (!testResult) {
@@ -903,6 +919,7 @@ export class Pathmuncher {
           featureDoc._id = foundry.utils.randomID();
           this.#createGrantedItem(featureDoc, document);
           if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
+          localFeatureDocs.push(featureDoc);
         } else if (choice?.nouuid) {
           logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
           if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
@@ -912,14 +929,8 @@ export class Pathmuncher {
           logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
           if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
           ruleEntry.selection = choice.value;
-          if (ruleEntry.adjustName && choice.label) {
-            const label = game.i18n.localize(choice.label);
-            const name = `${document.name} (${label})`;
-            const pattern = (() => {
-              const escaped = RegExp.escape(label);
-              return new RegExp(`\\(${escaped}\\) \\(${escaped}\\)$`);
-            })();
-            document.name = name.replace(pattern, `(${label})`);
+          if (!ruleEntry.adjustName && choice.label && (typeof uuid === "object")) {
+            document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
           }
         } else {
           const data = {
@@ -940,14 +951,25 @@ export class Pathmuncher {
             logger.debug("Prompting user for choices", ruleEntry);
             rulesToKeep.push(ruleEntry);
           } else if (ruleEntry.key === "ChoiceSet" && !choice && !uuid) {
-            logger.warn("Unable to determine choicem asking", data);
+            logger.warn("Unable to determine choice asking", data);
             rulesToKeep.push(ruleEntry);
+            rulesToKeep.push(...rollOptions);
           }
           logger.warn("Unable to determine granted rule feature, needs better parser", data);
         }
-        this.autoAddedFeatureRules[document._id].push(ruleEntry);
+        if (ruleEntry.adjustName && choice.label) {
+          document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
+        }
+        appendElements.push(ruleEntry);
       }
     }
+    if (grantRules.length > 0
+      && rulesToKeep.filter((c) => c.key === "ChoiceSet").length > 0
+      && localFeatureDocs.filter((c) => c.key === "GrantItem").length === 0
+    ) {
+      rulesToKeep.push(...grantRules);
+    }
+    this.autoAddedFeatureRules[document._id].unshift(...appendElements);
     if (!this.options.askForChoices) {
       // eslint-disable-next-line require-atomic-updates
       document.system.rules = rulesToKeep;
@@ -1090,7 +1112,7 @@ export class Pathmuncher {
         logger.debug("Generating feature for", pBFeat);
 
         const indexMatch = this.#indexFind(index, [pBFeat.name, pBFeat.originalName]);
-        const displayName = pBFeat.extra ? `${pBFeat.name} (${pBFeat.extra})` : pBFeat.name;
+        const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
         if (!indexMatch) {
           logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
           this.check[pBFeat.originalName] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
