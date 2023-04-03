@@ -1,7 +1,7 @@
 {
   "id": "pathmuncher",
   "author": "MrPrimate",
-  "title": "Pathmuncher",
+  "title": "Pathmuncher: Pathbuilder character importer for PF2e",
   "license": "MIT License",
   "description": "Import your Pathfinder 2e characters from Pathbuilder into Foundry",
   "version": "VERSION",
