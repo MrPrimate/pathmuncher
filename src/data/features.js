@@ -92,6 +92,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Polymath", foundryName: "Polymath Muse" },
   { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
   { pbName: "Quick Climber", foundryName: "Quick Climb" },
+  { pbName: "Raider", foundryName: "Ulfen Raider" },
   { pbName: "Recognise Threat", foundryName: "Recognize Threat" },
   { pbName: "Redeemer [Neutral Good]", foundryName: "Redeemer" },
   { pbName: "Revivification Protocall", foundryName: "Revivification Protocol" },
@@ -117,6 +118,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Wayfinder Resonance Infiltrator", foundryName: "Westyr's Wayfinder Repository" },
   { pbName: "Wind God's Fan", foundryName: "Wind God’s Fan" },
   { pbName: "Wind God’s Fan", foundryName: "Wind God's Fan" },
+  // dragons
   { pbName: "Black", foundryName: "Black Dragon" },
   { pbName: "Brine", foundryName: "Brine Dragon" },
   { pbName: "Copper", foundryName: "Copper Dragon" },
@@ -186,6 +188,7 @@ export function FEAT_RENAME_MAP(pbName = null) {
 }
 
 const IGNORED_FEATS_LIST = [
+  "Draconic Rage", // just handled by effects on Draconic Instinct
   "Unarmored",
   "Simple Weapon Expertise",
   "Spellbook",
