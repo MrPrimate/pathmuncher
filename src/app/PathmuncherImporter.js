@@ -89,7 +89,7 @@ export class PathmuncherImporter extends FormApplication {
       await pathmuncher.fetchPathbuilder(pathbuilderId);
     } else if (this.mode === "json") {
       try {
-        const jsonData = JSON.parse(formData.textBoxBuildJSON);
+        const jsonData = JSON.parse(formData.textBoxBuildJSON.trim());
         pathmuncher.source = jsonData.build;
       } catch (err) {
         ui.notifications.error("Unable to parse JSON data");
