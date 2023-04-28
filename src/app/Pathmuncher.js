@@ -3,6 +3,7 @@
 import CONSTANTS from "../constants.js";
 import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT } from "../data/equipment.js";
 import { FEAT_RENAME_MAP, IGNORED_FEATS } from "../data/features.js";
+import { FEAT_SPELLCASTING } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 
@@ -1346,7 +1347,7 @@ export class Pathmuncher {
       : "divine";
   }
 
-  async #generateSpellCaster(caster) {
+  #generateSpellCaster(caster) {
     const isFocus = caster.magicTradition === "focus";
     const magicTradition = this.getClassMagicTradition(caster);
     const spellcastingType = isFocus ? "focus" : caster.spellcastingType;
@@ -1440,47 +1441,143 @@ export class Pathmuncher {
     return data;
   }
 
-  async #processSpells() {
+  #generateFocusSpellCaster(proficiency, ability, tradition) {
+    const data = {
+      _id: foundry.utils.randomID(),
+      name: `${utils.capitalize(tradition)} Focus Tradition`,
+      type: "spellcastingEntry",
+      system: {
+        ability: {
+          value: ability,
+        },
+        proficiency: {
+          value: proficiency / 2,
+        },
+        spelldc: {
+          item: 0,
+        },
+        tradition: {
+          value: tradition,
+        },
+        prepared: {
+          value: "focus",
+          flexible: false,
+        },
+        showUnpreparedSpells: { value: true },
+      },
+    };
+    this.result.casters.push(data);
+    return data;
+  }
+
+  async #loadSpell(spell, casterId, debugData) {
     const compendium = game.packs.get("pf2e.spells-srd");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
     const psiCompendium = game.packs.get("pf2e-psychic-amps.psychic-psi-cantrips");
     const psiIndex = psiCompendium ? await psiCompendium.getIndex({ fields: ["name", "type", "system.slug"] }) : undefined;
 
-    for (const caster of this.source.spellCasters) {
-      logger.debug("Generating caster for", caster);
-      if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
-      const instance = await this.#generateSpellCaster(caster);
-      logger.debug("Generated caster instance", instance);
+    const spellName = spell.split("(")[0].trim();
+    logger.debug("focus spell details", { spell, spellName, debugData });
 
-      for (const spellSelection of caster.spells) {
-        const level = spellSelection.spellLevel;
+    const psiMatch = psiIndex ? psiIndex.find((i) => i.name === spell) : undefined;
+    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
+    if (!indexMatch && !psiMatch) {
+      logger.error(`Unable to match focus spell ${spell}`, { spell, spellName, debugData });
+      this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
+      return undefined;
+    }
 
-        for (const [i, spell] of spellSelection.list.entries()) {
-          const spellName = spell.split("(")[0].trim();
-          logger.debug("spell details", { spell, spellName, spellSelection, list: spellSelection.list });
+    const doc = psiMatch
+      ? await psiCompendium.getDocument(psiMatch._id)
+      : await compendium.getDocument(indexMatch._id);
+    const itemData = doc.toObject();
+    itemData._id = foundry.utils.randomID();
+    itemData.system.location.value = casterId;
 
-          const psiMatch = psiIndex ? psiIndex.find((i) => i.name === spell) : undefined;
-          const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
-          if (!indexMatch && !psiMatch) {
-            logger.error(`Unable to match spell ${spell}`, { spell, spellName, spellSelection, caster, instance });
-            this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, spellSelection, caster } });
-            continue;
-          }
+    return itemData;
+  }
 
-          const doc = psiMatch
-            ? await psiCompendium.getDocument(psiMatch._id)
-            : await compendium.getDocument(indexMatch._id);
-          const itemData = doc.toObject();
-          itemData._id = foundry.utils.randomID();
+  async #processCasterSpells(instance, spells, spellEnhancements) {
+    const spellNames = [];
+    for (const spellSelection of spells) {
+      const level = spellSelection.spellLevel;
+      for (const [i, spell] of spellSelection.list.entries()) {
+        const itemData = await this.#loadSpell(spell, instance._id, {
+          spellSelection,
+          list: spellSelection.list,
+          level,
+          instance,
+        });
+        if (itemData) {
           itemData.system.location.heightenedLevel = level;
-          itemData.system.location.value = instance._id;
+          spellNames.push(itemData.name);
           this.result.spells.push(itemData);
 
           // if the caster is prepared we don't prepare spells as all known spells come through in JSON
-          if (instance.system.prepared.value !== "prepared") {
+          if (instance.system.prepared.value !== "prepared" || spellEnhancements?.preparePBSpells) {
             instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
           }
+        }
+      }
+
+      if (spellEnhancements?.knownSpells) {
+        for (const spell of spellEnhancements.knownSpells) {
+          const itemData = await this.#loadSpell(spell, instance._id, {
+            spellEnhancements,
+            instance
+          });
+          if (itemData && !spellNames.includes(itemData.name)) {
+            itemData.system.location.heightenedLevel = level;
+            spellNames.push(itemData.name);
+            this.result.spells.push(itemData);
+          }
+        }
+      }
+    }
+  }
+
+  async #processFocusSpells(instance, spells) {
+    for (const spell of spells) {
+      const itemData = await this.#loadSpell(spell, instance._id, {
+        instance,
+        spells,
+        spell,
+      });
+      this.result.spells.push(itemData);
+    }
+  }
+
+  async #processSpells() {
+    for (const caster of this.source.spellCasters) {
+      logger.debug("Generating caster for", caster);
+      if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
+      const instance = this.#generateSpellCaster(caster);
+      logger.debug("Generated caster instance", instance);
+      const spellEnhancements = FEAT_SPELLCASTING.find((f) => f.name === caster.name);
+      await this.#processCasterSpells(instance, caster.spells, spellEnhancements);
+    }
+
+    const globalFocus = this.result.focus?.focusPoints;
+    if (Number.isInteger(globalFocus) && globalFocus > 0) {
+      this.result.focusPool = globalFocus;
+    }
+
+    for (const tradition of ["occult", "primal", "divine", "arcane"]) {
+      const traditionData = getProperty(this.source, `focus.${tradition}`);
+      logger.debug(`Checking for focus tradition ${tradition}`);
+      if (!traditionData) continue;
+      for (const ability of ["str", "dex", "con", "int", "wise", "cha"]) {
+        const abilityData = getProperty(traditionData, ability);
+        logger.debug(`Checking for focus tradition ${tradition} with ability ${ability}`);
+        if (!abilityData) continue;
+        logger.debug("Generating focus spellcasting ", { tradition, traditionData, ability });
+        const instance = this.#generateFocusSpellCaster(abilityData.proficiency, ability, tradition);
+        if (abilityData.focusCantrips && abilityData.focusCantrips.length > 0) {
+          await this.#processFocusSpells(instance, abilityData.focusCantrips);
+        }
+        if (abilityData.focusSpells && abilityData.focusSpells.length > 0) {
+          await this.#processFocusSpells(instance, abilityData.focusSpells);
         }
       }
     }

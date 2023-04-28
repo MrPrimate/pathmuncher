@@ -1,3 +1,7 @@
+# 0.3.0
+
+- Changes for focus spell move in v65 of Pathbuilder.
+
 # 0.2.0
 
 - Draconic Rage no longer throws a warning.
