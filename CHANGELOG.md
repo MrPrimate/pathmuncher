@@ -1,6 +1,7 @@
 # 0.3.0
 
 - Changes for focus spell move in v65 of Pathbuilder.
+- Nagaji and Kitsune spell feats will now add spells correctly.
 
 # 0.2.0
 

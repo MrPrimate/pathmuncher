@@ -1430,6 +1430,7 @@ export class Pathmuncher {
         },
       },
       showUnpreparedSpells: { value: true },
+      showSlotlessLevels: { value: true ,}
     };
     const data = {
       _id: foundry.utils.randomID(),
@@ -1555,6 +1556,9 @@ export class Pathmuncher {
       const instance = this.#generateSpellCaster(caster);
       logger.debug("Generated caster instance", instance);
       const spellEnhancements = FEAT_SPELLCASTING.find((f) => f.name === caster.name);
+      if (hasProperty(spellEnhancements, "showSlotless")) {
+        instance.system.showSlotlessLevels.value = getProperty(spellEnhancements, "showSlotless");
+      }
       await this.#processCasterSpells(instance, caster.spells, spellEnhancements);
     }
 
