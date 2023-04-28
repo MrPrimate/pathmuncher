@@ -68,6 +68,6 @@ jobs:
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_HOOK }}
         DISCORD_USERNAME: "Head of Marketing (Krum)"
-      uses: Ilshidur/action-discord@0.0.2
+      uses: Ilshidur/action-discord@0.3.2
       with:
         args: 'Pathmuncher ${{ steps.get-version.outputs.release_version }} has been published by our development Kobolds!'
