@@ -659,6 +659,11 @@ export class Pathmuncher {
         choices,
       });
 
+      if (choiceSet.choices?.query) {
+        const queryResults = await choiceSetRules.queryCompendium(choiceSet.choices);
+        logger.debug("Query Result", queryResults);
+      }
+
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
       const choiceMatch = await this.#featureChoiceMatch(choices, true, cleansedChoiceSet.adjustName);
       logger.debug("choiceMatch result", choiceMatch);
@@ -1430,7 +1435,7 @@ export class Pathmuncher {
         },
       },
       showUnpreparedSpells: { value: true },
-      showSlotlessLevels: { value: true ,}
+      showSlotlessLevels: { value: true }
     };
     const data = {
       _id: foundry.utils.randomID(),
