@@ -1,3 +1,7 @@
+# 0.3.1
+
+- Better detection of spell casting tradition for non-class spellcasting.
+
 # 0.3.0
 
 - Changes for focus spell move in v65 of Pathbuilder.

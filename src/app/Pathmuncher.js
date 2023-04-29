@@ -1339,13 +1339,18 @@ export class Pathmuncher {
       : undefined;
     // if a caster tradition or no spellcasters, return divine
     if (tradition || this.source.spellCasters.length === 0) return tradition ?? "divine";
+
+    // not a focus traditions
+    if (caster.magicTradition !== "focus" && ["divine", "occult", "primal", "arcane"].includes(caster.magicTradition)) {
+      return caster.magicTradition;
+    }
+
     // this spell caster type is not a class, determine class tradition based on ability
     const abilityTradition = this.source.spellCasters.find((c) =>
       [this.source.class, this.source.dualClass].includes(c.name)
       && c.ability === caster.ability
     );
     if (abilityTradition) return abilityTradition.magicTradition;
-    // final fallback
     // if no type and multiple spell casters, then return the first spell casting type
     return this.source.spellCasters[0].magicTradition && this.source.spellCasters[0].magicTradition !== "focus"
       ? this.source.spellCasters[0].magicTradition
