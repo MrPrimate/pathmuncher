@@ -1467,7 +1467,7 @@ export class Pathmuncher {
     return itemData;
   }
 
-  async #processCasterSpells(instance, spells, spellEnhancements) {
+  async #processCasterSpells(instance, spells, spellEnhancements, forcePrepare = false) {
     const spellNames = [];
     for (const spellSelection of spells) {
       const level = spellSelection.spellLevel;
@@ -1484,7 +1484,7 @@ export class Pathmuncher {
           this.result.spells.push(itemData);
 
           // if the caster is prepared we don't prepare spells as all known spells come through in JSON
-          if (instance.system.prepared.value !== "prepared" || spellEnhancements?.preparePBSpells) {
+          if (instance.system.prepared.value !== "prepared" || spellEnhancements?.preparePBSpells || forcePrepare) {
             instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
           }
         }
@@ -1524,10 +1524,22 @@ export class Pathmuncher {
       const instance = this.#generateSpellCaster(caster);
       logger.debug("Generated caster instance", instance);
       const spellEnhancements = FEAT_SPELLCASTING.find((f) => f.name === caster.name);
+      let forcePrepare = false;
       if (hasProperty(spellEnhancements, "showSlotless")) {
         instance.system.showSlotlessLevels.value = getProperty(spellEnhancements, "showSlotless");
+      } else if (caster.spellcastingType === "prepared"
+        && ![this.source.class, this.source.dualClass].includes(caster.name)
+      ) {
+        const slotToPreparedMatch = caster.spells.every((spellBlock) => {
+          const spellCount = spellBlock.list.length;
+          const perDay = caster.perDay[spellBlock.spellLevel];
+          return perDay === spellCount;
+        });
+        logger.debug(`Setting ${caster.name} show all slots to ${!slotToPreparedMatch}`);
+        instance.system.showSlotlessLevels.value = !slotToPreparedMatch;
+        forcePrepare = slotToPreparedMatch;
       }
-      await this.#processCasterSpells(instance, caster.spells, spellEnhancements);
+      await this.#processCasterSpells(instance, caster.spells, spellEnhancements, forcePrepare);
     }
 
     const globalFocus = this.result.focus?.focusPoints;
