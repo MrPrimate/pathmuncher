@@ -64,7 +64,7 @@ export class Pathmuncher {
 
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
     addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true,
-    addBackground = true, addHeritage = true, addAncestry = true, askForChoices = false } = {}
+    addBackground = true, addHeritage = true, addAncestry = true, askForChoices = false, statusCallback = null } = {}
   ) {
     this.actor = actor;
     // note not all these options do anything yet!
@@ -137,6 +137,11 @@ export class Pathmuncher {
     };
     this.check = {};
     this.bad = [];
+    this.statusCallback = statusCallback;
+  }
+
+  statusUpdate(total, count, type) {
+    this.statusCallback(total, count, type);
   }
 
   async fetchPathbuilder(pathbuilderId) {
