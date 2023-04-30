@@ -1670,7 +1670,9 @@ export class Pathmuncher {
           ))
           || (allowSelectedDocumentRules && documents.some((d) => d._id === i._id) && ["ChoiceSet",].includes(r.key) && r.selection)
         ).map((r) => {
-          if (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults) {
+          if ((typeof r.choices === 'string' || r.choices instanceof String)
+            || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
+          ) {
             r.choices = r.choiceQueryResults;
           }
           return r;
@@ -1681,28 +1683,6 @@ export class Pathmuncher {
       console.warn("items", deepClone(items));
 
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-      const currentItemIds = currentItems.map((i) => i._id);
-      const ruleUpdates = [];
-      for (const [key, value] of Object.entries(this.allFeatureRules)) {
-        if (currentItemIds.includes(key)) {
-          const currentItem = currentItems.find((i) => i._id === key);
-          const ruleUpdates = currentItem
-            ? value.filter((r) =>
-              (["ChoiceSet"].includes(r.key) && !currentItem.selection)
-              || (["GrantItem"].includes(r.key) && !currentItem.flag)
-              || (["RollOption"].includes(r.key))
-            )
-            : value.filter((r) => ["GrantItem", "ChoiceSet", "RollOption"].includes(r.key));
-          ruleUpdates.push({
-            _id: key,
-            system: {
-              rules: ruleUpdates,
-            },
-          });
-        }
-      }
-      console.warn("rule updates", ruleUpdates);
-      await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
       for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
@@ -1712,17 +1692,6 @@ export class Pathmuncher {
             items: deepClone(value),
           },
         });
-      }
-
-      for (const doc of documents) {
-        if (getProperty(doc, "system.rules")?.length > 0 && !ruleUpdates.some((r) => r._id === doc._id)) {
-          ruleUpdates.push({
-            _id: doc._id,
-            system: {
-              rules: deepClone(doc.system.rules),
-            },
-          });
-        }
       }
 
       await actor.updateEmbeddedDocuments("Item", itemUpdates);
@@ -1837,11 +1806,20 @@ export class Pathmuncher {
             rules: deepClone(item.system.rules),
           },
         });
-        item.system.rules = [];
+        item.system.rules = item.system.rules.map((r) => {
+          if (r.key === "ChoiceSet") {
+            if ((typeof r.choices === 'string' || r.choices instanceof String)
+              || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
+            ) {
+              r.choices = r.choiceQueryResults;
+            }
+          }
+          return r;
+        });
       }
     }
 
-    await this.actor.createEmbeddedDocuments("Item", items, { keepId: true });
+    await this.actor.createEmbeddedDocuments("Item", newItems, { keepId: true });
     await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
   }
 
@@ -1876,20 +1854,6 @@ export class Pathmuncher {
     // Loop back over items and add rule and item progression data back in.
     if (!this.options.askForChoices) {
       logger.debug("Restoring logic", { currentActor: duplicate(this.actor) });
-      const ruleUpdates = [];
-      for (const [key, value] of Object.entries(this.autoAddedFeatureRules)) {
-        if (importedItems.includes(key)) {
-          ruleUpdates.push({
-            _id: `${key}`,
-            system: {
-              rules: deepClone(value),
-            },
-          });
-        }
-      }
-      logger.debug("Restoring rule logic", ruleUpdates);
-      await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
-
       const itemUpdates = [];
       for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
         if (importedItems.includes(key)) {
@@ -1920,7 +1884,7 @@ export class Pathmuncher {
     logger.debug("Generated result", this.result);
     await this.actor.update(this.result.character);
     await this.#createActorEmbeddedDocuments();
-    // await this.#restoreEmbeddedRuleLogic();
+    await this.#restoreEmbeddedRuleLogic();
   }
 
   async postImportCheck() {
