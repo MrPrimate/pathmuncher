@@ -5,5 +5,6 @@ export const FEAT_SPELLCASTING = [
   { name: "Nagaji Spell Familiarity", showSlotless: false, knownSpells: ["Daze", "Detect Magic", "Mage Hand"], preparePBSpells: true, },
   { name: "Nagaji Spell Expertise", showSlotless: false, knownSpells: ["Blink", "Control Water", "Subconscious Suggestion"], preparePBSpells: true, },
   { name: "Nagaji Spell Mysteries", showSlotless: false, knownSpells: ["Charm", "Fleet Step", "Heal"], preparePBSpells: true, },
+  { name: "Rat Magic", showSlotless: false, knownSpells: [], preparePBSpells: true, },
 ];
 
