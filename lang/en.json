@@ -77,6 +77,7 @@
       "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user."
     },
     "Labels": {
+      "Character": "Character details",
       "Feats": "Feats",
       "Equipment": "Equipment",
       "Money": "Money",

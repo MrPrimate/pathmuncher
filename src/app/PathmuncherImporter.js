@@ -59,6 +59,7 @@ export class PathmuncherImporter extends FormApplication {
   }
 
   async _updateObject(event, formData) {
+    document.getElementById("pathmuncher-button").disabled = true;
     const pathbuilderId = formData.textBoxBuildID;
     const options = {
       pathbuilderId,
@@ -79,6 +80,7 @@ export class PathmuncherImporter extends FormApplication {
       addFamiliars: formData.checkBoxFamiliars,
       addFormulas: formData.checkBoxFormulas,
       askForChoices: formData.checkBoxAskForChoices,
+      statusCallback: PathmuncherImporter._updateProgress.bind(this),
     };
     logger.debug("Pathmuncher options", options);
 
