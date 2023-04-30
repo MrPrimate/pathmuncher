@@ -97,6 +97,7 @@ export class Pathmuncher {
     this.usedLocationsAlternateRules = new Set();
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
+    this.promptRules = {};
     this.allFeatureRules = {};
     this.autoAddedFeatureRules = {};
     this.grantItemLookUp = {};
@@ -499,7 +500,7 @@ export class Pathmuncher {
         await this.#addDualClass(itemData);
       }
       itemData._id = foundry.utils.randomID();
-      this.#generateGrantItemData(itemData);
+      // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
       await this.#addGrantedItems(itemData);
       return true;
@@ -642,8 +643,9 @@ export class Pathmuncher {
 
   async #evaluateChoices(document, choiceSet) {
     logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
-    const tempActor = await this.#generateTempActor();
+    const tempActor = await this.#generateTempActor([document], true);
     const cleansedChoiceSet = deepClone(choiceSet);
+    // let cleansedChoiceSet = choiceSet;
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
@@ -659,15 +661,19 @@ export class Pathmuncher {
         choices,
       });
 
-      if (choiceSet.choices?.query) {
-        const queryResults = await choiceSetRules.queryCompendium(choiceSet.choices);
-        logger.debug("Query Result", queryResults);
+      if (cleansedChoiceSet.choices?.query) {
+        const nonFilteredChoices = await choiceSetRules.inflateChoices();
+        const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices);
+        logger.debug("Query Result", { queryResults, nonFilteredChoices });
       }
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
       const choiceMatch = await this.#featureChoiceMatch(choices, true, cleansedChoiceSet.adjustName);
       logger.debug("choiceMatch result", choiceMatch);
-      if (choiceMatch) return choiceMatch;
+      if (choiceMatch) {
+        choiceMatch.choiceQueryResults = deepClone(choices);
+        return choiceMatch;
+      }
 
       if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
         for (const choice of choices) {
@@ -679,6 +685,20 @@ export class Pathmuncher {
             return choice;
           }
         }
+      }
+
+      let tempSet = deepClone(choiceSet);
+      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet });
+      console.warn("chociesetdata", {
+        choiceSetRules,
+        selection: choiceSetRules.selection,
+        choiceSet: deepClone(choiceSet),
+        tempSet: deepClone(tempSet),
+      });
+      if (tempSet.selection) {
+        const lookedUpChoice = choices.find((c) => c.value === tempSet.selection);
+        console.warn("lookedUpChoice", lookedUpChoice);
+        return lookedUpChoice;
       }
 
     } catch (err) {
@@ -698,110 +718,40 @@ export class Pathmuncher {
 
   }
 
-  async #resolveInjectedUuid(source, propertyData) {
-    if (source === null || typeof source === "number" || (typeof source === "string" && !source.includes("{"))) {
-      return source;
+  async #resolveInjectedUuid(document, ruleEntry) {
+    const tempActor = await this.#generateTempActor([document]);
+    const cleansedRuleEntry = deepClone(ruleEntry);
+    try {
+      const item = tempActor.getEmbeddedDocument("Item", document._id);
+      console.warn("creating grant item");
+      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, item);
+      console.warn("Begining uuid resovle");
+      const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid);
+
+      logger.debug("uuid selection", {
+        document,
+        choiceSet: ruleEntry,
+        item,
+        grantItemRule,
+        uuid,
+      });
+      if (uuid) return uuid;
+
+    } catch (err) {
+      logger.error("Whoa! Something went major bad wrong during uuid evaluation", {
+        err,
+        tempActor: tempActor.toObject(),
+        document: duplicate(document),
+        ruleEntry: duplicate(cleansedRuleEntry),
+      });
+      throw err;
+    } finally {
+      await Actor.deleteDocuments([tempActor._id]);
     }
 
-    // Walk the object tree and resolve any string values found
-    if (Array.isArray(source)) {
-      for (let i = 0; i < source.length; i++) {
-        source[i] = this.#resolveInjectedUuid(source[i]);
-      }
-    } else if (typeof source === 'object' && source !== null) {
-      for (const [key, value] of Object.entries(source)) {
-        if (typeof value === "string" || (typeof value === 'object' && value !== null)) {
-          source[key] = this.#resolveInjectedUuid(value);
-        }
-      }
-      return source;
-    } else if (typeof source === "string") {
-      const match = source.match(/{(actor|item|rule)\|(.*?)}/);
-      if (match && match[1] === "actor") {
-        return String(getProperty(this.result.character, match[1]));
-      } else if (match) {
-        const value = this.grantItemLookUp[match[0]].uuid;
-        if (!value) {
-          logger.error("Failed to resolve injected property", {
-            source,
-            propertyData,
-            key: match[1],
-            prop: match[2],
-          });
-        }
-        return String(value);
-      } else {
-        logger.error("Failed to resolve injected property", {
-          source,
-          propertyData,
-        });
-      }
-    }
+    logger.debug("Evaluate UUID failed", { choiceSet: cleansedRuleEntry, tempActor, document });
+    return undefined;
 
-    return source;
-  }
-
-  async #generateGrantItemData(document) {
-    logger.debug(`Generating grantItem rule lookups for ${document.name}...`, { document: deepClone(document) });
-    for (const rule of document.system.rules.filter((r) => r.key === "GrantItem" && r.uuid.includes("{"))) {
-      logger.debug("Generating rule for...", { document: deepClone(document), rule });
-      const match = rule.uuid.match(/{(item|rule)\|(.*?)}/);
-      if (match) {
-        const flagName = match[2].split(".").pop();
-        const choiceSet = document.system.rules.find((rule) => rule.key === "ChoiceSet" && rule.flag === flagName)
-          ?? document.system.rules.find((rule) => rule.key === "ChoiceSet");
-        const choice = choiceSet ? (await this.#evaluateChoices(document, choiceSet)) : undefined;
-        const value = choice?.value ?? undefined;
-        if (!value) {
-          logger.warn("Failed to resolve injected uuid", {
-            ruleData: choiceSet,
-            flagName,
-            key: match[1],
-            prop: match[2],
-            value,
-          });
-        } else {
-          logger.debug(`Generated lookup ${value} for key ${document.name}`);
-        }
-        this.grantItemLookUp[rule.uuid] = {
-          docId: document.id,
-          key: rule.uuid,
-          choice,
-          uuid: value,
-          flag: flagName,
-          choiceSet,
-        };
-        this.grantItemLookUp[`${document._id}-${flagName}`] = {
-          docId: document.id,
-          key: rule.uuid,
-          choice,
-          uuid: value,
-          flag: flagName,
-          choiceSet,
-        };
-        this.grantItemLookUp[`${document._id}`] = {
-          docId: document.id,
-          key: rule.uuid,
-          choice,
-          uuid: value,
-          flag: flagName,
-          choiceSet,
-        };
-        this.grantItemLookUp[`${document._id}-${flagName}`] = {
-          docId: document.id,
-          key: rule.uuid,
-          choice,
-          uuid: value,
-          flag: flagName,
-          choiceSet,
-        };
-      } else {
-        logger.error("Failed to resolve injected uuid", {
-          document,
-          rule,
-        });
-      }
-    }
   }
 
   async #checkRule(document, rule) {
@@ -856,126 +806,127 @@ export class Pathmuncher {
       return;
     }
 
-    // const rulesToKeep = document.system.rules.filter((r) => !["GrantItem", "ChoiceSet", "MartialProficiency"].includes(r.key));
     const rulesToKeep = [];
     this.allFeatureRules[document._id] = deepClone(document.system.rules);
-    this.autoAddedFeatureRules[document._id] = deepClone(document.system.rules.filter((r) => !["GrantItem", "ChoiceSet"].includes(r.key)));
-    await this.#generateGrantItemData(document);
+    this.autoAddedFeatureRules[document._id] = [];
+    this.promptRules[document._id] = [];
 
-    const grantRules = document.system.rules.filter((r) => r.key === "GrantItem");
-    const choiceRules = document.system.rules.filter((r) => r.key === "ChoiceSet");
-    const rollOptions = document.system.rules.filter((r) => r.key === "RollOption");
-    const appendElements = [];
-    const localFeatureDocs = [];
+    for (const ruleEntry of document.system.rules) {
+      console.warn(`Ping ${document.name} rule key: ${ruleEntry.key}`);
+      if (!["ChoiceSet", "GrantItem"].includes(ruleEntry.key)) {
+        this.autoAddedFeatureRules[document._id].push(ruleEntry);
+        rulesToKeep.push(ruleEntry);
+        continue;
+      }
+      logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`, {
+        ruleEntry,
+        docRules: deepClone(document.system.rules),
+        document: deepClone(document),
+      });
 
-    for (const ruleTypes of [choiceRules, grantRules]) {
-      for (const rawRuleEntry of ruleTypes) {
-        const ruleEntry = deepClone(rawRuleEntry);
-        logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`);
+      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry) : undefined;
+      const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
 
-        const lookupName = ruleEntry.flag ? `${document._id}-${ruleEntry.flag}` : document._id;
+      logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
+      const ruleFeature = uuid && (typeof uuid === "string") ? await fromUuid(uuid) : undefined;
+      if (ruleFeature) {
+        const featureDoc = ruleFeature.toObject();
+        featureDoc._id = foundry.utils.randomID();
+        if (featureDoc.system.rules) this.allFeatureRules[featureDoc._id] = deepClone(featureDoc.system.rules);
+        setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
+        logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
 
-        logger.debug("Rule check, looking up", {
-          id: `${document._id}-${ruleEntry.flag}`,
-          lookup: this.grantItemLookUp[lookupName],
-          lookups: this.grantItemLookUp,
-          ruleEntry,
-          lookupName,
-        });
+        if (choice) {
+          ruleEntry.selection = choice.value;
+        }
+        if (!ruleEntry.flag) {
+          ruleEntry.flag = game.pf2e.system.sluggify(featureDoc.name, { camel: "dromedary" });
+        }
 
-        // have we pre-evaluated this choice?
-        const choice = ruleEntry.key === "ChoiceSet"
-          ? this.grantItemLookUp[lookupName]?.choice
-            ? this.grantItemLookUp[lookupName].choice
-            : await this.#evaluateChoices(document, ruleEntry)
-          : undefined;
-
-        const uuid = ruleEntry.key === "GrantItem"
-          ? await this.#resolveInjectedUuid(ruleEntry.uuid, ruleEntry)
-          : choice?.value;
-
-        logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
-        const ruleFeature = uuid && (typeof uuid === "string")
-          ? await fromUuid(uuid)
-          : undefined;
-        if (ruleFeature) {
-          const featureDoc = ruleFeature.toObject();
-          featureDoc._id = foundry.utils.randomID();
-          if (featureDoc.system.rules) this.allFeatureRules[document._id] = deepClone(document.system.rules);
-          setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
-          if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
-            logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
+        if (ruleEntry.predicate) {
+          logger.debug(`Checking for predicates`, {
+            ruleEntry,
+            document,
+            featureDoc,
+          });
+          const testResult = await this.#checkRule(featureDoc, ruleEntry);
+          if (!testResult) {
+            const data = { document, ruleEntry, featureDoc, testResult };
+            logger.debug(`The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`, data);
+            rulesToKeep.push(ruleEntry);
+            // this.autoAddedFeatureRules[document._id].push(ruleEntry);
             continue;
           }
-          logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
+        }
 
-          if (ruleEntry.predicate) { // && featureDoc.type === "feat") {
-            const testResult = await this.#checkRule(featureDoc, ruleEntry);
-            // eslint-disable-next-line max-depth
-            if (!testResult) {
-              const data = { document, ruleEntry, featureDoc, testResult };
-              logger.debug(`The test failed for ${document.name} rule key: ${ruleFeature.key} (This is probably not a problem).`, data);
-              continue;
-            }
-          }
-          if (choice) {
-            ruleEntry.selection = choice.value;
+        // setProperty(ruleEntry, `preselectChoices.${ruleEntry.flag}`, ruleEntry.selection ?? ruleEntry.uuid);
+
+        if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
+          logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
+          // this.autoAddedFeatureRules[document._id].push(ruleEntry);
+          continue;
+        } else {
+          if (ruleEntry.selection || ruleEntry.flag) {
+            rulesToKeep.push(ruleEntry);
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
           this.#createGrantedItem(featureDoc, document);
-          if (hasProperty(ruleFeature, "system.rules.length")) await this.#addGrantedRules(featureDoc);
-          localFeatureDocs.push(featureDoc);
-        } else if (choice?.nouuid) {
-          logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
-          if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
-          ruleEntry.selection = choice.value;
-          if (choice.label) document.name = `${document.name} (${choice.label})`;
-        } else if (choice && uuid && !hasProperty(ruleEntry, "selection")) {
-          logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
-          if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
-          ruleEntry.selection = choice.value;
-          if (!ruleEntry.adjustName && choice.label && (typeof uuid === "object")) {
-            document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
-          }
-        } else {
-          const data = {
-            uuid: ruleEntry.uuid,
-            document,
-            ruleEntry,
-            choice,
-            lookup: this.grantItemLookUp[ruleEntry.uuid],
-          };
-          if (ruleEntry.key === "GrantItem" && this.grantItemLookUp[ruleEntry.uuid]) {
-            rulesToKeep.push(ruleEntry);
-            // const lookup = this.grantItemLookUp[ruleEntry.uuid].choiceSet
-            // eslint-disable-next-line max-depth
-            // if (!rulesToKeep.some((r) => r.key == lookup && r.prompt === lookup.prompt)) {
-            //   rulesToKeep.push(this.grantItemLookUp[ruleEntry.uuid].choiceSet);
-            // }
-          } else if (ruleEntry.key === "ChoiceSet" && !hasProperty(ruleEntry, "flag")) {
-            logger.debug("Prompting user for choices", ruleEntry);
-            rulesToKeep.push(ruleEntry);
-          } else if (ruleEntry.key === "ChoiceSet" && !choice && !uuid) {
-            logger.warn("Unable to determine choice asking", data);
-            rulesToKeep.push(ruleEntry);
-            rulesToKeep.push(...rollOptions);
-          }
-          logger.warn("Unable to determine granted rule feature, needs better parser", data);
+          if (hasProperty(ruleFeature, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
-        if (ruleEntry.adjustName && choice.label) {
+      } else if (choice?.nouuid) {
+        logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
+        if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+        ruleEntry.selection = choice.value;
+        if (choice.label) document.name = `${document.name} (${choice.label})`;
+        rulesToKeep.push(ruleEntry);
+      } else if (choice && uuid && !hasProperty(ruleEntry, "selection")) {
+        logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
+        if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+        ruleEntry.selection = choice.value;
+        if ((!ruleEntry.adjustName && choice.label && (typeof uuid === "object"))
+          || (!choice.adjustName && choice.label)
+        ) {
           document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
         }
-        appendElements.push(ruleEntry);
+        rulesToKeep.push(ruleEntry);
+      } else {
+        const data = {
+          uuid: ruleEntry.uuid,
+          document,
+          ruleEntry,
+          choice,
+        };
+        if (ruleEntry.key === "GrantItem" && (ruleEntry.flag || ruleEntry.selection || ruleEntry.uuid.startsWith("Compendium"))) {
+          rulesToKeep.push(ruleEntry);
+        } else if (ruleEntry.key === "ChoiceSet" && !hasProperty(ruleEntry, "flag")) {
+          logger.debug("Prompting user for choices", ruleEntry);
+          this.promptRules[document._id].push(ruleEntry);
+          rulesToKeep.push(ruleEntry);
+        } else if (ruleEntry.key === "ChoiceSet" && !choice && !uuid) {
+          logger.warn("Unable to determine choice asking", data);
+          rulesToKeep.push(ruleEntry);
+          this.promptRules[document._id].push(ruleEntry);
+        }
+        logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
+      if (ruleEntry.adjustName && choice.label) {
+        document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
+      }
+      this.autoAddedFeatureRules[document._id].push(ruleEntry);
+
+      if (choice?.choiceQueryResults) {
+        ruleEntry.choiceQueryResults = choice.choiceQueryResults;
+      }
+
+      logger.debug(`End result for ${document.name} for a ${ruleEntry.key}`, {
+        document: deepClone(document),
+        rulesToKeep: deepClone(rulesToKeep),
+        ruleEntry: deepClone(ruleEntry),
+        choice: deepClone(choice),
+        uuid: deepClone(uuid),
+      });
     }
-    if (grantRules.length > 0
-      && rulesToKeep.filter((c) => c.key === "ChoiceSet").length > 0
-      && localFeatureDocs.filter((c) => c.key === "GrantItem").length === 0
-    ) {
-      rulesToKeep.push(...grantRules);
-    }
-    this.autoAddedFeatureRules[document._id].unshift(...appendElements);
     if (!this.options.askForChoices) {
       // eslint-disable-next-line require-atomic-updates
       document.system.rules = rulesToKeep;
@@ -1004,14 +955,21 @@ export class Pathmuncher {
         featureDoc._id = foundry.utils.randomID();
         setProperty(featureDoc.system, "location", document._id);
         this.#createGrantedItem(featureDoc, document);
-        if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
+        if (hasProperty(featureDoc, "system.rules")) {
+          logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
+          await this.#addGrantedRules(featureDoc);
+        }
       }
       if (!this.options.askForChoices) {
         // eslint-disable-next-line require-atomic-updates
         document.system.items = failedFeatureItems;
       }
     }
-    if (hasProperty(document, "system.rules")) await this.#addGrantedRules(document);
+
+    if (hasProperty(document, "system.rules")) {
+      logger.debug(`Processing granted rules for core document ${document.name}`, duplicate(document));
+      await this.#addGrantedRules(document);
+    }
 
   }
 
@@ -1679,11 +1637,13 @@ export class Pathmuncher {
     await this.#generateMoney();
   }
 
-  async #generateTempActor(documents = []) {
+  async #generateTempActor(documents = [], allowSelectedDocumentRules = false) {
     const actorData = mergeObject({ type: "character" }, this.result.character);
     actorData.name = "Mr Temp";
     const actor = await Actor.create(actorData);
     const currentState = duplicate(this.result);
+
+    console.warn("Initial actor", deepClone(actor));
 
     const currentItems = [
       ...(this.options.askForChoices ? this.autoFeats : []),
@@ -1697,31 +1657,51 @@ export class Pathmuncher {
     ];
     for (const doc of documents) {
       if (!currentItems.some((d) => d._id === doc._id)) {
-        currentItems.push(doc);
+        currentItems.push(deepClone(doc));
       }
     }
     try {
       const items = duplicate(currentItems).map((i) => {
         if (i.system.items) i.system.items = [];
-        if (i.system.rules) i.system.rules = [];
+        if (i.system.rules) i.system.rules = i.system.rules.filter((r) =>
+          (!documents.some((d) => d._id === i._id)
+          && ((["ChoiceSet",].includes(r.key) && r.selection)
+            || (["GrantItem"].includes(r.key) && r.flag)
+          ))
+          || (allowSelectedDocumentRules && documents.some((d) => d._id === i._id) && ["ChoiceSet",].includes(r.key) && r.selection)
+        ).map((r) => {
+          if (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults) {
+            r.choices = r.choiceQueryResults;
+          }
+          return r;
+        });
         return i;
       });
 
+      console.warn("items", deepClone(items));
+
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-      const ruleIds = currentItems.map((i) => i._id);
+      const currentItemIds = currentItems.map((i) => i._id);
       const ruleUpdates = [];
       for (const [key, value] of Object.entries(this.allFeatureRules)) {
-        if (ruleIds.includes(key)) {
+        if (currentItemIds.includes(key)) {
+          const currentItem = currentItems.find((i) => i._id === key);
+          const ruleUpdates = currentItem
+            ? value.filter((r) =>
+              (["ChoiceSet"].includes(r.key) && !currentItem.selection)
+              || (["GrantItem"].includes(r.key) && !currentItem.flag)
+              || (["RollOption"].includes(r.key))
+            )
+            : value.filter((r) => ["GrantItem", "ChoiceSet", "RollOption"].includes(r.key));
           ruleUpdates.push({
             _id: key,
             system: {
-              // rules: value,
-              rules: value.filter((r) => ["GrantItem", "ChoiceSet", "RollOption"].includes(r.key)),
+              rules: ruleUpdates,
             },
           });
         }
       }
-      // console.warn("rule updates", ruleUpdates);
+      console.warn("rule updates", ruleUpdates);
       await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
@@ -1844,30 +1824,51 @@ export class Pathmuncher {
 
   }
 
+  async #createAndUpdateItemsWithRuleRestore(items) {
+    const ruleUpdates = [];
+
+    const newItems = deepClone(items);
+
+    for (const item of newItems) {
+      if (item.system.rules?.length > 0) {
+        ruleUpdates.push({
+          _id: item._id,
+          system: {
+            rules: deepClone(item.system.rules),
+          },
+        });
+        item.system.rules = [];
+      }
+    }
+
+    await this.actor.createEmbeddedDocuments("Item", items, { keepId: true });
+    await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
+  }
+
   async #createActorEmbeddedDocuments() {
-    if (this.options.addDeity) await this.actor.createEmbeddedDocuments("Item", this.result.deity, { keepId: true });
-    if (this.options.addAncestry) await this.actor.createEmbeddedDocuments("Item", this.result.ancestry, { keepId: true });
-    if (this.options.addHeritage) await this.actor.createEmbeddedDocuments("Item", this.result.heritage, { keepId: true });
-    if (this.options.addBackground) await this.actor.createEmbeddedDocuments("Item", this.result.background, { keepId: true });
-    if (this.options.addClass) await this.actor.createEmbeddedDocuments("Item", this.result.class, { keepId: true });
-    if (this.options.addLores) await this.actor.createEmbeddedDocuments("Item", this.result.lores, { keepId: true });
+    if (this.options.addDeity) await this.#createAndUpdateItemsWithRuleRestore(this.result.deity);
+    if (this.options.addAncestry) await this.#createAndUpdateItemsWithRuleRestore(this.result.ancestry);
+    if (this.options.addHeritage) await this.#createAndUpdateItemsWithRuleRestore(this.result.heritage);
+    if (this.options.addBackground) await this.#createAndUpdateItemsWithRuleRestore(this.result.background);
+    if (this.options.addClass) await this.#createAndUpdateItemsWithRuleRestore(this.result.class);
+    if (this.options.addLores) await this.#createAndUpdateItemsWithRuleRestore(this.result.lores);
     // for (const feat of this.result.feats.reverse()) {
     //   console.warn(`creating ${feat.name}`, feat);
-    //   await this.actor.createEmbeddedDocuments("Item", [feat], { keepId: true });
+    //   await this.#createAndUpdateItemsWithRuleRestore([feat]);
     // }
-    if (this.options.addFeats) await this.actor.createEmbeddedDocuments("Item", this.result.feats, { keepId: true });
+    if (this.options.addFeats) await this.#createAndUpdateItemsWithRuleRestore(this.result.feats);
     if (this.options.addSpells) {
-      await this.actor.createEmbeddedDocuments("Item", this.result.casters, { keepId: true });
-      await this.actor.createEmbeddedDocuments("Item", this.result.spells, { keepId: true });
+      await this.#createAndUpdateItemsWithRuleRestore(this.result.casters);
+      await this.#createAndUpdateItemsWithRuleRestore(this.result.spells);
     }
-    if (this.options.addEquipment) await this.actor.createEmbeddedDocuments("Item", this.result.equipment, { keepId: true });
-    if (this.options.addWeapons) await this.actor.createEmbeddedDocuments("Item", this.result.weapons, { keepId: true });
+    if (this.options.addEquipment) await this.#createAndUpdateItemsWithRuleRestore(this.result.equipment);
+    if (this.options.addWeapons) await this.#createAndUpdateItemsWithRuleRestore(this.result.weapons);
     if (this.options.addArmor) {
-      await this.actor.createEmbeddedDocuments("Item", this.result.armor, { keepId: true });
-      await this.actor.updateEmbeddedDocuments("Item", this.result.armor, { keepId: true });
+      await this.#createAndUpdateItemsWithRuleRestore(this.result.armor);
+      await this.actor.updateEmbeddedDocuments("Item", this.result.armor);
     }
-    if (this.options.addTreasure) await this.actor.createEmbeddedDocuments("Item", this.result.treasure, { keepId: true });
-    if (this.options.addMoney) await this.actor.createEmbeddedDocuments("Item", this.result.money, { keepId: true });
+    if (this.options.addTreasure) await this.#createAndUpdateItemsWithRuleRestore(this.result.treasure);
+    if (this.options.addMoney) await this.#createAndUpdateItemsWithRuleRestore(this.result.money);
   }
 
   async #restoreEmbeddedRuleLogic() {
@@ -1919,7 +1920,7 @@ export class Pathmuncher {
     logger.debug("Generated result", this.result);
     await this.actor.update(this.result.character);
     await this.#createActorEmbeddedDocuments();
-    await this.#restoreEmbeddedRuleLogic();
+    // await this.#restoreEmbeddedRuleLogic();
   }
 
   async postImportCheck() {
