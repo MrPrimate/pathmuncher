@@ -693,16 +693,29 @@ export class Pathmuncher {
       }
 
       let tempSet = deepClone(choiceSet);
+      logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet });
       await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet });
-      console.warn("chociesetdata", {
-        choiceSetRules,
-        selection: choiceSetRules.selection,
-        choiceSet: deepClone(choiceSet),
-        tempSet: deepClone(tempSet),
-      });
+      // console.warn("chociesetdata", {
+      //   choiceSetRules,
+      //   selection: choiceSetRules.selection,
+      //   choiceSet: deepClone(choiceSet),
+      //   tempSet: deepClone(tempSet),
+      // });
       if (tempSet.selection) {
         const lookedUpChoice = choices.find((c) => c.value === tempSet.selection);
-        console.warn("lookedUpChoice", lookedUpChoice);
+        logger.debug("lookedUpChoice", lookedUpChoice);
+        // set some common lookups here, e.g. deities are often not set!
+        if (lookedUpChoice && cleansedChoiceSet.flag === "deity") {
+          if (lookedUpChoice.label && lookedUpChoice.label !== "") {
+            setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
+            await this.#processGenericCompendiumLookup("pf2e.deities", lookedUpChoice.label, "deity");
+            lookedUpChoice.choiceQueryResults = deepClone(choices);
+            const camelCase = game.pf2e.system.sluggify(this.result.deity[0].system.slug, { camel: "dromedary" });
+            setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, { id: this.result.deity[0]._id, onDelete: "detach" });
+            setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
+            this.autoAddedFeatureIds.add(`${lookedUpChoice.value.split(".").pop()}deity`);
+          }
+        }
         return lookedUpChoice;
       }
 
@@ -817,7 +830,7 @@ export class Pathmuncher {
     this.promptRules[document._id] = [];
 
     for (const ruleEntry of document.system.rules) {
-      console.warn(`Ping ${document.name} rule key: ${ruleEntry.key}`);
+      logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
       if (!["ChoiceSet", "GrantItem"].includes(ruleEntry.key)) {
         this.autoAddedFeatureRules[document._id].push(ruleEntry);
         rulesToKeep.push(ruleEntry);
@@ -831,6 +844,10 @@ export class Pathmuncher {
 
       const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry) : undefined;
       const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
+
+      if (choice?.choiceQueryResults) {
+        ruleEntry.choiceQueryResults = choice.choiceQueryResults;
+      }
 
       logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
       const ruleFeature = uuid && (typeof uuid === "string") ? await fromUuid(uuid) : undefined;
@@ -869,6 +886,7 @@ export class Pathmuncher {
         if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
           logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
           // this.autoAddedFeatureRules[document._id].push(ruleEntry);
+          // rulesToKeep.push(ruleEntry);
           continue;
         } else {
           if (ruleEntry.selection || ruleEntry.flag) {
@@ -920,10 +938,6 @@ export class Pathmuncher {
       }
       this.autoAddedFeatureRules[document._id].push(ruleEntry);
 
-      if (choice?.choiceQueryResults) {
-        ruleEntry.choiceQueryResults = choice.choiceQueryResults;
-      }
-
       logger.debug(`End result for ${document.name} for a ${ruleEntry.key}`, {
         document: deepClone(document),
         rulesToKeep: deepClone(rulesToKeep),
@@ -936,6 +950,12 @@ export class Pathmuncher {
       // eslint-disable-next-line require-atomic-updates
       document.system.rules = rulesToKeep;
     }
+
+    logger.debug(`Final status for ${document.name}`, {
+      document: deepClone(document),
+      rulesToKeep: deepClone(rulesToKeep),
+    });
+
   }
 
   async #addGrantedItems(document) {
@@ -1820,23 +1840,34 @@ export class Pathmuncher {
         ruleUpdates.push({
           _id: item._id,
           system: {
-            rules: deepClone(item.system.rules),
+            rules: deepClone(item.system.rules).map((r) => {
+              delete r.choiceQueryResults;
+              return r;
+            }),
           },
         });
-        item.system.rules = item.system.rules.map((r) => {
-          if (r.key === "ChoiceSet") {
-            if ((typeof r.choices === 'string' || r.choices instanceof String)
-              || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
-            ) {
-              r.choices = r.choiceQueryResults;
+        item.system.rules = item.system.rules
+          .filter((r) => {
+            const excludedKeys = ["GrantItem", "ActiveEffectLike", "AdjustModifier", "Resistance", "Strike"].includes(r.key);
+            const objectSelection = typeof r.selection === 'object' && !Array.isArray(r.selection) && r.selection !== null;
+            return !excludedKeys && !objectSelection;
+          })
+          .map((r) => {
+            if (r.key === "ChoiceSet") {
+              if ((typeof r.choices === 'string' || r.choices instanceof String)
+                || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
+              ) {
+                r.choices = r.choiceQueryResults;
+              }
             }
-          }
-          return r;
-        });
+            return r;
+          });
       }
     }
 
+    logger.debug("Creating items", newItems);
     await this.actor.createEmbeddedDocuments("Item", newItems, { keepId: true });
+    logger.debug("Rule updates", ruleUpdates);
     await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
   }
 
