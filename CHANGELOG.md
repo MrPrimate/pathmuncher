@@ -1,3 +1,7 @@
+# 0.4.0
+
+- Major refactor, better matching in most cases.
+
 # 0.3.1
 
 - Better detection of spell casting tradition for non-class spellcasting.
