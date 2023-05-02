@@ -101,7 +101,12 @@
       "Familiars": "Familiars",
       "Finished": "Finished",
       "Cancel": "Cancel",
-      "Computing": "Computing"
+      "Computing": "Computing",
+      "Cooking": "Cooking",
+      "Shopping": "Shopping",
+      "Preparing": "Preparing",
+      "Eating": "Eating",
+      "Clearing": "Clearing up"
     }
   }
 }

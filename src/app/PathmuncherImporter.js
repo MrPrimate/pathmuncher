@@ -49,11 +49,11 @@ export class PathmuncherImporter extends FormApplication {
       });
   }
 
-  static _updateProgress(total, count, type) {
+  static _updateProgress(total, count, type, prefixLabel = "Cooking") {
     const localizedType = game.i18n.localize(`pathmuncher.Labels.${type}`);
     const progressBar = document.getElementById("pathmuncher-status");
     progressBar.style.width = `${Math.trunc((count / total) * 100)}%`;
-    progressBar.innerHTML = `<span>${game.i18n.localize("pathmuncher.Labels.Computing")} (${localizedType})...</span>`;
+    progressBar.innerHTML = `<span>${game.i18n.localize(`pathmuncher.Labels.${prefixLabel}`)} (${localizedType})...</span>`;
   }
 
   async _updateObject(event, formData) {
