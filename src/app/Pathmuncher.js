@@ -649,7 +649,6 @@ export class Pathmuncher {
     // let cleansedChoiceSet = choiceSet;
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      console.warn(item);
       const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = (await choiceSetRules.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions));
@@ -739,9 +738,9 @@ export class Pathmuncher {
     const cleansedRuleEntry = deepClone(ruleEntry);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      console.warn("creating grant item");
+      // console.warn("creating grant item");
       const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, item);
-      console.warn("Begining uuid resovle");
+      // console.warn("Begining uuid resovle");
       const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid);
 
       logger.debug("uuid selection", {
@@ -1704,7 +1703,7 @@ export class Pathmuncher {
     const actor = await Actor.create(actorData);
     const currentState = duplicate(this.result);
 
-    console.warn("Initial temp actor", deepClone(actor));
+    // console.warn("Initial temp actor", deepClone(actor));
 
     const currentItems = [
       ...currentState.deity,
@@ -1734,12 +1733,15 @@ export class Pathmuncher {
       for (const i of deepClone(currentItems)) {
         if (!i.system.rules || i.system.rules.length === 0) continue;
         const isPassedDocument = documents.some((d) => d._id === i._id);
+        if (isPassedDocument && !includePassedDocumentsRules) continue;
+
         const objectSelectionRules = i.system.rules
-          .filter((r) => {
-            const evaluateRules = (isPassedDocument && includePassedDocumentsRules) || !isPassedDocument;
-            return evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
-              // || (["ChoiceSet"].includes(r.key) && r.selection);
-          }).map((r) => {
+          // .filter((r) => {
+          //   const evaluateRules = (isPassedDocument && includePassedDocumentsRules) || !isPassedDocument;
+          //   return evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
+          //   // || (["ChoiceSet"].includes(r.key) && r.selection);
+          // })
+          .map((r) => {
             r.ignored = false;
             return r;
           });
@@ -1754,7 +1756,7 @@ export class Pathmuncher {
         }
       };
 
-      console.warn("Rule updates", duplicate(ruleUpdates));
+      // console.warn("Rule updates", duplicate(ruleUpdates));
 
       const items = duplicate(currentItems).map((i) => {
         if (i.system.items) i.system.items = [];
@@ -1790,35 +1792,35 @@ export class Pathmuncher {
         return i;
       });
 
-      const items2 = duplicate(currentItems).map((i) => {
-        if (i.system.items) i.system.items = [];
-        if (i.system.rules) i.system.rules = i.system.rules.filter((r) =>
-          (!documents.some((d) => d._id === i._id)
-          && ((["ChoiceSet",].includes(r.key) && r.selection)
-          //  || (["GrantItem"].includes(r.key) && r.flag)
-            || !["ChoiceSet", "GrantItem"].includes(r.key)
-          ))
-          || (includePassedDocumentsRules && documents.some((d) => d._id === i._id) && ["ChoiceSet",].includes(r.key) && r.selection)
-        ).map((r) => {
-          if ((typeof r.choices === 'string' || r.choices instanceof String)
-            || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
-          ) {
-            r.choices = r.choiceQueryResults;
-          }
-          r.ignored = false;
-          return r;
-        });
-        return i;
-      });
+      // const items2 = duplicate(currentItems).map((i) => {
+      //   if (i.system.items) i.system.items = [];
+      //   if (i.system.rules) i.system.rules = i.system.rules.filter((r) =>
+      //     (!documents.some((d) => d._id === i._id)
+      //     && ((["ChoiceSet",].includes(r.key) && r.selection)
+      //     //  || (["GrantItem"].includes(r.key) && r.flag)
+      //       || !["ChoiceSet", "GrantItem"].includes(r.key)
+      //     ))
+      //     || (includePassedDocumentsRules && documents.some((d) => d._id === i._id) && ["ChoiceSet",].includes(r.key) && r.selection)
+      //   ).map((r) => {
+      //     if ((typeof r.choices === 'string' || r.choices instanceof String)
+      //       || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
+      //     ) {
+      //       r.choices = r.choiceQueryResults;
+      //     }
+      //     r.ignored = false;
+      //     return r;
+      //   });
+      //   return i;
+      // });
 
 
-      console.warn("temp items", {
-        items: deepClone(items),
-        items2: deepClone(items2),
-        diff: diffObject(items, items2),
-      });
+      // console.warn("temp items", {
+      //   items: deepClone(items),
+      //   items2: deepClone(items2),
+      //   diff: diffObject(items, items2),
+      // });
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-      console.warn("restoring selection rules to temp items", ruleUpdates);
+      // console.warn("restoring selection rules to temp items", ruleUpdates);
       await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
@@ -1831,7 +1833,7 @@ export class Pathmuncher {
         });
       }
 
-      console.warn("restoring feature items to temp items", itemUpdates);
+      // console.warn("restoring feature items to temp items", itemUpdates);
       await actor.updateEmbeddedDocuments("Item", itemUpdates);
 
       logger.debug("Final temp actor", actor);
