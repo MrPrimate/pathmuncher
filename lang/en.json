@@ -96,10 +96,12 @@
       "Spellcasting": "Spellcasting",
       "Pet": "Pet",
       "Pets": "Pets",
+      "FeatureRec": "Feature Reconciliation",
       "Familiar": "Familiar",
       "Familiars": "Familiars",
       "Finished": "Finished",
-      "Cancel": "Cancel"
+      "Cancel": "Cancel",
+      "Computing": "Computing"
     }
   }
 }

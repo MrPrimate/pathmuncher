@@ -141,7 +141,7 @@ export class Pathmuncher {
   }
 
   statusUpdate(total, count, type) {
-    this.statusCallback(total, count, type);
+    if (this.statusCallback) this.statusCallback(total, count, type);
   }
 
   async fetchPathbuilder(pathbuilderId) {
@@ -1660,17 +1660,26 @@ export class Pathmuncher {
   }
 
   async #processFeats() {
+    this.statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("pf2e.feats-srd");
+    this.statusUpdate(2, 5, "Feats");
     await this.#generateFeatItems("pf2e.ancestryfeatures");
+    this.statusUpdate(3, 5, "Feats");
     await this.#generateSpecialItems("pf2e.ancestryfeatures");
+    this.statusUpdate(4, 5, "Feats");
     await this.#generateSpecialItems("pf2e.classfeatures");
+    this.statusUpdate(5, 5, "Feats");
     await this.#generateSpecialItems("pf2e.actionspf2e");
   }
 
   async #processEquipment() {
+    this.statusUpdate(1, 4, "Equipment");
     await this.#generateEquipmentItems();
+    this.statusUpdate(2, 4, "Weapons");
     await this.#generateWeaponItems();
+    this.statusUpdate(3, 4, "Armor");
     await this.#generateArmorItems();
+    this.statusUpdate(2, 4, "Money");
     await this.#generateMoney();
   }
 
@@ -1751,17 +1760,29 @@ export class Pathmuncher {
   async processCharacter() {
     if (!this.source) return;
     this.#prepare();
+    this.statusUpdate(1, 12, "Character");
     await this.#processCore();
+    this.statusUpdate(2, 12, "Formula");
     await this.#processFormulas();
+    this.statusUpdate(3, 12, "Deity");
     await this.#processGenericCompendiumLookup("pf2e.deities", this.source.deity, "deity");
+    this.statusUpdate(4, 12, "Background");
     await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, "background");
+    this.statusUpdate(5, 12, "Class");
     await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
+    this.statusUpdate(6, 12, "Ancestry");
     await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestry");
+    this.statusUpdate(7, 12, "Heritage");
     await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
+    this.statusUpdate(8, 12, "FeatureRec");
     await this.#detectGrantedFeatures();
+    this.statusUpdate(9, 12, "FeatureRec");
     await this.#processFeats();
+    this.statusUpdate(10, 12, "Equipment");
     await this.#processEquipment();
+    this.statusUpdate(11, 12, "Spells");
     await this.#processSpells();
+    this.statusUpdate(12, 12, "Lores");
     await this.#generateLores();
   }
 

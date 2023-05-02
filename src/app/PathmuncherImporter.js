@@ -50,12 +50,10 @@ export class PathmuncherImporter extends FormApplication {
   }
 
   static _updateProgress(total, count, type) {
-    const localizedType = `pathmuncher.Label.${type}`;
-    $(".import-progress-bar")
-      .width(`${Math.trunc((count / total) * 100)}%`)
-      .html(
-        `<span>${game.i18n.localize("pathmuncher.Label.Working")} (${game.i18n.localize(localizedType)})...</span>`
-      );
+    const localizedType = game.i18n.localize(`pathmuncher.Labels.${type}`);
+    const progressBar = document.getElementById("pathmuncher-status");
+    progressBar.style.width = `${Math.trunc((count / total) * 100)}%`;
+    progressBar.innerHTML = `<span>${game.i18n.localize("pathmuncher.Labels.Computing")} (${localizedType})...</span>`;
   }
 
   async _updateObject(event, formData) {
@@ -85,6 +83,9 @@ export class PathmuncherImporter extends FormApplication {
     logger.debug("Pathmuncher options", options);
 
     await utils.setFlags(this.actor, options);
+
+    const statusBar = document.getElementById("pathmuncher-import-progress");
+    statusBar.classList.toggle("import-hidden");
 
     const pathmuncher = new Pathmuncher(this.actor, options);
     if (this.mode === "number") {

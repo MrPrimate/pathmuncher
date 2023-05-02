@@ -2,6 +2,14 @@ import CONSTANTS from "./constants.js";
 
 const utils = {
 
+  isObject: (obj) => {
+    return typeof obj === 'object' && !Array.isArray(obj) && obj !== null;
+  },
+
+  isString: (str) => {
+    return typeof str === 'string' || str instanceof String;
+  },
+
   wait: async (ms) => {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
