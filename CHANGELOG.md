@@ -1,3 +1,7 @@
+# 0.4.1
+
+- Greenwatch features now matchup correctly.
+
 # 0.4.0
 
 - Major refactor, better matching in most cases.
