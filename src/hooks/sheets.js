@@ -4,7 +4,7 @@ import utils from "../utils.js";
 
 export function registerSheetButton() {
 
-  const trustedUsersOnly = utils.setting(CONSTANTS.SETTINGS.RESTRICT_TO_TRUSTED);
+  const trustedUsersOnly = utils.setting("RESTRICT_TO_TRUSTED");
   if (trustedUsersOnly && !game.user.isTrusted) return;
 
   /**

@@ -22,11 +22,11 @@ const utils = {
   },
 
   setting: (key) => {
-    return game.settings.get(CONSTANTS.MODULE_NAME, key);
+    return game.settings.get(CONSTANTS.MODULE_NAME, CONSTANTS.SETTINGS[key]);
   },
 
   updateSetting: async (key, value) => {
-    return game.settings.set(CONSTANTS.MODULE_NAME, key, value);
+    return game.settings.set(CONSTANTS.MODULE_NAME, CONSTANTS.SETTINGS[key], value);
   },
 
   getFlags: (actor) => {

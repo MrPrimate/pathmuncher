@@ -7,7 +7,7 @@ const logger = {
       return false;
     }
 
-    const setting = utils.setting(CONSTANTS.SETTINGS.LOG_LEVEL);
+    const setting = utils.setting("LOG_LEVEL");
     const logLevels = ["DEBUG", "INFO", "WARN", "ERR", "OFF"];
     const logLevelIndex = logLevels.indexOf(logLevel.toUpperCase());
     if (setting == "OFF" || logLevelIndex === -1 || logLevelIndex < logLevels.indexOf(setting)) {
