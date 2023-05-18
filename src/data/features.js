@@ -40,6 +40,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Bite (Gnoll)", foundryName: "Bite" },
   { pbName: "Bloodline: Genie (Efreeti)", foundryName: "Bloodline: Genie" },
   { pbName: "Bloody Debilitations", foundryName: "Bloody Debilitation" },
+  { pbName: "Canoneer", foundryName: "Cannoneer" },
   { pbName: "Cave Climber Kobold", foundryName: "Caveclimber Kobold" },
   { pbName: "Chosen One", foundryName: "Chosen of Lamashtu" },
   { pbName: "Cognative Mutagen (Greater)", foundryName: "Cognitive Mutagen (Greater)" },
@@ -221,6 +222,6 @@ const IGNORED_FEATS_LIST = [
 ];
 
 export function IGNORED_FEATS() {
-  const visionFeats = utils.setting(CONSTANTS.SETTINGS.ADD_VISION_FEATS) ? [] : ["Low-Light Vision", "Darkvision"];
+  const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
   return IGNORED_FEATS_LIST.concat(visionFeats);
 }
