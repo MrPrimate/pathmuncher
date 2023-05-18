@@ -32,26 +32,7 @@ const utils = {
   getFlags: (actor) => {
     const flags = actor.flags[CONSTANTS.FLAG_NAME]
       ? actor.flags[CONSTANTS.FLAG_NAME]
-      : {
-        pathbuilderId: undefined,
-        addFeats: true,
-        addEquipment: true,
-        addBackground: true,
-        addHeritage: true,
-        addAncestry: true,
-        addSpells: true,
-        addMoney: true,
-        addTreasure: true,
-        addLores: true,
-        addWeapons: true,
-        addArmor: true,
-        addDeity: true,
-        addName: true,
-        addClass: true,
-        addFamiliars: true,
-        addFormulas: true,
-        askForChoices: false,
-      };
+      : CONSTANTS.ACTOR_FLAGS;
     return flags;
   },
 
