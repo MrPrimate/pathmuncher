@@ -1,3 +1,8 @@
+# Next up
+
+- Changes for v66 of Pathbuilder for familiars.
+- Cannoneer name matching.
+
 # 0.4.1
 
 - Greenwatch features now matchup correctly.

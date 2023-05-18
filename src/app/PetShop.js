@@ -11,9 +11,10 @@ import utils from "../utils.js";
 export class PetShop {
 
 
-  constructor ({ parent, pathbuilderJson } = {}) {
+  constructor ({ type = "familiars", parent, pathbuilderJson } = {}) {
     this.parent = parent;
     this.pathbuilderJson = pathbuilderJson;
+    this.type = type;
 
     this.result = {
       pets: [],
@@ -30,10 +31,10 @@ export class PetShop {
     this.folders[type] = await utils.getOrCreateFolder(parent.folder, "Actor", folderName);
   }
 
-  async #existingPetCheck(familiarName, type) {
+  async #existingPetCheck(petName, type) {
     const existingPet = game.actors.find((a) =>
       a.type === type.toLowerCase()
-      && a.name === familiarName
+      && a.name === petName
       && a.system.master.id === this.parent._id
     );
 
@@ -41,7 +42,7 @@ export class PetShop {
 
     const actorData = {
       type: type.toLowerCase(),
-      name: familiarName,
+      name: petName,
       system: {
         master: {
           id: this.parent._id,
@@ -49,7 +50,7 @@ export class PetShop {
         },
       },
       prototypeToken: {
-        name: familiarName,
+        name: petName,
       },
       folder: this.folders[type].id,
     };
@@ -102,14 +103,11 @@ export class PetShop {
   }
 
   async processPets() {
-
-    for (const petJson of this.pathbuilderJson.pets) {
-      // only support familiars at this time
-      if (petJson.type !== "Familiar") {
-        logger.warn(`Pets with type ${petJson.type} are not supported at this time`);
-        continue;
-      }
-      await this.ensureFolder(petJson.type);
+    const petData = this.type === "familiars" && this.pathbuilderJson.familiars
+      ? this.pathbuilderJson.familiars
+      : this.pathbuilderJson.pets.filter((p) => p.type.toLowerCase() === this.type);
+    await this.ensureFolder(utils.capitalize(this.type));
+    for (const petJson of petData) {
       await this.buildPet(petJson);
     }
 
