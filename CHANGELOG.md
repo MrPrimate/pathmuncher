@@ -2,6 +2,7 @@
 
 - Changes for v66 of Pathbuilder for familiars.
 - Cannoneer name matching.
+- Added a abstraction layer for finding items in compendiums to allow for third party compendiums to be used.
 
 # 0.4.1
 
