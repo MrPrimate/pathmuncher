@@ -1,26 +1,16 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT } from "../data/equipment.js";
-import { FEAT_RENAME_MAP, IGNORED_FEATS } from "../data/features.js";
-import { FEAT_SPELLCASTING } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
+import { CompendiumMatcher } from "./CompendiumMatcher.js";
+import { Seasoning } from "./Seasoning.js";
 
 export class Pathmuncher {
 
-  // eslint-disable-next-line class-methods-use-this
-  EQUIPMENT_RENAME_MAP(name) {
-    return EQUIPMENT_RENAME_MAP(name);
-  }
-
-  getFoundryEquipmentName(pbName) {
-    return this.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
-  }
-
   FEAT_RENAME_MAP(name) {
     const dynamicItems = [
-      { pbName: "Shining Oath", foundryName: `Shining Oath (${this.getChampionType()})` },
+      { pbName: "Shining Oath", foundryName: `Shining Oath (${Seasoning.getChampionType(this.source.alignment)})` },
       { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType() ?? "")})` },
       { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")})` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.class})` },
@@ -28,38 +18,12 @@ export class Pathmuncher {
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType() ?? "")} Caster)` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")} Caster)` },
     ];
-    return FEAT_RENAME_MAP(name).concat(dynamicItems);
+    return Seasoning.FEAT_RENAME_MAP(name).concat(dynamicItems);
   }
 
   getFoundryFeatureName(pbName) {
     const match = this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
     return match ?? { pbName, foundryName: pbName, details: undefined };
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  get RESTRICTED_EQUIPMENT() {
-    return RESTRICTED_EQUIPMENT;
-  }
-
-  // specials that are handled by Foundry and shouldn't be added
-  // eslint-disable-next-line class-methods-use-this
-  get IGNORED_FEATURES() {
-    return IGNORED_FEATS();
-  };
-
-  // eslint-disable-next-line class-methods-use-this
-  get IGNORED_EQUIPMENT() {
-    return IGNORED_EQUIPMENT;
-  };
-
-  getChampionType() {
-    if (this.source.alignment == "LG") return "Paladin";
-    else if (this.source.alignment == "CG") return "Liberator";
-    else if (this.source.alignment == "NG") return "Redeemer";
-    else if (this.source.alignment == "LE") return "Tyrant";
-    else if (this.source.alignment == "CE") return "Antipaladin";
-    else if (this.source.alignment == "NE") return "Desecrator";
-    return "Unknown";
   }
 
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
@@ -138,9 +102,20 @@ export class Pathmuncher {
     this.check = {};
     this.bad = [];
     this.statusCallback = statusCallback;
+    this.compendiumMatchers = {};
+    for (const type of Object.keys(utils.setting("COMPENDIUM_MAPPINGS"))) {
+      this.compendiumMatchers[type] = new CompendiumMatcher({ type });
+    }
   }
 
-  statusUpdate(total, count, type, prefixLabel) {
+  async #loadCompendiumMatchers() {
+    for (const matcher of Object.values(this.compendiumMatchers)) {
+      await matcher.loadCompendiums();
+    }
+    console.warn("state of the thing", {this: this, compendiumMatchers: this.compendiumMatchers});
+  }
+
+  #statusUpdate(total, count, type, prefixLabel) {
     if (this.statusCallback) this.statusCallback(total, count, type, prefixLabel);
   }
 
@@ -161,55 +136,12 @@ export class Pathmuncher {
     }
   }
 
-  getClassAdjustedSpecialNameLowerCase(name) {
-    return `${name} (${this.source.class})`.toLowerCase();
-  }
-
-  getDualClassAdjustedSpecialNameLowerCase(name) {
-    return `${name} (${this.source.dualClass})`.toLowerCase();
-  }
-
-  getAncestryAdjustedSpecialNameLowerCase(name) {
-    return `${name} (${this.source.ancestry})`.toLowerCase();
-  }
-
-  getHeritageAdjustedSpecialNameLowerCase(name) {
-    return `${name} (${this.source.heritage})`.toLowerCase();
-  }
-
-  static getMaterialGrade(material) {
-    if (material.toLowerCase().includes("high-grade")) {
-      return "high";
-    } else if (material.toLowerCase().includes("standard-grade")) {
-      return "standard";
-    }
-    return "low";
-  }
-
-  static getFoundryFeatLocation(pathbuilderFeatType, pathbuilderFeatLevel) {
-    if (pathbuilderFeatType === "Ancestry Feat") {
-      return `ancestry-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Class Feat") {
-      return `class-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Skill Feat") {
-      return `skill-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "General Feat") {
-      return `general-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Background Feat") {
-      return `skill-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Archetype Feat") {
-      return `archetype-${pathbuilderFeatLevel}`;
-    } else {
-      return null;
-    }
-  }
-
   #generateFoundryFeatLocation(document, feature) {
     if (feature.type && feature.level) {
       const ancestryParagonVariant = game.settings.get("pf2e", "ancestryParagonVariant");
       const dualClassVariant = game.settings.get("pf2e", "dualClassVariant");
       // const freeArchetypeVariant = game.settings.get("pf2e", "freeArchetypeVariant");
-      const location = Pathmuncher.getFoundryFeatLocation(feature.type, feature.level);
+      const location = Seasoning.getFoundryFeatLocation(feature.type, feature.level);
       if (location && !this.usedLocations.has(location)) {
         document.system.location = location;
         this.usedLocations.add(location);
@@ -242,21 +174,21 @@ export class Pathmuncher {
     this.source.equipment
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
-        const name = this.getFoundryEquipmentName(e[0]);
+        const name = Seasoning.getFoundryEquipmentName(e[0]);
         const item = { pbName: name, qty: e[1], added: false };
         this.parsed.equipment.push(item);
       });
     this.source.armor
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
-        const name = this.getFoundryEquipmentName(e.name);
+        const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
         this.parsed.armor.push(item);
       });
     this.source.weapons
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
-        const name = this.getFoundryEquipmentName(e.name);
+        const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
         this.parsed.weapons.push(item);
       });
@@ -271,7 +203,7 @@ export class Pathmuncher {
       )
       .forEach((special) => {
         const name = this.getFoundryFeatureName(special).foundryName;
-        if (!this.#processSpecialData(name) && !this.IGNORED_FEATURES.includes(name)) {
+        if (!this.#processSpecialData(name) && !Seasoning.IGNORED_FEATS().includes(name)) {
           this.parsed.specials.push({ name, originalName: special, added: false });
         }
       });
@@ -299,21 +231,9 @@ export class Pathmuncher {
     logger.debug("Finished Feat Rename");
   }
 
-  #prepare() {
+  async #prepare() {
+    await this.#loadCompendiumMatchers();
     this.#nameMap();
-  }
-
-  static getSizeValue(size) {
-    switch (size) {
-      case 0:
-        return "tiny";
-      case 1:
-        return "sm";
-      case 3:
-        return "lg";
-      default:
-        return "med";
-    }
   }
 
   async #processSenses() {
@@ -350,14 +270,11 @@ export class Pathmuncher {
     }
 
     // find the dual class
-    const compendium = await game.packs.get("pf2e.classes");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const foundryName = this.getFoundryFeatureName(this.source.dualClass).foundryName;
-    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName))
-      ?? index.find((i) => i.system.slug === game.pf2e.system.sluggify(this.source.dualClass));
+    const indexMatch = this.compendiumMatchers["classes"].getNameMatch(this.source.dualClass, foundryName);
 
     if (!indexMatch) return;
-    const doc = await compendium.getDocument(indexMatch._id);
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
     const dualClass = doc.toObject();
 
     logger.debug(`Dual Class ${dualClass.name} found, squashing things together.`);
@@ -489,16 +406,13 @@ export class Pathmuncher {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async #processGenericCompendiumLookup(compendiumLabel, name, target) {
-    logger.debug(`Checking for compendium documents for ${name} (${target}) in ${compendiumLabel}`);
-    const compendium = await game.packs.get(compendiumLabel);
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+  async #processGenericCompendiumLookup(type, name, target) {
+    logger.debug(`Checking for compendium documents for ${name} (${target}) in compendiums for ${type}`);
     const foundryName = this.getFoundryFeatureName(name).foundryName;
-    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(foundryName))
-     ?? index.find((i) => i.system.slug === game.pf2e.system.sluggify(name));
+    const indexMatch = this.compendiumMatchers[type].getNameMatch(name, foundryName);
 
     if (indexMatch) {
-      const doc = await compendium.getDocument(indexMatch._id);
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = doc.toObject();
       if (target === "class") {
         itemData.system.keyAbility.selected = this.source.keyability;
@@ -556,17 +470,17 @@ export class Pathmuncher {
     const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
       && (
-        slug === game.pf2e.system.sluggify(f.name)
-        || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.name))
-        || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.name))
-        || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.name))
-        || slug === game.pf2e.system.sluggify(f.originalName)
-        || slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(f.originalName))
-        || slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(f.originalName))
-        || slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(f.originalName))
+        slug === Seasoning.slug(f.name)
+        || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.name, this.source.class))
+        || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.name, this.source.ancestry))
+        || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.name, this.source.heritage))
+        || slug === Seasoning.slug(f.originalName)
+        || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.originalName, this.source.class))
+        || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
+        || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage))
         || (game.settings.get("pf2e", "dualClassVariant")
-          && (slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(f.name))
-            || slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(f.originalName))
+          && (slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
+            || slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass))
           )
         )
       )
@@ -599,7 +513,7 @@ export class Pathmuncher {
 
   #createGrantedItem(document, parent) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name})`);
-    const camelCase = game.pf2e.system.sluggify(document.system.slug, { camel: "dromedary" });
+    const camelCase = Seasoning.slugD(document.system.slug);
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
     this.autoFeats.push(document);
@@ -608,7 +522,7 @@ export class Pathmuncher {
     }
     const featureMatch = this.#findAllFeatureMatch(document.system.slug, true)
       ?? (document.name.includes("(")
-        ? this.#findAllFeatureMatch(game.pf2e.system.sluggify(document.name.split("(")[0].trim()), true)
+        ? this.#findAllFeatureMatch(Seasoning.slug(document.name.split("(")[0].trim()), true)
         : undefined
       );
 
@@ -630,7 +544,7 @@ export class Pathmuncher {
         : await fromUuid(choice.value);
       if (!doc) continue;
       const slug = adjustName
-        ? game.pf2e.system.sluggify(doc)
+        ? Seasoning.slug(doc)
         : doc.system.slug;
       const featMatch = this.#findAllFeatureMatch(slug, ignoreAdded);
       if (featMatch) {
@@ -704,9 +618,9 @@ export class Pathmuncher {
         if (lookedUpChoice && cleansedChoiceSet.flag === "deity") {
           if (lookedUpChoice.label && lookedUpChoice.label !== "") {
             setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
-            await this.#processGenericCompendiumLookup("pf2e.deities", lookedUpChoice.label, "deity");
+            await this.#processGenericCompendiumLookup("deities", lookedUpChoice.label, "deity");
             lookedUpChoice.choiceQueryResults = deepClone(choices);
-            const camelCase = game.pf2e.system.sluggify(this.result.deity[0].system.slug, { camel: "dromedary" });
+            const camelCase = Seasoning.slugD(this.result.deity[0].system.slug);
             setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, { id: this.result.deity[0]._id, onDelete: "detach" });
             setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
             this.autoAddedFeatureIds.add(`${lookedUpChoice.value.split(".").pop()}deity`);
@@ -869,7 +783,7 @@ export class Pathmuncher {
           ruleEntry.selection = choice.value;
         }
         if (!ruleEntry.flag) {
-          ruleEntry.flag = game.pf2e.system.sluggify(featureDoc.name, { camel: "dromedary" });
+          ruleEntry.flag = Seasoning.slugD(featureDoc.name);
         }
 
         if (ruleEntry.predicate) {
@@ -906,13 +820,13 @@ export class Pathmuncher {
         }
       } else if (choice?.nouuid) {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
-        if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+        if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if (choice.label) document.name = `${document.name} (${choice.label})`;
         rulesToKeep.push(ruleEntry);
       } else if (choice && uuid && !hasProperty(ruleEntry, "selection")) {
         logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
-        if (!ruleEntry.flag) ruleEntry.flag = game.pf2e.system.sluggify(document.name, { camel: "dromedary" });
+        if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if ((!ruleEntry.adjustName && choice.label && (typeof uuid === "object"))
           || (!choice.adjustName && choice.label)
@@ -1028,7 +942,7 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
     setProperty(this.result.character, "system.details.keyability.value", this.source.keyability);
     if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
-    setProperty(this.result.character, "system.traits.size.value", Pathmuncher.getSizeValue(this.source.size));
+    setProperty(this.result.character, "system.traits.size.value", Seasoning.getSizeValue(this.source.size));
     setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
 
     this.#processSenses();
@@ -1077,12 +991,12 @@ export class Pathmuncher {
   #indexFind(index, arrayOfNameMatches) {
     for (const name of arrayOfNameMatches) {
       const indexMatch = index.find((i) =>
-        i.system.slug === game.pf2e.system.sluggify(name)
-        || i.system.slug === game.pf2e.system.sluggify(this.getClassAdjustedSpecialNameLowerCase(name))
-        || i.system.slug === game.pf2e.system.sluggify(this.getAncestryAdjustedSpecialNameLowerCase(name))
-        || i.system.slug === game.pf2e.system.sluggify(this.getHeritageAdjustedSpecialNameLowerCase(name))
+        i.system.slug === Seasoning.slug(name)
+        || i.system.slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class))
+        || i.system.slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry))
+        || i.system.slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage))
         || (game.settings.get("pf2e", "dualClassVariant")
-          && (i.system.slug === game.pf2e.system.sluggify(this.getDualClassAdjustedSpecialNameLowerCase(name))
+          && (i.system.slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(name, this.source.dualClass))
           )
         )
       );
@@ -1091,10 +1005,16 @@ export class Pathmuncher {
     return undefined;
   }
 
-  async #generateFeatItems(compendiumLabel) {
-    const compendium = await game.packs.get(compendiumLabel);
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
+  #findInPackIndexes(type, arrayOfNameMatches) {
+    const matcher = this.compendiumMatchers[type];
+    for (const [packName, index] of Object.entries(matcher.indexes)) {
+      const indexMatch = this.#indexFind(index, arrayOfNameMatches);
+      if (indexMatch) return { i: indexMatch, pack: matcher.packs[packName] };
+    }
+    return undefined;
+  }
 
+  async #generateFeatItems(type) {
     this.parsed.feats.sort((f1, f2) => {
       const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String);
       const f2RefUndefined = !(typeof f2.type === "string" || f2.type instanceof String);
@@ -1114,21 +1034,21 @@ export class Pathmuncher {
         if (pBFeat.added) continue;
         logger.debug("Generating feature for", pBFeat);
 
-        const indexMatch = this.#indexFind(index, [pBFeat.name, pBFeat.originalName]);
+        const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
         const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
         if (!indexMatch) {
-          logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, compendiumLabel });
-          this.check[pBFeat.originalName] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, compendiumLabel } };
+          logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, type });
+          this.check[pBFeat.originalName] = { name: displayName, type: "feat", details: { displayName, name: pBFeat.name, originalName: pBFeat.originalName, extra: pBFeat.extra, pBFeat, type } };
           continue;
         }
         if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
         pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
-          logger.debug("Feat included in class features auto add", { displayName, pBFeat, compendiumLabel });
+          logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
           continue;
         }
 
-        const doc = await compendium.getDocument(indexMatch._id);
+        const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
         const item = doc.toObject();
         item._id = foundry.utils.randomID();
         item.name = displayName;
@@ -1140,27 +1060,24 @@ export class Pathmuncher {
     }
   }
 
-  async #generateSpecialItems(compendiumLabel) {
-    const compendium = await game.packs.get(compendiumLabel);
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-
+  async #generateSpecialItems(type) {
     for (const special of this.parsed.specials) {
       if (special.added) continue;
       logger.debug("Generating special for", special);
-      const indexMatch = this.#indexFind(index, [special.name, special.originalName]);
+      const indexMatch = this.#findInPackIndexes(type, [special.name, special.originalName]);
       if (!indexMatch) {
-        logger.debug(`Unable to match special ${special.name}`, { special: special.name, compendiumLabel });
+        logger.debug(`Unable to match special ${special.name}`, { special: special.name, type });
         this.check[special.originalName] = { name: special.name, type: "special", details: { displayName: special.name, name: special.name, originalName: special.originalName, special } };
         continue;
       }
       special.added = true;
       if (this.check[special.originalName]) delete this.check[special.originalName];
       if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
-        logger.debug("Special included in class features auto add", { special: special.name, compendiumLabel });
+        logger.debug("Special included in class features auto add", { special: special.name, type });
         continue;
       }
 
-      const doc = await compendium.getDocument(indexMatch._id);
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const docData = doc.toObject();
       docData._id = foundry.utils.randomID();
       this.result.feats.push(docData);
@@ -1168,10 +1085,10 @@ export class Pathmuncher {
     }
   }
 
-  async #generateEquipmentItems(pack = "pf2e.equipment-srd") {
-    const compendium = game.packs.get(pack);
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-    const compendiumBackpack = await compendium.getDocument("3lgwjrFEsQVKzhh7");
+  async #generateEquipmentItems() {
+    const defaultCompendium = game.packs.get("pf2e.equipment-srd");
+    const index = await defaultCompendium.getIndex({ fields: ["name", "type", "system.slug"] });
+    const compendiumBackpack = await defaultCompendium.getDocument("3lgwjrFEsQVKzhh7");
 
     const adventurersPack = this.parsed.equipment.find((e) => e.pbName === "Adventurer's Pack");
     const backpackInstance = adventurersPack ? compendiumBackpack.toObject() : null;
@@ -1187,7 +1104,7 @@ export class Pathmuncher {
           continue;
         }
 
-        const doc = await compendium.getDocument(indexMatch._id);
+        const doc = await defaultCompendium.getDocument(indexMatch._id);
         const itemData = doc.toObject();
         itemData._id = foundry.utils.randomID();
         itemData.system.quantity = content.qty;
@@ -1199,19 +1116,19 @@ export class Pathmuncher {
     for (const e of this.parsed.equipment) {
       if (e.pbName === "Adventurer's Pack") continue;
       if (e.added) continue;
-      if (this.IGNORED_EQUIPMENT.includes(e.pbName)) {
+      if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
         e.added = true;
         continue;
       }
       logger.debug("Generating item for", e);
-      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(e.pbName));
+      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(e.pbName, e.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match ${e.pbName}`, e);
         this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
         continue;
       }
 
-      const doc = await compendium.getDocument(indexMatch._id);
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       if (doc.type != "kit") {
         const itemData = doc.toObject();
         itemData._id = foundry.utils.randomID();
@@ -1225,23 +1142,20 @@ export class Pathmuncher {
   }
 
   async #generateWeaponItems() {
-    const compendium = game.packs.get("pf2e.equipment-srd");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-
     for (const w of this.parsed.weapons) {
-      if (this.IGNORED_EQUIPMENT.includes(w.pbName)) {
+      if (Seasoning.IGNORED_EQUIPMENT.includes(w.pbName)) {
         w.added = true;
         continue;
       }
       logger.debug("Generating weapon for", w);
-      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(w.pbName));
+      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(w.pbName, w.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match weapon item ${w.name}`, w);
         this.bad.push({ pbName: w.pbName, type: "weapon", details: { w } });
         continue;
       }
 
-      const doc = await compendium.getDocument(indexMatch._id);
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
       itemData.system.quantity = w.qty;
@@ -1249,14 +1163,14 @@ export class Pathmuncher {
       itemData.system.potencyRune.value = w.pot;
       itemData.system.strikingRune.value = w.str;
 
-      if (w.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(w.runes[0], { camel: "dromedary" });
-      if (w.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(w.runes[1], { camel: "dromedary" });
-      if (w.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(w.runes[2], { camel: "dromedary" });
-      if (w.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(w.runes[3], { camel: "dromedary" });
+      if (w.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(w.runes[0]);
+      if (w.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(w.runes[1]);
+      if (w.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(w.runes[2]);
+      if (w.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(w.runes[3]);
       if (w.mat) {
         const material = w.mat.split(" (")[0];
-        itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
-        itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(w.mat);
+        itemData.system.preciousMaterial.value = Seasoning.slugD(material);
+        itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(w.mat);
       }
       if (w.display) itemData.name = w.display;
 
@@ -1266,30 +1180,24 @@ export class Pathmuncher {
   }
 
   async #generateArmorItems() {
-    const compendium = game.packs.get("pf2e.equipment-srd");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-
     for (const a of this.parsed.armor) {
-      if (this.IGNORED_EQUIPMENT.includes(a.pbName)) {
+      if (Seasoning.IGNORED_EQUIPMENT.includes(a.pbName)) {
         a.added = true;
         continue;
       }
       logger.debug("Generating armor for", a);
-      const indexMatch = index.find((i) =>
-        i.system.slug === game.pf2e.system.sluggify(a.pbName)
-        || i.system.slug === game.pf2e.system.sluggify(`${a.pbName} Armor`)
-      );
+      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(`${a.pbName} Armor`, a.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
         this.bad.push({ pbName: a.pbName, type: "armor", details: { a } });
         continue;
       }
 
-      const doc = await compendium.getDocument(indexMatch._id);
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
       itemData.system.equipped.value = a.worn ?? false;
-      if (!this.RESTRICTED_EQUIPMENT.some((i) => itemData.name.startsWith(i))) {
+      if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
         itemData.system.equipped.inSlot = a.worn ?? false;
         itemData.system.quantity = a.qty;
         itemData.system.category = a.prof;
@@ -1300,14 +1208,14 @@ export class Pathmuncher {
         itemData.system.equipped.handsHeld = isShield && a.worn ? 1 : 0;
         itemData.system.equipped.carryType = isShield && a.worn ? "held" : "worn";
 
-        if (a.runes[0]) itemData.system.propertyRune1.value = game.pf2e.system.sluggify(a.runes[0], { camel: "dromedary" });
-        if (a.runes[1]) itemData.system.propertyRune2.value = game.pf2e.system.sluggify(a.runes[1], { camel: "dromedary" });
-        if (a.runes[2]) itemData.system.propertyRune3.value = game.pf2e.system.sluggify(a.runes[2], { camel: "dromedary" });
-        if (a.runes[3]) itemData.system.propertyRune4.value = game.pf2e.system.sluggify(a.runes[3], { camel: "dromedary" });
+        if (a.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(a.runes[0]);
+        if (a.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(a.runes[1]);
+        if (a.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(a.runes[2]);
+        if (a.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(a.runes[3]);
         if (a.mat) {
           const material = a.mat.split(" (")[0];
-          itemData.system.preciousMaterial.value = game.pf2e.system.sluggify(material, { camel: "dromedary" });
-          itemData.system.preciousMaterialGrade.value = Pathmuncher.getMaterialGrade(a.mat);
+          itemData.system.preciousMaterial.value = Seasoning.slugD(material);
+          itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(a.mat);
         }
       }
       if (a.display) itemData.name = a.display;
@@ -1479,26 +1387,17 @@ export class Pathmuncher {
   }
 
   async #loadSpell(spell, casterId, debugData) {
-    const compendium = game.packs.get("pf2e.spells-srd");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-
-    const psiCompendium = game.packs.get("pf2e-psychic-amps.psychic-psi-cantrips");
-    const psiIndex = psiCompendium ? await psiCompendium.getIndex({ fields: ["name", "type", "system.slug"] }) : undefined;
-
     const spellName = spell.split("(")[0].trim();
     logger.debug("focus spell details", { spell, spellName, debugData });
 
-    const psiMatch = psiIndex ? psiIndex.find((i) => i.name === spell) : undefined;
-    const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(spellName));
-    if (!indexMatch && !psiMatch) {
+    const indexMatch = this.compendiumMatchers["spells"].getNameMatch(spellName, spellName);
+    if (!indexMatch) {
       logger.error(`Unable to match focus spell ${spell}`, { spell, spellName, debugData });
       this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
       return undefined;
     }
 
-    const doc = psiMatch
-      ? await psiCompendium.getDocument(psiMatch._id)
-      : await compendium.getDocument(indexMatch._id);
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
     const itemData = doc.toObject();
     itemData._id = foundry.utils.randomID();
     itemData.system.location.value = casterId;
@@ -1562,7 +1461,7 @@ export class Pathmuncher {
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
       const instance = this.#generateSpellCaster(caster);
       logger.debug("Generated caster instance", instance);
-      const spellEnhancements = FEAT_SPELLCASTING.find((f) => f.name === caster.name);
+      const spellEnhancements = Seasoning.getSpellCastingFeatureAdjustment(caster.name);
       let forcePrepare = false;
       if (hasProperty(spellEnhancements, "showSlotless")) {
         instance.system.showSlotlessLevels.value = getProperty(spellEnhancements, "showSlotless");
@@ -1654,19 +1553,17 @@ export class Pathmuncher {
   }
 
   async #processFormulas() {
-    const compendium = game.packs.get("pf2e.equipment-srd");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     const uuids = [];
 
     for (const formulaSource of this.source.formula) {
       for (const formulaName of formulaSource.known) {
-        const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(formulaName));
+        const indexMatch = this.compendiumMatchers["formulas"].getNameMatch(formulaName, formulaName);
         if (!indexMatch) {
           logger.error(`Unable to match formula ${formulaName}`, { formulaSource, name: formulaName });
           this.bad.push({ pbName: formulaName, type: "formula", details: { formulaSource, name: formulaName } });
           continue;
         }
-        const doc = await compendium.getDocument(indexMatch._id);
+        const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
         uuids.push({ uuid: doc.uuid });
       }
     }
@@ -1674,26 +1571,26 @@ export class Pathmuncher {
   }
 
   async #processFeats() {
-    this.statusUpdate(1, 5, "Feats");
-    await this.#generateFeatItems("pf2e.feats-srd");
-    this.statusUpdate(2, 5, "Feats");
-    await this.#generateFeatItems("pf2e.ancestryfeatures");
-    this.statusUpdate(3, 5, "Feats");
-    await this.#generateSpecialItems("pf2e.ancestryfeatures");
-    this.statusUpdate(4, 5, "Feats");
-    await this.#generateSpecialItems("pf2e.classfeatures");
-    this.statusUpdate(5, 5, "Feats");
-    await this.#generateSpecialItems("pf2e.actionspf2e");
+    this.#statusUpdate(1, 5, "Feats");
+    await this.#generateFeatItems("feats");
+    this.#statusUpdate(2, 5, "Feats");
+    await this.#generateFeatItems("ancestryFeatures");
+    this.#statusUpdate(3, 5, "Feats");
+    await this.#generateSpecialItems("ancestryFeatures");
+    this.#statusUpdate(4, 5, "Feats");
+    await this.#generateSpecialItems("classFeatures");
+    this.#statusUpdate(5, 5, "Feats");
+    await this.#generateSpecialItems("actions");
   }
 
   async #processEquipment() {
-    this.statusUpdate(1, 4, "Equipment");
+    this.#statusUpdate(1, 4, "Equipment");
     await this.#generateEquipmentItems();
-    this.statusUpdate(2, 4, "Weapons");
+    this.#statusUpdate(2, 4, "Weapons");
     await this.#generateWeaponItems();
-    this.statusUpdate(3, 4, "Armor");
+    this.#statusUpdate(3, 4, "Armor");
     await this.#generateArmorItems();
-    this.statusUpdate(2, 4, "Money");
+    this.#statusUpdate(2, 4, "Money");
     await this.#generateMoney();
   }
 
@@ -1853,30 +1750,30 @@ export class Pathmuncher {
 
   async processCharacter() {
     if (!this.source) return;
-    this.#prepare();
-    this.statusUpdate(1, 12, "Character");
+    await this.#prepare();
+    this.#statusUpdate(1, 12, "Character");
     await this.#processCore();
-    this.statusUpdate(2, 12, "Formula");
+    this.#statusUpdate(2, 12, "Formula");
     await this.#processFormulas();
-    this.statusUpdate(3, 12, "Deity");
-    await this.#processGenericCompendiumLookup("pf2e.deities", this.source.deity, "deity");
-    this.statusUpdate(4, 12, "Background");
-    await this.#processGenericCompendiumLookup("pf2e.backgrounds", this.source.background, "background");
-    this.statusUpdate(5, 12, "Class");
-    await this.#processGenericCompendiumLookup("pf2e.classes", this.source.class, "class");
-    this.statusUpdate(6, 12, "Ancestry");
-    await this.#processGenericCompendiumLookup("pf2e.ancestries", this.source.ancestry, "ancestry");
-    this.statusUpdate(7, 12, "Heritage");
-    await this.#processGenericCompendiumLookup("pf2e.heritages", this.source.heritage, "heritage");
-    this.statusUpdate(8, 12, "FeatureRec");
+    this.#statusUpdate(3, 12, "Deity");
+    await this.#processGenericCompendiumLookup("deities", this.source.deity, "deity");
+    this.#statusUpdate(4, 12, "Background");
+    await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
+    this.#statusUpdate(5, 12, "Class");
+    await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
+    this.#statusUpdate(6, 12, "Ancestry");
+    await this.#processGenericCompendiumLookup("ancestries", this.source.ancestry, "ancestry");
+    this.#statusUpdate(7, 12, "Heritage");
+    await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
+    this.#statusUpdate(8, 12, "FeatureRec");
     await this.#detectGrantedFeatures();
-    this.statusUpdate(9, 12, "FeatureRec");
+    this.#statusUpdate(9, 12, "FeatureRec");
     await this.#processFeats();
-    this.statusUpdate(10, 12, "Equipment");
+    this.#statusUpdate(10, 12, "Equipment");
     await this.#processEquipment();
-    this.statusUpdate(11, 12, "Spells");
+    this.#statusUpdate(11, 12, "Spells");
     await this.#processSpells();
-    this.statusUpdate(12, 12, "Lores");
+    this.#statusUpdate(12, 12, "Lores");
     await this.#generateLores();
   }
 
@@ -1986,7 +1883,7 @@ export class Pathmuncher {
   }
 
   async #createActorEmbeddedDocuments() {
-    this.statusUpdate(1, 12, "Character", "Eating");
+    this.#statusUpdate(1, 12, "Character", "Eating");
     if (this.options.addDeity) await this.#createAndUpdateItemsWithRuleRestore(this.result.deity);
     if (this.options.addAncestry) await this.#createAndUpdateItemsWithRuleRestore(this.result.ancestry);
     if (this.options.addHeritage) await this.#createAndUpdateItemsWithRuleRestore(this.result.heritage);
@@ -1998,17 +1895,17 @@ export class Pathmuncher {
     if (this.options.addFeats) {
       for (const [i, feat] of this.result.feats.entries()) {
         // console.warn(`creating ${feat.name}`, feat);
-        this.statusUpdate(i, featNums, "Feats", "Eating");
+        this.#statusUpdate(i, featNums, "Feats", "Eating");
         await this.#createAndUpdateItemsWithRuleRestore([feat]);
       }
     }
     // if (this.options.addFeats) await this.#createAndUpdateItemsWithRuleRestore(this.result.feats);
     if (this.options.addSpells) {
-      this.statusUpdate(3, 12, "Spells", "Eating");
+      this.#statusUpdate(3, 12, "Spells", "Eating");
       await this.#createAndUpdateItemsWithRuleRestore(this.result.casters);
       await this.#createAndUpdateItemsWithRuleRestore(this.result.spells);
     }
-    this.statusUpdate(4, 12, "Equipment", "Eating");
+    this.#statusUpdate(4, 12, "Equipment", "Eating");
     if (this.options.addEquipment) await this.#createAndUpdateItemsWithRuleRestore(this.result.equipment);
     if (this.options.addWeapons) await this.#createAndUpdateItemsWithRuleRestore(this.result.weapons);
     if (this.options.addArmor) {
@@ -2035,7 +1932,7 @@ export class Pathmuncher {
           });
         }
       }
-      this.statusUpdate(1, 12, "Feats", "Clearing");
+      this.#statusUpdate(1, 12, "Feats", "Clearing");
       logger.debug("Restoring granted item logic", itemUpdates);
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }

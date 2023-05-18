@@ -9,6 +9,9 @@ const CONSTANTS = {
     LOG_LEVEL: "log-level",
     RESTRICT_TO_TRUSTED: "restrict-to-trusted",
     ADD_VISION_FEATS: "add-vision-feats",
+    COMPENDIUM_MAPPINGS: "compendium-mappings",
+  },
+
   ACTOR_FLAGS: {
     pathbuilderId: undefined,
     addFeats: true,
@@ -45,6 +48,26 @@ CONSTANTS.DEFAULT_SETTINGS = {
     type: Boolean,
     default: false,
     onChange: debouncedReload,
+  },
+
+  [CONSTANTS.SETTINGS.COMPENDIUM_MAPPINGS]: {
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {
+      feats: ["pf2e.feats-srd"],
+      ancestryFeatures: ["pf2e.ancestryfeatures"],
+      classFeatures: ["pf2e.classfeatures"],
+      actions: ["pf2e.actionspf2e"],
+      spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
+      classes: ["pf2e.classes",],
+      ancestries: ["pf2e.ancestries",],
+      heritages: ["pf2e.heritages"],
+      equipment: ["pf2e.equipment-srd"],
+      formulas: ["pf2e.equipment-srd"],
+      deities: ["pf2e.deities"],
+      backgrounds: ["pf2e.backgrounds"],
+    },
   },
 
   [CONSTANTS.SETTINGS.ADD_VISION_FEATS]: {
