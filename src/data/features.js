@@ -1,6 +1,5 @@
 // these are features which are named differently in pathbuilder to foundry
 
-import CONSTANTS from "../constants.js";
 import utils from "../utils.js";
 
 const POSTFIX_PB_REMOVALS = [
