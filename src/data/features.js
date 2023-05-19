@@ -5,12 +5,16 @@ import utils from "../utils.js";
 const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
   /(.*) (Style)$/,
+  // Cleric +
+  /(.*) (Doctrine)$/,
 ];
 
 const PREFIX_PB_REMOVALS = [
   /^(Arcane Thesis): (.*)/,
   /^(Arcane School): (.*)/,
   /^(The) (.*)/,
+  // Cleric +
+  /^(Blessing): (.*)/,
 ];
 
 const PARENTHESIS = [
@@ -145,7 +149,9 @@ const FEAT_RENAME_STATIC_MAP = [
   // sizes for fleshwarp
   { pbName: "Medium", foundryName: "med" },
   { pbName: "Small", foundryName: "sm" },
-
+  // Cleric +
+  { pbName: "Decree of the Warsworn Ecstacy", foundryName: "Decree of Warsworn Ecstacy" },
+  { pbName: "Decree of Warsworn Ecstacy", foundryName: "Decree of the Warsworn Ecstacy" },
 ];
 
 function generateDynamicNames(pbName) {

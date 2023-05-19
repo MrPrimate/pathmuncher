@@ -32,6 +32,7 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Greater Swapping Stone", foundryName: "Greater Bonmuan Swapping Stone" },
   { pbName: "Heartstone", foundryName: "Skarja's Heartstone" },
   { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
+  { pbName: "Hide", foundryName: "Hide Armor" },
 ];
 
 function generateDynamicNames(pbName) {
