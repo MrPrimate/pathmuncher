@@ -213,14 +213,14 @@ export class Pathmuncher {
       .filter((feat) => feat[0]
         && feat[0] !== "undefined"
         && feat[0] !== "Not Selected"
-        && feat[0] !== this.source.heritage
+        // && feat[0] !== this.source.heritage
       )
       .forEach((feat) => {
         const name = this.getFoundryFeatureName(feat[0]).foundryName;
         const data = {
           name,
           extra: feat[1],
-          added: false,
+          added: (feat[0] === this.source.heritage),
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
@@ -228,6 +228,9 @@ export class Pathmuncher {
         this.parsed.feats.push(data);
       });
     logger.debug("Finished Feat Rename");
+    logger.debug("Name remapping results", {
+      parsed: this.parsed,
+    });
   }
 
   async #prepare() {
@@ -465,7 +468,7 @@ export class Pathmuncher {
   //     }
 
   #parsedFeatureMatch(type, slug, ignoreAdded) {
-    // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`);
+    // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
     const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
       && (
@@ -484,6 +487,15 @@ export class Pathmuncher {
         )
       )
     );
+    // const slugs = this.parsed[type].map((f) => {
+    //   return {
+    //     name: f.name,
+    //     slug: Seasoning.slug(f.name),
+    //     match: slug === Seasoning.slug(f.name),
+    //   }
+    // });
+    // console.warn(slugs);
+    //
     // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, {
     //   slug,
     //   parsedMatch,
@@ -512,14 +524,14 @@ export class Pathmuncher {
 
   #createGrantedItem(document, parent) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name})`);
-    const camelCase = Seasoning.slugD(document.system.slug);
+    const camelCase = Seasoning.slugD(document.system.slug ?? document.name);
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
     this.autoFeats.push(document);
     if (!this.options.askForChoices) {
       this.result.feats.push(document);
     }
-    const featureMatch = this.#findAllFeatureMatch(document.system.slug, true)
+    const featureMatch = this.#findAllFeatureMatch(document.system.slug ?? Seasoning.slug(document.name), true)
       ?? (document.name.includes("(")
         ? this.#findAllFeatureMatch(Seasoning.slug(document.name.split("(")[0].trim()), true)
         : undefined
@@ -544,7 +556,7 @@ export class Pathmuncher {
       if (!doc) continue;
       const slug = adjustName
         ? Seasoning.slug(doc)
-        : doc.system.slug;
+        : doc.system.slug === null ? Seasoning.slug(doc.name) : doc.system.slug;
       const featMatch = this.#findAllFeatureMatch(slug, ignoreAdded);
       if (featMatch) {
         if (adjustName && hasProperty(featMatch, "added")) featMatch.added = true;
@@ -613,12 +625,12 @@ export class Pathmuncher {
       if (tempSet.selection) {
         const lookedUpChoice = choices.find((c) => c.value === tempSet.selection);
         logger.debug("lookedUpChoice", lookedUpChoice);
+        if (lookedUpChoice) lookedUpChoice.choiceQueryResults = deepClone(choices);
         // set some common lookups here, e.g. deities are often not set!
         if (lookedUpChoice && cleansedChoiceSet.flag === "deity") {
           if (lookedUpChoice.label && lookedUpChoice.label !== "") {
             setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
             await this.#processGenericCompendiumLookup("deities", lookedUpChoice.label, "deity");
-            lookedUpChoice.choiceQueryResults = deepClone(choices);
             const camelCase = Seasoning.slugD(this.result.deity[0].system.slug);
             setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, { id: this.result.deity[0]._id, onDelete: "detach" });
             setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
@@ -646,7 +658,7 @@ export class Pathmuncher {
   }
 
   async #resolveInjectedUuid(document, ruleEntry) {
-    const tempActor = await this.#generateTempActor([document], true, true);
+    const tempActor = await this.#generateTempActor([document], false, false);
     // const tempActor = await this.#generateTempActor([document]);
     const cleansedRuleEntry = deepClone(ruleEntry);
     try {
@@ -761,6 +773,18 @@ export class Pathmuncher {
         docRules: deepClone(document.system.rules),
         document: deepClone(document),
       });
+
+      // if (ruleEntry.key === "GrantItem") {
+      //   const checkDoc = deepClone(document);
+      //   checkDoc.system.rules = [];
+      //   const testResult = await this.#checkRule(checkDoc, ruleEntry);
+      //   if (!testResult) {
+      //     const data = { document, ruleEntry, testResult };
+      //     logger.debug(`The early test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`, data);
+      //     rulesToKeep.push(ruleEntry);
+      //     continue;
+      //   }
+      // }
 
       const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry) : undefined;
       const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
@@ -925,12 +949,12 @@ export class Pathmuncher {
 
   }
 
-  async #detectGrantedFeatures() {
-    if (this.result.class.length > 0) await this.#addGrantedItems(this.result.class[0]);
-    if (this.result.ancestry.length > 0) await this.#addGrantedItems(this.result.ancestry[0]);
-    if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
-    if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
-  }
+  // async #detectGrantedFeatures() {
+  //   if (this.result.class.length > 0) await this.#addGrantedItems(this.result.class[0]);
+  //   if (this.result.ancestry.length > 0) await this.#addGrantedItems(this.result.ancestry[0]);
+  //   if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
+  //   if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
+  // }
 
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
@@ -989,16 +1013,17 @@ export class Pathmuncher {
 
   #indexFind(index, arrayOfNameMatches) {
     for (const name of arrayOfNameMatches) {
-      const indexMatch = index.find((i) =>
-        i.system.slug === Seasoning.slug(name)
-        || i.system.slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class))
-        || i.system.slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry))
-        || i.system.slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage))
-        || (game.settings.get("pf2e", "dualClassVariant")
-          && (i.system.slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(name, this.source.dualClass))
-          )
-        )
-      );
+      const indexMatch = index.find((i) => {
+        const slug = i.system.slug ?? Seasoning.slug(i.name);
+        return slug === Seasoning.slug(name)
+          || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class))
+          || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry))
+          || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage))
+          || (game.settings.get("pf2e", "dualClassVariant")
+            && (slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(name, this.source.dualClass))
+            )
+          );
+      });
       if (indexMatch) return indexMatch;
     }
     return undefined;
@@ -1142,7 +1167,7 @@ export class Pathmuncher {
 
   async #generateWeaponItems() {
     for (const w of this.parsed.weapons) {
-      if (Seasoning.IGNORED_EQUIPMENT.includes(w.pbName)) {
+      if (Seasoning.IGNORED_EQUIPMENT().includes(w.pbName)) {
         w.added = true;
         continue;
       }
@@ -1180,7 +1205,7 @@ export class Pathmuncher {
 
   async #generateArmorItems() {
     for (const a of this.parsed.armor) {
-      if (Seasoning.IGNORED_EQUIPMENT.includes(a.pbName)) {
+      if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
         a.added = true;
         continue;
       }
@@ -1765,8 +1790,8 @@ export class Pathmuncher {
     this.#statusUpdate(7, 12, "Heritage");
     await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
     this.#statusUpdate(8, 12, "FeatureRec");
-    await this.#detectGrantedFeatures();
-    this.#statusUpdate(9, 12, "FeatureRec");
+    // await this.#detectGrantedFeatures();
+    // this.#statusUpdate(9, 12, "FeatureRec");
     await this.#processFeats();
     this.#statusUpdate(10, 12, "Equipment");
     await this.#processEquipment();
