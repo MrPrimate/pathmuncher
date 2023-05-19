@@ -43,7 +43,6 @@ export class CompendiumMatcher {
         ?? index.find((i) => i.system.slug === Seasoning.slug(name));
 
       if (indexMatch) {
-        console.warn("found", indexMatch)
         return { i: indexMatch, pack: this.packs[packName] };
       }
     }

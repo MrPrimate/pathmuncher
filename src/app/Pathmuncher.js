@@ -112,7 +112,6 @@ export class Pathmuncher {
     for (const matcher of Object.values(this.compendiumMatchers)) {
       await matcher.loadCompendiums();
     }
-    console.warn("state of the thing", {this: this, compendiumMatchers: this.compendiumMatchers});
   }
 
   #statusUpdate(total, count, type, prefixLabel) {
