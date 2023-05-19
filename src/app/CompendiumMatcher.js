@@ -36,13 +36,14 @@ export class CompendiumMatcher {
     return match ?? { pbName, foundryName: pbName, details: undefined };
   }
 
-  getNameMatch(name, foundryName) {
+  getNameMatch(pbName, foundryName) {
     for (const [packName, index] of Object.entries(this.indexes)) {
-      logger.debug(`Checking for compendium documents for ${name} (${foundryName}) in ${packName}`);
+      logger.debug(`Checking for compendium documents for ${pbName} (${foundryName}) in ${packName}`);
       const indexMatch = index.find((i) => i.system.slug === Seasoning.slug(foundryName))
-        ?? index.find((i) => i.system.slug === Seasoning.slug(name));
+        ?? index.find((i) => i.system.slug === Seasoning.slug(pbName));
 
       if (indexMatch) {
+        logger.debug(`Found compendium document for ${pbName} (${foundryName}) in ${packName} with id ${indexMatch._id}`);
         return { i: indexMatch, pack: this.packs[packName] };
       }
     }
