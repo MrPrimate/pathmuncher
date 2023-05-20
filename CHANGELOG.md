@@ -1,4 +1,4 @@
-# Next up
+# 0.4.2
 
 - Changes for v66 of Pathbuilder for familiars.
 - Cannoneer name matching. Some other enhancements to name matching.
