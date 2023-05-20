@@ -1513,7 +1513,7 @@ export class Pathmuncher {
       const traditionData = getProperty(this.source, `focus.${tradition}`);
       logger.debug(`Checking for focus tradition ${tradition}`);
       if (!traditionData) continue;
-      for (const ability of ["str", "dex", "con", "int", "wise", "cha"]) {
+      for (const ability of ["str", "dex", "con", "int", "wis", "cha"]) {
         const abilityData = getProperty(traditionData, ability);
         logger.debug(`Checking for focus tradition ${tradition} with ability ${ability}`);
         if (!abilityData) continue;

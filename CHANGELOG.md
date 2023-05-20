@@ -1,8 +1,9 @@
 # Next up
 
 - Changes for v66 of Pathbuilder for familiars.
-- Cannoneer name matching.
-- Added a abstraction layer for finding items in compendiums to allow for third party compendiums to be used.
+- Cannoneer name matching. Some other enhancements to name matching.
+- Added a abstraction layer for finding items in compendiums to allow for third party compendiums to be used. (Upcoming feature).
+- Wisdom based focus spells would not import (typo).
 
 # 0.4.1
 
