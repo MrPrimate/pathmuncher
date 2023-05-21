@@ -1,3 +1,7 @@
+# 0.4.3
+
+- Familiars would not create a correctly named folder.
+
 # 0.4.2
 
 - Changes for v66 of Pathbuilder for familiars.

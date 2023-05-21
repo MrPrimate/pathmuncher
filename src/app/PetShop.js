@@ -27,8 +27,8 @@ export class PetShop {
 
 
   async ensureFolder(type) {
-    const folderName = game.i18n.localize(`${CONSTANTS.MODULE_NAME}.Labels.${type}s`);
-    this.folders[type] = await utils.getOrCreateFolder(parent.folder, "Actor", folderName);
+    const folderName = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Labels.${type}`);
+    this.folders[type] = await utils.getOrCreateFolder(this.parent.folder, "Actor", folderName);
   }
 
   async #existingPetCheck(petName, type) {
