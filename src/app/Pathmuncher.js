@@ -2047,9 +2047,6 @@ export class Pathmuncher {
     if (totalBad.length > 0) {
       warning += `<p>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.MissingItemsOpen")}</p><ul>${totalBad.join("\n")}</ul><br>`;
     }
-    if (this.result.focusPool > 0) {
-      warning += `<strong>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.FocusSpells")}</strong><br>`;
-    }
 
     logger.debug("Bad thing check", {
       badClass,
