@@ -80,18 +80,21 @@ CONSTANTS.DEFAULT_SETTINGS = {
     type: Object,
     default: {
       feats: [
-        "pf2e-battlezoo-dragon-feats",
-        "yom-features",
-        "yom-feats",
+        "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-feats",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-feats",
         "clerics.clerics-feats",
         "clerics.clerics-features",
         "pf2e.feats-srd"
       ],
-      ancestryFeatures: ["yom-features", "pf2e.ancestryfeatures"],
+      ancestryFeatures: [
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
+        "pf2e.ancestryfeatures",
+      ],
       classFeatures: [
-        "yom-features",
-        "pf2e-battlezoo-dragon-feats",
-        "yom-feats",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
+        "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-feats",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-feats",
         "clerics.clerics-doctrines",
         "clerics.clerics-feats",
         "clerics.clerics-features",
@@ -101,18 +104,18 @@ CONSTANTS.DEFAULT_SETTINGS = {
       spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
       classes: ["clerics.clerics-features", "pf2e.classes",],
       ancestries: [
-        "pf2e-battlezoo-dragon-ancestry",
-        "yom-ancestries",
+        "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-ancestry",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-ancestries",
         "pf2e.ancestries",
       ],
       heritages: [
-        "pf2e-battlezoo-dragon-heritages",
-        "yom-heritages",
+        "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-heritages",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-heritages",
         "pf2e.heritages",
       ],
       equipment: [
-        "pf2e-battlezoo-dragon-equipment",
-        "yom-equipment",
+        "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-equipment",
+        "battlezoo-ancestries-year-of-monsters-pf2e.yom-equipment",
         "pf2e.equipment-srd"
       ],
       formulas: ["pf2e.equipment-srd"],

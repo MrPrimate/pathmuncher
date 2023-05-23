@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Some underlying changes for upcoming custom/third party compendium support.
+
 # 0.4.4
 
 - Characters would not get focus points set as available.
