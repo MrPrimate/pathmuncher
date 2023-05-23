@@ -9,7 +9,8 @@ const CONSTANTS = {
     LOG_LEVEL: "log-level",
     RESTRICT_TO_TRUSTED: "restrict-to-trusted",
     ADD_VISION_FEATS: "add-vision-feats",
-    COMPENDIUM_MAPPINGS: "compendium-mappings",
+    USE_CUSTOM_COMPENDIUM_MAPPINGS: "use-custom-compendium-mappings",
+    CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
   },
 
   ACTOR_FLAGS: {
@@ -33,6 +34,21 @@ const CONSTANTS = {
     askForChoices: false,
   },
 
+  CORE_COMPENDIUM_MAPPINGS: {
+    feats: ["pf2e.feats-srd"],
+    ancestryFeatures: ["pf2e.ancestryfeatures"],
+    classFeatures: ["pf2e.classfeatures"],
+    actions: ["pf2e.actionspf2e"],
+    spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
+    classes: ["pf2e.classes",],
+    ancestries: ["pf2e.ancestries",],
+    heritages: ["pf2e.heritages"],
+    equipment: ["pf2e.equipment-srd"],
+    formulas: ["pf2e.equipment-srd"],
+    deities: ["pf2e.deities"],
+    backgrounds: ["pf2e.backgrounds"],
+  },
+
   GET_DEFAULT_SETTINGS() {
     return foundry.utils.deepClone(CONSTANTS.DEFAULT_SETTINGS);
   },
@@ -50,27 +66,15 @@ CONSTANTS.DEFAULT_SETTINGS = {
     onChange: debouncedReload,
   },
 
-  // [CONSTANTS.SETTINGS.COMPENDIUM_MAPPINGS]: {
-  //   scope: "world",
-  //   config: false,
-  //   type: Object,
-  //   default: {
-  //     feats: ["pf2e.feats-srd"],
-  //     ancestryFeatures: ["pf2e.ancestryfeatures"],
-  //     classFeatures: ["pf2e.classfeatures"],
-  //     actions: ["pf2e.actionspf2e"],
-  //     spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
-  //     classes: ["pf2e.classes",],
-  //     ancestries: ["pf2e.ancestries",],
-  //     heritages: ["pf2e.heritages"],
-  //     equipment: ["pf2e.equipment-srd"],
-  //     formulas: ["pf2e.equipment-srd"],
-  //     deities: ["pf2e.deities"],
-  //     backgrounds: ["pf2e.backgrounds"],
-  //   },
-  // },
+  [CONSTANTS.SETTINGS.USE_CUSTOM_COMPENDIUM_MAPPINGS]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.UseCustomCompendiumMappings.Name`,
+    scope: "world",
+    config: false,
+    type: Boolean,
+    default: false,
+  },
 
-  [CONSTANTS.SETTINGS.COMPENDIUM_MAPPINGS]: {
+  [CONSTANTS.SETTINGS.CUSTOM_COMPENDIUM_MAPPINGS]: {
     scope: "world",
     config: false,
     type: Object,

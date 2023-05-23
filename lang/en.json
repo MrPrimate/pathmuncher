@@ -23,6 +23,10 @@
         "warn": "WARN - Warnings & warnings only",
         "error": "ERROR - Errors only",
         "off": "OFF"
+      },
+      "UseCustomCompendiumMappings": {
+        "Name": "Use custom compendium mappings?",
+        "Hint": "This is useful for things like Battlezoo or Cleric+ modules, or even if you have your own compendium of custom feats."
       }
     },
     "Dialogs": {

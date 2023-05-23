@@ -103,7 +103,10 @@ export class Pathmuncher {
     this.bad = [];
     this.statusCallback = statusCallback;
     this.compendiumMatchers = {};
-    for (const type of Object.keys(utils.setting("COMPENDIUM_MAPPINGS"))) {
+    const compendiumMappings = utils.setting("USE_CUSTOM_COMPENDIUM_MAPPINGS")
+      ? utils.setting("CUSTOM_COMPENDIUM_MAPPINGS")
+      : CONSTANTS.CORE_COMPENDIUM_MAPPINGS;
+    for (const type of Object.keys(compendiumMappings)) {
       this.compendiumMatchers[type] = new CompendiumMatcher({ type });
     }
   }
@@ -2069,7 +2072,7 @@ export class Pathmuncher {
       warning,
     });
 
-    if (totalBad.length > 0 || this.result.focusPool > 0) {
+    if (totalBad.length > 0) {
       ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
       new Dialog({
         title: game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.ImportNotes"),
