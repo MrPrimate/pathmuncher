@@ -1504,7 +1504,7 @@ export class Pathmuncher {
       await this.#processCasterSpells(instance, caster.spells, spellEnhancements, forcePrepare);
     }
 
-    const globalFocus = this.result.focus?.focusPoints;
+    const globalFocus = this.source.focus?.focusPoints;
     if (Number.isInteger(globalFocus) && globalFocus > 0) {
       this.result.focusPool = globalFocus;
     }
@@ -1528,8 +1528,8 @@ export class Pathmuncher {
       }
     }
 
-    setProperty(this.result.character, "system.resources.focus.max", this.result.focusPool);
-    setProperty(this.result.character, "system.resources.focus.value", this.result.focusPool);
+    setProperty(this.result.character, "system.resources.focus.max", this.result.focusPoints);
+    setProperty(this.result.character, "system.resources.focus.value", this.result.focusPoints);
   }
 
   async #generateLores() {

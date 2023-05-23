@@ -1,3 +1,8 @@
+# 0.4.4
+
+- Characters would not get focus points set as available.
+- Removed Focus Spells warning, as Pathbuilder now supplies tradition.
+
 # 0.4.3
 
 - Familiars would not create a correctly named folder.
