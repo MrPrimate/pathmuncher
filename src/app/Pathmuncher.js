@@ -66,6 +66,12 @@ export class Pathmuncher {
     this.autoAddedFeatureRules = {};
     this.grantItemLookUp = {};
     this.autoFeats = [];
+    this.boosts = {
+      custom: false,
+      class: {},
+      background: {},
+      ancestry: {},
+    };
     this.result = {
       character: {
         _id: this.actor.id,
@@ -959,6 +965,70 @@ export class Pathmuncher {
   //   if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
   // }
 
+  #determineAbilityBoosts() {
+    const breakdown = getProperty(this.source, "abilities.breakdown");
+    const useCustomStats = breakdown
+      && breakdown.ancestryFree.length === 0
+      && breakdown.ancestryBoosts.length === 0
+      && breakdown.ancestryFlaws.length === 0
+      && breakdown.backgroundBoosts.length === 0
+      && breakdown.classBoosts.length === 0;
+    if (breakdown && !useCustomStats) {
+      this.boosts.custom = false;
+      const classBoostMap = {};
+      for (const [key, boosts] of Object.entries(this.source.abilities.breakdown.mapLevelledBoosts)) {
+        if (key <= this.source.level) {
+          classBoostMap[key] = boosts.map((ability) => ability.toLowerCase());
+        }
+      }
+      setProperty(this.result.character, "system.build.abilities.boosts", classBoostMap);
+      this.boosts.class = classBoostMap;
+
+      // ancestry
+    } else {
+      this.boosts.custom = true;
+      setProperty(this.result.character, "system.abilities.str.value", this.source.abilities.str);
+      setProperty(this.result.character, "system.abilities.dex.value", this.source.abilities.dex);
+      setProperty(this.result.character, "system.abilities.con.value", this.source.abilities.con);
+      setProperty(this.result.character, "system.abilities.int.value", this.source.abilities.int);
+      setProperty(this.result.character, "system.abilities.wis.value", this.source.abilities.wis);
+      setProperty(this.result.character, "system.abilities.cha.value", this.source.abilities.cha);
+    }
+  }
+
+  #generateBackgroundAbilityBoosts() {
+    const breakdown = getProperty(this.source, "abilities.breakdown");
+    breakdown.backgroundBoosts.forEach((boost) => {
+      for (const [key, boostSet] of Object.entries(this.result.background[0].system.boosts)) {
+        if (boostSet.value.includes(boost.toLowerCase())) {
+          this.result.background[0].system.boosts[key].selected = boost.toLowerCase();
+          break;
+        }
+      }
+    });
+  }
+
+  #generateAncestryAbilityBoosts() {
+    const breakdown = getProperty(this.source, "abilities.breakdown");
+    breakdown.ancestryBoosts.concat(breakdown.ancestryFree).forEach((boost) => {
+      for (const [key, boostSet] of Object.entries(this.result.ancestry[0].system.boosts)) {
+        if (boostSet.value.includes(boost.toLowerCase())) {
+          this.result.ancestry[0].system.boosts[key].selected = boost.toLowerCase();
+          break;
+        }
+      }
+    });
+  }
+
+  #setAbilityBoosts() {
+    if (this.boosts.custom) return;
+    this.#generateBackgroundAbilityBoosts();
+    this.#generateAncestryAbilityBoosts();
+
+    this.result.class[0].system.boosts = this.boosts.class;
+
+  }
+
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
     setProperty(this.result.character, "prototypeToken.name", this.source.name);
@@ -973,12 +1043,7 @@ export class Pathmuncher {
 
     this.#processSenses();
 
-    setProperty(this.result.character, "system.abilities.str.value", this.source.abilities.str);
-    setProperty(this.result.character, "system.abilities.dex.value", this.source.abilities.dex);
-    setProperty(this.result.character, "system.abilities.con.value", this.source.abilities.con);
-    setProperty(this.result.character, "system.abilities.int.value", this.source.abilities.int);
-    setProperty(this.result.character, "system.abilities.wis.value", this.source.abilities.wis);
-    setProperty(this.result.character, "system.abilities.cha.value", this.source.abilities.cha);
+    this.#determineAbilityBoosts();
 
     setProperty(this.result.character, "system.saves.fortitude.tank", this.source.proficiencies.fortitude / 2);
     setProperty(this.result.character, "system.saves.reflex.value", this.source.proficiencies.reflex / 2);
@@ -1432,11 +1497,15 @@ export class Pathmuncher {
     return itemData;
   }
 
-  async #processCasterSpells(instance, spells, spellEnhancements, forcePrepare = false) {
+  async #processCasterSpells(instance, spells, preparedSpells, spellEnhancements, forcePrepare = false) {
     const spellNames = [];
     for (const spellSelection of spells) {
       const level = spellSelection.spellLevel;
-      for (const [i, spell] of spellSelection.list.entries()) {
+      const preparedAtLevel = preparedSpells?.length > 0
+        ? (preparedSpells.find((p) => p.spellLevel === level)?.list ?? [])
+        : [];
+      const spellList = [...new Set(spellSelection.list.concat(preparedAtLevel))];
+      for (const [i, spell] of spellList.entries()) {
         const itemData = await this.#loadSpell(spell, instance._id, {
           spellSelection,
           list: spellSelection.list,
@@ -1449,7 +1518,12 @@ export class Pathmuncher {
           this.result.spells.push(itemData);
 
           // if the caster is prepared we don't prepare spells as all known spells come through in JSON
-          if (instance.system.prepared.value !== "prepared" || spellEnhancements?.preparePBSpells || forcePrepare) {
+          if (preparedAtLevel.includes(spell)
+            || instance.system.prepared.value !== "prepared"
+            || spellEnhancements?.preparePBSpells
+            || forcePrepare
+          ) {
+            // eslint-disable-next-line require-atomic-updates
             instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
           }
         }
@@ -1504,12 +1578,7 @@ export class Pathmuncher {
         instance.system.showSlotlessLevels.value = !slotToPreparedMatch;
         forcePrepare = slotToPreparedMatch;
       }
-      await this.#processCasterSpells(instance, caster.spells, spellEnhancements, forcePrepare);
-    }
-
-    const globalFocus = this.source.focus?.focusPoints;
-    if (Number.isInteger(globalFocus) && globalFocus > 0) {
-      this.result.focusPool = globalFocus;
+      await this.#processCasterSpells(instance, caster.spells, caster.prepared, spellEnhancements, forcePrepare);
     }
 
     for (const tradition of ["occult", "primal", "divine", "arcane"]) {
@@ -1531,8 +1600,8 @@ export class Pathmuncher {
       }
     }
 
-    setProperty(this.result.character, "system.resources.focus.max", this.result.focusPoints);
-    setProperty(this.result.character, "system.resources.focus.value", this.result.focusPoints);
+    setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
+    setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
   }
 
   async #generateLores() {
@@ -1792,6 +1861,9 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("ancestries", this.source.ancestry, "ancestry");
     this.#statusUpdate(7, 12, "Heritage");
     await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
+
+    this.#setAbilityBoosts();
+
     this.#statusUpdate(8, 12, "FeatureRec");
     // await this.#detectGrantedFeatures();
     // this.#statusUpdate(9, 12, "FeatureRec");
@@ -1974,6 +2046,19 @@ export class Pathmuncher {
     }
     if (!this.options.addFormulas) {
       delete this.result.character.system.formulas;
+    }
+
+    if (!this.boosts.custom) {
+      const abilityDeletions = ["str", "dex", "con", "int", "wis", "cha"]
+        .filter((ability) => hasProperty(this.actor, `system.abilities.${ability}`))
+        .reduce(
+          (accumulated, ability) => ({
+            ...accumulated,
+            [`-=${ability}`]: null
+          }),
+          {}
+        );
+      setProperty(this.result.character, "system.abilities", abilityDeletions);
     }
 
     logger.debug("Generated result", this.result);

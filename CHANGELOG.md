@@ -1,6 +1,9 @@
 # NEXT UP
 
 - Some underlying changes for upcoming custom/third party compendium support.
+- Support new prepared spells in Pathbuilder v66 export.
+- Support changes to familiar data in Pathbuilder v66.
+- Abilities are now set properly, rather than as an override, thanks to changes in Pathbuilder v66 export.
 
 # 0.4.4
 
