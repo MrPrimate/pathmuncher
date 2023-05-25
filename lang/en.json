@@ -110,6 +110,10 @@
       "Preparing": "Preparing",
       "Eating": "Eating",
       "Clearing": "Clearing up"
+    },
+    "Folders": {
+      "Familiar": "Familiars",
+      "Familiars": "Familiars"
     }
   }
 }

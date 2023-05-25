@@ -11,7 +11,7 @@ import utils from "../utils.js";
 export class PetShop {
 
 
-  constructor ({ type = "familiars", parent, pathbuilderJson } = {}) {
+  constructor ({ type = "familiar", parent, pathbuilderJson } = {}) {
     this.parent = parent;
     this.pathbuilderJson = pathbuilderJson;
     this.type = type;
@@ -27,7 +27,7 @@ export class PetShop {
 
 
   async ensureFolder(type) {
-    const folderName = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Labels.${type}`);
+    const folderName = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Folders.${type}`);
     this.folders[type] = await utils.getOrCreateFolder(this.parent.folder, "Actor", folderName);
   }
 
@@ -103,9 +103,9 @@ export class PetShop {
   }
 
   async processPets() {
-    const petData = this.type === "familiars" && this.pathbuilderJson.familiars
+    const petData = this.type === "familiar" && this.pathbuilderJson.familiars
       ? this.pathbuilderJson.familiars
-      : this.pathbuilderJson.pets.filter((p) => p.type.toLowerCase() === this.type);
+      : this.pathbuilderJson.pets.filter((p) => this.type === p.type.toLowerCase());
     await this.ensureFolder(utils.capitalize(this.type));
     for (const petJson of petData) {
       await this.buildPet(petJson);
