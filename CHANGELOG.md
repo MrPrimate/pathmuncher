@@ -1,4 +1,4 @@
-# NEXT UP
+# 0.5.0
 
 - Some underlying changes for upcoming custom/third party compendium support.
 - Support new prepared spells in Pathbuilder v66 export.
