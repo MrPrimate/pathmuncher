@@ -1,3 +1,7 @@
+# 0.5.1
+
+- Container support. Items now appear in containers! Neat!
+
 # 0.5.0
 
 - Some underlying changes for upcoming custom/third party compendium support.

@@ -183,7 +183,21 @@ export class Pathmuncher {
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e[0]);
-        const item = { pbName: name, qty: e[1], added: false };
+        const containerKey = Object.keys(this.source.equipmentContainers)
+          .find((key) => this.source.equipmentContainers[key].containerName === name);
+
+        const container = containerKey
+          ? {
+            id: containerKey,
+            containerName: this.source.equipmentContainers[containerKey].containerName,
+            bagOfHolding: this.source.equipmentContainers[containerKey].bagOfHolding,
+            backpack: this.source.equipmentContainers[containerKey].backpack,
+          }
+          : null;
+
+        const foundryId = foundry.utils.randomID();
+
+        const item = { pbName: name, qty: e[1], added: false, inContainer: e[2], container, foundryId };
         this.parsed.equipment.push(item);
       });
     this.source.armor
@@ -1223,9 +1237,16 @@ export class Pathmuncher {
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       if (doc.type != "kit") {
         const itemData = doc.toObject();
-        itemData._id = foundry.utils.randomID();
+        itemData._id = e.foundryId || foundry.utils.randomID();
         itemData.system.quantity = e.qty;
         const type = doc.type === "treasure" ? "treasure" : "equipment";
+        if (e.inContainer) {
+          const containerMatch = this.parsed.equipment.find((con) =>
+            con.container?.id === e.inContainer
+          );
+          itemData.system.containerId = containerMatch.foundryId;
+          itemData.system.equipped.carryType = "stowed";
+        }
         this.result[type].push(itemData);
       }
       // eslint-disable-next-line require-atomic-updates
