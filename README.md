@@ -16,11 +16,7 @@ To use this module the users must have the CREATE ACTOR ability, as it creates t
 
 ## Known Issues
 
-- [Pathbuilder JSON does not distinguish between prepared spells and known spells for prepared spell casters like the Witch and Wizard.](https://gitlab.com/doctor.unspeakable/pathbuilder-2e-web-version/-/issues/794)
 - Pathbuilder JSON does not contain ritual spell data at the moment.
-- [Pathbuilder JSON does not contain any details about containers.](https://gitlab.com/doctor.unspeakable/pathbuilder-2e-web-version/-/issues/677)
-- Pathbuilder JSON does not export the tradition of focus spells. The builder takes a good guess at these, but it's worth checking to make sure.
-- [Pathbuilder JSON does not contain details of ability score choices](https://gitlab.com/doctor.unspeakable/pathbuilder-2e-web-version/-/issues/793), just final scores. so custom ability score assignment is used.
 - There are differences between Pathbuilder names and Foundry names. If you find any, please open an issue, or drop a note in Discord with as much detail as possible, ideally with a shared link to a pathbuilder character.
 - Support for "dual classed" characters from the Advanced Players guide is ropey at best.
 
