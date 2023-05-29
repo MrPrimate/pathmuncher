@@ -177,6 +177,15 @@ export class Pathmuncher {
     }
   }
 
+  #getContainerData(key) {
+    return {
+      id: key,
+      containerName: this.source.equipmentContainers[key].containerName,
+      bagOfHolding: this.source.equipmentContainers[key].bagOfHolding,
+      backpack: this.source.equipmentContainers[key].backpack,
+    };
+  }
+
   #nameMap() {
     logger.debug("Starting Equipment Rename");
     this.source.equipment
@@ -187,15 +196,14 @@ export class Pathmuncher {
           .find((key) => this.source.equipmentContainers[key].containerName === name);
 
         const container = containerKey
-          ? {
-            id: containerKey,
-            containerName: this.source.equipmentContainers[containerKey].containerName,
-            bagOfHolding: this.source.equipmentContainers[containerKey].bagOfHolding,
-            backpack: this.source.equipmentContainers[containerKey].backpack,
-          }
+          ? this.#getContainerData(containerKey)
           : null;
 
         const foundryId = foundry.utils.randomID();
+
+        if (container) {
+          this.source.equipmentContainers[containerKey].foundryId = foundryId;
+        }
 
         const item = { pbName: name, qty: e[1], added: false, inContainer: e[2], container, foundryId };
         this.parsed.equipment.push(item);
@@ -1219,6 +1227,28 @@ export class Pathmuncher {
       }
     }
 
+    for (const [key, data] of Object.entries(this.source.equipmentContainers)) {
+      if (data.foundryId) continue;
+      const name = Seasoning.getFoundryEquipmentName(data.containerName);
+      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(data.containerName, name);
+      const id = foundry.utils.randomID();
+      const doc = indexMatch
+        ? await indexMatch.pack.getDocument(indexMatch.i._id)
+        : await Item.create({ name: data.containerName, type: "backpack" }, { temporary: true });
+      const itemData = doc.toObject();
+      itemData._id = id;
+      this.result["equipment"].push(itemData);
+      this.parsed.equipment.push({
+        pbName: data.containerName,
+        name,
+        qty: 1,
+        added: true,
+        inContainer: undefined,
+        container: this.#getContainerData(key),
+        foundryId: id,
+      });
+    }
+
     for (const e of this.parsed.equipment) {
       if (e.pbName === "Adventurer's Pack") continue;
       if (e.added) continue;
@@ -1244,8 +1274,10 @@ export class Pathmuncher {
           const containerMatch = this.parsed.equipment.find((con) =>
             con.container?.id === e.inContainer
           );
-          itemData.system.containerId = containerMatch.foundryId;
-          itemData.system.equipped.carryType = "stowed";
+          if (containerMatch) {
+            itemData.system.containerId = containerMatch.foundryId;
+            itemData.system.equipped.carryType = "stowed";
+          }
         }
         this.result[type].push(itemData);
       }

@@ -1,3 +1,7 @@
+# 0.5.2
+
+- Support having multiple containers with the same name.
+
 # 0.5.1
 
 - Container support. Items now appear in containers! Neat!
