@@ -1,3 +1,7 @@
+# 0.5.3
+
+- Enhanced detection for some feats and features such as the Scholar backgorund.
+
 # 0.5.2
 
 - Support having multiple containers with the same name.

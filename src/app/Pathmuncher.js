@@ -447,6 +447,10 @@ export class Pathmuncher {
     if (indexMatch) {
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = doc.toObject();
+      if (name.includes("(")) {
+        const extra = name.split(")")[0].split("(").pop();
+        this.parsed.specials.push({ name: doc.name, originalName: name, added: true, extra });
+      }
       if (target === "class") {
         itemData.system.keyAbility.selected = this.source.keyability;
         await this.#addDualClass(itemData);
@@ -498,7 +502,7 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
-  #parsedFeatureMatch(type, slug, ignoreAdded) {
+  #parsedFeatureMatch(type, document, slug, ignoreAdded) {
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
     const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
@@ -518,21 +522,15 @@ export class Pathmuncher {
         )
       )
     );
-    // const slugs = this.parsed[type].map((f) => {
-    //   return {
-    //     name: f.name,
-    //     slug: Seasoning.slug(f.name),
-    //     match: slug === Seasoning.slug(f.name),
-    //   }
-    // });
-    // console.warn(slugs);
-    //
-    // console.warn(`Results of find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, {
-    //   slug,
-    //   parsedMatch,
-    //   parsed: duplicate(this.parsed),
-    // });
-    return parsedMatch;
+    if (parsedMatch || !document) return parsedMatch;
+
+    const extraMatch = this.parsed[type].find((f) =>
+      // (!ignoreAdded || (ignoreAdded && !f.added))
+      f.extra && f.added
+      && Seasoning.slug(f.name) === (document.system.slug ?? Seasoning.slug(document.name))
+      && Seasoning.slug(f.extra) === slug
+    );
+    return extraMatch;
   }
 
   #generatedResultMatch(type, slug) {
@@ -540,10 +538,10 @@ export class Pathmuncher {
     return featMatch;
   }
 
-  #findAllFeatureMatch(slug, ignoreAdded) {
-    const featMatch = this.#parsedFeatureMatch("feats", slug, ignoreAdded);
+  #findAllFeatureMatch(document, slug, ignoreAdded) {
+    const featMatch = this.#parsedFeatureMatch("feats", document, slug, ignoreAdded);
     if (featMatch) return featMatch;
-    const specialMatch = this.#parsedFeatureMatch("specials", slug, ignoreAdded);
+    const specialMatch = this.#parsedFeatureMatch("specials", document, slug, ignoreAdded);
     if (specialMatch) return specialMatch;
     const deityMatch = this.#generatedResultMatch("deity", slug);
     return deityMatch;
@@ -562,9 +560,9 @@ export class Pathmuncher {
     if (!this.options.askForChoices) {
       this.result.feats.push(document);
     }
-    const featureMatch = this.#findAllFeatureMatch(document.system.slug ?? Seasoning.slug(document.name), true)
+    const featureMatch = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), true)
       ?? (document.name.includes("(")
-        ? this.#findAllFeatureMatch(Seasoning.slug(document.name.split("(")[0].trim()), true)
+        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), true)
         : undefined
       );
 
@@ -579,7 +577,7 @@ export class Pathmuncher {
     if (document.type !== "action") logger.warn(`Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`, { document, parent });
   }
 
-  async #featureChoiceMatch(choices, ignoreAdded, adjustName) {
+  async #featureChoiceMatch(document, choices, ignoreAdded, adjustName) {
     for (const choice of choices) {
       const doc = adjustName
         ? game.i18n.localize(choice.label)
@@ -588,7 +586,7 @@ export class Pathmuncher {
       const slug = adjustName
         ? Seasoning.slug(doc)
         : doc.system.slug === null ? Seasoning.slug(doc.name) : doc.system.slug;
-      const featMatch = this.#findAllFeatureMatch(slug, ignoreAdded);
+      const featMatch = this.#findAllFeatureMatch(document, slug, ignoreAdded);
       if (featMatch) {
         if (adjustName && hasProperty(featMatch, "added")) featMatch.added = true;
         logger.debug("Choices evaluated", { choices, document, featMatch, choice });
@@ -625,7 +623,7 @@ export class Pathmuncher {
       }
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
-      const choiceMatch = await this.#featureChoiceMatch(choices, true, cleansedChoiceSet.adjustName);
+      const choiceMatch = await this.#featureChoiceMatch(document, choices, true, cleansedChoiceSet.adjustName);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
         choiceMatch.choiceQueryResults = deepClone(choices);
@@ -634,7 +632,7 @@ export class Pathmuncher {
 
       if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
         for (const choice of choices) {
-          const featMatch = this.#findAllFeatureMatch(choice.value, true, cleansedChoiceSet.adjustName);
+          const featMatch = this.#findAllFeatureMatch(document, choice.value, true, cleansedChoiceSet.adjustName);
           if (featMatch) {
             logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
             featMatch.added = true;
@@ -740,7 +738,7 @@ export class Pathmuncher {
         : [ruleElement.resolveValue()];
 
       const isGood = cleansedRule.key === "ChoiceSet"
-        ? (await this.#featureChoiceMatch(choices, false)) !== undefined
+        ? (await this.#featureChoiceMatch(document, choices, false)) !== undefined
         : ruleElement.test(rollOptions);
 
       logger.debug("Checking rule", {
