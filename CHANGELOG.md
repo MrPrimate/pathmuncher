@@ -1,3 +1,8 @@
+# 0.5.4
+
+- Work around for sometimes incorrect key ability on champions in Pathbuilder JSON.
+- Some name matching updates between Pathbuilder/Foundry.
+
 # 0.5.3
 
 - Enhanced detection for some feats and features such as the Scholar backgorund.
