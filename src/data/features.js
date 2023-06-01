@@ -202,6 +202,7 @@ export function FEAT_RENAME_MAP(pbName = null) {
 
 const IGNORED_FEATS_LIST = [
   "Draconic Rage", // just handled by effects on Draconic Instinct
+  "Spellstrike Specifics",
   "Unarmored",
   "Simple Weapon Expertise",
   "Spellbook",
