@@ -66,6 +66,7 @@ export class Pathmuncher {
     this.autoAddedFeatureRules = {};
     this.grantItemLookUp = {};
     this.autoFeats = [];
+    this.keyAbility = null;
     this.boosts = {
       custom: false,
       class: {},
@@ -452,7 +453,7 @@ export class Pathmuncher {
         this.parsed.specials.push({ name: doc.name, originalName: name, added: true, extra });
       }
       if (target === "class") {
-        itemData.system.keyAbility.selected = this.source.keyability;
+        itemData.system.keyAbility.selected = this.keyAbility;
         await this.#addDualClass(itemData);
       }
       itemData._id = foundry.utils.randomID();
@@ -1014,6 +1015,13 @@ export class Pathmuncher {
       setProperty(this.result.character, "system.abilities.wis.value", this.source.abilities.wis);
       setProperty(this.result.character, "system.abilities.cha.value", this.source.abilities.cha);
     }
+
+    if (breakdown?.classBoosts.length > 0) {
+      this.keyAbility = breakdown.classBoosts[0].toLowerCase();
+    } else {
+      this.keyAbility = this.source.keyability;
+    }
+    setProperty(this.result.character, "system.details.keyability.value", this.keyAbility);
   }
 
   #generateBackgroundAbilityBoosts() {
@@ -1056,7 +1064,7 @@ export class Pathmuncher {
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
     setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
-    setProperty(this.result.character, "system.details.keyability.value", this.source.keyability);
+
     if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
     setProperty(this.result.character, "system.traits.size.value", Seasoning.getSizeValue(this.source.size));
     setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
