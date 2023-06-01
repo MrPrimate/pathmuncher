@@ -73,6 +73,14 @@
         "CompletedWithNotes": "Import completed with some notes.",
         "CompletedSuccess": "Import completed successfully.",
         "ImportNotes": "Pathmuncher Import Notes"
+      },
+      "CompendiumSelector": {
+        "Select": "Select lookup type...",
+        "Title": "Compendium Selector",
+        "Add": "Add",
+        "Remove": "Remove",
+        "Up": "Up",
+        "Down": "Down"
       }
     },
     "Chat": {},

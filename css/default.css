@@ -77,3 +77,44 @@
   -webkit-animation: roll 3s infinite;
   animation: roll 3s infinite;
 }
+
+.pathmuncher-compendium-selector .drop-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 10vh; */
+  flex: initial;
+  padding: 10px;
+}
+
+.pathmuncher-compendium-selector .container {
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  height: 100vh;
+  flex: initial;
+  padding: 10px;
+}
+
+.pathmuncher-compendium-selector .list-container {
+  display: flex;
+  /* flex-direction: column;
+  align-items: center; */
+}
+
+.pathmuncher-compendium-selector .list {
+  width: 200px;
+  margin: 0 20px;
+}
+
+.pathmuncher-compendium-selector .button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 20px;
+}
+
+.pathmuncher-compendium-selector .button {
+  margin-bottom: 10px;
+}
