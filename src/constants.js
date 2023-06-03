@@ -13,6 +13,19 @@ const CONSTANTS = {
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
   },
 
+  FEAT_PRIORITY: [
+    "Heritage",
+    "Heritage Feat",
+    "Ancestry",
+    "Ancestry Feat",
+    "Background",
+    "Background Feat",
+    "Class Feat",
+    "Skill Feat",
+    "General Feat",
+    "Awarded Feat",
+  ],
+
   ACTOR_FLAGS: {
     pathbuilderId: undefined,
     addFeats: true,

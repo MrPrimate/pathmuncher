@@ -1135,6 +1135,7 @@ export class Pathmuncher {
   }
 
   async #generateFeatItems(type) {
+    // eslint-disable-next-line complexity
     this.parsed.feats.sort((f1, f2) => {
       const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String);
       const f2RefUndefined = !(typeof f2.type === "string" || f2.type instanceof String);
@@ -1146,8 +1147,25 @@ export class Pathmuncher {
         } else {
           return -1;
         }
+      } else if (f1.type === "Awarded Feat" && f2.type === "Awarded Feat") {
+        return (f1.level ?? 20) - (f2.level ?? 20);
+      } else if (f1.type === "Awarded Feat") {
+        return 1;
+      } else if (f2.type === "Awarded Feat") {
+        return -1;
+      } else if ((f1.level ?? 20) === (f2.level ?? 20)) {
+        const f1Index = CONSTANTS.FEAT_PRIORITY.indexOf(f1.type);
+        const f2Index = CONSTANTS.FEAT_PRIORITY.indexOf(f2.type);
+        if (f1Index > f2Index) {
+          return 1;
+        } else if (f1Index < f2Index) {
+          return -1;
+        } else {
+          return 0;
+        }
+      } else {
+        return (f1.level ?? 20) - (f2.level ?? 20);
       }
-      return 0;
     });
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {

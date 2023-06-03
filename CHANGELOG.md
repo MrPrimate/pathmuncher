@@ -1,3 +1,7 @@
+# 0.5.5
+
+- Fix up for granted feats added before other feats, resulting in some bad dialogs for things like Multifarious Muse.
+
 # 0.5.4
 
 - Work around for sometimes incorrect key ability on champions in Pathbuilder JSON.
