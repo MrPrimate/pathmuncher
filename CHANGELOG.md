@@ -1,6 +1,8 @@
 # 0.5.5
 
 - Fix up for granted feats added before other feats, resulting in some bad dialogs for things like Multifarious Muse.
+- Dwarfes should no longer ask about Clan Dagger/Clan Pistol choices.
+- In some rare cases granted items would not always be granted. (I can't find an "in the wild" example of this happening).
 
 # 0.5.4
 
