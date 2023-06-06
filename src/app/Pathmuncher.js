@@ -1660,7 +1660,9 @@ export class Pathmuncher {
         ? (preparedSpells.find((p) => p.spellLevel === level)?.list ?? [])
         : [];
       const spellList = [...new Set(spellSelection.list.concat(preparedAtLevel))];
+      let preparedValue = 0;
       for (const [i, spell] of spellList.entries()) {
+        logger.debug(`Checking spell at ${i} for level ${level}`, { spell });
         const itemData = await this.#loadSpell(spell, instance._id, {
           spellSelection,
           list: spellSelection.list,
@@ -1679,8 +1681,10 @@ export class Pathmuncher {
             || spellEnhancements?.preparePBSpells
             || forcePrepare
           ) {
+            logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spell });
             // eslint-disable-next-line require-atomic-updates
-            instance.system.slots[`slot${level}`].prepared[i] = { id: itemData._id };
+            instance.system.slots[`slot${level}`].prepared[preparedValue] = { id: itemData._id };
+            preparedValue++;
           }
         }
       }
