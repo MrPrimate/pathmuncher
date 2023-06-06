@@ -97,6 +97,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Marked for Death", foundryName: "Mark for Death" },
   { pbName: "Miraculous Spells", foundryName: "Miraculous Spell" },
   { pbName: "Multifarious", foundryName: "Multifarious Muse" },
+  { pbName: "Mystic", foundryName: "Nexian Mystic" },
   { pbName: "Paladin [Lawful Good]", foundryName: "Paladin" },
   { pbName: "Parry", foundryName: "Aldori Parry" },
   { pbName: "Polymath", foundryName: "Polymath Muse" },

@@ -1,3 +1,7 @@
+# 0.5.6
+
+- Map Mystic to Nexian Mystic for @Whirlmeister#2484
+
 # 0.5.5
 
 - Fix up for granted feats added before other feats, resulting in some bad dialogs for things like Multifarious Muse.
