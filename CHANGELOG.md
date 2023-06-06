@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Child of Squalor/the Puddles mapping
+
 # 0.5.6
 
 - Map Mystic to Nexian Mystic for @Whirlmeister#2484

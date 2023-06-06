@@ -45,6 +45,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Bloody Debilitations", foundryName: "Bloody Debilitation" },
   { pbName: "Canoneer", foundryName: "Cannoneer" },
   { pbName: "Cave Climber Kobold", foundryName: "Caveclimber Kobold" },
+  { pbName: "Child of Squalor", foundryName: "Child of the Puddles" },
   { pbName: "Chosen One", foundryName: "Chosen of Lamashtu" },
   { pbName: "Cognative Mutagen (Greater)", foundryName: "Cognitive Mutagen (Greater)" },
   { pbName: "Cognative Mutagen (Lesser)", foundryName: "Cognitive Mutagen (Lesser)" },
