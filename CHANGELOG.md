@@ -1,6 +1,7 @@
-# NEXT UP
+# 0.5.7
 
 - Child of Squalor/the Puddles mapping
+- Prepared Wizard spells came in odd slots.
 
 # 0.5.6
 
