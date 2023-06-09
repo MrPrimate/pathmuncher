@@ -122,6 +122,20 @@
     "Folders": {
       "Familiar": "Familiars",
       "Familiars": "Familiars"
+    },
+    "CompendiumGroups": {
+      "feats": "Feats",
+      "ancestryFeatures": "Ancestry Features",
+      "classFeatures": "Class Features",
+      "actions": "Actions",
+      "spells": "Spells",
+      "classes": "Classes",
+      "ancestries": "Ancestries",
+      "heritages": "Heritages",
+      "equipment": "Equipment",
+      "formulas": "Formulas",
+      "deities": "Deities",
+      "backgrounds": "Backgrounds"
     }
   }
 }

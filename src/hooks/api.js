@@ -1,4 +1,5 @@
 import { CompendiumMatcher } from "../app/CompendiumMatcher.js";
+import { CompendiumSelector } from "../app/CompendiumSelector.js";
 import { Pathmuncher } from "../app/Pathmuncher.js";
 import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
 import { PetShop } from "../app/PetShop.js";
@@ -15,6 +16,7 @@ export function registerAPI() {
     PetShop,
     CompendiumMatcher,
     Seasoning,
+    CompendiumSelector,
     data: {
       generateFeatMap: FEAT_RENAME_MAP,
       equipment: EQUIPMENT_RENAME_MAP,

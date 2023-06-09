@@ -1,0 +1,35 @@
+<div class="drop-container">
+  <select id="comp-selector">
+    <option selected value="">{{localize "pathmuncher.Dialogs.CompendiumSelector.Select"}}</option>
+    {{#each lookups}}
+    <option value="{{this.key}}">{{this.label}}</option>
+    {{/each}}
+  </select>
+</div>
+
+<div class="container">
+    <div class="list-container">
+      <select id="sourceList" class="list" multiple>
+        {{#each sourceItems}}
+        <option value="{{this}}">{{this}}/option>
+        {{/each}}
+      </select>
+
+      <div class="button-container">
+        <button id="addButton" class="button">{{localize "pathmuncher.Dialogs.CompendiumSelector.Add"}} &gt;&gt;</button>
+        <button id="removeButton" class="button">&lt;&lt; {{localize "pathmuncher.Dialogs.CompendiumSelector.Remove"}}</button>
+      </div>
+
+      <select id="compendiumList" class="list" multiple>
+        {{#each compendiumItems}}
+        <option value="{{this}}">{{this}}</option>
+        {{/each}}
+      </select>
+
+        <div class="button-container">
+        <button id="upButton" class="button">Up</button>
+        <button id="downButton" class="button">Down</button>
+      </div>
+    </div>
+</div>
+
