@@ -1,3 +1,4 @@
+import { CompendiumSelector } from "../app/CompendiumSelector.js";
 import CONSTANTS from "../constants.js";
 
 async function resetSettings() {
@@ -48,5 +49,14 @@ export function registerSettings() {
   for (const [name, data] of Object.entries(CONSTANTS.GET_DEFAULT_SETTINGS())) {
     game.settings.register(CONSTANTS.MODULE_NAME, name, data);
   }
+
+  game.settings.registerMenu(CONSTANTS.MODULE_NAME, "selectCustomCompendiums", {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.UseCustomCompendiumMappings.Title`,
+    label: `${CONSTANTS.FLAG_NAME}.Settings.UseCustomCompendiumMappings.Label`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.UseCustomCompendiumMappings.Hint`,
+    icon: "fas fa-book",
+    type: CompendiumSelector,
+    restricted: true,
+  });
 
 }

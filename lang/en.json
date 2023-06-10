@@ -25,7 +25,8 @@
         "off": "OFF"
       },
       "UseCustomCompendiumMappings": {
-        "Name": "Use custom compendium mappings?",
+        "Title": "Use custom compendium mappings?",
+        "Label": "Custom Compendium Mappings",
         "Hint": "This is useful for things like Battlezoo or Cleric+ modules, or even if you have your own compendium of custom feats."
       }
     },

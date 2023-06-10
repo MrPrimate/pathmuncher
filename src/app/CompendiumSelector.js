@@ -1,7 +1,7 @@
 import CONSTANTS from "../constants.js";
 import utils from "../utils.js";
 
-export class CompendiumSelector extends Application {
+export class CompendiumSelector extends FormApplication {
   constructor() {
     super();
     this.lookups = utils.setting("CUSTOM_COMPENDIUM_MAPPINGS");
