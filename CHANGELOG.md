@@ -1,3 +1,7 @@
+# 0.5.8
+
+- Handle Magical Experiment backgrounds.
+
 # 0.5.7
 
 - Child of Squalor/the Puddles mapping
