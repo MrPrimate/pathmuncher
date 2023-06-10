@@ -277,6 +277,17 @@ export class Pathmuncher {
       };
       this.parsed.specials.push(clanDagger);
     }
+
+    const match = this.source.background.match(/(Magical Experiment) \((.*)\)$/);
+    if (match) {
+      this.parsed.specials.push({
+        name: match[2],
+        originalName: `${this.source.background}`,
+        added: false,
+        isChoice: true,
+      });
+      this.source.background = match[1];
+    }
   }
 
   async #prepare() {
@@ -967,7 +978,7 @@ export class Pathmuncher {
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
-      if (ruleEntry.adjustName && choice.label) {
+      if (ruleEntry.adjustName && choice?.label) {
         document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
       }
       this.autoAddedFeatureRules[document._id].push(ruleEntry);
