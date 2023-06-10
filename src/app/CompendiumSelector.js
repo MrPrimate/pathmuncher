@@ -46,13 +46,6 @@ export class CompendiumSelector extends Application {
     const sourceList = document.getElementById("sourceList");
     const compendiumList = document.getElementById("compendiumList");
 
-    console.warn("filterList", {
-      event,
-      this: this,
-      compendiumType,
-      lookups: this.lookups[compendiumType],
-    });
-
     const sourceOptions = this.packs.filter((p) => !this.lookups[compendiumType].includes(p.id));
     const compendiumOptions = this.packs.filter((p) => this.lookups[compendiumType].includes(p.id));
 
