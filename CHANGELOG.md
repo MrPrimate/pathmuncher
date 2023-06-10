@@ -1,3 +1,7 @@
+# 0.6.0
+
+- You can now select which compendiums and orders will be used when looking up entries for a character. This is a setting in the setting menu for Pathmuncher.
+
 # 0.5.8
 
 - Handle Magical Experiment backgrounds.
