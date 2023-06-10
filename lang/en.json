@@ -80,7 +80,9 @@
         "Add": "Add",
         "Remove": "Remove",
         "Up": "Up",
-        "Down": "Down"
+        "Down": "Down",
+        "Enable": "Enable Custom Compendium Lookups",
+        "Reset": "Reset Compendium Choices"
       }
     },
     "Chat": {},

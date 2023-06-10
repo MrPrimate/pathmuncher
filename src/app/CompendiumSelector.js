@@ -11,6 +11,7 @@ export class CompendiumSelector extends Application {
         return { id: p.metadata.id, label: `${p.metadata.label} (${p.metadata.packageName})` };
       });
     this.currentType = null;
+    this.useCustomCompendiums = utils.setting("USE_CUSTOM_COMPENDIUM_MAPPINGS");
   }
 
   static get defaultOptions() {
@@ -38,7 +39,21 @@ export class CompendiumSelector extends Application {
       title: this.options.title,
       sourceItems: [],
       compendiumItems: [],
+      useCustomCompendiums: this.useCustomCompendiums,
     };
+  }
+
+  async reset() {
+    const defaults = CONSTANTS.GET_DEFAULT_SETTINGS();
+    this.lookups = defaults[CONSTANTS.SETTINGS.CUSTOM_COMPENDIUM_MAPPINGS].default;
+    await utils.updateSetting("CUSTOM_COMPENDIUM_MAPPINGS", this.lookups);
+    this.currentType = null;
+    this.render(true);
+  }
+
+  async enableCustomCompendiums() {
+    this.useCustomCompendiums = !this.useCustomCompendiums;
+    await utils.updateSetting("USE_CUSTOM_COMPENDIUM_MAPPINGS", this.useCustomCompendiums);
   }
 
   filterList(event) {
@@ -131,6 +146,8 @@ export class CompendiumSelector extends Application {
     document.getElementById("removeButton").addEventListener("click", this.removeCompendium.bind(this));
     document.getElementById("upButton").addEventListener("click", this.moveUp.bind(this));
     document.getElementById("downButton").addEventListener("click", this.moveDown.bind(this));
-    document.getElementById("comp-selector").addEventListener("change", this.filterList.bind(this));
+    document.getElementById("compSelector").addEventListener("change", this.filterList.bind(this));
+    document.getElementById("resetButton").addEventListener("click", this.reset.bind(this));
+    document.getElementById("enableCustomCompendiums").addEventListener("change", this.enableCustomCompendiums.bind(this));
   }
 }
