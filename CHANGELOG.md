@@ -1,3 +1,7 @@
+# 0.6.1
+
+- For characters exported with v67 of Pathbuilder, rituals will now be added.
+
 # 0.6.0
 
 - You can now select which compendiums and orders will be used when looking up entries for a character. This is a setting in the setting menu for Pathmuncher.

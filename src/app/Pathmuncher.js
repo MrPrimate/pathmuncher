@@ -1727,6 +1727,36 @@ export class Pathmuncher {
     }
   }
 
+  async #processRituals() {
+    if (!this.source.rituals) return;
+    const ritualCompendium = new CompendiumMatcher({
+      type: "spells",
+      indexFields: ["name", "type", "system.slug", "system.category.value"],
+    });
+    await ritualCompendium.loadCompendiums();
+
+    const ritualFilters = {
+      "system.category.value": "ritual",
+    };
+    for (const ritual of this.source.rituals) {
+      const ritualName = ritual.split("(")[0].trim();
+      logger.debug("focus spell details", { ritual, spellName: ritualName });
+
+      const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName, ritualFilters);
+      if (!indexMatch) {
+        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName });
+        this.bad.push({ pbName: ritual, type: "spell", details: { originalName: ritual, name: ritualName } });
+        continue;
+      }
+
+      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+      const itemData = doc.toObject();
+      itemData._id = foundry.utils.randomID();
+
+      this.result.spells.push(itemData);
+    }
+  }
+
   async #processSpells() {
     for (const caster of this.source.spellCasters) {
       logger.debug("Generating caster for", caster);
@@ -2054,6 +2084,8 @@ export class Pathmuncher {
     await this.#processEquipment();
     this.#statusUpdate(11, 12, "Spells");
     await this.#processSpells();
+    this.#statusUpdate(11, 12, "Rituals");
+    await this.#processRituals();
     this.#statusUpdate(12, 12, "Lores");
     await this.#generateLores();
   }

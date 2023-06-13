@@ -56,5 +56,34 @@ export class CompendiumMatcher {
     return undefined;
   }
 
+  static checkForFilters(i, filters) {
+    for (const [key, value] of Object.entries(filters)) {
+      if (getProperty(i, key) !== value) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  getNameMatchWithFilter(pbName, foundryName, filters = {}) {
+    for (const [packName, index] of Object.entries(this.indexes)) {
+      logger.debug(`Checking for compendium documents for ${pbName} (${foundryName}) in ${packName}`);
+      const indexMatch = index.find((i) =>
+        ((i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(foundryName))
+          && CompendiumMatcher.checkForFilters(i, filters))
+        ?? index.find((i) =>
+          ((i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(pbName)
+          && CompendiumMatcher.checkForFilters(i, filters))
+        );
+
+      if (indexMatch) {
+        logger.debug(`Found compendium document for ${pbName} (${foundryName}) in ${packName} with id ${indexMatch._id}`);
+        return { i: indexMatch, pack: this.packs[packName] };
+      }
+    }
+
+    return undefined;
+  }
+
 
 }
