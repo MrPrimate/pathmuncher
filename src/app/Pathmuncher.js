@@ -659,7 +659,9 @@ export class Pathmuncher {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
-      const choices = (await choiceSetRules.inflateChoices()).filter((c) => c.predicate?.test(rollOptions) ?? true);
+      const choices = isNewerVersion(game.version, 11)
+        ? await choiceSetRules.inflateChoices(rollOptions)
+        : (await choiceSetRules.inflateChoices()).filter((c) => c.predicate?.test(rollOptions) ?? true);
 
       logger.debug("Starting choice evaluation", {
         document,
@@ -671,7 +673,9 @@ export class Pathmuncher {
       });
 
       if (cleansedChoiceSet.choices?.query) {
-        const nonFilteredChoices = await choiceSetRules.inflateChoices();
+        const nonFilteredChoices = isNewerVersion(game.version, 11)
+          ? await choiceSetRules.inflateChoices(rollOptions)
+          : await choiceSetRules.inflateChoices();
         const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices);
         logger.debug("Query Result", { queryResults, nonFilteredChoices });
       }
@@ -789,7 +793,9 @@ export class Pathmuncher {
         : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = cleansedRule.key === "ChoiceSet"
-        ? (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
+        ? isNewerVersion(game.version, 11)
+          ? await ruleElement.inflateChoices(rollOptions)
+          : (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
         : [ruleElement.resolveValue()];
 
       const isGood = cleansedRule.key === "ChoiceSet"
@@ -1316,14 +1322,15 @@ export class Pathmuncher {
     }
   }
 
-  async #generateEquipmentItems() {
+  async #generateAdventurersPack() {
     const defaultCompendium = game.packs.get("pf2e.equipment-srd");
     const index = await defaultCompendium.getIndex({ fields: ["name", "type", "system.slug"] });
-    const compendiumBackpack = await defaultCompendium.getDocument("3lgwjrFEsQVKzhh7");
+
 
     const adventurersPack = this.parsed.equipment.find((e) => e.pbName === "Adventurer's Pack");
-    const backpackInstance = adventurersPack ? compendiumBackpack.toObject() : null;
-    if (backpackInstance) {
+    if (adventurersPack) {
+      const compendiumBackpack = await defaultCompendium.getDocument("3lgwjrFEsQVKzhh7");
+      const backpackInstance = compendiumBackpack.toObject();
       adventurersPack.added = true;
       backpackInstance._id = foundry.utils.randomID();
       this.result.adventurersPack.item = adventurersPack;
@@ -1343,7 +1350,9 @@ export class Pathmuncher {
         this.result.equipment.push(itemData);
       }
     }
+  }
 
+  async #generateContainers() {
     for (const [key, data] of Object.entries(this.source.equipmentContainers)) {
       if (data.foundryId) continue;
       const name = Seasoning.getFoundryEquipmentName(data.containerName);
@@ -1365,7 +1374,9 @@ export class Pathmuncher {
         foundryId: id,
       });
     }
+  }
 
+  async #generateEquipmentItems() {
     for (const e of this.parsed.equipment) {
       if (e.pbName === "Adventurer's Pack") continue;
       if (e.added) continue;
@@ -1399,6 +1410,13 @@ export class Pathmuncher {
       // eslint-disable-next-line require-atomic-updates
       e.added = true;
     }
+  }
+
+  async #processEquipmentItems() {
+    // just in case it's in the equipment, pathbuilder should have translated this to items
+    await this.#generateAdventurersPack();
+    await this.#generateContainers();
+    await this.#generateEquipmentItems();
   }
 
   async #generateWeaponItems() {
@@ -1883,7 +1901,7 @@ export class Pathmuncher {
 
   async #processEquipment() {
     this.#statusUpdate(1, 4, "Equipment");
-    await this.#generateEquipmentItems();
+    await this.#processEquipmentItems();
     this.#statusUpdate(2, 4, "Weapons");
     await this.#generateWeaponItems();
     this.#statusUpdate(3, 4, "Armor");

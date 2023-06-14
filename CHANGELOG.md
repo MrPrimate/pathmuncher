@@ -1,3 +1,7 @@
+# 0.7.0
+
+- Support for v11.
+
 # 0.6.1
 
 - For characters exported with v67 of Pathbuilder, rituals will now be added.
