@@ -1117,14 +1117,19 @@ export class Pathmuncher {
 
   #generateAncestryAbilityBoosts() {
     const breakdown = getProperty(this.source, "abilities.breakdown");
+    const boosts = [];
     breakdown.ancestryBoosts.concat(breakdown.ancestryFree).forEach((boost) => {
       for (const [key, boostSet] of Object.entries(this.result.ancestry[0].system.boosts)) {
         if (boostSet.value.includes(boost.toLowerCase())) {
           this.result.ancestry[0].system.boosts[key].selected = boost.toLowerCase();
+          boosts.push(boost.toLowerCase());
           break;
         }
       }
     });
+    if (breakdown.ancestryBoosts.length === 0) {
+      setProperty(this.result.ancestry[0], "system.alternateAncestryBoosts", boosts);
+    }
   }
 
   #setAbilityBoosts() {

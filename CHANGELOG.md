@@ -1,3 +1,7 @@
+# 0.7.1
+
+- Alternative ability score method would not always import correctly.
+
 # 0.7.0
 
 - Support for v11.
