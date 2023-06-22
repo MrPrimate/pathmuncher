@@ -1,6 +1,7 @@
 # 0.7.2
 
 - Fixes for system version v5.0.2.
+- Improvements to adding prepared spells for classes like cleric where spell blending may have been used on Pathmuncher.
 
 # 0.7.1
 

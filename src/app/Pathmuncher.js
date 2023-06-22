@@ -1694,16 +1694,19 @@ export class Pathmuncher {
     return itemData;
   }
 
-  async #processCasterSpells(instance, spells, preparedSpells, spellEnhancements, forcePrepare = false) {
-    const spellNames = [];
-    for (const spellSelection of spells) {
+  // eslint-disable-next-line complexity
+  async #processCasterSpells(instance, caster, spellEnhancements, forcePrepare = false) {
+    const spellNames = {};
+    for (const spellSelection of caster.spells) {
       const level = spellSelection.spellLevel;
-      const preparedAtLevel = preparedSpells?.length > 0
-        ? (preparedSpells.find((p) => p.spellLevel === level)?.list ?? [])
+      const preparedAtLevel = caster.prepared?.length > 0
+        ? (caster.prepared.find((p) => p.spellLevel === level)?.list ?? [])
         : [];
-      const spellList = [...new Set(spellSelection.list.concat(preparedAtLevel))];
       let preparedValue = 0;
-      for (const [i, spell] of spellList.entries()) {
+
+      // const preparedMap = preparedAtLevel.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+
+      for (const [i, spell] of spellSelection.list.entries()) {
         logger.debug(`Checking spell at ${i} for level ${level}`, { spell });
         const itemData = await this.#loadSpell(spell, instance._id, {
           spellSelection,
@@ -1713,15 +1716,15 @@ export class Pathmuncher {
         });
         if (itemData) {
           itemData.system.location.heightenedLevel = level;
-          spellNames.push(itemData.name);
+          spellNames[spell] = itemData._id;
           this.result.spells.push(itemData);
 
           // if the caster is prepared we don't prepare spells as all known spells come through in JSON
-          if (
-            preparedAtLevel.includes(spell)
-            || instance.system.prepared.value !== "prepared"
+          if (instance.system.prepared.value !== "prepared"
             || spellEnhancements?.preparePBSpells
             || forcePrepare
+            || (caster.spellcastingType === "prepared"
+              && preparedAtLevel.length === 0 && spellSelection.list.length <= caster.perDay[level])
           ) {
             logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spell });
             // eslint-disable-next-line require-atomic-updates
@@ -1731,15 +1734,41 @@ export class Pathmuncher {
         }
       }
 
+      for (const spell of preparedAtLevel) {
+        // if (spellNames.includes(spellName)) continue;
+        const parsedSpell = getProperty(spellNames, spell);
+        const itemData = parsedSpell
+          ? this.result.spells.find((s) => s._id === parsedSpell)
+          : await this.#loadSpell(spell, instance._id, {
+            spellSelection,
+            level,
+            instance,
+          });
+        if (itemData) {
+          itemData.system.location.heightenedLevel = level;
+          if (itemData && !parsedSpell) {
+            spellNames[spell] = itemData._id;
+            this.result.spells.push(itemData);
+          }
+
+          logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spellName: spell });
+          // eslint-disable-next-line require-atomic-updates
+          instance.system.slots[`slot${level}`].prepared[preparedValue] = { id: itemData._id };
+          preparedValue++;
+        } else {
+          logger.warn(`Unable to find spell ${spell}`);
+        }
+      }
+
       if (spellEnhancements?.knownSpells) {
         for (const spell of spellEnhancements.knownSpells) {
           const itemData = await this.#loadSpell(spell, instance._id, {
             spellEnhancements,
             instance,
           });
-          if (itemData && !spellNames.includes(itemData.name)) {
+          if (itemData && !hasProperty(spellNames, itemData.name)) {
             itemData.system.location.heightenedLevel = level;
-            spellNames.push(itemData.name);
+            spellNames[spell] = itemData._id;
             this.result.spells.push(itemData);
           }
         }
@@ -1811,7 +1840,7 @@ export class Pathmuncher {
         instance.system.showSlotlessLevels.value = !slotToPreparedMatch;
         forcePrepare = slotToPreparedMatch;
       }
-      await this.#processCasterSpells(instance, caster.spells, caster.prepared, spellEnhancements, forcePrepare);
+      await this.#processCasterSpells(instance, caster, spellEnhancements, forcePrepare);
     }
 
     for (const tradition of ["occult", "primal", "divine", "arcane"]) {
