@@ -657,7 +657,9 @@ export class Pathmuncher {
     const cleansedChoiceSet = deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
+      const choiceSetRules = isNewerVersion(game.version, 11)
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item })
+        : new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = isNewerVersion(game.version, 11)
         ? await choiceSetRules.inflateChoices(rollOptions)
@@ -755,9 +757,11 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       // console.warn("creating grant item");
-      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, item);
+      const grantItemRule = isNewerVersion(game.version, 11)
+        ? new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item })
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, item);
       // console.warn("Begining uuid resovle");
-      const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid);
+      const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
 
       logger.debug("uuid selection", {
         document,
@@ -789,8 +793,12 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
+        ? isNewerVersion(game.version, 11)
+          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
+          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+        : isNewerVersion(game.version, 11)
+          ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
+          : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = cleansedRule.key === "ChoiceSet"
         ? isNewerVersion(game.version, 11)

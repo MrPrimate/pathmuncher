@@ -1,3 +1,7 @@
+# 0.7.2
+
+- Fixes for system version v5.0.2.
+
 # 0.7.1
 
 - Alternative ability score method would not always import correctly.
