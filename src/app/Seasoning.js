@@ -69,6 +69,19 @@ export class Seasoning {
     }
   }
 
+  static PHYSICAL_ITEM_TYPES = new Set([
+    "armor",
+    "backpack",
+    "book",
+    "consumable",
+    "equipment",
+    "treasure",
+    "weapon"
+  ]);
+
+  static isPhysicalItemType(type) {
+    return Seasoning.PHYSICAL_ITEM_TYPES.has(type);
+  }
 
   static getMaterialGrade(material) {
     if (material.toLowerCase().includes("high-grade")) {

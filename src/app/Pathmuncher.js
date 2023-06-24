@@ -72,6 +72,7 @@ export class Pathmuncher {
       background: {},
       ancestry: {},
     };
+    this.size = "med";
     this.result = {
       character: {
         _id: this.actor.id,
@@ -863,6 +864,8 @@ export class Pathmuncher {
     for (const ruleEntry of document.system.rules) {
       logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
       if (!["ChoiceSet", "GrantItem"].includes(ruleEntry.key)) {
+        // size work around due to Pathbuilder not always adding the right size to json
+        if (ruleEntry.key === "CreatureSize") this.size = ruleEntry.value;
         this.autoAddedFeatureRules[document._id].push(ruleEntry);
         rulesToKeep.push(ruleEntry);
         continue;
@@ -1157,7 +1160,8 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
 
     if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
-    setProperty(this.result.character, "system.traits.size.value", Seasoning.getSizeValue(this.source.size));
+    this.size = Seasoning.getSizeValue(this.source.size);
+    setProperty(this.result.character, "system.traits.size.value", this.size);
     setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
 
     this.#processSenses();
@@ -1335,6 +1339,13 @@ export class Pathmuncher {
     }
   }
 
+  #resizeItem(item) {
+    if (Seasoning.isPhysicalItemType(item.type)) {
+      const resizeItem = item.type !== "treasure" && !["med", "sm"].includes(this.size);
+      if (resizeItem) item.system.size = this.size;
+    }
+  }
+
   async #generateAdventurersPack() {
     const defaultCompendium = game.packs.get("pf2e.equipment-srd");
     const index = await defaultCompendium.getIndex({ fields: ["name", "type", "system.slug"] });
@@ -1360,6 +1371,7 @@ export class Pathmuncher {
         itemData._id = foundry.utils.randomID();
         itemData.system.quantity = content.qty;
         itemData.system.containerId = backpackInstance?._id;
+        this.#resizeItem(itemData);
         this.result.equipment.push(itemData);
       }
     }
@@ -1376,6 +1388,7 @@ export class Pathmuncher {
         : await Item.create({ name: data.containerName, type: "backpack" }, { temporary: true });
       const itemData = doc.toObject();
       itemData._id = id;
+      this.#resizeItem(itemData);
       this.result["equipment"].push(itemData);
       this.parsed.equipment.push({
         pbName: data.containerName,
@@ -1418,6 +1431,7 @@ export class Pathmuncher {
             itemData.system.equipped.carryType = "stowed";
           }
         }
+        this.#resizeItem(itemData);
         this.result[type].push(itemData);
       }
       // eslint-disable-next-line require-atomic-updates
@@ -1430,6 +1444,25 @@ export class Pathmuncher {
     await this.#generateAdventurersPack();
     await this.#generateContainers();
     await this.#generateEquipmentItems();
+  }
+
+  static applyRunes(parsedItem, itemData, type) {
+    itemData.system.potencyRune.value = parsedItem.pot;
+    if (type === "weapon") {
+      itemData.system.strikingRune.value = parsedItem.str;
+    } else if (type === "armor") {
+      itemData.system.resiliencyRune.value = parsedItem.res;
+    }
+
+    if (parsedItem.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(parsedItem.runes[0]);
+    if (parsedItem.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(parsedItem.runes[1]);
+    if (parsedItem.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(parsedItem.runes[2]);
+    if (parsedItem.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(parsedItem.runes[3]);
+    if (parsedItem.mat) {
+      const material = parsedItem.mat.split(" (")[0];
+      itemData.system.preciousMaterial.value = Seasoning.slugD(material);
+      itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(parsedItem.mat);
+    }
   }
 
   async #generateWeaponItems() {
@@ -1451,20 +1484,12 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       itemData.system.quantity = w.qty;
       itemData.system.damage.die = w.die;
-      itemData.system.potencyRune.value = w.pot;
-      itemData.system.strikingRune.value = w.str;
 
-      if (w.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(w.runes[0]);
-      if (w.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(w.runes[1]);
-      if (w.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(w.runes[2]);
-      if (w.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(w.runes[3]);
-      if (w.mat) {
-        const material = w.mat.split(" (")[0];
-        itemData.system.preciousMaterial.value = Seasoning.slugD(material);
-        itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(w.mat);
-      }
+      Pathmuncher.applyRunes(w, itemData, "weapon");
+
       if (w.display) itemData.name = w.display;
 
+      this.#resizeItem(itemData);
       this.result.weapons.push(itemData);
       w.added = true;
     }
@@ -1492,25 +1517,16 @@ export class Pathmuncher {
         itemData.system.equipped.inSlot = a.worn ?? false;
         itemData.system.quantity = a.qty;
         itemData.system.category = a.prof;
-        itemData.system.potencyRune.value = a.pot;
-        itemData.system.resiliencyRune.value = a.res;
 
         const isShield = itemData.system.category === "shield";
         itemData.system.equipped.handsHeld = isShield && a.worn ? 1 : 0;
         itemData.system.equipped.carryType = isShield && a.worn ? "held" : "worn";
 
-        if (a.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(a.runes[0]);
-        if (a.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(a.runes[1]);
-        if (a.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(a.runes[2]);
-        if (a.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(a.runes[3]);
-        if (a.mat) {
-          const material = a.mat.split(" (")[0];
-          itemData.system.preciousMaterial.value = Seasoning.slugD(material);
-          itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(a.mat);
-        }
+        Pathmuncher.applyRunes(a, itemData, "armor");
       }
       if (a.display) itemData.name = a.display;
 
+      this.#resizeItem(itemData);
       this.result.armor.push(itemData);
       // eslint-disable-next-line require-atomic-updates
       a.added = true;
