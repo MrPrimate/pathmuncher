@@ -1,6 +1,6 @@
-# NEXT UP
+# 0.7.3
 
-- Tiny creatues will now have items sizes adjusted appropriately.
+- Tiny things for tiny people. Tiny creatues will now have items sizes adjusted appropriately.
 
 # 0.7.2
 
