@@ -3,6 +3,8 @@
 - Fixes for failure on import when background not matched.
 - Academic backgrounds now match up properly.
 - Fixes for some ability boosts for backgrounds and ancestry not always fully selected.
+- Relaxed some ignore rules around skills in the Pathbuilder JSON output - this may increase some false "missing" notes post export, but will actually improve some feat parsing.
+- Moved skill generation till after heritage selection to allow Skilled Heritage feat to be fully populated.
 
 # 0.7.3
 
