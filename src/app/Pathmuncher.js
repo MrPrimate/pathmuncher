@@ -207,21 +207,43 @@ export class Pathmuncher {
           this.source.equipmentContainers[containerKey].foundryId = foundryId;
         }
 
-        const item = { pbName: name, qty: e[1], added: false, inContainer: e[2], container, foundryId };
+        const item = {
+          pbName: name,
+          qty: e[1],
+          added: false,
+          addedId: null,
+          addedAutoId: null,
+          inContainer: e[2],
+          container,
+          foundryId,
+        };
         this.parsed.equipment.push(item);
       });
     this.source.armor
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
+        const item = mergeObject({
+          pbName: name,
+          originalName: e.name,
+          added: false,
+          addedId: null,
+          addedAutoId: null,
+        }, e);
         this.parsed.armor.push(item);
       });
     this.source.weapons
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = mergeObject({ pbName: name, originalName: e.name, added: false }, e);
+        const item = mergeObject({
+          pbName: name,
+          originalName:
+          e.name,
+          added: false,
+          addedId: null,
+          addedAutoId: null,
+        }, e);
         this.parsed.weapons.push(item);
       });
     logger.debug("Finished Equipment Rename");
@@ -236,8 +258,8 @@ export class Pathmuncher {
       )
       .forEach((special) => {
         const name = this.getFoundryFeatureName(special).foundryName;
-        if (!this.#processSpecialData(name) && !Seasoning.IGNORED_FEATS().includes(name)) {
-          this.parsed.specials.push({ name, originalName: special, added: false });
+        if (!this.#processSpecialData(name) && !Seasoning.IGNORED_SPECIALS().includes(name)) {
+          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null });
         }
       });
     logger.debug("Finished Special Rename");
@@ -256,6 +278,8 @@ export class Pathmuncher {
           name,
           extra: feat[1],
           added: feat[0] === this.source.heritage,
+          addedId: null,
+          addedAutoId: "heritage",
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
@@ -274,6 +298,8 @@ export class Pathmuncher {
         name: "Clan Dagger",
         originalName: "Clan Dagger",
         added: false,
+        addedId: null,
+        addedAutoId: null,
         isChoice: true,
       };
       this.parsed.specials.push(clanDagger);
@@ -285,6 +311,8 @@ export class Pathmuncher {
         name: match[2],
         originalName: `${this.source.background}`,
         added: false,
+        addedId: null,
+        addedAutoId: null,
         isChoice: true,
       });
       this.source.background = match[1];
@@ -615,6 +643,7 @@ export class Pathmuncher {
     if (featureMatch) {
       if (hasProperty(featureMatch, "added")) {
         featureMatch.added = true;
+        featureMatch.addedId = document._id;
         this.#generateFoundryFeatLocation(document, featureMatch);
       }
 
@@ -638,7 +667,10 @@ export class Pathmuncher {
           : doc.system.slug;
       const featMatch = this.#findAllFeatureMatch(document, slug, ignoreAdded);
       if (featMatch) {
-        if (adjustName && hasProperty(featMatch, "added")) featMatch.added = true;
+        if (adjustName && hasProperty(featMatch, "added")) {
+          featMatch.added = true;
+          featMatch.addedId = document._id;
+        }
         logger.debug("Choices evaluated", { choices, document, featMatch, choice });
         return choice;
       }
@@ -701,6 +733,7 @@ export class Pathmuncher {
           if (featMatch) {
             logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
             featMatch.added = true;
+            featMatch.addedId = document._id;
             choice.nouuid = true;
             return choice;
           }
@@ -708,7 +741,7 @@ export class Pathmuncher {
       }
 
       let tempSet = deepClone(choiceSet);
-      logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet });
+      logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
       await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet });
       // console.warn("chociesetdata", {
       //   choiceSetRules,
@@ -1115,6 +1148,7 @@ export class Pathmuncher {
   }
 
   #generateBackgroundAbilityBoosts() {
+    if (!this.result.background[0]) return;
     const breakdown = getProperty(this.source, "abilities.breakdown");
     breakdown.backgroundBoosts.forEach((boost) => {
       for (const [key, boostSet] of Object.entries(this.result.background[0].system.boosts)) {
@@ -1127,6 +1161,7 @@ export class Pathmuncher {
   }
 
   #generateAncestryAbilityBoosts() {
+    if (!this.result.ancestry[0]) return;
     const breakdown = getProperty(this.source, "abilities.breakdown");
     const boosts = [];
     breakdown.ancestryBoosts.concat(breakdown.ancestryFree).forEach((boost) => {
@@ -1295,17 +1330,19 @@ export class Pathmuncher {
         pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
+          pBFeat.addedAutoId = `${indexMatch._id}_${indexMatch.type}`;
           continue;
         }
 
         const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-        const item = doc.toObject();
-        item._id = foundry.utils.randomID();
-        item.name = displayName;
+        const docData = doc.toObject();
+        docData._id = foundry.utils.randomID();
+        pBFeat.addedId = docData._id;
+        docData.name = displayName;
 
-        this.#generateFoundryFeatLocation(item, pBFeat);
-        this.result.feats.push(item);
-        await this.#addGrantedItems(item);
+        this.#generateFoundryFeatLocation(docData, pBFeat);
+        this.result.feats.push(docData);
+        await this.#addGrantedItems(docData);
       }
     }
   }
@@ -1328,12 +1365,14 @@ export class Pathmuncher {
       if (this.check[special.originalName]) delete this.check[special.originalName];
       if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
         logger.debug("Special included in class features auto add", { special: special.name, type });
+        special.addedAutoId = `${indexMatch._id}_${indexMatch.type}`;
         continue;
       }
 
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const docData = doc.toObject();
       docData._id = foundry.utils.randomID();
+      special.addedId = docData._id;
       this.result.feats.push(docData);
       await this.#addGrantedItems(docData);
     }
@@ -1357,6 +1396,7 @@ export class Pathmuncher {
       const backpackInstance = compendiumBackpack.toObject();
       adventurersPack.added = true;
       backpackInstance._id = foundry.utils.randomID();
+      adventurersPack.addedId = backpackInstance._id;
       this.result.adventurersPack.item = adventurersPack;
       this.result.equipment.push(backpackInstance);
       for (const content of this.result.adventurersPack.contents) {
@@ -1408,6 +1448,7 @@ export class Pathmuncher {
       if (e.added) continue;
       if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
         e.added = true;
+        e.addedAutoId = "ignored";
         continue;
       }
       logger.debug("Generating item for", e);
@@ -1433,6 +1474,7 @@ export class Pathmuncher {
         }
         this.#resizeItem(itemData);
         this.result[type].push(itemData);
+        e.addedId = itemData._id;
       }
       // eslint-disable-next-line require-atomic-updates
       e.added = true;
@@ -1469,6 +1511,7 @@ export class Pathmuncher {
     for (const w of this.parsed.weapons) {
       if (Seasoning.IGNORED_EQUIPMENT().includes(w.pbName)) {
         w.added = true;
+        w.addedAutoId = "ignored";
         continue;
       }
       logger.debug("Generating weapon for", w);
@@ -1492,6 +1535,7 @@ export class Pathmuncher {
       this.#resizeItem(itemData);
       this.result.weapons.push(itemData);
       w.added = true;
+      w.addedId = itemData._id;
     }
   }
 
@@ -1499,6 +1543,7 @@ export class Pathmuncher {
     for (const a of this.parsed.armor) {
       if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
         a.added = true;
+        a.addedAutoId = "ignored";
         continue;
       }
       logger.debug("Generating armor for", a);
@@ -1530,6 +1575,7 @@ export class Pathmuncher {
       this.result.armor.push(itemData);
       // eslint-disable-next-line require-atomic-updates
       a.added = true;
+      a.addedId = itemData._id;
     }
   }
 

@@ -32,6 +32,9 @@ const SWAPS = [
 ];
 
 const FEAT_RENAME_STATIC_MAP = [
+  { pbName: "Academic", foundryName: "Ustalavic Academic" },
+  { pbName: "Academic (Arcana)", foundryName: "Magaambya Academic" },
+  { pbName: "Academic (Nature)", foundryName: "Magaambya Academic" },
   { pbName: "Aerialist", foundryName: "Shory Aerialist" },
   { pbName: "Aeromancer", foundryName: "Shory Aeromancer" },
   { pbName: "Ancient-Blooded", foundryName: "Ancient-Blooded Dwarf" },
@@ -202,7 +205,7 @@ export function FEAT_RENAME_MAP(pbName = null) {
   return postfixNames.concat(FEAT_RENAME_STATIC_MAP);
 }
 
-const IGNORED_FEATS_LIST = [
+const SHARED_IGNORE_LIST = [
   "Draconic Rage", // just handled by effects on Draconic Instinct
   "Mirror Initiate Benefit",
   "Spellstrike Specifics",
@@ -211,6 +214,9 @@ const IGNORED_FEATS_LIST = [
   "Spellbook",
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
+];
+
+const IGNORED_FEATS_LIST = [
   // ignore skills listed as feats
   "Acrobatics",
   "Athletics",
@@ -234,7 +240,16 @@ const IGNORED_FEATS_LIST = [
   // "Small",
 ];
 
+const IGNORED_SPECIALS_LIST = [
+
+];
+
 export function IGNORED_FEATS() {
+  // const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
+  return IGNORED_FEATS_LIST.concat(SHARED_IGNORE_LIST);
+}
+
+export function IGNORED_SPECIALS() {
   const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
-  return IGNORED_FEATS_LIST.concat(visionFeats);
+  return IGNORED_SPECIALS_LIST.concat(SHARED_IGNORE_LIST, visionFeats);
 }

@@ -1,3 +1,9 @@
+# 0.7.4
+
+- Fixes for failure on import when background not matched.
+- Academic backgrounds now match up properly.
+
+
 # 0.7.3
 
 - Tiny things for tiny people. Tiny creatures will now have items sizes adjusted appropriately.
