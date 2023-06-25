@@ -2431,9 +2431,15 @@ export class Pathmuncher {
       : [];
     const badFeats2 = this.options.addFeats
       ? Object.values(this.check).filter((b) =>
-        (b.type === "feat" || b.type === "special")
-        && this.parsed.feats.concat(this.parsed.specials).some((f) => f.name === b.details.name && !f.added)
+        b.type === "feat"
+        && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
+      : [];
+    const badSpecials = this.options.addFeats
+      ? Object.values(this.check).filter((b) =>
+        (b.type === "special")
+        && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
+      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.name}</li>`)
       : [];
     const badEquipment = this.options.addEquipment
       ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
@@ -2464,6 +2470,7 @@ export class Pathmuncher {
       ...badDeity,
       ...badFeats,
       ...badFeats2,
+      ...badSpecials,
       ...badEquipment,
       ...badWeapons,
       ...badArmor,
@@ -2487,6 +2494,7 @@ export class Pathmuncher {
       badDeity,
       badFeats,
       badFeats2,
+      badSpecials,
       badEquipment,
       badWeapons,
       badArmor,
