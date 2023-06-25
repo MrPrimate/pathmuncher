@@ -2,7 +2,7 @@
 
 - Fixes for failure on import when background not matched.
 - Academic backgrounds now match up properly.
-
+- Fixes for some ability boosts for backgrounds and ancestry not always fully selected.
 
 # 0.7.3
 

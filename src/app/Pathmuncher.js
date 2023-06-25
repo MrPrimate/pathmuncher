@@ -1101,13 +1101,6 @@ export class Pathmuncher {
     }
   }
 
-  // async #detectGrantedFeatures() {
-  //   if (this.result.class.length > 0) await this.#addGrantedItems(this.result.class[0]);
-  //   if (this.result.ancestry.length > 0) await this.#addGrantedItems(this.result.ancestry[0]);
-  //   if (this.result.heritage.length > 0) await this.#addGrantedItems(this.result.heritage[0]);
-  //   if (this.result.background.length > 0) await this.#addGrantedItems(this.result.background[0]);
-  // }
-
   #determineAbilityBoosts() {
     const breakdown = getProperty(this.source, "abilities.breakdown");
     const useCustomStats
@@ -1150,14 +1143,15 @@ export class Pathmuncher {
   #generateBackgroundAbilityBoosts() {
     if (!this.result.background[0]) return;
     const breakdown = getProperty(this.source, "abilities.breakdown");
-    breakdown.backgroundBoosts.forEach((boost) => {
+    for (const boost of breakdown.backgroundBoosts) {
       for (const [key, boostSet] of Object.entries(this.result.background[0].system.boosts)) {
+        if (this.result.background[0].system.boosts[key].selected) continue;
         if (boostSet.value.includes(boost.toLowerCase())) {
           this.result.background[0].system.boosts[key].selected = boost.toLowerCase();
           break;
         }
       }
-    });
+    }
   }
 
   #generateAncestryAbilityBoosts() {
@@ -1166,6 +1160,7 @@ export class Pathmuncher {
     const boosts = [];
     breakdown.ancestryBoosts.concat(breakdown.ancestryFree).forEach((boost) => {
       for (const [key, boostSet] of Object.entries(this.result.ancestry[0].system.boosts)) {
+        if (this.result.ancestry[0].system.boosts[key].selected) continue;
         if (boostSet.value.includes(boost.toLowerCase())) {
           this.result.ancestry[0].system.boosts[key].selected = boost.toLowerCase();
           boosts.push(boost.toLowerCase());
@@ -1186,36 +1181,7 @@ export class Pathmuncher {
     this.result.class[0].system.boosts = this.boosts.class;
   }
 
-  async #processCore() {
-    setProperty(this.result.character, "name", this.source.name);
-    setProperty(this.result.character, "prototypeToken.name", this.source.name);
-    setProperty(this.result.character, "system.details.level.value", this.source.level);
-    if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
-    if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
-    setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
-
-    if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
-    this.size = Seasoning.getSizeValue(this.source.size);
-    setProperty(this.result.character, "system.traits.size.value", this.size);
-    setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
-
-    this.#processSenses();
-
-    this.#determineAbilityBoosts();
-
-    setProperty(this.result.character, "system.saves.fortitude.tank", this.source.proficiencies.fortitude / 2);
-    setProperty(this.result.character, "system.saves.reflex.value", this.source.proficiencies.reflex / 2);
-    setProperty(this.result.character, "system.saves.will.value", this.source.proficiencies.will / 2);
-
-    setProperty(this.result.character, "system.martial.advanced.rank", this.source.proficiencies.advanced / 2);
-    setProperty(this.result.character, "system.martial.heavy.rank", this.source.proficiencies.heavy / 2);
-    setProperty(this.result.character, "system.martial.light.rank", this.source.proficiencies.light / 2);
-    setProperty(this.result.character, "system.martial.medium.rank", this.source.proficiencies.medium / 2);
-    setProperty(this.result.character, "system.martial.unarmored.rank", this.source.proficiencies.unarmored / 2);
-    setProperty(this.result.character, "system.martial.martial.rank", this.source.proficiencies.martial / 2);
-    setProperty(this.result.character, "system.martial.simple.rank", this.source.proficiencies.simple / 2);
-    setProperty(this.result.character, "system.martial.unarmed.rank", this.source.proficiencies.unarmed / 2);
-
+  #setSkills() {
     setProperty(this.result.character, "system.skills.acr.rank", this.source.proficiencies.acrobatics / 2);
     setProperty(this.result.character, "system.skills.arc.rank", this.source.proficiencies.arcana / 2);
     setProperty(this.result.character, "system.skills.ath.rank", this.source.proficiencies.athletics / 2);
@@ -1232,6 +1198,45 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.skills.ste.rank", this.source.proficiencies.stealth / 2);
     setProperty(this.result.character, "system.skills.sur.rank", this.source.proficiencies.survival / 2);
     setProperty(this.result.character, "system.skills.thi.rank", this.source.proficiencies.thievery / 2);
+  }
+
+  #setSaves() {
+    setProperty(this.result.character, "system.saves.fortitude.tank", this.source.proficiencies.fortitude / 2);
+    setProperty(this.result.character, "system.saves.reflex.value", this.source.proficiencies.reflex / 2);
+    setProperty(this.result.character, "system.saves.will.value", this.source.proficiencies.will / 2);
+  }
+
+  #setMartials() {
+    setProperty(this.result.character, "system.martial.advanced.rank", this.source.proficiencies.advanced / 2);
+    setProperty(this.result.character, "system.martial.heavy.rank", this.source.proficiencies.heavy / 2);
+    setProperty(this.result.character, "system.martial.light.rank", this.source.proficiencies.light / 2);
+    setProperty(this.result.character, "system.martial.medium.rank", this.source.proficiencies.medium / 2);
+    setProperty(this.result.character, "system.martial.unarmored.rank", this.source.proficiencies.unarmored / 2);
+    setProperty(this.result.character, "system.martial.martial.rank", this.source.proficiencies.martial / 2);
+    setProperty(this.result.character, "system.martial.simple.rank", this.source.proficiencies.simple / 2);
+    setProperty(this.result.character, "system.martial.unarmed.rank", this.source.proficiencies.unarmed / 2);
+
+  }
+
+  async #processCore() {
+    setProperty(this.result.character, "name", this.source.name);
+    setProperty(this.result.character, "prototypeToken.name", this.source.name);
+    setProperty(this.result.character, "system.details.level.value", this.source.level);
+    if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
+    if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
+    setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
+
+    if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
+    this.size = Seasoning.getSizeValue(this.source.size);
+    setProperty(this.result.character, "system.traits.size.value", this.size);
+    setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
+
+    this.#processSenses();
+
+    this.#determineAbilityBoosts();
+    this.#setSaves();
+    this.#setMartials();
+    // this.#setSkills();
 
     setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
     setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
@@ -2197,10 +2202,9 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
 
     this.#setAbilityBoosts();
+    this.#setSkills();
 
     this.#statusUpdate(8, 12, "FeatureRec");
-    // await this.#detectGrantedFeatures();
-    // this.#statusUpdate(9, 12, "FeatureRec");
     await this.#processFeats();
     this.#statusUpdate(10, 12, "Equipment");
     await this.#processEquipment();
