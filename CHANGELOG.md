@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Some name mappings for Highhelm.
+
 # 0.7.4
 
 - Fixes for failure on import when background not matched.
