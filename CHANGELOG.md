@@ -1,6 +1,7 @@
 # NEXT UP
 
 - Some name mappings for Highhelm.
+- Invested items are now marked as invested thanks to updates in Pathbuilder exports.
 
 # 0.7.4
 

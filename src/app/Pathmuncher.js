@@ -213,9 +213,10 @@ export class Pathmuncher {
           added: false,
           addedId: null,
           addedAutoId: null,
-          inContainer: e[2],
+          inContainer: e[2] !== "Invested" ? e[2] : null,
           container,
           foundryId,
+          invested: e[2] === "Invested",
         };
         this.parsed.equipment.push(item);
       });
@@ -1477,6 +1478,12 @@ export class Pathmuncher {
             itemData.system.equipped.carryType = "stowed";
           }
         }
+        if (e.invested) {
+          itemData.system.equipped.carryType = "worn";
+          itemData.system.equipped.invested = true;
+          itemData.system.equipped.inSlot = true;
+          itemData.system.equipped.handsHeld = 0;
+        }
         this.#resizeItem(itemData);
         this.result[type].push(itemData);
         e.addedId = itemData._id;
@@ -1499,6 +1506,14 @@ export class Pathmuncher {
       itemData.system.strikingRune.value = parsedItem.str;
     } else if (type === "armor") {
       itemData.system.resiliencyRune.value = parsedItem.res;
+    }
+
+    if (type === "armor" && parsedItem.worn
+      && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
+        || (parsedItem.res && parsedItem.res !== "")
+      )
+    ) {
+      itemData.system.equipped.invested = true;
     }
 
     if (parsedItem.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(parsedItem.runes[0]);
@@ -2324,6 +2339,11 @@ export class Pathmuncher {
     await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
   }
 
+  async #updateItems(type) {
+    logger.debug(`Updating ${type}`, this.result[type]);
+    await this.actor.updateEmbeddedDocuments("Item", this.result[type]);
+  }
+
   async #createActorEmbeddedDocuments() {
     this.#statusUpdate(1, 12, "Character", "Eating");
     if (this.options.addDeity) await this.#createAndUpdateItemsWithRuleRestore(this.result.deity);
@@ -2348,7 +2368,10 @@ export class Pathmuncher {
       await this.#createAndUpdateItemsWithRuleRestore(this.result.spells);
     }
     this.#statusUpdate(4, 12, "Equipment", "Eating");
-    if (this.options.addEquipment) await this.#createAndUpdateItemsWithRuleRestore(this.result.equipment);
+    if (this.options.addEquipment) {
+      await this.#createAndUpdateItemsWithRuleRestore(this.result.equipment);
+      await this.#updateItems("equipment");
+    }
     if (this.options.addWeapons) await this.#createAndUpdateItemsWithRuleRestore(this.result.weapons);
     if (this.options.addArmor) {
       await this.#createAndUpdateItemsWithRuleRestore(this.result.armor);
