@@ -64,6 +64,7 @@ export class PathmuncherImporter extends FormApplication {
       addMoney: formData.checkBoxMoney,
       addFeats: formData.checkBoxFeats,
       addSpells: formData.checkBoxSpells,
+      adjustBlendedSlots: formData.checkBoxBlendedSlots,
       addEquipment: formData.checkBoxEquipment,
       addTreasure: formData.checkBoxTreasure,
       addLores: formData.checkBoxLores,

@@ -34,6 +34,7 @@ const CONSTANTS = {
     addHeritage: true,
     addAncestry: true,
     addSpells: true,
+    adjustBlendedSlots: true,
     addMoney: true,
     addTreasure: true,
     addLores: true,

@@ -47,6 +47,7 @@
           "Equipment": "Equipment?",
           "Money": "Money?",
           "Spells": "Spells?",
+          "BlendedSlots": "Adjust for blended slots?",
           "DeleteAll": "Delete all?",
           "Name": "Name?",
           "Class": "Class?",

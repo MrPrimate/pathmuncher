@@ -2,6 +2,7 @@
 
 - Some name mappings for Highhelm.
 - Invested items are now marked as invested thanks to updates in Pathbuilder exports.
+- Spell blending on pathbuilder is now taken into account and reflected on your imported sheet if the option is selected.
 
 # 0.7.4
 

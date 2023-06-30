@@ -24,7 +24,7 @@
   margin: 0 auto;
   padding: 5px;
 }
-.pathmuncher #checkBoxMoney, .pathmuncher #checkBoxTreasure, .pathmuncher #checkBoxArmor, .pathmuncher #checkBoxWeapons {
+.pathmuncher #checkBoxMoney, .pathmuncher #checkBoxTreasure, .pathmuncher #checkBoxArmor, .pathmuncher #checkBoxWeapons, .pathmuncher #checkBoxBlendedSlots {
   margin-left: 35px;
 }
 

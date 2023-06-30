@@ -25,9 +25,10 @@ export class Pathmuncher {
     return match ?? { pbName, foundryName: pbName, details: undefined };
   }
 
-  constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, addMoney = true, addLores = true,
-    addWeapons = true, addArmor = true, addTreasure = true, addDeity = true, addName = true, addClass = true,
-    addBackground = true, addHeritage = true, addAncestry = true, askForChoices = false, statusCallback = null } = {}
+  constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, adjustBlendedSlots = true,
+    addMoney = true, addLores = true, addWeapons = true, addArmor = true, addTreasure = true, addDeity = true,
+    addName = true, addClass = true, addBackground = true, addHeritage = true, addAncestry = true,
+    askForChoices = false, statusCallback = null } = {}
   ) {
     this.actor = actor;
     // note not all these options do anything yet!
@@ -36,6 +37,7 @@ export class Pathmuncher {
       addMoney,
       addFeats,
       addSpells,
+      adjustBlendedSlots,
       addEquipment,
       addLores,
       addWeapons,
@@ -1633,6 +1635,28 @@ export class Pathmuncher {
       : "divine";
   }
 
+  #applySpellBlending(spellcastingEntity, caster) {
+    if (caster.blendedSpells.length === 0) return;
+
+    const remove = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const add = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    // find adjustments
+    caster.blendedSpells.forEach((slot) => {
+      remove[slot.levelFrom]++;
+      add[slot.LevelTo]++;
+    });
+
+    for (let i = 0; i <= 10; i++) {
+      const toAdd = this.options.adjustBlendedSlots ? 0 : Math.floor(add[i] / 2);
+      const toRemove = this.options.adjustBlendedSlots ? remove[i] : 0;
+      const adjustment = 0 - toRemove - toAdd;
+      logger.debug("Adjusting spells for spell blending", { i, adjustment, add, remove, toAdd, max: spellcastingEntity.slots[`slot${i}`].max });
+      spellcastingEntity.slots[`slot${i}`].max += adjustment;
+      spellcastingEntity.slots[`slot${i}`].value += adjustment;
+    }
+  }
+
   #generateSpellCaster(caster) {
     const isFocus = caster.magicTradition === "focus";
     const magicTradition = this.getClassMagicTradition(caster);
@@ -1658,66 +1682,23 @@ export class Pathmuncher {
         value: spellcastingType,
         flexible,
       },
-      slots: {
-        slot0: {
-          max: caster.perDay[0],
-          prepared: {},
-          value: caster.perDay[0],
-        },
-        slot1: {
-          max: caster.perDay[1],
-          prepared: {},
-          value: caster.perDay[1],
-        },
-        slot2: {
-          max: caster.perDay[2],
-          prepared: {},
-          value: caster.perDay[2],
-        },
-        slot3: {
-          max: caster.perDay[3],
-          prepared: {},
-          value: caster.perDay[3],
-        },
-        slot4: {
-          max: caster.perDay[4],
-          prepared: {},
-          value: caster.perDay[4],
-        },
-        slot5: {
-          max: caster.perDay[5],
-          prepared: {},
-          value: caster.perDay[5],
-        },
-        slot6: {
-          max: caster.perDay[6],
-          prepared: {},
-          value: caster.perDay[6],
-        },
-        slot7: {
-          max: caster.perDay[7],
-          prepared: {},
-          value: caster.perDay[7],
-        },
-        slot8: {
-          max: caster.perDay[8],
-          prepared: {},
-          value: caster.perDay[8],
-        },
-        slot9: {
-          max: caster.perDay[9],
-          prepared: {},
-          value: caster.perDay[9],
-        },
-        slot10: {
-          max: caster.perDay[10],
-          prepared: {},
-          value: caster.perDay[10],
-        },
-      },
+      slots: {},
       showUnpreparedSpells: { value: true },
       showSlotlessLevels: { value: true },
     };
+
+    // apply slot data
+    for (let i = 0; i <= 10; i++) {
+
+      spellcastingEntity.slots[`slot${i}`] = {
+        max: caster.perDay[i],
+        prepared: {},
+        value: caster.perDay[i],
+      };
+    }
+    // adjust slots for spell blended effects
+    this.#applySpellBlending(spellcastingEntity, caster);
+
     const data = {
       _id: foundry.utils.randomID(),
       name,
