@@ -1,3 +1,9 @@
+# 0.7.6
+
+- Fix Thaumaturgy Initiate Benefit parsing reporting as mismatch.
+- Match Prodigy background.
+
+
 # 0.7.5
 
 - Some name mappings for Highhelm.

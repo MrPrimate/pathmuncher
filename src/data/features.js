@@ -5,6 +5,7 @@ import utils from "../utils.js";
 const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
   /(.*) (Style)$/,
+  /(.*) (Initiate Benefit)$/,
   // Cleric +
   /(.*) (Doctrine)$/,
 ];
@@ -106,6 +107,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Parry", foundryName: "Aldori Parry" },
   { pbName: "Polymath", foundryName: "Polymath Muse" },
   { pbName: "Precise Debilitation", foundryName: "Precise Debilitations" },
+  { pbName: "Prodigy", foundryName: "Merabite Prodigy" },
   { pbName: "Quick Climber", foundryName: "Quick Climb" },
   { pbName: "Raider", foundryName: "Ulfen Raider" },
   { pbName: "Recognise Threat", foundryName: "Recognize Threat" },

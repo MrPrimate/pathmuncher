@@ -62,7 +62,7 @@
           "Pets": "Pets?",
           "Familiars": "Familiars?",
           "Formulas": "Formulas? (e.g. Formulas for an Alchemist book)",
-          "Choices": "When munching features with choices, present choice dialogue in Foundry. If unchecked Pathmuncher will do it's best to guess the right choice. If it's unable to determine an option it will still prompt you for a choice. You almost certainly want this ticked."
+          "Choices": "(Deprecated) When munching features with choices, present choice dialogue in Foundry. If unchecked Pathmuncher will do it's best to guess the right choice. If it's unable to determine an option it will still prompt you for a choice."
         },
         "PathBuilderId": "Your Pathbuilder ID number",
         "PathBuilderJSON": "Paste your Pathbuilder JSON data here",
