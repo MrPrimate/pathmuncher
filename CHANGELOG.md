@@ -1,8 +1,11 @@
+# 0.7.7
+
+- Some features such as Raging Thrower caused failures during evaluation due to a typo.
+
 # 0.7.6
 
 - Fix Thaumaturgy Initiate Benefit parsing reporting as mismatch.
 - Match Prodigy background.
-
 
 # 0.7.5
 

@@ -831,8 +831,8 @@ export class Pathmuncher {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
         ? isNewerVersion(game.version, 11)
-          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
-          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
         : isNewerVersion(game.version, 11)
           ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
           : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
