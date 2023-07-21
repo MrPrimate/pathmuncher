@@ -1548,9 +1548,11 @@ export class Pathmuncher {
       const itemData = doc.toObject();
       itemData._id = foundry.utils.randomID();
       itemData.system.quantity = w.qty;
-      itemData.system.damage.die = w.die;
-
-      Pathmuncher.applyRunes(w, itemData, "weapon");
+      // because some shields don't have damage dice, but come in as weapons on pathbuilder
+      if (itemData.type === "weapon") {
+        itemData.system.damage.die = w.die;
+        Pathmuncher.applyRunes(w, itemData, "weapon");
+      }
 
       if (w.display) itemData.name = w.display;
 
