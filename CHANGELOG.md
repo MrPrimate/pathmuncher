@@ -1,3 +1,7 @@
+# 0.7.8
+
+- Throwing shields would not import correctly.
+
 # 0.7.7
 
 - Some features such as Raging Thrower caused failures during evaluation due to a typo.
