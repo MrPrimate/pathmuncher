@@ -1744,7 +1744,7 @@ export class Pathmuncher {
     const spellName = spell.split("(")[0].trim();
     logger.debug("focus spell details", { spell, spellName, debugData });
 
-    const indexMatch = this.compendiumMatchers["spells"].getNameMatch(spellName, spellName);
+    const indexMatch = this.compendiumMatchers["spells"].getNameMatch(spell, spellName, true);
     if (!indexMatch) {
       logger.error(`Unable to match focus spell ${spell}`, { spell, spellName, debugData });
       this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
