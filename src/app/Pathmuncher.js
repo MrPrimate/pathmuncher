@@ -363,7 +363,7 @@ export class Pathmuncher {
 
     // find the dual class
     const foundryName = this.getFoundryFeatureName(this.source.dualClass).foundryName;
-    const indexMatch = this.compendiumMatchers["classes"].getNameMatch(this.source.dualClass, foundryName);
+    const indexMatch = this.compendiumMatchers["classes"].getMatch(this.source.dualClass, foundryName);
 
     if (!indexMatch) return;
     const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
@@ -503,7 +503,7 @@ export class Pathmuncher {
   async #processGenericCompendiumLookup(type, name, target) {
     logger.debug(`Checking for compendium documents for ${name} (${target}) in compendiums for ${type}`);
     const foundryName = this.getFoundryFeatureName(name).foundryName;
-    const indexMatch = this.compendiumMatchers[type].getNameMatch(name, foundryName);
+    const indexMatch = this.compendiumMatchers[type].getMatch(name, foundryName);
 
     if (indexMatch) {
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
@@ -1429,7 +1429,7 @@ export class Pathmuncher {
     for (const [key, data] of Object.entries(this.source.equipmentContainers)) {
       if (data.foundryId) continue;
       const name = Seasoning.getFoundryEquipmentName(data.containerName);
-      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(data.containerName, name);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.containerName, name);
       const id = foundry.utils.randomID();
       const doc = indexMatch
         ? await indexMatch.pack.getDocument(indexMatch.i._id)
@@ -1460,7 +1460,7 @@ export class Pathmuncher {
         continue;
       }
       logger.debug("Generating item for", e);
-      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(e.pbName, e.pbName);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match ${e.pbName}`, e);
         this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
@@ -1537,7 +1537,7 @@ export class Pathmuncher {
         continue;
       }
       logger.debug("Generating weapon for", w);
-      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(w.pbName, w.pbName);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(w.pbName, w.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match weapon item ${w.name}`, w);
         this.bad.push({ pbName: w.pbName, type: "weapon", details: { w } });
@@ -1571,7 +1571,7 @@ export class Pathmuncher {
         continue;
       }
       logger.debug("Generating armor for", a);
-      const indexMatch = this.compendiumMatchers["equipment"].getNameMatch(`${a.pbName} Armor`, a.pbName);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(`${a.pbName} Armor`, a.pbName);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
         this.bad.push({ pbName: a.pbName, type: "armor", details: { a } });
@@ -1744,8 +1744,9 @@ export class Pathmuncher {
     const spellName = spell.split("(")[0].trim();
     logger.debug("focus spell details", { spell, spellName, debugData });
 
-    const indexMatch = this.compendiumMatchers["spells"].getNameMatch(spell, spellName, true);
+    const indexMatch = this.compendiumMatchers["spells"].getMatch(spell, spellName, true);
     if (!indexMatch) {
+      if (debugData.psychicAmpSpell) return undefined;
       logger.error(`Unable to match focus spell ${spell}`, { spell, spellName, debugData });
       this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
       return undefined;
@@ -1848,7 +1849,19 @@ export class Pathmuncher {
         spells,
         spell,
       });
-      this.result.spells.push(itemData);
+      if (itemData) this.result.spells.push(itemData);
+      if (spell.endsWith("(Amped)")) {
+        const psychicSpell = spell.replace("(Amped)", "(Psychic)");
+        const psychicItemData = await this.#loadSpell(psychicSpell, instance._id, {
+          instance,
+          spells,
+          spell: psychicSpell,
+          psychicAmpSpell: true,
+        });
+        if (psychicItemData) {
+          this.result.spells.push(psychicItemData);
+        }
+      }
     }
   }
 
@@ -1980,7 +1993,7 @@ export class Pathmuncher {
 
     for (const formulaSource of this.source.formula) {
       for (const formulaName of formulaSource.known) {
-        const indexMatch = this.compendiumMatchers["formulas"].getNameMatch(formulaName, formulaName);
+        const indexMatch = this.compendiumMatchers["formulas"].getMatch(formulaName, formulaName);
         if (!indexMatch) {
           logger.error(`Unable to match formula ${formulaName}`, { formulaSource, name: formulaName });
           this.bad.push({ pbName: formulaName, type: "formula", details: { formulaSource, name: formulaName } });

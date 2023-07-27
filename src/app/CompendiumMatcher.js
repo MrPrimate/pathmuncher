@@ -41,7 +41,7 @@ export class CompendiumMatcher {
     return match ?? { pbName, foundryName: pbName, details: undefined };
   }
 
-  getNameOnlyMatch(pbName, foundryName) {
+  getNameMatch(pbName, foundryName) {
     for (const [packName, index] of Object.entries(this.indexes)) {
       const indexMatch = index.find((i) => i.name === foundryName)
         ?? index.find((i) => i.name === pbName);
@@ -54,13 +54,7 @@ export class CompendiumMatcher {
     return undefined;
   }
 
-  getNameMatch(pbName, foundryName, forceName = false) {
-
-    if (forceName) {
-      const nameOnlyMatch = this.getNameOnlyMatch(pbName, foundryName);
-      if (nameOnlyMatch) return nameOnlyMatch;
-    }
-
+  getSlugMatch(pbName, foundryName) {
     for (const [packName, index] of Object.entries(this.indexes)) {
       logger.debug(`Checking for compendium documents for ${pbName} (${foundryName}) in ${packName}`, {
         pbName,
@@ -81,6 +75,18 @@ export class CompendiumMatcher {
         return { i: indexMatch, pack: this.packs[packName] };
       }
     }
+    return undefined;
+  }
+
+  getMatch(pbName, foundryName, forceName = false) {
+
+    if (forceName) {
+      const nameOnlyMatch = this.getNameMatch(pbName, foundryName);
+      if (nameOnlyMatch) return nameOnlyMatch;
+    }
+
+    const slugMatch = this.getSlugMatch(pbName, foundryName);
+    if (slugMatch) return slugMatch;
 
     return undefined;
   }
