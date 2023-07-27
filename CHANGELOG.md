@@ -1,4 +1,4 @@
-# NEXT UP
+# 0.7.9
 
 - Ensure current focus points are set after feature import.
 - Improvements to Psi Amped cantrips when using the psychic-amps module.
