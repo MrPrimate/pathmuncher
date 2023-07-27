@@ -53,7 +53,7 @@ const CONSTANTS = {
     ancestryFeatures: ["pf2e.ancestryfeatures"],
     classFeatures: ["pf2e.classfeatures"],
     actions: ["pf2e.actionspf2e"],
-    spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
+    spells: ["pf2e-psychic-amps.psychic-psi-cantrips", "pf2e.spells-srd"],
     classes: ["pf2e.classes",],
     ancestries: ["pf2e.ancestries",],
     heritages: ["pf2e.heritages"],
@@ -115,7 +115,7 @@ CONSTANTS.DEFAULT_SETTINGS = {
         "pf2e.classfeatures",
       ],
       actions: ["pf2e.actionspf2e"],
-      spells: ["pf2e.spells-srd", "pf2e-psychic-amps.psychic-psi-cantrips"],
+      spells: ["pf2e-psychic-amps.psychic-psi-cantrips", "pf2e.spells-srd"],
       classes: ["clerics.clerics-features", "pf2e.classes",],
       ancestries: [
         "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-ancestry",
