@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Ensure current focus points are set after feature import.
+
 # 0.7.8
 
 - Throwing shields would not import correctly.

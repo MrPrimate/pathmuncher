@@ -2384,6 +2384,9 @@ export class Pathmuncher {
       logger.debug("Restoring granted item logic", itemUpdates);
       await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }
+    await this.actor.update({
+      "system.resources.focus": this.result.character.system.resources.focus,
+    });
   }
 
   async updateActor() {
