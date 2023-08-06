@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
+import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { CompendiumMatcher } from "./CompendiumMatcher.js";
@@ -1749,7 +1750,7 @@ export class Pathmuncher {
   }
 
   async #loadSpell(spell, casterId, debugData) {
-    const spellName = spell.split("(")[0].trim();
+    const spellName = spellRename(spell.split("(")[0].trim());
     logger.debug("focus spell details", { spell, spellName, debugData });
 
     const indexMatch = this.compendiumMatchers["spells"].getMatch(spell, spellName, true);

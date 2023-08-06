@@ -1,6 +1,7 @@
 # 0.8.0
 
 - Support for 5.3.1 Pathfinder system attribute adjustments.
+- Support detection of renamed spells if importing from Pathbuilder into v5.3.1 of Pathfinder system.
 
 # 0.7.9
 
