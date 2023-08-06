@@ -1,3 +1,7 @@
+# 0.8.0
+
+- Support for 5.3.1 Pathfinder system attribute adjustments.
+
 # 0.7.9
 
 - Ensure current focus points are set after feature import.

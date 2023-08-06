@@ -1105,6 +1105,9 @@ export class Pathmuncher {
   }
 
   #determineAbilityBoosts() {
+    const boostLocation = foundry.utils.isNewerVersion(game.system.version, "5.3.0")
+      ? "attributes"
+      : "abilities";
     const breakdown = getProperty(this.source, "abilities.breakdown");
     const useCustomStats
       = breakdown
@@ -1121,18 +1124,23 @@ export class Pathmuncher {
           classBoostMap[key] = boosts.map((ability) => ability.toLowerCase());
         }
       }
-      setProperty(this.result.character, "system.build.abilities.boosts", classBoostMap);
+      setProperty(this.result.character, `system.build.${boostLocation}.boosts`, classBoostMap);
       this.boosts.class = classBoostMap;
 
       // ancestry
     } else {
       this.boosts.custom = true;
-      setProperty(this.result.character, "system.abilities.str.value", this.source.abilities.str);
-      setProperty(this.result.character, "system.abilities.dex.value", this.source.abilities.dex);
-      setProperty(this.result.character, "system.abilities.con.value", this.source.abilities.con);
-      setProperty(this.result.character, "system.abilities.int.value", this.source.abilities.int);
-      setProperty(this.result.character, "system.abilities.wis.value", this.source.abilities.wis);
-      setProperty(this.result.character, "system.abilities.cha.value", this.source.abilities.cha);
+      if (foundry.utils.isNewerVersion("5.3.0", game.system.version)) {
+        ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
+          setProperty(this.result.character, `system.abilities.${key}.value`, this.source.abilities[key]);
+        });
+      } else {
+        ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
+          const mod = Math.min(Math.max(Math.trunc((this.source.abilities[key] - 10) / 2), -5), 10) || 0;
+          setProperty(this.result.character, `system.abilities.${key}.mod`, mod);
+        });
+      }
+
     }
 
     if (breakdown?.classBoosts.length > 0) {
@@ -2414,16 +2422,19 @@ export class Pathmuncher {
     }
 
     if (!this.boosts.custom) {
-      const abilityDeletions = ["str", "dex", "con", "int", "wis", "cha"]
-        .filter((ability) => hasProperty(this.actor, `system.abilities.${ability}`))
-        .reduce(
-          (accumulated, ability) => ({
-            ...accumulated,
-            [`-=${ability}`]: null,
-          }),
-          {}
-        );
-      setProperty(this.result.character, "system.abilities", abilityDeletions);
+      ["abilities"].forEach((location) => {
+        const abilityTargets = ["str", "dex", "con", "int", "wis", "cha"]
+          .filter((ability) => hasProperty(this.actor, `system.${location}.${ability}`));
+        const abilityDeletions = abilityTargets
+          .reduce(
+            (accumulated, ability) => ({
+              ...accumulated,
+              [`-=${ability}`]: null,
+            }),
+            {}
+          );
+        setProperty(this.result.character, `system.${location}`, abilityDeletions);
+      });
     }
 
     logger.debug("Generated result", this.result);
