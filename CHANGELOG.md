@@ -1,6 +1,8 @@
 # 0.8.1
 
 - Ignore Imprecise Scent warning as sense applied correctly.
+- Some improvement to feat location placements from granted items.
+- Slight tweak to processing order to better account for skills during class predicate evaluations.
 
 # 0.8.0
 

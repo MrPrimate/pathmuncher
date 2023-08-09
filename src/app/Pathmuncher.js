@@ -520,7 +520,7 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
-      await this.#addGrantedItems(itemData);
+      await this.#addGrantedItems(itemData, type);
       return true;
     } else {
       this.bad.push({ pbName: name, type: target, details: { name } });
@@ -629,8 +629,8 @@ export class Pathmuncher {
     // return equipmentMatch;
   }
 
-  #createGrantedItem(document, parent) {
-    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name})`);
+  #createGrantedItem(document, parent, originType = null) {
+    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}"`);
     const camelCase = Seasoning.slugD(document.system.slug ?? document.name);
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
@@ -645,10 +645,11 @@ export class Pathmuncher {
         : undefined);
 
     if (featureMatch) {
+      logger.debug(`Found feature match for ${document.name}`, { featureMatch });
       if (hasProperty(featureMatch, "added")) {
         featureMatch.added = true;
         featureMatch.addedId = document._id;
-        this.#generateFoundryFeatLocation(document, featureMatch);
+        if (originType) this.#generateFoundryFeatLocation(document, featureMatch);
       }
 
       return;
@@ -881,8 +882,8 @@ export class Pathmuncher {
     return name.replace(pattern, `(${localLabel})`);
   }
 
-  // eslint-disable-next-line complexity
-  async #addGrantedRules(document) {
+  // eslint-disable-next-line complexity, no-unused-vars
+  async #addGrantedRules(document, originType = null) {
     if (document.system.rules.length === 0) return;
     logger.debug(`addGrantedRules for ${document.name}`, duplicate(document));
 
@@ -990,7 +991,7 @@ export class Pathmuncher {
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
           this.#createGrantedItem(featureDoc, document);
-          if (hasProperty(ruleFeature, "system.rules")) await this.#addGrantedRules(featureDoc);
+          if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
       } else if (choice?.nouuid) {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
@@ -1056,7 +1057,7 @@ export class Pathmuncher {
     });
   }
 
-  async #addGrantedItems(document) {
+  async #addGrantedItems(document, originType = null) {
     const subRuleDocuments = [];
     if (hasProperty(document, "system.items")) {
       logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
@@ -1078,7 +1079,7 @@ export class Pathmuncher {
         const featureDoc = feature.toObject();
         featureDoc._id = foundry.utils.randomID();
         setProperty(featureDoc.system, "location", document._id);
-        this.#createGrantedItem(featureDoc, document);
+        this.#createGrantedItem(featureDoc, document, originType);
         if (hasProperty(featureDoc, "system.rules")) {
           logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
           // await this.#addGrantedRules(featureDoc);
@@ -1101,7 +1102,7 @@ export class Pathmuncher {
 
     if (hasProperty(document, "system.rules")) {
       logger.debug(`Processing granted rules for core document ${document.name}`, duplicate(document));
-      await this.#addGrantedRules(document);
+      await this.#addGrantedRules(document, originType);
     }
   }
 
@@ -1359,7 +1360,7 @@ export class Pathmuncher {
 
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
-        await this.#addGrantedItems(docData);
+        await this.#addGrantedItems(docData, "feat");
       }
     }
   }
@@ -1391,7 +1392,7 @@ export class Pathmuncher {
       docData._id = foundry.utils.randomID();
       special.addedId = docData._id;
       this.result.feats.push(docData);
-      await this.#addGrantedItems(docData);
+      await this.#addGrantedItems(docData, "special");
     }
   }
 
@@ -2212,17 +2213,20 @@ export class Pathmuncher {
     await this.#processFormulas();
     this.#statusUpdate(3, 12, "Deity");
     await this.#processGenericCompendiumLookup("deities", this.source.deity, "deity");
-    this.#statusUpdate(4, 12, "Background");
-    await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
-    this.#statusUpdate(5, 12, "Class");
-    await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
-    this.#statusUpdate(6, 12, "Ancestry");
+
+    this.#statusUpdate(4, 12, "Ancestry");
     await this.#processGenericCompendiumLookup("ancestries", this.source.ancestry, "ancestry");
-    this.#statusUpdate(7, 12, "Heritage");
+    this.#statusUpdate(5, 12, "Heritage");
     await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
+    this.#statusUpdate(6, 12, "Background");
+    await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
+
+    this.#setSkills();
+
+    this.#statusUpdate(7, 12, "Class");
+    await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
 
     this.#setAbilityBoosts();
-    this.#setSkills();
 
     this.#statusUpdate(8, 12, "FeatureRec");
     await this.#processFeats();
