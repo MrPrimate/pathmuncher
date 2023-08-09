@@ -1,3 +1,7 @@
+# 0.8.1
+
+- Ignore Imprecise Scent warning as sense applied correctly.
+
 # 0.8.0
 
 - Support for 5.3.1 Pathfinder system attribute adjustments.
