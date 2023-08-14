@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Improve order of items granted by glass to sort by level, if the class does not order them this way in the data (e.g. Kineticist ) to improve feature matching.
+
 # 0.8.1
 
 - Ignore Imprecise Scent warning as sense applied correctly.

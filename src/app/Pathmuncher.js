@@ -1065,8 +1065,8 @@ export class Pathmuncher {
         this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
       }
       const failedFeatureItems = {};
-      for (const [key, grantedItemFeature] of Object.entries(document.system.items)) {
-        logger.debug(`Checking granted item ${document.name}, with key: ${key}`, grantedItemFeature);
+      for (const [key, grantedItemFeature] of Object.entries(document.system.items).sort(([, a], [, b]) => a.level - b.level)) {
+        logger.debug(`Checking ${document.name} granted item ${grantedItemFeature.name}, level(${grantedItemFeature.level}) with key: ${key}`, grantedItemFeature);
         if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
         const feature = await fromUuid(grantedItemFeature.uuid);
         if (!feature) {
