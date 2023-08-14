@@ -109,6 +109,8 @@ export class Seasoning {
       return `skill-${pathbuilderFeatLevel}`;
     } else if (pathbuilderFeatType === "Archetype Feat") {
       return `archetype-${pathbuilderFeatLevel}`;
+    } else if (pathbuilderFeatType === "Kineticist Feat") { // return as null for now
+      return null;
     } else {
       return null;
     }
