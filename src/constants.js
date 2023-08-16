@@ -11,6 +11,7 @@ const CONSTANTS = {
     ADD_VISION_FEATS: "add-vision-feats",
     USE_CUSTOM_COMPENDIUM_MAPPINGS: "use-custom-compendium-mappings",
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
+    USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
   },
 
   FEAT_PRIORITY: [
@@ -86,6 +87,14 @@ CONSTANTS.DEFAULT_SETTINGS = {
     config: false,
     type: Boolean,
     default: false,
+  },
+
+  [CONSTANTS.SETTINGS.USE_IMMEDIATE_DEEP_DIVE]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.UseImmediateDeepDive.Name`,
+    scope: "world",
+    config: false,
+    type: Boolean,
+    default: true,
   },
 
   [CONSTANTS.SETTINGS.CUSTOM_COMPENDIUM_MAPPINGS]: {

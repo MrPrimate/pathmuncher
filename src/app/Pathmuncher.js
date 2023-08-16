@@ -283,7 +283,7 @@ export class Pathmuncher {
           extra: feat[1],
           added: feat[0] === this.source.heritage,
           addedId: null,
-          addedAutoId: "heritage",
+          addedAutoId: null,
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
@@ -520,7 +520,7 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
-      await this.#addGrantedItems(itemData, type);
+      await this.#addGrantedItems(itemData, { applyFeatLocation: true });
       return true;
     } else {
       this.bad.push({ pbName: name, type: target, details: { name } });
@@ -564,10 +564,14 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
-  #parsedFeatureMatch(type, document, slug, ignoreAdded, isChoiceMatch = false) {
+  #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
     const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
+        && (
+          featType === null
+          || f.type === featType
+        )
         && !f.isChoice
         && (slug === Seasoning.slug(f.name)
           || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.name, this.source.class))
@@ -616,10 +620,10 @@ export class Pathmuncher {
     return featMatch;
   }
 
-  #findAllFeatureMatch(document, slug, ignoreAdded, isChoiceMatch = false) {
-    const featMatch = this.#parsedFeatureMatch("feats", document, slug, ignoreAdded);
+  #findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+    const featMatch = this.#parsedFeatureMatch("feats", document, slug, { ignoreAdded, featType });
     if (featMatch) return featMatch;
-    const specialMatch = this.#parsedFeatureMatch("specials", document, slug, ignoreAdded, isChoiceMatch);
+    const specialMatch = this.#parsedFeatureMatch("specials", document, slug, { ignoreAdded, isChoiceMatch });
     if (specialMatch) return specialMatch;
     const deityMatch = this.#generatedResultMatch("deity", slug);
     return deityMatch;
@@ -629,8 +633,8 @@ export class Pathmuncher {
     // return equipmentMatch;
   }
 
-  #createGrantedItem(document, parent, originType = null) {
-    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}"`);
+  #createGrantedItem(document, parent, { originType = null, applyFeatLocation = true } = {}) {
+    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`);
     const camelCase = Seasoning.slugD(document.system.slug ?? document.name);
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
@@ -638,10 +642,11 @@ export class Pathmuncher {
     if (!this.options.askForChoices) {
       this.result.feats.push(document);
     }
+    const matchOptions = { ignoreAdded: true, featType: originType };
     const featureMatch
-      = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), true)
+      = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
       ?? (document.name.includes("(")
-        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), true)
+        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), matchOptions)
         : undefined);
 
     if (featureMatch) {
@@ -649,7 +654,7 @@ export class Pathmuncher {
       if (hasProperty(featureMatch, "added")) {
         featureMatch.added = true;
         featureMatch.addedId = document._id;
-        if (originType) this.#generateFoundryFeatLocation(document, featureMatch);
+        if (applyFeatLocation) this.#generateFoundryFeatLocation(document, featureMatch);
       }
 
       return;
@@ -670,7 +675,7 @@ export class Pathmuncher {
         : doc.system.slug === null
           ? Seasoning.slug(doc.name)
           : doc.system.slug;
-      const featMatch = this.#findAllFeatureMatch(document, slug, ignoreAdded);
+      const featMatch = this.#findAllFeatureMatch(document, slug, { ignoreAdded });
       if (featMatch) {
         if (adjustName && hasProperty(featMatch, "added")) {
           featMatch.added = true;
@@ -716,7 +721,7 @@ export class Pathmuncher {
         const nonFilteredChoices = isNewerVersion(game.version, 11)
           ? await choiceSetRules.inflateChoices(rollOptions)
           : await choiceSetRules.inflateChoices();
-        const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices);
+        const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices, rollOptions);
         logger.debug("Query Result", { queryResults, nonFilteredChoices });
       }
 
@@ -734,7 +739,7 @@ export class Pathmuncher {
           //   choice,
           //   parsed: duplicate(this.parsed),
           // });
-          const featMatch = this.#findAllFeatureMatch(document, choice.value, true, true);
+          const featMatch = this.#findAllFeatureMatch(document, choice.value, { ignoreAdded: true, isChoiceMatch: true });
           if (featMatch) {
             logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
             featMatch.added = true;
@@ -1057,7 +1062,8 @@ export class Pathmuncher {
     });
   }
 
-  async #addGrantedItems(document, originType = null) {
+  async #addGrantedItems(document, { originType = null, applyFeatLocation = false } = {}) {
+    const immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
     const subRuleDocuments = [];
     if (hasProperty(document, "system.items")) {
       logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
@@ -1079,11 +1085,14 @@ export class Pathmuncher {
         const featureDoc = feature.toObject();
         featureDoc._id = foundry.utils.randomID();
         setProperty(featureDoc.system, "location", document._id);
-        this.#createGrantedItem(featureDoc, document, originType);
+        this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
         if (hasProperty(featureDoc, "system.rules")) {
           logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
-          // await this.#addGrantedRules(featureDoc);
-          subRuleDocuments.push(featureDoc);
+          if (immediateDiveAdd) {
+            await this.#addGrantedItems(featureDoc);
+          } else {
+            subRuleDocuments.push(featureDoc);
+          }
         }
       }
       if (!this.options.askForChoices) {
@@ -1091,12 +1100,14 @@ export class Pathmuncher {
         document.system.items = failedFeatureItems;
       }
 
-      for (const subRuleDocument of subRuleDocuments) {
-        logger.debug(
-          `Processing granted rules for granted item document ${subRuleDocument.name}`,
-          duplicate(subRuleDocument)
-        );
-        await this.#addGrantedItems(subRuleDocument);
+      if (!immediateDiveAdd) {
+        for (const subRuleDocument of subRuleDocuments) {
+          logger.debug(
+            `Processing granted rules for granted item document ${subRuleDocument.name}`,
+            duplicate(subRuleDocument)
+          );
+          await this.#addGrantedItems(subRuleDocument);
+        }
       }
     }
 
@@ -1282,7 +1293,7 @@ export class Pathmuncher {
     return undefined;
   }
 
-  async #generateFeatItems(type) {
+  #sortParsedFeats() {
     // eslint-disable-next-line complexity
     this.parsed.feats.sort((f1, f2) => {
       const f1RefUndefined = !(typeof f1.type === "string" || f1.type instanceof String);
@@ -1315,9 +1326,16 @@ export class Pathmuncher {
         return (f1.level ?? 20) - (f2.level ?? 20);
       }
     });
+  }
+
+  async #generateFeatItems(type, { levelCap = null, parsedFilter = null } = {}) {
+    logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${parsedFilter}"`);
+
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
         if (pBFeat.added) continue;
+        if (levelCap && (pBFeat.level ?? 20) > levelCap) continue;
+        if (parsedFilter && pBFeat.type !== parsedFilter) continue;
         logger.debug("Generating feature for", pBFeat);
 
         const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
@@ -1360,7 +1378,7 @@ export class Pathmuncher {
 
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
-        await this.#addGrantedItems(docData, "feat");
+        await this.#addGrantedItems(docData, "feat", { originType: parsedFilter });
       }
     }
   }
@@ -1392,7 +1410,7 @@ export class Pathmuncher {
       docData._id = foundry.utils.randomID();
       special.addedId = docData._id;
       this.result.feats.push(docData);
-      await this.#addGrantedItems(docData, "special");
+      await this.#addGrantedItems(docData, { applyFeatLocation: true });
     }
   }
 
@@ -2017,6 +2035,12 @@ export class Pathmuncher {
   }
 
   async #processFeats() {
+    this.#sortParsedFeats();
+    // pre pass
+    await this.#generateFeatItems("feats", { parsedFilter: "Ancestry Feat" });
+    await this.#generateFeatItems("feats", { parsedFilter: "Skill Feat" });
+    await this.#generateFeatItems("feats", { parsedFilter: "Class Feat" });
+
     this.#statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("feats");
     this.#statusUpdate(2, 5, "Feats");
