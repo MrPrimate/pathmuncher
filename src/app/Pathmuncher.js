@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
+import { SPECIAL_NAME_ADDITIONS } from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -253,7 +254,7 @@ export class Pathmuncher {
     logger.debug("Finished Equipment Rename");
 
     logger.debug("Starting Special Rename");
-    this.source.specials
+    [].concat(this.source.specials, SPECIAL_NAME_ADDITIONS(this.source.specials))
       .filter((special) =>
         special
         && special !== "undefined"
@@ -903,6 +904,7 @@ export class Pathmuncher {
     this.allFeatureRules[document._id] = deepClone(document.system.rules);
     this.autoAddedFeatureRules[document._id] = [];
     this.promptRules[document._id] = [];
+    let featureRenamed = false;
 
     for (const ruleEntry of document.system.rules) {
       logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
@@ -1009,10 +1011,12 @@ export class Pathmuncher {
         // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if (
-          (!ruleEntry.adjustName && choice.label && typeof uuid === "object")
-          || (!choice.adjustName && choice.label)
+          ((!ruleEntry.adjustName && choice.label && typeof uuid === "object")
+          || (!choice.adjustName && choice.label))
+          && !featureRenamed
         ) {
           document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
+          featureRenamed = true;
         }
         rulesToKeep.push(ruleEntry);
       } else {
@@ -1038,7 +1042,7 @@ export class Pathmuncher {
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
-      if (ruleEntry.adjustName && choice?.label) {
+      if (ruleEntry.adjustName && choice?.label && !featureRenamed) {
         document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
       }
       this.autoAddedFeatureRules[document._id].push(ruleEntry);
