@@ -1,4 +1,4 @@
-# NEXT UP
+# 0.8.2
 
 - Improve order of items granted by glass to sort by level, if the class does not order them this way in the data (e.g. Kineticist ) to improve feature matching.
 - Skill feat and ancestry feats should now have a better match ratio in higher level characters.
