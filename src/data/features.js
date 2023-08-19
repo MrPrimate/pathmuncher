@@ -8,6 +8,9 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Initiate Benefit)$/,
   // Cleric +
   /(.*) (Doctrine)$/,
+  /(.*) (Element)$/,
+  /(.*) (Impulse Junction)$/,
+  /(.*) (Gate Junction:).*$/,
 ];
 
 const PREFIX_PB_REMOVALS = [
@@ -16,6 +19,11 @@ const PREFIX_PB_REMOVALS = [
   /^(The) (.*)/,
   // Cleric +
   /^(Blessing): (.*)/,
+];
+
+const POSTFIX_PB_SPLIT_AND_KEEP = [
+  /(.*) (Impulse Junction)$/,
+  /(.*) Gate Junction: (.*)$/,
 ];
 
 const PARENTHESIS = [
@@ -258,4 +266,18 @@ export function IGNORED_FEATS() {
 export function IGNORED_SPECIALS() {
   const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
   return IGNORED_SPECIALS_LIST.concat(SHARED_IGNORE_LIST, visionFeats);
+}
+
+export function SPECIAL_NAME_ADDITIONS(specials) {
+  const newSpecials = [];
+
+  for (const special of specials) {
+    for (const reg of POSTFIX_PB_SPLIT_AND_KEEP) {
+      const match = special.match(reg);
+      if (match) {
+        newSpecials.push(match[2]);
+      }
+    }
+  }
+  return newSpecials;
 }
