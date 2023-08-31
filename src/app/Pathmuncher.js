@@ -30,7 +30,7 @@ export class Pathmuncher {
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, adjustBlendedSlots = true,
     addMoney = true, addLores = true, addWeapons = true, addArmor = true, addTreasure = true, addDeity = true,
     addName = true, addClass = true, addBackground = true, addHeritage = true, addAncestry = true,
-    askForChoices = false, statusCallback = null } = {}
+    statusCallback = null } = {}
   ) {
     this.actor = actor;
     // note not all these options do anything yet!
@@ -50,7 +50,6 @@ export class Pathmuncher {
       addBackground,
       addHeritage,
       addAncestry,
-      askForChoices,
     };
     this.source = null;
     this.parsed = {
@@ -253,6 +252,7 @@ export class Pathmuncher {
       });
     logger.debug("Finished Equipment Rename");
 
+    let i = 0;
     logger.debug("Starting Special Rename");
     [].concat(this.source.specials, SPECIAL_NAME_ADDITIONS(this.source.specials))
       .filter((special) =>
@@ -264,11 +264,13 @@ export class Pathmuncher {
       .forEach((special) => {
         const name = this.getFoundryFeatureName(special).foundryName;
         if (!this.#processSpecialData(name) && !Seasoning.IGNORED_SPECIALS().includes(name)) {
-          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null });
+          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i });
+          i++;
         }
       });
     logger.debug("Finished Special Rename");
 
+    let y = 0;
     logger.debug("Starting Feat Rename");
     this.source.feats
       .filter((feat) =>
@@ -288,8 +290,10 @@ export class Pathmuncher {
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
+          rank: y,
         };
         this.parsed.feats.push(data);
+        y++;
       });
     logger.debug("Finished Feat Rename");
     logger.debug("Name remapping results", {
@@ -306,6 +310,7 @@ export class Pathmuncher {
         addedId: null,
         addedAutoId: null,
         isChoice: true,
+        rank: 0,
       };
       this.parsed.specials.push(clanDagger);
     }
@@ -319,6 +324,7 @@ export class Pathmuncher {
         addedId: null,
         addedAutoId: null,
         isChoice: true,
+        rank: 0,
       });
       this.source.background = match[1];
     }
@@ -512,7 +518,7 @@ export class Pathmuncher {
       const itemData = doc.toObject();
       if (name.includes("(")) {
         const extra = name.split(")")[0].split("(").pop();
-        this.parsed.specials.push({ name: doc.name, originalName: name, added: true, extra });
+        this.parsed.specials.push({ name: doc.name, originalName: name, added: true, extra, rank: 99 });
       }
       if (target === "class") {
         itemData.system.keyAbility.selected = this.keyAbility;
@@ -521,7 +527,7 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
-      await this.#addGrantedItems(itemData, { applyFeatLocation: true });
+      await this.#addGrantedItems(itemData, { applyFeatLocation: target !== "class" });
       return true;
     } else {
       this.bad.push({ pbName: name, type: target, details: { name } });
@@ -634,15 +640,13 @@ export class Pathmuncher {
     // return equipmentMatch;
   }
 
-  #createGrantedItem(document, parent, { originType = null, applyFeatLocation = true } = {}) {
+  #createGrantedItem(document, parent, { originType = null, applyFeatLocation = false } = {}) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`);
     const camelCase = Seasoning.slugD(document.system.slug ?? document.name);
     setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
     setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
     this.autoFeats.push(document);
-    if (!this.options.askForChoices) {
-      this.result.feats.push(document);
-    }
+    this.result.feats.push(document);
     const matchOptions = { ignoreAdded: true, featType: originType };
     const featureMatch
       = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
@@ -667,7 +671,15 @@ export class Pathmuncher {
       );
   }
 
+
+  static #getLowestChoiceRank(choices) {
+    return choices.reduce((p, c) => {
+      return p.rank > c.rank ? c : p;
+    });
+  }
+
   async #featureChoiceMatch(document, choices, ignoreAdded, adjustName) {
+    const matches = [];
     for (const choice of choices) {
       const doc = adjustName ? game.i18n.localize(choice.label) : await fromUuid(choice.value);
       if (!doc) continue;
@@ -676,17 +688,53 @@ export class Pathmuncher {
         : doc.system.slug === null
           ? Seasoning.slug(doc.name)
           : doc.system.slug;
-      const featMatch = this.#findAllFeatureMatch(document, slug, { ignoreAdded });
+      const featMatch = this.#findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch: false });
       if (featMatch) {
-        if (adjustName && hasProperty(featMatch, "added")) {
-          featMatch.added = true;
-          featMatch.addedId = document._id;
-        }
-        logger.debug("Choices evaluated", { choices, document, featMatch, choice });
-        return choice;
+        matches.push({
+          slug,
+          rank: featMatch.rank,
+          choice,
+        });
       }
     }
-    return undefined;
+    if (matches.length > 0) {
+      const match = Pathmuncher.#getLowestChoiceRank(matches);
+      const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
+      if (adjustName && hasProperty(featMatch, "added")) {
+        featMatch.added = true;
+        featMatch.addedId = document._id;
+      }
+      logger.debug("Choices evaluated", { choices, document, featMatch, match, matches });
+      return match.choice;
+    } else {
+      return undefined;
+    }
+  }
+
+  async #featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet) {
+    const matches = [];
+    for (const choice of choices) {
+      const featMatch = this.#findAllFeatureMatch(document, choice.value, { ignoreAdded: true, isChoiceMatch: true });
+      if (featMatch) {
+        matches.push({
+          rank: featMatch.rank,
+          choice,
+        });
+      }
+    }
+    if (matches.length > 0) {
+      const match = Pathmuncher.#getLowestChoiceRank(matches);
+      const featMatch = this.#findAllFeatureMatch(document, match.choice.value, { ignoreAdded: true, isChoiceMatch: true });
+      if (featMatch) {
+        featMatch.added = true;
+        featMatch.addedId = document._id;
+        match.choice.nouuid = true;
+      }
+      logger.debug("No UUID Choices evaluated", { choices, cleansedChoiceSet, document, featMatch, match, matches });
+      return match.choice;
+    } else {
+      return undefined;
+    }
   }
 
   static getFlag(document, ruleSet) {
@@ -697,7 +745,7 @@ export class Pathmuncher {
 
   async #evaluateChoices(document, choiceSet) {
     logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
-    const tempActor = await this.#generateTempActor([document], false, false);
+    const tempActor = await this.#generateTempActor([document], false, false, true);
     const cleansedChoiceSet = deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -706,7 +754,7 @@ export class Pathmuncher {
         : new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
       const choices = isNewerVersion(game.version, 11)
-        ? await choiceSetRules.inflateChoices(rollOptions)
+        ? await choiceSetRules.inflateChoices(rollOptions, [])
         : (await choiceSetRules.inflateChoices()).filter((c) => c.predicate?.test(rollOptions) ?? true);
 
       logger.debug("Starting choice evaluation", {
@@ -720,9 +768,9 @@ export class Pathmuncher {
 
       if (cleansedChoiceSet.choices?.query) {
         const nonFilteredChoices = isNewerVersion(game.version, 11)
-          ? await choiceSetRules.inflateChoices(rollOptions)
+          ? await choiceSetRules.inflateChoices(rollOptions, [item])
           : await choiceSetRules.inflateChoices();
-        const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices, rollOptions);
+        const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices, rollOptions, [item]);
         logger.debug("Query Result", { queryResults, nonFilteredChoices });
       }
 
@@ -735,25 +783,15 @@ export class Pathmuncher {
       }
 
       if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
-        for (const choice of choices) {
-          // console.warn(`Checking ${document.name} for choice ${choice.value}`, {
-          //   choice,
-          //   parsed: duplicate(this.parsed),
-          // });
-          const featMatch = this.#findAllFeatureMatch(document, choice.value, { ignoreAdded: true, isChoiceMatch: true });
-          if (featMatch) {
-            logger.debug("Choices evaluated", { cleansedChoiceSet, choices, document, featMatch, choice });
-            featMatch.added = true;
-            featMatch.addedId = document._id;
-            choice.nouuid = true;
-            return choice;
-          }
+        const featureMatch = await this.#featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet);
+        if (featureMatch) {
+          return featureMatch;
         }
       }
 
       let tempSet = deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
-      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet });
+      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet, pendingItems: [item] });
       // console.warn("chociesetdata", {
       //   choiceSetRules,
       //   selection: choiceSetRules.selection,
@@ -845,9 +883,15 @@ export class Pathmuncher {
           ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
           : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+
+      if (rule.predicate) {
+        const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
+        if (!predicate.test(rollOptions)) return false;
+      }
+
       const choices = cleansedRule.key === "ChoiceSet"
         ? isNewerVersion(game.version, 11)
-          ? await ruleElement.inflateChoices(rollOptions)
+          ? await ruleElement.inflateChoices(rollOptions, [item])
           : (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
         : [ruleElement.resolveValue()];
 
@@ -867,6 +911,38 @@ export class Pathmuncher {
       return isGood;
     } catch (err) {
       logger.error("Something has gone most wrong during rule checking", {
+        document,
+        rule: cleansedRule,
+        tempActor,
+      });
+      throw err;
+    } finally {
+      await Actor.deleteDocuments([tempActor._id]);
+    }
+  }
+
+  async #checkRulePredicate(document, rule) {
+    const tempActor = await this.#generateTempActor([document], true);
+    const cleansedRule = deepClone(rule);
+    try {
+      const item = tempActor.getEmbeddedDocument("Item", document._id);
+      const ruleElement = cleansedRule.key === "ChoiceSet"
+        ? isNewerVersion(game.version, 11)
+          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
+        : isNewerVersion(game.version, 11)
+          ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
+          : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
+      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+
+      if (rule.predicate) {
+        const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
+        return predicate.test(rollOptions);
+      } else {
+        return true;
+      }
+    } catch (err) {
+      logger.error("Something has gone most wrong during rule predicate checking", {
         document,
         rule: cleansedRule,
         tempActor,
@@ -921,17 +997,22 @@ export class Pathmuncher {
         document: deepClone(document),
       });
 
-      // if (ruleEntry.key === "GrantItem") {
-      //   const checkDoc = deepClone(document);
-      //   checkDoc.system.rules = [];
-      //   const testResult = await this.#checkRule(checkDoc, ruleEntry);
-      //   if (!testResult) {
-      //     const data = { document, ruleEntry, testResult };
-      //     logger.debug(`The early test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`, data);
-      //     rulesToKeep.push(ruleEntry);
-      //     continue;
-      //   }
-      // }
+      if (ruleEntry.key === "ChoiceSet" && ruleEntry.predicate) {
+        logger.debug(`Checking for predicates`, {
+          ruleEntry,
+          document,
+        });
+        const testResult = await this.#checkRulePredicate(duplicate(document), ruleEntry);
+        if (!testResult) {
+          const data = { document, ruleEntry, testResult };
+          logger.debug(
+            `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
+            data
+          );
+          rulesToKeep.push(ruleEntry);
+          continue;
+        }
+      }
 
       const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry) : undefined;
       const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
@@ -941,7 +1022,7 @@ export class Pathmuncher {
       }
 
       const flagName = Pathmuncher.getFlag(document, ruleEntry);
-      if (flagName && choice?.value) {
+      if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
         setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
       }
 
@@ -955,15 +1036,10 @@ export class Pathmuncher {
         setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
         logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
 
-        if (choice) {
-          ruleEntry.selection = choice.value;
-        }
-        // if (!ruleEntry.flag) {
-        //   ruleEntry.flag = Seasoning.slugD(featureDoc.name);
-        // }
+        if (choice) ruleEntry.selection = choice.value;
 
-        if (ruleEntry.predicate) {
-          logger.debug(`Checking for predicates`, {
+        if (ruleEntry.predicate && ruleEntry.key === "GrantItem") {
+          logger.debug(`Checking for grantitem predicates`, {
             ruleEntry,
             document,
             featureDoc,
@@ -978,31 +1054,36 @@ export class Pathmuncher {
             rulesToKeep.push(ruleEntry);
             // this.autoAddedFeatureRules[document._id].push(ruleEntry);
             continue;
+          } else {
+            logger.debug(`The test passed for ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
+            // this.autoAddedFeatureRules[document._id].push(ruleEntry);
+            // eslint-disable-next-line max-depth
+            // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
+            ruleEntry.pathmuncherImport = true;
+            rulesToKeep.push(ruleEntry);
           }
         }
 
         // setProperty(ruleEntry, `preselectChoices.${ruleEntry.flag}`, ruleEntry.selection ?? ruleEntry.uuid);
 
         if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
-          logger.debug(
-            `Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`,
-            ruleFeature
-          );
+          logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
           // this.autoAddedFeatureRules[document._id].push(ruleEntry);
           // rulesToKeep.push(ruleEntry);
           continue;
         } else {
+          logger.debug(`Feature ${featureDoc.name} not found for ${document.name}, adding (${ruleFeature.id})`, ruleFeature);
           if (ruleEntry.selection || ruleEntry.flag) {
             rulesToKeep.push(ruleEntry);
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
-          this.#createGrantedItem(featureDoc, document);
+          this.#createGrantedItem(featureDoc, document, { applyFeatLocation: false });
           if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
-      } else if (choice?.nouuid) {
+      } else if (getProperty(choice, "nouuid")) {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
-        // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
+        if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if (choice.label) document.name = `${document.name} (${choice.label})`;
         rulesToKeep.push(ruleEntry);
@@ -1020,6 +1101,7 @@ export class Pathmuncher {
         }
         rulesToKeep.push(ruleEntry);
       } else {
+        logger.debug(`Final rule fallback for ${document.name}`, ruleEntry);
         const data = {
           uuid: ruleEntry.uuid,
           document,
@@ -1055,10 +1137,8 @@ export class Pathmuncher {
         uuid: deepClone(uuid),
       });
     }
-    if (!this.options.askForChoices) {
-      // eslint-disable-next-line require-atomic-updates
-      document.system.rules = rulesToKeep;
-    }
+    // eslint-disable-next-line require-atomic-updates
+    document.system.rules = rulesToKeep;
 
     logger.debug(`Final status for ${document.name}`, {
       document: deepClone(document),
@@ -1093,16 +1173,14 @@ export class Pathmuncher {
         if (hasProperty(featureDoc, "system.rules")) {
           logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
           if (immediateDiveAdd) {
-            await this.#addGrantedItems(featureDoc);
+            await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation });
           } else {
             subRuleDocuments.push(featureDoc);
           }
         }
       }
-      if (!this.options.askForChoices) {
-        // eslint-disable-next-line require-atomic-updates
-        document.system.items = failedFeatureItems;
-      }
+      // eslint-disable-next-line require-atomic-updates
+      document.system.items = failedFeatureItems;
 
       if (!immediateDiveAdd) {
         for (const subRuleDocument of subRuleDocuments) {
@@ -1110,7 +1188,7 @@ export class Pathmuncher {
             `Processing granted rules for granted item document ${subRuleDocument.name}`,
             duplicate(subRuleDocument)
           );
-          await this.#addGrantedItems(subRuleDocument);
+          await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation });
         }
       }
     }
@@ -1382,7 +1460,7 @@ export class Pathmuncher {
 
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
-        await this.#addGrantedItems(docData, "feat", { originType: parsedFilter });
+        await this.#addGrantedItems(docData, "feat", { originType: parsedFilter, applyFeatLocation: false });
       }
     }
   }
@@ -2068,7 +2146,7 @@ export class Pathmuncher {
     await this.#generateMoney();
   }
 
-  async #generateTempActor(documents = [], includePassedDocumentsRules = false, includeGrants = false) {
+  async #generateTempActor(documents = [], includePassedDocumentsRules = false, includeGrants = false, includeFlagsOnly = false) {
     const actorData = mergeObject({ type: "character" }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
     const actor = await Actor.create(actorData);
@@ -2103,14 +2181,14 @@ export class Pathmuncher {
       for (const i of deepClone(currentItems)) {
         if (!i.system.rules || i.system.rules.length === 0) continue;
         const isPassedDocument = documents.some((d) => d._id === i._id);
-        if (isPassedDocument && !includePassedDocumentsRules) continue;
+        if (isPassedDocument && !includePassedDocumentsRules && !includeFlagsOnly) continue;
 
         const objectSelectionRules = i.system.rules
-          // .filter((r) => {
-          //   const evaluateRules = (isPassedDocument && includePassedDocumentsRules) || !isPassedDocument;
-          //   return evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
-          //   // || (["ChoiceSet"].includes(r.key) && r.selection);
-          // })
+          .filter((r) => {
+            const evaluateRules = ["RollOption", "ChoiceSet"].includes(r.key) && r.selection;
+            return !includeFlagsOnly || evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
+            // || (["ChoiceSet"].includes(r.key) && r.selection);
+          })
           .map((r) => {
             r.ignored = false;
             return r;
@@ -2355,7 +2433,7 @@ export class Pathmuncher {
         item.system.rules = item.system.rules
           .filter((r) => {
             const excludedKeys = ["ActiveEffectLike", "AdjustModifier", "Resistance", "Strike"].includes(r.key);
-            const grantItemWithFlags = ["GrantItem"].includes(r.key) && hasProperty(r, "flag");
+            const grantItemWithFlags = ["GrantItem"].includes(r.key) && (hasProperty(r, "flag") || getProperty(r, "pathmuncherImport"));
             const objectSelection = ["ChoiceSet"].includes(r.key) && utils.isObject(r.selection);
             return !excludedKeys && !grantItemWithFlags && !objectSelection;
           })
@@ -2365,6 +2443,7 @@ export class Pathmuncher {
                 r.choices = r.choiceQueryResults;
               }
             }
+            if (r.pathmuncherImport) delete r.pathmuncherImport;
             return r;
           });
       }
@@ -2421,23 +2500,22 @@ export class Pathmuncher {
   async #restoreEmbeddedRuleLogic() {
     const importedItems = this.actor.items.map((i) => i._id);
     // Loop back over items and add rule and item progression data back in.
-    if (!this.options.askForChoices) {
-      logger.debug("Restoring logic", { currentActor: duplicate(this.actor) });
-      const itemUpdates = [];
-      for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
-        if (importedItems.includes(key)) {
-          itemUpdates.push({
-            _id: `${key}`,
-            system: {
-              items: deepClone(value),
-            },
-          });
-        }
+    logger.debug("Restoring logic", { currentActor: duplicate(this.actor) });
+    const itemUpdates = [];
+    for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
+      if (importedItems.includes(key)) {
+        itemUpdates.push({
+          _id: `${key}`,
+          system: {
+            items: deepClone(value),
+          },
+        });
       }
-      this.#statusUpdate(1, 12, "Feats", "Clearing");
-      logger.debug("Restoring granted item logic", itemUpdates);
-      await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
     }
+    this.#statusUpdate(1, 12, "Feats", "Clearing");
+    logger.debug("Restoring granted item logic", itemUpdates);
+    await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
+
     await this.actor.update({
       "system.resources.focus": this.result.character.system.resources.focus,
     });
