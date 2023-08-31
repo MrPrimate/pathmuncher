@@ -1,3 +1,9 @@
+# 0.9.0
+
+- Support for PF2e 5.4.x
+- More improvements to placing feats granted by feats into teh correct place.
+- Removal of deprecated always prompt option
+
 # 0.8.2
 
 - Improve order of items granted by glass to sort by level, if the class does not order them this way in the data (e.g. Kineticist ) to improve feature matching.
