@@ -46,7 +46,6 @@ const CONSTANTS = {
     addClass: true,
     addFamiliars: true,
     addFormulas: true,
-    askForChoices: false,
   },
 
   CORE_COMPENDIUM_MAPPINGS: {

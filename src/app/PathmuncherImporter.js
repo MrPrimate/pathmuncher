@@ -78,7 +78,6 @@ export class PathmuncherImporter extends FormApplication {
       addAncestry: formData.checkBoxAncestry,
       addFamiliars: formData.checkBoxFamiliars,
       addFormulas: formData.checkBoxFormulas,
-      askForChoices: formData.checkBoxAskForChoices,
       statusCallback: PathmuncherImporter._updateProgress.bind(this),
     };
     logger.debug("Pathmuncher options", options);
