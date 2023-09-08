@@ -1,3 +1,7 @@
+# 0.9.1
+
+- Support Skill Training feat when taken outside of a ancestry choice.
+
 # 0.9.0
 
 - Support for PF2e 5.4.x
