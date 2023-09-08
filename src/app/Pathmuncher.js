@@ -678,7 +678,7 @@ export class Pathmuncher {
     });
   }
 
-  async #featureChoiceMatch(document, choices, ignoreAdded, adjustName) {
+  async #featureChoiceMatch(document, choices, ignoreAdded, adjustName, choiceHint = null) {
     const matches = [];
     for (const choice of choices) {
       const doc = adjustName ? game.i18n.localize(choice.label) : await fromUuid(choice.value);
@@ -698,6 +698,10 @@ export class Pathmuncher {
       }
     }
     if (matches.length > 0) {
+      if (choiceHint) {
+        const hintMatch = matches.find((m) => m.slug === Seasoning.slug(choiceHint));
+        if (hintMatch) return hintMatch;
+      }
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
       if (adjustName && hasProperty(featMatch, "added")) {
@@ -743,8 +747,8 @@ export class Pathmuncher {
       : Seasoning.slugD(document.system.slug ?? document.system.name);
   }
 
-  async #evaluateChoices(document, choiceSet) {
-    logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet });
+  async #evaluateChoices(document, choiceSet, choiceHint) {
+    logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet, choiceHint });
     const tempActor = await this.#generateTempActor([document], false, false, true);
     const cleansedChoiceSet = deepClone(choiceSet);
     try {
@@ -775,7 +779,7 @@ export class Pathmuncher {
       }
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
-      const choiceMatch = await this.#featureChoiceMatch(document, choices, true, cleansedChoiceSet.adjustName);
+      const choiceMatch = await this.#featureChoiceMatch(document, choices, true, cleansedChoiceSet.adjustName, choiceHint);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
         choiceMatch.choiceQueryResults = deepClone(choices);
@@ -965,7 +969,7 @@ export class Pathmuncher {
   }
 
   // eslint-disable-next-line complexity, no-unused-vars
-  async #addGrantedRules(document, originType = null) {
+  async #addGrantedRules(document, originType = null, choiceHint = null) {
     if (document.system.rules.length === 0) return;
     logger.debug(`addGrantedRules for ${document.name}`, duplicate(document));
 
@@ -1014,7 +1018,7 @@ export class Pathmuncher {
         }
       }
 
-      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry) : undefined;
+      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry, choiceHint) : undefined;
       const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
 
       if (choice?.choiceQueryResults) {
@@ -1146,7 +1150,7 @@ export class Pathmuncher {
     });
   }
 
-  async #addGrantedItems(document, { originType = null, applyFeatLocation = false } = {}) {
+  async #addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null } = {}) {
     const immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
     const subRuleDocuments = [];
     if (hasProperty(document, "system.items")) {
@@ -1188,14 +1192,14 @@ export class Pathmuncher {
             `Processing granted rules for granted item document ${subRuleDocument.name}`,
             duplicate(subRuleDocument)
           );
-          await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation });
+          await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
         }
       }
     }
 
     if (hasProperty(document, "system.rules")) {
       logger.debug(`Processing granted rules for core document ${document.name}`, duplicate(document));
-      await this.#addGrantedRules(document, originType);
+      await this.#addGrantedRules(document, originType, choiceHint);
     }
   }
 
@@ -1342,7 +1346,6 @@ export class Pathmuncher {
     this.#determineAbilityBoosts();
     this.#setSaves();
     this.#setMartials();
-    // this.#setSkills();
 
     setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
     setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
@@ -1456,11 +1459,16 @@ export class Pathmuncher {
         const docData = doc.toObject();
         docData._id = foundry.utils.randomID();
         pBFeat.addedId = docData._id;
-        docData.name = displayName;
+        // docData.name = displayName;
 
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
-        await this.#addGrantedItems(docData, "feat", { originType: parsedFilter, applyFeatLocation: false });
+        const options = {
+          originType: parsedFilter,
+          applyFeatLocation: false,
+          choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
+        };
+        await this.#addGrantedItems(docData, "feat", options);
       }
     }
   }
@@ -2149,6 +2157,10 @@ export class Pathmuncher {
   async #generateTempActor(documents = [], includePassedDocumentsRules = false, includeGrants = false, includeFlagsOnly = false) {
     const actorData = mergeObject({ type: "character" }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
+    if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
+      delete actorData.system.skills;
+    }
+
     const actor = await Actor.create(actorData);
     const currentState = duplicate(this.result);
 
