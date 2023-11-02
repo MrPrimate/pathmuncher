@@ -49,13 +49,17 @@ const CONSTANTS = {
   },
 
   CORE_COMPENDIUM_MAPPINGS: {
-    feats: ["pf2e.feats-srd"],
+    feats: ["pf2e.feats-srd", "pf2e-playtest-data.war-of-immortals-playtest-class-feats"],
     ancestryFeatures: ["pf2e.ancestryfeatures"],
-    classFeatures: ["pf2e.classfeatures"],
-    actions: ["pf2e.actionspf2e"],
-    spells: ["pf2e-psychic-amps.psychic-psi-cantrips", "pf2e.spells-srd"],
-    classes: ["pf2e.classes",],
-    ancestries: ["pf2e.ancestries",],
+    classFeatures: ["pf2e.classfeatures", "pf2e-playtest-data.war-of-immortals-playtest-class-features"],
+    actions: ["pf2e.actionspf2e", "pf2e-playtest-data.war-of-immortals-playtest-actions"],
+    spells: [
+      "pf2e-psychic-amps.psychic-psi-cantrips",
+      "pf2e.spells-srd",
+      "pf2e-playtest-data.war-of-immortals-playtest-spells",
+    ],
+    classes: ["pf2e.classes", "pf2e-playtest-data.war-of-immortals-playtest-classes"],
+    ancestries: ["pf2e.ancestries"],
     heritages: ["pf2e.heritages"],
     equipment: ["pf2e.equipment-srd"],
     formulas: ["pf2e.equipment-srd"],
@@ -107,7 +111,8 @@ CONSTANTS.DEFAULT_SETTINGS = {
         "battlezoo-ancestries-year-of-monsters-pf2e.yom-feats",
         "clerics.clerics-feats",
         "clerics.clerics-features",
-        "pf2e.feats-srd"
+        "pf2e.feats-srd",
+        "pf2e-playtest-data.war-of-immortals-playtest-class-feats",
       ],
       ancestryFeatures: [
         "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
@@ -121,10 +126,11 @@ CONSTANTS.DEFAULT_SETTINGS = {
         "clerics.clerics-feats",
         "clerics.clerics-features",
         "pf2e.classfeatures",
+        "pf2e-playtest-data.war-of-immortals-playtest-class-features",
       ],
-      actions: ["pf2e.actionspf2e"],
-      spells: ["pf2e-psychic-amps.psychic-psi-cantrips", "pf2e.spells-srd"],
-      classes: ["clerics.clerics-features", "pf2e.classes",],
+      actions: ["pf2e.actionspf2e", "pf2e-playtest-data.war-of-immortals-playtest-actions"],
+      spells: ["pf2e-psychic-amps.psychic-psi-cantrips", "pf2e.spells-srd", "pf2e-playtest-data.war-of-immortals-playtest-spells"],
+      classes: ["clerics.clerics-features", "pf2e.classes", "pf2e-playtest-data.war-of-immortals-playtest-classes"],
       ancestries: [
         "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-ancestry",
         "battlezoo-ancestries-year-of-monsters-pf2e.yom-ancestries",
