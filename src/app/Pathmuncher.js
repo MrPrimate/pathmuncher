@@ -795,7 +795,7 @@ export class Pathmuncher {
 
       let tempSet = deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
-      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet, pendingItems: [item] });
+      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet, pendingItems: [item], tempItems: [] });
       // console.warn("chociesetdata", {
       //   choiceSetRules,
       //   selection: choiceSetRules.selection,
@@ -2583,7 +2583,7 @@ export class Pathmuncher {
       ? this.bad.filter((b) => b.type === "background").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Background")}: ${b.pbName}</li>`)
       : [];
     const badDeity = this.options.addDeity
-      ? this.bad.filter((b) => b.type === "deity" && b.pbName !== "Not set").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "deity" && b.pbName !== "Not set" && b.pbName !== "").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
       : [];
     const badFeats = this.options.addFeats
       ? this.bad.filter((b) => b.type === "feat").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
