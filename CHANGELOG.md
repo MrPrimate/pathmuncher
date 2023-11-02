@@ -1,3 +1,8 @@
+# 0.10.0
+
+- Feat level detection tweaks
+- Support for Pathfinder system 5.8.0
+
 # 0.9.1
 
 - Support Skill Training feat when taken outside of a ancestry choice.
