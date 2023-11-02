@@ -2127,9 +2127,12 @@ export class Pathmuncher {
   async #processFeats() {
     this.#sortParsedFeats();
     // pre pass
-    await this.#generateFeatItems("feats", { parsedFilter: "Ancestry Feat" });
-    await this.#generateFeatItems("feats", { parsedFilter: "Skill Feat" });
-    await this.#generateFeatItems("feats", { parsedFilter: "Class Feat" });
+    for (let i = 1; i <= this.result.character.system.details.level.value; i++) {
+      await this.#generateFeatItems("feats", { parsedFilter: "Ancestry Feat", levelCap: i });
+      await this.#generateFeatItems("feats", { parsedFilter: "Skill Feat", levelCap: i });
+      await this.#generateFeatItems("feats", { parsedFilter: "Class Feat", levelCap: i });
+      await this.#generateFeatItems("feats", { parsedFilter: "General Feat", levelCap: i });
+    }
 
     this.#statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("feats");
