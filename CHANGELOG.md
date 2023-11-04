@@ -1,3 +1,7 @@
+# 0.10.1
+
+- Lumberjack background mapping to Foundry. @wintermute_wrath
+
 # 0.10.0
 
 - Feat level detection tweaks
