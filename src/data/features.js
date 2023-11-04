@@ -102,6 +102,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Katana", foundryName: "Katana Weapon Familiarity" },
   { pbName: "Liberator [Chaotic Good]", foundryName: "Liberator" },
   { pbName: "Lumberjack Dedication", foundryName: "Turpin Rowe Lumberjack Dedication" },
+  { pbName: "Lumberjack", foundryName: "Lumber Consortium Laborer" },
   { pbName: "Maestro", foundryName: "Maestro Muse" },
   { pbName: "Major Lesson I", foundryName: "Major Lesson" },
   { pbName: "Major Lesson II", foundryName: "Major Lesson" },
