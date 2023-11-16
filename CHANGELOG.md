@@ -1,4 +1,4 @@
-# 0.11.1
+# 0.11.0
 
 - Support Remaster PF2e version 5.9.0+
 
