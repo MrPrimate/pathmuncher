@@ -1,3 +1,7 @@
+# 0.11.1
+
+- Support Remaster PF2e version 5.9.0+
+
 # 0.10.1
 
 - Lumberjack background mapping to Foundry. @wintermute_wrath

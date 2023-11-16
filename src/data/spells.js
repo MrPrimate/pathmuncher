@@ -40,6 +40,7 @@ const REMASTER_NAMES = [
 ];
 
 export function spellRename(spellName) {
+  if (isNewerVersion(game.version, "5.9.0")) return spellName;
   if (foundry.utils.isNewerVersion(game.system.version, "5.3.0")) {
     const remasterName = REMASTER_NAMES.find((remaster) => remaster.pbName === spellName);
     if (remasterName) {

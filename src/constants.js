@@ -49,22 +49,39 @@ const CONSTANTS = {
   },
 
   CORE_COMPENDIUM_MAPPINGS: {
-    feats: ["pf2e.feats-srd", "pf2e-playtest-data.war-of-immortals-playtest-class-feats"],
-    ancestryFeatures: ["pf2e.ancestryfeatures"],
-    classFeatures: ["pf2e.classfeatures", "pf2e-playtest-data.war-of-immortals-playtest-class-features"],
-    actions: ["pf2e.actionspf2e", "pf2e-playtest-data.war-of-immortals-playtest-actions"],
+    feats: [
+      "pf2e.feats-srd",
+      "pf2e-playtest-data.war-of-immortals-playtest-class-feats",
+      "pf2e-legacy-content.feats-legacy",
+    ],
+    ancestryFeatures: ["pf2e.ancestryfeatures", "pf2e-legacy-content.ancestry-features-legacy"],
+    classFeatures: [
+      "pf2e.classfeatures",
+      "pf2e-playtest-data.war-of-immortals-playtest-class-features",
+      "pf2e-legacy-content.class-features-legacy",
+    ],
+    actions: [
+      "pf2e.actionspf2e",
+      "pf2e-playtest-data.war-of-immortals-playtest-actions",
+      "pf2e-legacy-content.actions-legacy",
+    ],
     spells: [
       "pf2e-psychic-amps.psychic-psi-cantrips",
       "pf2e.spells-srd",
       "pf2e-playtest-data.war-of-immortals-playtest-spells",
+      "pf2e-legacy-content.spells-legacy",
     ],
-    classes: ["pf2e.classes", "pf2e-playtest-data.war-of-immortals-playtest-classes"],
-    ancestries: ["pf2e.ancestries"],
-    heritages: ["pf2e.heritages"],
-    equipment: ["pf2e.equipment-srd"],
-    formulas: ["pf2e.equipment-srd"],
-    deities: ["pf2e.deities"],
-    backgrounds: ["pf2e.backgrounds"],
+    classes: [
+      "pf2e.classes",
+      "pf2e-playtest-data.war-of-immortals-playtest-classes",
+      "pf2e-legacy-content.classes-legacy",
+    ],
+    ancestries: ["pf2e.ancestries", "pf2e-legacy-content.ancestries-legacy"],
+    heritages: ["pf2e.heritages", "pf2e-legacy-content.heritages-legacy"],
+    equipment: ["pf2e.equipment-srd", "pf2e-legacy-content.equipment-legacy"],
+    formulas: ["pf2e.equipment-srd", "pf2e-legacy-content.formulas-legacy"],
+    deities: ["pf2e.deities", "pf2e-legacy-content.deities-legacy"],
+    backgrounds: ["pf2e.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
   },
 
   GET_DEFAULT_SETTINGS() {

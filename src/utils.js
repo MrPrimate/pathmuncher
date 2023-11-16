@@ -87,6 +87,15 @@ const utils = {
     }
   },
 
+  allowDualClasses: () => {
+    return (isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "dualClassVariant"));
+    // || (!isNewerVersion("5.9.0", game.version) && when remaster supports dualclass then add here
+  },
+
+  allowAncestryParagon: () => {
+    return (isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "ancestryParagonVariant"));
+  }
+
 };
 
 

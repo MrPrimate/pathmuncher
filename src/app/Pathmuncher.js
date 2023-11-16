@@ -154,20 +154,18 @@ export class Pathmuncher {
 
   #generateFoundryFeatLocation(document, feature) {
     if (feature.type && feature.level) {
-      const ancestryParagonVariant = game.settings.get("pf2e", "ancestryParagonVariant");
-      const dualClassVariant = game.settings.get("pf2e", "dualClassVariant");
       // const freeArchetypeVariant = game.settings.get("pf2e", "freeArchetypeVariant");
       const location = Seasoning.getFoundryFeatLocation(feature.type, feature.level);
       if (location && !this.usedLocations.has(location)) {
         document.system.location = location;
         this.usedLocations.add(location);
       } else if (location && this.usedLocations.has(location)) {
-        logger.debug("Variant feat location", { ancestryParagonVariant, location, feature });
+        logger.debug("Variant feat location", { ancestryParagonVariant: utils.allowAncestryParagon(), location, feature });
         // eslint-disable-next-line max-depth
-        if (ancestryParagonVariant && feature.type === "Ancestry Feat") {
+        if (utils.allowAncestryParagon() && feature.type === "Ancestry Feat") {
           document.system.location = "ancestry-bonus";
           this.usedLocationsAlternateRules.add(location);
-        } else if (dualClassVariant && feature.type === "Class Feat") {
+        } else if (utils.allowDualClasses() && feature.type === "Class Feat") {
           document.system.location = `dualclass-${feature.level}`;
           this.usedLocationsAlternateRules.add(location);
         }
@@ -351,7 +349,7 @@ export class Pathmuncher {
   }
 
   async #addDualClass(klass) {
-    if (!game.settings.get("pf2e", "dualClassVariant")) {
+    if (!utils.allowDualClasses()) {
       if (this.source.dualClass && this.source.dualClass !== "") {
         logger.warn(`Imported character is dual class but system is not configured for dual class`, {
           class: this.source.class,
@@ -590,7 +588,7 @@ export class Pathmuncher {
             === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
           || slug
             === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage))
-          || (game.settings.get("pf2e", "dualClassVariant")
+          || (utils.allowDualClasses()
             && (slug
               === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
               || slug
@@ -1360,7 +1358,7 @@ export class Pathmuncher {
           || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class))
           || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry))
           || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage))
-          || (game.settings.get("pf2e", "dualClassVariant")
+          || (utils.allowDualClasses()
             && slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(name, this.source.dualClass)))
         );
       });
