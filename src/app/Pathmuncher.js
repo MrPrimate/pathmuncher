@@ -2162,7 +2162,7 @@ export class Pathmuncher {
       delete actorData.system.skills;
     }
 
-    const actor = await Actor.create(actorData);
+    const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = duplicate(this.result);
 
     // console.warn("Initial temp actor", deepClone(actor));
@@ -2504,7 +2504,7 @@ export class Pathmuncher {
     if (this.options.addWeapons) await this.#createAndUpdateItemsWithRuleRestore(this.result.weapons);
     if (this.options.addArmor) {
       await this.#createAndUpdateItemsWithRuleRestore(this.result.armor);
-      await this.actor.updateEmbeddedDocuments("Item", this.result.armor);
+      await this.#updateItems("armor");
     }
     if (this.options.addTreasure) await this.#createAndUpdateItemsWithRuleRestore(this.result.treasure);
     if (this.options.addMoney) await this.#createAndUpdateItemsWithRuleRestore(this.result.money);
@@ -2546,19 +2546,23 @@ export class Pathmuncher {
     }
 
     if (!this.boosts.custom) {
-      ["abilities"].forEach((location) => {
-        const abilityTargets = ["str", "dex", "con", "int", "wis", "cha"]
-          .filter((ability) => hasProperty(this.actor, `system.${location}.${ability}`));
-        const abilityDeletions = abilityTargets
-          .reduce(
-            (accumulated, ability) => ({
-              ...accumulated,
-              [`-=${ability}`]: null,
-            }),
-            {}
-          );
-        setProperty(this.result.character, `system.${location}`, abilityDeletions);
-      });
+      if (foundry.utils.isNewerVersion("5.9.0", game.system.version)) {
+        ["abilities"].forEach((location) => {
+          const abilityTargets = ["str", "dex", "con", "int", "wis", "cha"]
+            .filter((ability) => hasProperty(this.actor, `system.${location}.${ability}`));
+          const abilityDeletions = abilityTargets
+            .reduce(
+              (accumulated, ability) => ({
+                ...accumulated,
+                [`-=${ability}`]: null,
+              }),
+              {}
+            );
+          setProperty(this.result.character, `system.${location}`, abilityDeletions);
+        });
+      } else {
+        setProperty(this.result.character, `system.abilities`, null);
+      }
     }
 
     logger.debug("Generated result", this.result);

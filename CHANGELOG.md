@@ -1,6 +1,10 @@
+# 0.11.1
+
+- Some character builds would render all abilities/attributes at 0.
+
 # 0.11.0
 
-- Support Remaster PF2e version 5.9.0+
+- Support Remaster PF2e version 5.9.0+/Remaster
 
 # 0.10.1
 
