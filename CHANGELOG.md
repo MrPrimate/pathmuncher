@@ -1,3 +1,7 @@
+# 0.11.2
+
+- Support latest changes to precious materials on weapons.
+
 # 0.11.1
 
 - Some character builds would render all abilities/attributes at 0.
