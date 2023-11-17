@@ -1640,8 +1640,13 @@ export class Pathmuncher {
     if (parsedItem.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(parsedItem.runes[3]);
     if (parsedItem.mat) {
       const material = parsedItem.mat.split(" (")[0];
-      itemData.system.preciousMaterial.value = Seasoning.slugD(material);
-      itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(parsedItem.mat);
+      if (hasProperty(itemData.system, "preciousMaterial")) {
+        itemData.system.preciousMaterial.value = Seasoning.slugD(material);
+        itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(parsedItem.mat);
+      } else {
+        itemData.system.material.type = Seasoning.slugD(material);
+        itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
+      }
     }
   }
 
