@@ -1,3 +1,7 @@
+# 0.11.3
+
+- Typo fix in boilerplate.
+
 # 0.11.2
 
 - Support latest changes to precious materials on weapons.
