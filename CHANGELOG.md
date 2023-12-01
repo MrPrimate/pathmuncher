@@ -1,3 +1,7 @@
+# 0.11.4
+
+- Saving throw data is inferred from classes, but in some instances remnants of the old data model could cause problems.
+
 # 0.11.3
 
 - Typo fix in boilerplate.
