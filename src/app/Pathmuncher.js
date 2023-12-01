@@ -1309,21 +1309,15 @@ export class Pathmuncher {
   }
 
   #setSaves() {
-    setProperty(this.result.character, "system.saves.fortitude.tank", this.source.proficiencies.fortitude / 2);
-    setProperty(this.result.character, "system.saves.reflex.value", this.source.proficiencies.reflex / 2);
-    setProperty(this.result.character, "system.saves.will.value", this.source.proficiencies.will / 2);
+    ["fortitude", "reflex", "will"].forEach((key) => {
+      setProperty(this.result.character, `system.savingThrows.${key}`, this.source.proficiencies[key] / 2);
+    });
   }
 
   #setMartials() {
-    setProperty(this.result.character, "system.martial.advanced.rank", this.source.proficiencies.advanced / 2);
-    setProperty(this.result.character, "system.martial.heavy.rank", this.source.proficiencies.heavy / 2);
-    setProperty(this.result.character, "system.martial.light.rank", this.source.proficiencies.light / 2);
-    setProperty(this.result.character, "system.martial.medium.rank", this.source.proficiencies.medium / 2);
-    setProperty(this.result.character, "system.martial.unarmored.rank", this.source.proficiencies.unarmored / 2);
-    setProperty(this.result.character, "system.martial.martial.rank", this.source.proficiencies.martial / 2);
-    setProperty(this.result.character, "system.martial.simple.rank", this.source.proficiencies.simple / 2);
-    setProperty(this.result.character, "system.martial.unarmed.rank", this.source.proficiencies.unarmed / 2);
-
+    ["advanced", "heavy", "light", "medium", "unarmored", "martial", "simple", "unarmed"].forEach((key) => {
+      setProperty(this.result.character, `system.martial.${key}.rank`, this.source.proficiencies[key] / 2);
+    });
   }
 
   async #processCore() {
