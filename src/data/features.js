@@ -229,6 +229,7 @@ const SHARED_IGNORE_LIST = [
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
   "Imprecise Scent", // this gets picked up and added by granted features
+  "Sanctification", // choose on import
 ];
 
 const IGNORED_FEATS_LIST = [
