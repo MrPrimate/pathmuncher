@@ -1,3 +1,7 @@
+# 0.11.5
+
+- Axe Musket, and other weapons with a Ranged/Melee option in Pathbuilder were not matched/imported.
+
 # 0.11.4
 
 - Saving throw data is inferred from classes, but in some instances remnants of the old data model could cause problems.
