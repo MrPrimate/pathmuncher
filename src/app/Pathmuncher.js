@@ -1669,7 +1669,7 @@ export class Pathmuncher {
         Pathmuncher.applyRunes(w, itemData, "weapon");
       }
 
-      if (w.display) itemData.name = w.display;
+      if (w.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(w.display)) itemData.name = w.display;
 
       this.#resizeItem(itemData);
       this.result.weapons.push(itemData);

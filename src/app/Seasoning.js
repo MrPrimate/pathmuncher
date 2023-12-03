@@ -1,4 +1,4 @@
-import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT } from "../data/equipment.js";
+import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT, IGNORED_EQUIPMENT, IGNORED_EQUIPMENT_DISPLAY } from "../data/equipment.js";
 import { FEAT_RENAME_MAP, IGNORED_FEATS, IGNORED_SPECIALS } from "../data/features.js";
 import { FEAT_SPELLCASTING } from "../data/spells.js";
 
@@ -59,6 +59,10 @@ export class Seasoning {
   static IGNORED_EQUIPMENT() {
     return IGNORED_EQUIPMENT;
   };
+
+  static IGNORED_EQUIPMENT_DISPLAY(pbName) {
+    return IGNORED_EQUIPMENT_DISPLAY(pbName);
+  }
 
   static getSizeValue(size) {
     switch (size) {

@@ -6,6 +6,11 @@ const SWAPS = [
   /^(Standard) (.*)/,
 ];
 
+const POSTFIX_PB_REMOVALS = [
+  /(.*) (- Melee)$/,
+  /(.*) (- Ranged)$/,
+];
+
 // this equipment is named differently in foundry vs pathbuilder
 export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Chain", foundryName: "Chain (10 feet)" },
@@ -34,10 +39,20 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
   { pbName: "Hide", foundryName: "Hide Armor" },
   { pbName: "Soverign Glue", foundryName: "Sovereign Glue" },
+  { pbName: "Axe Musket - Melee", foundryName: "Axe Musket" },
+  { pbName: "Axe Musket - Ranged", foundryName: "Axe Musket" },
 ];
 
 function generateDynamicNames(pbName) {
   const result = [];
+  // if we have a hardcoded map, don't return here
+  if (EQUIPMENT_RENAME_STATIC_MAP.some((e) => e.pbName === pbName)) return result;
+  for (const reg of POSTFIX_PB_REMOVALS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[1], details: match[2] });
+    }
+  }
   // if we have a hardcoded map, don't return here
   for (const reg of SWAPS) {
     const match = pbName.match(reg);
@@ -63,3 +78,16 @@ export const RESTRICTED_EQUIPMENT = [
 export const IGNORED_EQUIPMENT = [
   "Unarmored"
 ];
+
+const IGNORED_DISPLAY_POSTFIX = [
+  /(.*) - Melee$/,
+  /(.*) - Ranged$/,
+];
+
+export function IGNORED_EQUIPMENT_DISPLAY(pbName) {
+  for (const reg of IGNORED_DISPLAY_POSTFIX) {
+    const match = reg.test(pbName);
+    if (match === true) return true;
+  }
+  return false;
+}
