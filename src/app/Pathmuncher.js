@@ -1612,26 +1612,45 @@ export class Pathmuncher {
     await this.#generateEquipmentItems();
   }
 
+  static RUNE_SCALE = [
+    "Minor",
+    "Lesser",
+    "Moderate",
+    "Greater",
+    "Major",
+    "Supreme",
+  ];
+
   static applyRunes(parsedItem, itemData, type) {
-    itemData.system.potencyRune.value = parsedItem.pot;
-    if (type === "weapon") {
-      itemData.system.strikingRune.value = parsedItem.str;
-    } else if (type === "armor") {
-      itemData.system.resiliencyRune.value = parsedItem.res;
+    if (itemData.type == "shield") {
+      parsedItem.runes.forEach((rune) => {
+        const runeScale = rune.split("(").pop().split(")").shift();
+        const runeLevel = Pathmuncher.RUNE_SCALE.indexOf(runeScale);
+        const runeType = rune.split("(").shift().toLowerCase();
+        if (runeLevel !== -1) itemData.system[runeType] = runeLevel;
+      });
+    } else {
+      itemData.system.potencyRune.value = parsedItem.pot;
+      if (type === "weapon") {
+        itemData.system.strikingRune.value = parsedItem.str;
+      } else if (type === "armor") {
+        itemData.system.resiliencyRune.value = parsedItem.res;
+      }
+
+      if (type === "armor" && parsedItem.worn
+        && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
+          || (parsedItem.res && parsedItem.res !== "")
+        )
+      ) {
+        itemData.system.equipped.invested = true;
+      }
+
+      if (parsedItem.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(parsedItem.runes[0]);
+      if (parsedItem.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(parsedItem.runes[1]);
+      if (parsedItem.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(parsedItem.runes[2]);
+      if (parsedItem.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(parsedItem.runes[3]);
     }
 
-    if (type === "armor" && parsedItem.worn
-      && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
-        || (parsedItem.res && parsedItem.res !== "")
-      )
-    ) {
-      itemData.system.equipped.invested = true;
-    }
-
-    if (parsedItem.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(parsedItem.runes[0]);
-    if (parsedItem.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(parsedItem.runes[1]);
-    if (parsedItem.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(parsedItem.runes[2]);
-    if (parsedItem.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(parsedItem.runes[3]);
     if (parsedItem.mat) {
       const material = parsedItem.mat.split(" (")[0];
       if (hasProperty(itemData.system, "preciousMaterial")) {
