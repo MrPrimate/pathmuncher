@@ -1,3 +1,7 @@
+# 0.11.6
+
+- Handle resilient rune on shields.
+
 # 0.11.5
 
 - Axe Musket, and other weapons with a Ranged/Melee option in Pathbuilder were not matched/imported.
