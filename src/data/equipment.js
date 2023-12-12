@@ -41,6 +41,8 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Soverign Glue", foundryName: "Sovereign Glue" },
   { pbName: "Axe Musket - Melee", foundryName: "Axe Musket" },
   { pbName: "Axe Musket - Ranged", foundryName: "Axe Musket" },
+  { pbName: "Repair Kit", foundryName: "Repair Toolkit" },
+  { pbName: "Repair Kit (Superb)", foundryName: "Repair Toolkit (Superb)" },
 ];
 
 function generateDynamicNames(pbName) {
