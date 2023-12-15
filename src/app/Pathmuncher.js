@@ -751,13 +751,9 @@ export class Pathmuncher {
     const cleansedChoiceSet = deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const choiceSetRules = isNewerVersion(game.version, 11)
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item })
-        : new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, item);
+      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item });
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
-      const choices = isNewerVersion(game.version, 11)
-        ? await choiceSetRules.inflateChoices(rollOptions, [])
-        : (await choiceSetRules.inflateChoices()).filter((c) => c.predicate?.test(rollOptions) ?? true);
+      const choices = await choiceSetRules.inflateChoices(rollOptions, []);
 
       logger.debug("Starting choice evaluation", {
         document,
@@ -769,9 +765,7 @@ export class Pathmuncher {
       });
 
       if (cleansedChoiceSet.choices?.query) {
-        const nonFilteredChoices = isNewerVersion(game.version, 11)
-          ? await choiceSetRules.inflateChoices(rollOptions, [item])
-          : await choiceSetRules.inflateChoices();
+        const nonFilteredChoices = await choiceSetRules.inflateChoices(rollOptions, [item]);
         const queryResults = await choiceSetRules.queryCompendium(cleansedChoiceSet.choices, rollOptions, [item]);
         logger.debug("Query Result", { queryResults, nonFilteredChoices });
       }
@@ -842,9 +836,7 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       // console.warn("creating grant item");
-      const grantItemRule = isNewerVersion(game.version, 11)
-        ? new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item })
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, item);
+      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item });
       // console.warn("Begining uuid resovle");
       const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
 
@@ -878,12 +870,8 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? isNewerVersion(game.version, 11)
-          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
-          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
-        : isNewerVersion(game.version, 11)
-          ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
-          : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
 
       if (rule.predicate) {
@@ -892,9 +880,7 @@ export class Pathmuncher {
       }
 
       const choices = cleansedRule.key === "ChoiceSet"
-        ? isNewerVersion(game.version, 11)
-          ? await ruleElement.inflateChoices(rollOptions, [item])
-          : (await ruleElement.inflateChoices()).filter((c) => !c.predicate || c.predicate.test(rollOptions))
+        ? await ruleElement.inflateChoices(rollOptions, [item])
         : [ruleElement.resolveValue()];
 
       const isGood = cleansedRule.key === "ChoiceSet"
@@ -929,12 +915,8 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? isNewerVersion(game.version, 11)
-          ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
-          : new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, item)
-        : isNewerVersion(game.version, 11)
-          ? new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item })
-          : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, item);
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
 
       if (rule.predicate) {
@@ -1202,9 +1184,6 @@ export class Pathmuncher {
   }
 
   #determineAbilityBoosts() {
-    const boostLocation = foundry.utils.isNewerVersion(game.system.version, "5.3.0")
-      ? "attributes"
-      : "abilities";
     const breakdown = getProperty(this.source, "abilities.breakdown");
     const useCustomStats
       = breakdown
@@ -1221,23 +1200,16 @@ export class Pathmuncher {
           classBoostMap[key] = boosts.map((ability) => ability.toLowerCase());
         }
       }
-      setProperty(this.result.character, `system.build.${boostLocation}.boosts`, classBoostMap);
+      setProperty(this.result.character, "system.build.attributes.boosts", classBoostMap);
       this.boosts.class = classBoostMap;
 
       // ancestry
     } else {
       this.boosts.custom = true;
-      if (foundry.utils.isNewerVersion("5.3.0", game.system.version)) {
-        ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
-          setProperty(this.result.character, `system.abilities.${key}.value`, this.source.abilities[key]);
-        });
-      } else {
-        ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
-          const mod = Math.min(Math.max(Math.trunc((this.source.abilities[key] - 10) / 2), -5), 10) || 0;
-          setProperty(this.result.character, `system.abilities.${key}.mod`, mod);
-        });
-      }
-
+      ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
+        const mod = Math.min(Math.max(Math.trunc((this.source.abilities[key] - 10) / 2), -5), 10) || 0;
+        setProperty(this.result.character, `system.abilities.${key}.mod`, mod);
+      });
     }
 
     if (breakdown?.classBoosts.length > 0) {
@@ -1745,7 +1717,11 @@ export class Pathmuncher {
         Pathmuncher.applyRunes(w, itemData, "weapon");
       }
 
-      if (w.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(w.display)) itemData.name = w.display;
+      if (w.display.startsWith("Large ")) {
+        itemData.system.size = "lg";
+      } else if (w.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(w.display)) {
+        itemData.name = w.display;
+      }
 
       this.#resizeItem(itemData);
       this.result.weapons.push(itemData);
@@ -2059,19 +2035,16 @@ export class Pathmuncher {
     if (!this.source.rituals) return;
     const ritualCompendium = new CompendiumMatcher({
       type: "spells",
-      indexFields: ["name", "type", "system.slug", "system.category.value"],
+      indexFields: ["name", "type", "system.slug", "system.ritual"],
     });
     await ritualCompendium.loadCompendiums();
 
-    const ritualFilters = {
-      "system.category.value": "ritual",
-    };
     for (const ritual of this.source.rituals) {
       const ritualName = ritual.split("(")[0].trim();
       logger.debug("focus spell details", { ritual, spellName: ritualName });
 
-      const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName, ritualFilters);
-      if (!indexMatch) {
+      const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName);
+      if (!indexMatch || !hasProperty(indexMatch, "system.ritual")) {
         logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName });
         this.bad.push({ pbName: ritual, type: "spell", details: { originalName: ritual, name: ritualName } });
         continue;
@@ -2620,23 +2593,7 @@ export class Pathmuncher {
     }
 
     if (!this.boosts.custom) {
-      if (foundry.utils.isNewerVersion("5.9.0", game.system.version)) {
-        ["abilities"].forEach((location) => {
-          const abilityTargets = ["str", "dex", "con", "int", "wis", "cha"]
-            .filter((ability) => hasProperty(this.actor, `system.${location}.${ability}`));
-          const abilityDeletions = abilityTargets
-            .reduce(
-              (accumulated, ability) => ({
-                ...accumulated,
-                [`-=${ability}`]: null,
-              }),
-              {}
-            );
-          setProperty(this.result.character, `system.${location}`, abilityDeletions);
-        });
-      } else {
-        setProperty(this.result.character, `system.abilities`, null);
-      }
+      setProperty(this.result.character, `system.abilities`, null);
     }
 
     logger.debug("Generated result", this.result);
