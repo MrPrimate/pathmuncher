@@ -1,3 +1,10 @@
+# 0.12.0
+
+- Support for Pathfinder system v5.11.1 (and dropping of earlier versions)
+- Attempt to match Large Weapons and upsize them for you.
+- Shields will add resilient rune again.
+- Fixes for runs in v5.11.x
+
 # 0.11.7
 
 - Match repair toolkit.
