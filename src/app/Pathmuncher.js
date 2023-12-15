@@ -1613,6 +1613,7 @@ export class Pathmuncher {
   }
 
   static RUNE_SCALE = [
+    "",
     "Minor",
     "Lesser",
     "Moderate",
@@ -1621,45 +1622,101 @@ export class Pathmuncher {
     "Supreme",
   ];
 
+  static REINFORCING_DATA = {
+    "Minor": {
+      value: 1,
+      hp: 44,
+    },
+    "Lesser": {
+      value: 2,
+      hp: 52,
+    },
+    "Moderate": {
+      value: 3,
+      hp: 64,
+    },
+    "Greater": {
+      value: 4,
+      hp: 80,
+    },
+    "Major": {
+      value: 5,
+      hp: 84,
+    },
+    "Supreme": {
+      value: 6,
+      hp: 108,
+    },
+  };
+
+  static POTENCY_SCALE = [
+    "",
+    "striking",
+    "greaterStriking",
+    "majorStriking",
+  ];
+
+  static RESILIENT_SCALE = [
+    "",
+    "resilient",
+    "greaterResilient",
+    "majorResilient",
+  ];
+
+  // eslint-disable-next-line complexity
   static applyRunes(parsedItem, itemData, type) {
     if (itemData.type == "shield") {
       parsedItem.runes.forEach((rune) => {
-        const runeScale = rune.split("(").pop().split(")").shift();
-        const runeLevel = Pathmuncher.RUNE_SCALE.indexOf(runeScale);
-        const runeType = rune.split("(").shift().toLowerCase();
-        if (runeLevel !== -1) itemData.system[runeType] = runeLevel;
+        if (rune.startsWith("Reinforcing")) {
+          const runeScale = rune.split("(").pop().split(")").shift().trim();
+          const runeMatch = Pathmuncher.REINFORCING_DATA[runeScale];
+          if (runeMatch) {
+            itemData.system.runes.reinforcing = runeMatch.value;
+            itemData.system.hp.value += runeMatch.hp;
+          }
+        } else {
+          const runeScale = rune.split("(").pop().split(")").shift().trim();
+          const runeLevel = Pathmuncher.RUNE_SCALE.indexOf(runeScale);
+          const runeType = rune.split("(").shift().toLowerCase().trim();
+          if (runeLevel !== -1) {
+            itemData.system.runes[runeType] = runeLevel;
+          }
+        }
       });
-    } else {
-      itemData.system.potencyRune.value = parsedItem.pot;
+    } else if (hasProperty(itemData, "system.runes.potency")) {
+      itemData.system.runes.potency = parsedItem.pot;
       if (type === "weapon") {
-        itemData.system.strikingRune.value = parsedItem.str;
+        const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str);
+        if (striking !== -1) itemData.system.runes.striking = striking;
       } else if (type === "armor") {
-        itemData.system.resiliencyRune.value = parsedItem.res;
+        const resilient = Pathmuncher.RESILIENT_SCALE.indexOf(parsedItem.res);
+        if (resilient !== -1) itemData.system.runes.resilient = resilient;
       }
+    }
 
-      if (type === "armor" && parsedItem.worn
-        && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
-          || (parsedItem.res && parsedItem.res !== "")
-        )
-      ) {
-        itemData.system.equipped.invested = true;
-      }
+    if (type === "armor" && parsedItem.worn
+      && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
+        || (parsedItem.res && parsedItem.res !== "")
+      )
+    ) {
+      itemData.system.equipped.invested = true;
+    }
 
-      if (parsedItem.runes[0]) itemData.system.propertyRune1.value = Seasoning.slugD(parsedItem.runes[0]);
-      if (parsedItem.runes[1]) itemData.system.propertyRune2.value = Seasoning.slugD(parsedItem.runes[1]);
-      if (parsedItem.runes[2]) itemData.system.propertyRune3.value = Seasoning.slugD(parsedItem.runes[2]);
-      if (parsedItem.runes[3]) itemData.system.propertyRune4.value = Seasoning.slugD(parsedItem.runes[3]);
+    if (hasProperty(itemData, "system.runes.property")) {
+      parsedItem.runes.forEach((property) => {
+        const resistantRegex = /Energy Resistant - (.*)/i;
+        const resistantMatch = property.match(resistantRegex);
+        const rune = resistantMatch
+          ? `${resistantMatch[1]} Resistant`
+          : property;
+        itemData.system.runes.property.push(Seasoning.slugD(rune));
+      });
     }
 
     if (parsedItem.mat) {
       const material = parsedItem.mat.split(" (")[0];
-      if (hasProperty(itemData.system, "preciousMaterial")) {
-        itemData.system.preciousMaterial.value = Seasoning.slugD(material);
-        itemData.system.preciousMaterialGrade.value = Seasoning.getMaterialGrade(parsedItem.mat);
-      } else {
-        itemData.system.material.type = Seasoning.slugD(material);
-        itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
-      }
+      itemData.system.material.type = Seasoning.slugD(material);
+      itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
     }
   }
 
