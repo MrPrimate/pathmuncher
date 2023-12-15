@@ -226,6 +226,7 @@ const SHARED_IGNORE_LIST = [
   "Unarmored",
   "Simple Weapon Expertise",
   "Spellbook",
+  "Titan Mauler", // not needed
   "Energy Emanation", // pathbuilder does not pass through a type for this
   "Imprecise Sense", // this gets picked up and added by granted features
   "Imprecise Scent", // this gets picked up and added by granted features
