@@ -1776,9 +1776,8 @@ export class Pathmuncher {
       if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
         itemData.system.equipped.inSlot = a.worn ?? false;
         itemData.system.quantity = a.qty;
-        itemData.system.category = a.prof;
 
-        const isShield = itemData.system.category === "shield";
+        const isShield = a.prof === "shield";
         itemData.system.equipped.handsHeld = isShield && a.worn ? 1 : 0;
         itemData.system.equipped.carryType = isShield && a.worn ? "held" : "worn";
 
