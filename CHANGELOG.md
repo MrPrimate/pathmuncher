@@ -1,3 +1,7 @@
+# 0.12.1
+
+- Improved name matching for some items (thanks @killersquirrel59 )
+
 # 0.12.0
 
 - Support for Pathfinder system v5.11.1 (and dropping of earlier versions)

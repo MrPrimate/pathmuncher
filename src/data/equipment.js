@@ -43,6 +43,9 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Axe Musket - Ranged", foundryName: "Axe Musket" },
   { pbName: "Repair Kit", foundryName: "Repair Toolkit" },
   { pbName: "Repair Kit (Superb)", foundryName: "Repair Toolkit (Superb)" },
+  { pbName: "Extendible Pincer", foundryName: "Extendable Pincer" },
+  { pbName: "Clothing (Explorer's)", foundryName: "Explorer's Clothing" },
+  { pbName: "Street Preacher [Placeholder]", foundryName: "Street Preacher" },
 ];
 
 function generateDynamicNames(pbName) {
