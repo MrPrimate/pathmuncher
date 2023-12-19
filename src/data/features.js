@@ -6,6 +6,7 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
   /(.*) (Style)$/,
   /(.*) (Initiate Benefit)$/,
+  /(.*) Mystery$/,
   // Cleric +
   /(.*) (Doctrine)$/,
   /(.*) (Element)$/,
@@ -283,4 +284,12 @@ export function SPECIAL_NAME_ADDITIONS(specials) {
     }
   }
   return newSpecials;
+}
+
+const NO_AUTO_CHOICE_LIST = [
+  // "Elemental Evolution",
+];
+
+export function NO_AUTO_CHOICE() {
+  return NO_AUTO_CHOICE_LIST;
 }
