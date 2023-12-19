@@ -218,6 +218,7 @@ export class Pathmuncher {
           container,
           foundryId,
           invested: e[2] === "Invested",
+          sourceType: "equipment",
         };
         this.parsed.equipment.push(item);
       });
@@ -231,6 +232,7 @@ export class Pathmuncher {
           added: false,
           addedId: null,
           addedAutoId: null,
+          sourceType: "armor",
         }, e);
         this.parsed.armor.push(item);
       });
@@ -245,6 +247,7 @@ export class Pathmuncher {
           added: false,
           addedId: null,
           addedAutoId: null,
+          sourceType: "weapons",
         }, e);
         this.parsed.weapons.push(item);
       });
@@ -262,7 +265,7 @@ export class Pathmuncher {
       .forEach((special) => {
         const name = this.getFoundryFeatureName(special).foundryName;
         if (!this.#processSpecialData(name) && !Seasoning.IGNORED_SPECIALS().includes(name)) {
-          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i });
+          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i, sourceType: "specials" });
           i++;
         }
       });
@@ -289,7 +292,22 @@ export class Pathmuncher {
           level: feat[3],
           originalName: feat[0],
           rank: y,
+          sourceType: "feats",
         };
+        if (feat.length >= 7) {
+          data.featChoiceRef = feat[4];
+          data.hasChildren = feat[5] === "parentChoice";
+          data.isChild = feat[5] === "childChoice";
+          data.isStandard = feat[5] === "standardChoice";
+          data.parentFeatChoiceRef = feat[6];
+        } else {
+          // probably an awarded feat
+          data.featChoiceRef = null;
+          data.hasChildren = null;
+          data.isChild = null;
+          data.isStandard = null;
+          data.parentFeatChoiceRef = null;
+        }
         this.parsed.feats.push(data);
         y++;
       });
@@ -309,6 +327,7 @@ export class Pathmuncher {
         addedAutoId: null,
         isChoice: true,
         rank: 0,
+        sourceType: "specials",
       };
       this.parsed.specials.push(clanDagger);
     }
@@ -323,6 +342,7 @@ export class Pathmuncher {
         addedAutoId: null,
         isChoice: true,
         rank: 0,
+        sourceType: "specials",
       });
       this.source.background = match[1];
     }
@@ -1377,15 +1397,22 @@ export class Pathmuncher {
     });
   }
 
-  async #generateFeatItems(type, { levelCap = null, parsedFilter = null } = {}) {
-    logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${parsedFilter}"`);
+  // eslint-disable-next-line complexity
+  async #generateFeatItems(type,
+    { levelCap = null, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {}
+  ) {
+    logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${typeFilter}"`);
 
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
         if (pBFeat.added) continue;
         if (levelCap && (pBFeat.level ?? 20) > levelCap) continue;
-        if (parsedFilter && pBFeat.type !== parsedFilter) continue;
-        logger.debug("Generating feature for", pBFeat);
+        if (typeFilter && pBFeat.type !== typeFilter) continue;
+        if (excludeChild && pBFeat.isChild === true) continue;
+        if (excludeParents && pBFeat.isParent === true) continue;
+        if (excludeStandard && pBFeat.isStandard === true) continue;
+        logger.debug(`Generating feature for ${pBFeat.name}`, pBFeat);
+        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeat, this: this });
 
         const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
         const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
@@ -2171,14 +2198,25 @@ export class Pathmuncher {
 
   async #processFeats() {
     this.#sortParsedFeats();
-    // pre pass
+    // pre pass for standard items
     for (let i = 1; i <= this.result.character.system.details.level.value; i++) {
-      await this.#generateFeatItems("feats", { parsedFilter: "Ancestry Feat", levelCap: i });
-      await this.#generateFeatItems("feats", { parsedFilter: "Skill Feat", levelCap: i });
-      await this.#generateFeatItems("feats", { parsedFilter: "Class Feat", levelCap: i });
-      await this.#generateFeatItems("feats", { parsedFilter: "General Feat", levelCap: i });
+      await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true, excludeParents: true });
     }
+    await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
+    // prepass for non-child items
+    for (let i = 1; i <= this.result.character.system.details.level.value; i++) {
+      await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true });
+      await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat", levelCap: i, excludeChild: true });
+    }
+    await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
 
+    // final pass, include all
     this.#statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("feats");
     this.#statusUpdate(2, 5, "Feats");
