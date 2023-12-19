@@ -1,4 +1,4 @@
-# Next Up
+# 1.0.0
 
 - Improved Large weapon matching.
 - Detection of Mystery types for Oracle.
