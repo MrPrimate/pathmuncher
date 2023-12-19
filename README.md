@@ -17,7 +17,6 @@ To use this module the users must have the CREATE ACTOR ability, as it creates t
 
 ## Known Issues
 
-- Pathbuilder JSON does not contain ritual spell data at the moment.
 - There are differences between Pathbuilder names and Foundry names. If you find any, please open an issue, or drop a note in Discord with as much detail as possible, ideally with a shared link to a pathbuilder character.
 - Support for "dual classed" characters from the Advanced Players guide is ropey at best.
 
