@@ -1744,7 +1744,7 @@ export class Pathmuncher {
         Pathmuncher.applyRunes(w, itemData, "weapon");
       }
 
-      if (w.display.startsWith("Large ")) {
+      if (w.display.startsWith("Large ") || w.increasedDice) {
         itemData.system.size = "lg";
       } else if (w.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(w.display)) {
         itemData.name = w.display;
