@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { SPECIAL_NAME_ADDITIONS } from "../data/features.js";
+import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE } from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -32,6 +32,7 @@ export class Pathmuncher {
     addName = true, addClass = true, addBackground = true, addHeritage = true, addAncestry = true,
     statusCallback = null } = {}
   ) {
+    this.devMode = game.modules.get("pathmuncher").version === "999.0.0";
     this.actor = actor;
     // note not all these options do anything yet!
     this.options = {
@@ -674,7 +675,14 @@ export class Pathmuncher {
 
     if (featureMatch) {
       logger.debug(`Found feature match for ${document.name}`, { featureMatch });
-      if (hasProperty(featureMatch, "added")) {
+      const existingMatch = featureMatch.sourceType
+        ? this.parsed[featureMatch.sourceType].some((f) => f.addedId === document._id)
+        : false;
+      if (this.devMode && existingMatch) {
+        logger.warn(`Existing match for ${document.name}`, { featureMatch, existingMatch, document });
+      }
+      // console.warn(`Match for ${document.name} createGrantedItem`, { featureMatch, existingMatch, document });
+      if (hasProperty(featureMatch, "added") && !existingMatch) {
         featureMatch.added = true;
         featureMatch.addedId = document._id;
         if (applyFeatLocation) this.#generateFoundryFeatLocation(document, featureMatch);
@@ -722,7 +730,14 @@ export class Pathmuncher {
       }
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
-      if (adjustName && hasProperty(featMatch, "added")) {
+      const existingMatch = featMatch.sourceType
+        ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
+        : false;
+      if (this.devMode && existingMatch) {
+        logger.warn(`Existing match for ${document.name}`, { featMatch, existingMatch, document });
+      }
+      // console.warn(`Match for ${document.name} featureChoiceMatch`, { match, featMatch, existingMatch, document });
+      if (adjustName && hasProperty(featMatch, "added") && !existingMatch) {
         featMatch.added = true;
         featMatch.addedId = document._id;
       }
@@ -747,7 +762,16 @@ export class Pathmuncher {
     if (matches.length > 0) {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.choice.value, { ignoreAdded: true, isChoiceMatch: true });
-      if (featMatch) {
+
+      const existingMatch = featMatch.sourceType
+        ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
+        : false;
+
+      if (this.devMode && existingMatch) {
+        logger.warn(`Existing match for ${document.name}`, { featMatch, existingMatch, document });
+      }
+      // console.warn(`Match for ${document.name} featureChoiceMatchNoUUID`, { match, featMatch, existingMatch, document });
+      if (featMatch && !existingMatch) {
         featMatch.added = true;
         featMatch.addedId = document._id;
         match.choice.nouuid = true;
@@ -992,6 +1016,11 @@ export class Pathmuncher {
         // size work around due to Pathbuilder not always adding the right size to json
         if (ruleEntry.key === "CreatureSize") this.size = ruleEntry.value;
         this.autoAddedFeatureRules[document._id].push(ruleEntry);
+        rulesToKeep.push(ruleEntry);
+        continue;
+      }
+      if (NO_AUTO_CHOICE().includes(document.name)) {
+        logger.debug(`Deliberately skipping ${document.name} auto choice detection`);
         rulesToKeep.push(ruleEntry);
         continue;
       }
@@ -1455,7 +1484,7 @@ export class Pathmuncher {
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
         const options = {
-          originType: parsedFilter,
+          originType: typeFilter,
           applyFeatLocation: false,
           choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
         };

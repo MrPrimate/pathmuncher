@@ -1,3 +1,9 @@
+# Next Up
+
+- Improved Large weapon matching.
+- Detection of Mystery types for Oracle.
+- First pass at improved child feat detection for Pathbuilder exports in v79 of Pathbuilder.
+
 # 0.12.1
 
 - Improved name matching for some items (thanks @killersquirrel59 )
