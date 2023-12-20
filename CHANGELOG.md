@@ -1,3 +1,9 @@
+# NEXT UP
+
+- Some slightly improved name mapping for legacy toolkits.
+- Handwraps of Mighty Blows will import correctly.
+- Various improvements for legacy equipment matching.
+
 # 1.0.0
 
 - Improved Large weapon matching.

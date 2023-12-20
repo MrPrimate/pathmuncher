@@ -193,42 +193,85 @@ export class Pathmuncher {
     };
   }
 
+  #nameMapSourceEquipment(e) {
+    const name = Seasoning.getFoundryEquipmentName(e[0]);
+    const containerKey = Object.keys(this.source.equipmentContainers)
+      .find((key) => this.source.equipmentContainers[key].containerName === name);
+
+    const container = containerKey ? this.#getContainerData(containerKey) : null;
+    const foundryId = foundry.utils.randomID();
+
+    if (container) {
+      this.source.equipmentContainers[containerKey].foundryId = foundryId;
+    }
+
+    const item = {
+      foundryName: name,
+      pbName: e[0],
+      originalName: e[0],
+      qty: e[1],
+      added: false,
+      addedId: null,
+      addedAutoId: null,
+      inContainer: e[2] !== "Invested" ? e[2] : null,
+      container,
+      foundryId,
+      invested: e[2] === "Invested",
+      sourceType: "equipment",
+    };
+    this.parsed.equipment.push(item);
+  }
+
+  #nameMapSourceEquipmentAddHandwraps(e) {
+    const name = Seasoning.getFoundryEquipmentName(e[0]);
+    const potencyMatch = e[0].match(/\(\+(\d)[\s)]/i);
+    const potency = potencyMatch ? parseInt(potencyMatch[1]) : 0;
+    const strikingMatch = e[0].match(/\d( \w*)? (Striking)/i);
+    const striking = strikingMatch
+      ? Seasoning.slugD(`${(strikingMatch[1] ?? "").trim()}${(strikingMatch[2] ?? "").trim()}`) // `${(strikingMatch[2] ?? "").toLowerCase().trim()}${(strikingMatch[1] ?? "").trim()}`.trim()
+      : "";
+    const mockE = {
+      name: e[0],
+      qty: 1,
+      prof: "unarmed",
+      pot: Number.isInteger(potency) ? potency : 0,
+      str: striking,
+      mat: null,
+      display: e[0],
+      runes: [],
+      damageType: "B",
+      increasedDice: false
+    };
+    const weapon = mergeObject({
+      foundryName: name,
+      pbName: mockE.name,
+      originalName: mockE.name,
+      added: false,
+      addedId: null,
+      addedAutoId: null,
+      sourceType: "weapons",
+    }, mockE);
+    this.parsed.weapons.push(weapon);
+  }
+
   #nameMap() {
     logger.debug("Starting Equipment Rename");
     this.source.equipment
       .filter((e) => e[0] && e[0] !== "undefined")
       .forEach((e) => {
-        const name = Seasoning.getFoundryEquipmentName(e[0]);
-        const containerKey = Object.keys(this.source.equipmentContainers)
-          .find((key) => this.source.equipmentContainers[key].containerName === name);
-
-        const container = containerKey ? this.#getContainerData(containerKey) : null;
-        const foundryId = foundry.utils.randomID();
-
-        if (container) {
-          this.source.equipmentContainers[containerKey].foundryId = foundryId;
+        if (e[0].startsWith("Handwraps of Mighty Blows")) {
+          this.#nameMapSourceEquipmentAddHandwraps(e);
+        } else {
+          this.#nameMapSourceEquipment(e);
         }
-
-        const item = {
-          pbName: name,
-          qty: e[1],
-          added: false,
-          addedId: null,
-          addedAutoId: null,
-          inContainer: e[2] !== "Invested" ? e[2] : null,
-          container,
-          foundryId,
-          invested: e[2] === "Invested",
-          sourceType: "equipment",
-        };
-        this.parsed.equipment.push(item);
       });
     this.source.armor
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({
-          pbName: name,
+          foundryName: name,
+          pbName: e.name,
           originalName: e.name,
           added: false,
           addedId: null,
@@ -242,9 +285,9 @@ export class Pathmuncher {
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({
-          pbName: name,
-          originalName:
-          e.name,
+          foundryName: name,
+          pbName: e.name,
+          originalName: e.name,
           added: false,
           addedId: null,
           addedAutoId: null,
@@ -1577,7 +1620,9 @@ export class Pathmuncher {
       this.#resizeItem(itemData);
       this.result["equipment"].push(itemData);
       this.parsed.equipment.push({
+        foundryName: name,
         pbName: data.containerName,
+        originalName: data.containerName,
         name,
         qty: 1,
         added: true,
@@ -1598,7 +1643,7 @@ export class Pathmuncher {
         continue;
       }
       logger.debug("Generating item for", e);
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.pbName);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.foundryName);
       if (!indexMatch) {
         logger.error(`Unable to match ${e.pbName}`, e);
         this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
@@ -1748,6 +1793,39 @@ export class Pathmuncher {
     }
   }
 
+  async #createWeaponItem(data) {
+    // { pbName, name, prof, qty, die, display, increasedDice, pot, str, mat, runes, attack, damageBonus, extraDamage, damageType }
+    logger.debug("Generating weapon for", data);
+    const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.pbName, data.foundryName);
+    if (!indexMatch) {
+      logger.error(`Unable to match weapon item ${data.name}`, data);
+      this.bad.push({ pbName: data.pbName, type: "weapon", details: { w: data } });
+      return null;
+    }
+
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+    const itemData = doc.toObject();
+    itemData._id = foundry.utils.randomID();
+    itemData.system.quantity = data.qty;
+    // because some shields don't have damage dice, but come in as weapons on pathbuilder
+    if (itemData.type === "weapon") {
+      if (data.die) itemData.system.damage.die = data.die;
+      Pathmuncher.applyRunes(data, itemData, "weapon");
+    }
+
+    if (data.display.startsWith("Large ") || data.increasedDice) {
+      itemData.system.size = "lg";
+    } else if (data.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(data.display)) {
+      itemData.name = data.display;
+    }
+
+    this.#resizeItem(itemData);
+    this.result.weapons.push(itemData);
+    data.added = true;
+    data.addedId = itemData._id;
+    return itemData;
+  }
+
   async #generateWeaponItems() {
     for (const w of this.parsed.weapons) {
       if (Seasoning.IGNORED_EQUIPMENT().includes(w.pbName)) {
@@ -1755,34 +1833,7 @@ export class Pathmuncher {
         w.addedAutoId = "ignored";
         continue;
       }
-      logger.debug("Generating weapon for", w);
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(w.pbName, w.pbName);
-      if (!indexMatch) {
-        logger.error(`Unable to match weapon item ${w.name}`, w);
-        this.bad.push({ pbName: w.pbName, type: "weapon", details: { w } });
-        continue;
-      }
-
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const itemData = doc.toObject();
-      itemData._id = foundry.utils.randomID();
-      itemData.system.quantity = w.qty;
-      // because some shields don't have damage dice, but come in as weapons on pathbuilder
-      if (itemData.type === "weapon") {
-        itemData.system.damage.die = w.die;
-        Pathmuncher.applyRunes(w, itemData, "weapon");
-      }
-
-      if (w.display.startsWith("Large ") || w.increasedDice) {
-        itemData.system.size = "lg";
-      } else if (w.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(w.display)) {
-        itemData.name = w.display;
-      }
-
-      this.#resizeItem(itemData);
-      this.result.weapons.push(itemData);
-      w.added = true;
-      w.addedId = itemData._id;
+      await this.#createWeaponItem(w);
     }
   }
 
@@ -1794,7 +1845,7 @@ export class Pathmuncher {
         continue;
       }
       logger.debug("Generating armor for", a);
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(`${a.pbName} Armor`, a.pbName);
+      const indexMatch = this.compendiumMatchers["equipment"].getMatch(a.foundryName, `${a.pbName} Armor`);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
         this.bad.push({ pbName: a.pbName, type: "armor", details: { a } });
