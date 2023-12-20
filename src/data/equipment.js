@@ -9,6 +9,25 @@ const SWAPS = [
 const POSTFIX_PB_REMOVALS = [
   /(.*) (- Melee)$/,
   /(.*) (- Ranged)$/,
+  /(Charm of Resistance .*) - (.*)/,
+];
+
+const PARENTHESIS = [
+  /^(.*) \((.*)\)$/,
+];
+
+const SPLITS = [
+  // /^(.*) - (.*)/,
+];
+
+const SPLITS_INVERT = [
+  /^(.*): (.*)/,
+];
+
+const REPLACES = [
+  { pbName: "Ring of Energy Resistance", foundryName: "Charm of Resistance" },
+  { pbName: "Feather Token", foundryName: "Marvelous Miniatures" },
+  { pbName: "Goggles of Night", foundryName: "Obsidian Goggles" },
 ];
 
 // this equipment is named differently in foundry vs pathbuilder
@@ -41,30 +60,127 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Soverign Glue", foundryName: "Sovereign Glue" },
   { pbName: "Axe Musket - Melee", foundryName: "Axe Musket" },
   { pbName: "Axe Musket - Ranged", foundryName: "Axe Musket" },
-  { pbName: "Repair Kit", foundryName: "Repair Toolkit" },
-  { pbName: "Repair Kit (Superb)", foundryName: "Repair Toolkit (Superb)" },
   { pbName: "Extendible Pincer", foundryName: "Extendable Pincer" },
   { pbName: "Clothing (Explorer's)", foundryName: "Explorer's Clothing" },
   { pbName: "Street Preacher [Placeholder]", foundryName: "Street Preacher" },
+  { pbName: "Repair Kit", foundryName: "Repair Toolkit" },
+  { pbName: "Repair Kit (Superb)", foundryName: "Repair Toolkit (Superb)" },
+  { pbName: "Alchemist's Tools", foundryName: "Alchemist's Toolkit" },
+  { pbName: "Healer's Tools", foundryName: "Healer's Toolkit" },
+  { pbName: "Healer's Tools (Expanded)", foundryName: "Healer's Toolkit (Expanded)" },
+  { pbName: "Thieves' Tools", foundryName: "Thieves' Toolkit" },
+  { pbName: "Thieves' Tools (Infiltrator)", foundryName: "Thieves' Toolkit (Infiltrator)" },
+  { pbName: "Thieves' Tools (Infiltrator Picks)", foundryName: "Thieves' Toolkit (Infiltrator Picks)" },
+  { pbName: "Artisan's Tools", foundryName: "Artisan's Toolkit" },
+  { pbName: "Artisan's Tools (Sterling)", foundryName: "Artisan's Toolkit (Sterling)" },
+
+  { pbName: "Aeon Stone (Dull Grey)", foundryName: "Aeon Stone (Consumed)" },
+  { pbName: "Aeon Stone (Clear Spindle)", foundryName: "Aeon Stone (Nourishing)" },
+  { pbName: "Aeon Stone (Tourmaline Sphere)", foundryName: "Aeon Stone (Delaying)" },
+  { pbName: "Aeon Stone (Orange Prism)", foundryName: "Aeon Stone (Amplifying)" },
+  { pbName: "Bag of Holding", foundryName: "Spacious Pouch" },
+  { pbName: "Barkskin Potion", foundryName: "Oak Potion" },
+  { pbName: "Boots of Speed", foundryName: "Propulsive Boots" },
+  { pbName: "Bracers of Armor", foundryName: "Bands of Force" },
+  { pbName: "Broom of Flying", foundryName: "Flying Broomstick" },
+  { pbName: "Dagger of Venom", foundryName: "Serpent Dagger" },
+  // these are actually matched to energy type witch Pathbuilder does not support
+  { pbName: "Dragon's Breath Potion (Young)", foundryName: "Energy Breath Potion (Lesser)" },
+  { pbName: "Dragon's Breath Potion (Adult)", foundryName: "Energy Breath Potion (Moderate)" },
+  { pbName: "Dragon's Breath Potion (Wyrm)", foundryName: "Energy Breath Potion (Greater)" },
+  { pbName: "Druid's Vestments", foundryName: "Living Mantle" },
+  { pbName: "Everburning Torch", foundryName: "Everlight Crystal" },
+  { pbName: "Eyes of the Eagle", foundryName: "Eyes of the Cat" },
+  { pbName: "Feather Token (Chest)", foundryName: "Marvelous Miniatures (Chest)" },
+  { pbName: "Feather Token (Ladder)", foundryName: "Marvelous Miniatures (Ladder)" },
+  { pbName: "Feather Token (Swan Boat)", foundryName: "Marvelous Miniatures (Boat)" },
+  { pbName: "Flame Tongue", foundryName: "Searing Blade" },
+  { pbName: "Gloves of Storing", foundryName: "Retrieval Belt" },
+  { pbName: "Goggles of Night", foundryName: "Obsidian Goggles" },
+  { pbName: "Goggles of Night (Greater)", foundryName: "Obsidian Goggles (Greater)" },
+  { pbName: "Goggles of Night (Major)", foundryName: "Obsidian Goggles (Major)" },
+  { pbName: "Hat of Disguise", foundryName: "Masquerade Scarf" },
+  { pbName: "Hat of Disguise (Greater)", foundryName: "Masquerade Scarf (Greater)" },
+  { pbName: "Horn of Fog", foundryName: "Cloud Pouch" },
+  { pbName: "Horseshoes of Speed", foundryName: "Alacritous Horseshoes" },
+  { pbName: "Javelin of Lightning", foundryName: "Trident of Lightning" },
+  { pbName: "Potion of Expeditious Retreat", foundryName: "Potion of Emergency Escape" },
+  { pbName: "Ring of Energy Resistance (Greater)", foundryName: "Charm of Resistance (Greater)" },
+  { pbName: "Ring of Energy Resistance (Major)", foundryName: "Charm of Resistance (Major)" },
+  { pbName: "Silversheen", foundryName: "Silver Salve" },
+  { pbName: "Smokestick (Lesser)", foundryName: "Smoke Ball (Lesser)" },
+  { pbName: "Smokestick (Greater)", foundryName: "Smoke Ball (Greater)" },
+  { pbName: "Sunrod", foundryName: "Glow Rod" },
+  { pbName: "Tanglefoot Bag (Lesser)", foundryName: "Glue Bomb (Lesser)" },
+  { pbName: "Tanglefoot Bag (Moderate)", foundryName: "Glue Bomb (Moderate)" },
+  { pbName: "Tanglefoot Bag (Major)", foundryName: "Glue Bomb (Major)" },
+  { pbName: "Tanglefoot Bag (Greater)", foundryName: "Glue Bomb (Greater)" },
+  { pbName: "Tindertwig", foundryName: "Matchstick" },
+  { pbName: "Owlbear Claw", foundryName: "Predator's Claw" },
+  { pbName: "Wand of Manifold Missiles", foundryName: "Wand of Shardstorm" },
+  { pbName: "Wand of Manifold Missiles (1st-Level Spell)", foundryName: "Wand of Shardstorm (1st-Rank Spell)" },
+  { pbName: "Wand of Manifold Missiles (3rd-Level Spell)", foundryName: "Wand of Shardstorm (3rd-Rank Spell)" },
+  { pbName: "Wand of Manifold Missiles (5th-Level Spell)", foundryName: "Wand of Shardstorm (5th-Rank Spell)" },
+  { pbName: "Wand of Manifold Missiles (7th-Level Spell)", foundryName: "Wand of Shardstorm (7th-Rank Spell)" },
+
 ];
 
-function generateDynamicNames(pbName) {
+function dynamicNamesSteps(pbName) {
   const result = [];
-  // if we have a hardcoded map, don't return here
-  if (EQUIPMENT_RENAME_STATIC_MAP.some((e) => e.pbName === pbName)) return result;
   for (const reg of POSTFIX_PB_REMOVALS) {
     const match = pbName.match(reg);
     if (match) {
       result.push({ pbName, foundryName: match[1], details: match[2] });
     }
   }
-  // if we have a hardcoded map, don't return here
   for (const reg of SWAPS) {
     const match = pbName.match(reg);
     if (match) {
       result.push({ pbName, foundryName: `${match[2]} (${match[1]})`, details: match[2] });
     }
   }
+  for (const reg of SPLITS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[2], details: match[1] });
+    }
+  }
+  for (const reg of SPLITS_INVERT) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[1], details: match[2] });
+    }
+  }
+  for (const reg of PARENTHESIS) {
+    const match = pbName.match(reg);
+    if (match) {
+      result.push({ pbName, foundryName: match[1], details: match[2] });
+    }
+  }
+  return result;
+}
+
+function generateDynamicNames(pbName) {
+  const result = [];
+  // if we have a hardcoded map, don't return here
+  const basicResults = EQUIPMENT_RENAME_STATIC_MAP.filter((e) => e.pbName === pbName);
+  if (basicResults.length > 0) {
+    result.push(...basicResults);
+  }
+
+  for (const replace of REPLACES) {
+    if (pbName.includes(replace.pbName)) {
+      const replaced = pbName.replace(replace.pbName, replace.foundryName);
+      result.push(...dynamicNamesSteps(replaced));
+      result.push({ pbName, foundryName: replaced });
+    }
+  }
+
+  if (result.length > 0) {
+    return result;
+  }
+
+  result.push(...dynamicNamesSteps(pbName));
   return result;
 }
 

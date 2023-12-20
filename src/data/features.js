@@ -39,6 +39,8 @@ const SWAPS = [
   /^(Greater) (.*)/,
   /^(Lesser) (.*)/,
   /^(Major) (.*)/,
+  /^(Moderate) (.*)/,
+  /^(Standard) (.*)/,
 ];
 
 const FEAT_RENAME_STATIC_MAP = [
