@@ -1,4 +1,4 @@
-# NEXT UP
+# 1.0.1
 
 - Some slightly improved name mapping for legacy toolkits.
 - Handwraps of Mighty Blows will import correctly.
