@@ -274,6 +274,35 @@ export function IGNORED_SPECIALS() {
   return IGNORED_SPECIALS_LIST.concat(SHARED_IGNORE_LIST, visionFeats);
 }
 
+const SKILL_LOOKUP = {
+  "acrobatics": "acr",
+  "arcana": "arc",
+  "athletics": "ath",
+  "crafting": "cra",
+  "deception": "dec",
+  "diplomacy": "dip",
+  "intimidation": "itm",
+  "medicine": "med",
+  "nature": "nat",
+  "occultism": "occ",
+  "performance": "prf",
+  "religion": "rel",
+  "society": "soc",
+  "stealth": "ste",
+  "survival": "sur",
+  "thievery": "thi",
+};
+
+export function specialOnlyNameLookup(name) {
+  for (const [key, value] of Object.entries(SKILL_LOOKUP)) {
+    if (key === name.toLowerCase()) {
+      return { pbName: name, foundryName: value };
+    }
+  }
+  return undefined;
+}
+
+
 export function SPECIAL_NAME_ADDITIONS(specials) {
   const newSpecials = [];
 
