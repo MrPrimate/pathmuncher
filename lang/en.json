@@ -42,6 +42,7 @@
         "Button": "Import",
         "StepOne": "<b>Step 1:</b> Export your character using \"Export JSON\" from Pathbuilder via the burger menu",
         "StepTwo": "<b>Step 2:</b> Enter the 6 digit user ID number from the pathbuilder export dialog below",
+        "Problems": "Please report any problems on <a href=\"https://discord.gg/EzKAwngjKn\">Discord</a>.",
         "Ask": {
           "Feats": "Feats and Specials?",
           "Equipment": "Equipment?",
