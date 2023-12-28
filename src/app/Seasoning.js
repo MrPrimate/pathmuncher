@@ -14,11 +14,13 @@ export class Seasoning {
 
   // sluggify
   static slug(name) {
+    if (!name) return undefined;
     return game.pf2e.system.sluggify(name);
   }
 
   // sluggify with dromedary casing
   static slugD(name) {
+    if (!name) return undefined;
     return game.pf2e.system.sluggify(name, { camel: "dromedary" });
   }
 
