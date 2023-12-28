@@ -1,3 +1,8 @@
+# 1.0.2
+
+- More improvements to feat detection for child feats.
+- Improved detection of skill choices for feats such as Empiricism and Natural Skill.
+
 # 1.0.1
 
 - Some slightly improved name mapping for legacy toolkits.
