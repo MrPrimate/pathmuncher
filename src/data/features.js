@@ -2,6 +2,25 @@
 
 import utils from "../utils.js";
 
+const SKILL_LOOKUP = {
+  "acrobatics": "acr",
+  "arcana": "arc",
+  "athletics": "ath",
+  "crafting": "cra",
+  "deception": "dec",
+  "diplomacy": "dip",
+  "intimidation": "itm",
+  "medicine": "med",
+  "nature": "nat",
+  "occultism": "occ",
+  "performance": "prf",
+  "religion": "rel",
+  "society": "soc",
+  "stealth": "ste",
+  "survival": "sur",
+  "thievery": "thi",
+};
+
 const POSTFIX_PB_REMOVALS = [
   /(.*) (Racket)$/,
   /(.*) (Style)$/,
@@ -20,6 +39,7 @@ const PREFIX_PB_REMOVALS = [
   /^(The) (.*)/,
   // Cleric +
   /^(Blessing): (.*)/,
+  /^(Empiricism) Selected Skill: (.*)/,
 ];
 
 const POSTFIX_PB_SPLIT_AND_KEEP = [
@@ -193,7 +213,9 @@ function generateDynamicNames(pbName) {
   for (const reg of PREFIX_PB_REMOVALS) {
     const match = pbName.match(reg);
     if (match) {
-      result.push({ pbName, foundryName: match[2], details: match[1] });
+      const parsed = { pbName, foundryName: match[2], details: match[1] };
+      parsed.foundryValue = SKILL_LOOKUP[parsed.foundryName.toLowerCase()];
+      result.push(parsed);
     }
   }
   for (const reg of SPLITS) {
@@ -274,29 +296,10 @@ export function IGNORED_SPECIALS() {
   return IGNORED_SPECIALS_LIST.concat(SHARED_IGNORE_LIST, visionFeats);
 }
 
-const SKILL_LOOKUP = {
-  "acrobatics": "acr",
-  "arcana": "arc",
-  "athletics": "ath",
-  "crafting": "cra",
-  "deception": "dec",
-  "diplomacy": "dip",
-  "intimidation": "itm",
-  "medicine": "med",
-  "nature": "nat",
-  "occultism": "occ",
-  "performance": "prf",
-  "religion": "rel",
-  "society": "soc",
-  "stealth": "ste",
-  "survival": "sur",
-  "thievery": "thi",
-};
-
 export function specialOnlyNameLookup(name) {
   for (const [key, value] of Object.entries(SKILL_LOOKUP)) {
     if (key === name.toLowerCase()) {
-      return { pbName: name, foundryName: value };
+      return { pbName: name, foundryName: name, foundryValue: value };
     }
   }
   return undefined;
