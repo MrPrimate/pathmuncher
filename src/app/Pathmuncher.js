@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE } from "../data/features.js";
+import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE, specialOnlyNameLookup } from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -22,7 +22,11 @@ export class Pathmuncher {
     return Seasoning.FEAT_RENAME_MAP(name).concat(dynamicItems);
   }
 
-  getFoundryFeatureName(pbName) {
+  getFoundryFeatureName(pbName, isSpecial = false) {
+    if (isSpecial) {
+      const specialMatch = specialOnlyNameLookup(pbName);
+      if (specialMatch) return specialMatch;
+    }
     const match = this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
     return match ?? { pbName, foundryName: pbName, details: undefined };
   }
@@ -307,9 +311,9 @@ export class Pathmuncher {
         && special !== this.source.heritage
       )
       .forEach((special) => {
-        const name = this.getFoundryFeatureName(special).foundryName;
-        if (!this.#processSpecialData(name) && !Seasoning.IGNORED_SPECIALS().includes(name)) {
-          this.parsed.specials.push({ name, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i, sourceType: "specials" });
+        const match = this.getFoundryFeatureName(special); // , true);
+        if (!this.#processSpecialData(match.foundryName) && !Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
+          this.parsed.specials.push({ name: match.foundryName, foundryName: match.foundryName, foundryValue: match.foundryValue, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i, sourceType: "specials" });
           i++;
         }
       });
@@ -344,6 +348,14 @@ export class Pathmuncher {
           data.isChild = feat[5] === "childChoice";
           data.isStandard = feat[5] === "standardChoice";
           data.parentFeatChoiceRef = feat[6];
+          const parentFeatMatch = this.source.feats.find((f) =>
+            feat[5] === "childChoice"
+            && (data.featChoiceRef.toLowerCase().startsWith(f[0].toLowerCase())
+            || (data.parentFeatChoiceRef
+              && data.featChoiceRef.replace(data.parentFeatChoiceRef, "").trim().toLowerCase().startsWith(f[0].toLowerCase()))
+            )
+          );
+          data.nameHint = parentFeatMatch?.[0];
         } else {
           // probably an awarded feat
           data.featChoiceRef = null;
@@ -635,7 +647,41 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
+  #slugNameMatch(f, slug) {
+    return slug === Seasoning.slug(f.name)
+    || slug === Seasoning.slug(f.foundryValue)
+    || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.name, this.source.class))
+    || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.name, this.source.ancestry))
+    || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.name, this.source.heritage))
+    || slug === Seasoning.slug(f.originalName)
+    || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.originalName, this.source.class))
+    || slug
+      === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
+    || slug
+      === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage))
+    || (utils.allowDualClasses()
+      && (slug
+        === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
+        || slug
+          === Seasoning.slug(
+            Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass)
+          )));
+  }
+
   #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+    if (type === "feats" && document) {
+      const hintMatch = this.parsed[type].find((f) =>
+        (!ignoreAdded || (ignoreAdded && !f.added))
+        && f.isChild
+        && f.nameHint
+        && Seasoning.slug(document.name) === Seasoning.slug(f.nameHint)
+        && this.#slugNameMatch(f, slug)
+      );
+      if (hintMatch) {
+        hintMatch.rank = -10;
+        return hintMatch;
+      }
+    }
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
     const parsedMatch = this.parsed[type].find((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
@@ -644,23 +690,7 @@ export class Pathmuncher {
           || f.type === featType
         )
         && !f.isChoice
-        && (slug === Seasoning.slug(f.name)
-          || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.name, this.source.class))
-          || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.name, this.source.ancestry))
-          || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.name, this.source.heritage))
-          || slug === Seasoning.slug(f.originalName)
-          || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.originalName, this.source.class))
-          || slug
-            === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
-          || slug
-            === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage))
-          || (utils.allowDualClasses()
-            && (slug
-              === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
-              || slug
-                === Seasoning.slug(
-                  Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass)
-                ))))
+        && this.#slugNameMatch(f, slug)
     );
     if (parsedMatch || !document) return parsedMatch;
 
@@ -692,6 +722,7 @@ export class Pathmuncher {
   }
 
   #findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+    // console.warn("Finding all feature matches", { document, slug, ignoreAdded, isChoiceMatch, featType });
     const featMatch = this.#parsedFeatureMatch("feats", document, slug, { ignoreAdded, featType });
     if (featMatch) return featMatch;
     const specialMatch = this.#parsedFeatureMatch("specials", document, slug, { ignoreAdded, isChoiceMatch });
@@ -720,11 +751,12 @@ export class Pathmuncher {
 
     if (featureMatch) {
       logger.debug(`Found feature match for ${document.name}`, { featureMatch });
-      const existingMatch = featureMatch.sourceType
-        ? this.parsed[featureMatch.sourceType].some((f) => f.addedId === document._id)
-        : false;
+      const existingMatch = false;
+      // featureMatch.sourceType
+      //   ? this.parsed[featureMatch.sourceType].some((f) => f.addedId === document._id)
+      //   : false;
       if (this.devMode && existingMatch) {
-        logger.warn(`Existing match for ${document.name}`, { featureMatch, existingMatch, document });
+        logger.warn(`create Granted Item Existing match for ${document.name}`, { featureMatch, existingMatch, document });
       }
       // console.warn(`Match for ${document.name} createGrantedItem`, { featureMatch, existingMatch, document });
       if (hasProperty(featureMatch, "added") && !existingMatch) {
@@ -765,6 +797,7 @@ export class Pathmuncher {
           slug,
           rank: featMatch.rank,
           choice,
+          featMatch,
         });
       }
     }
@@ -773,13 +806,15 @@ export class Pathmuncher {
         const hintMatch = matches.find((m) => m.slug === Seasoning.slug(choiceHint));
         if (hintMatch) return hintMatch;
       }
+      if (this.devMode) logger.warn(`MATCHES`, matches);
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
-      const existingMatch = featMatch.sourceType
-        ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
-        : false;
+      const existingMatch = false;
+      // featMatch.sourceType
+      //   ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
+      //   : false;
       if (this.devMode && existingMatch) {
-        logger.warn(`Existing match for ${document.name}`, { featMatch, existingMatch, document });
+        logger.warn(`Feature Choice Existing match for ${document.name}`, { featMatch, existingMatch, document });
       }
       // console.warn(`Match for ${document.name} featureChoiceMatch`, { match, featMatch, existingMatch, document });
       if (adjustName && hasProperty(featMatch, "added") && !existingMatch) {
@@ -808,12 +843,13 @@ export class Pathmuncher {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.choice.value, { ignoreAdded: true, isChoiceMatch: true });
 
-      const existingMatch = featMatch.sourceType
-        ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
-        : false;
+      const existingMatch = false;
+      // featMatch.sourceType
+      //   ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
+      //   : false;
 
       if (this.devMode && existingMatch) {
-        logger.warn(`Existing match for ${document.name}`, { featMatch, existingMatch, document });
+        logger.warn(`NoUUID Existing match for ${document.name}`, { featMatch, existingMatch, document });
       }
       // console.warn(`Match for ${document.name} featureChoiceMatchNoUUID`, { match, featMatch, existingMatch, document });
       if (featMatch && !existingMatch) {
@@ -2763,7 +2799,7 @@ export class Pathmuncher {
       ? Object.values(this.check).filter((b) =>
         (b.type === "special")
         && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
-      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.name}</li>`)
+      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.originalName}</li>`)
       : [];
     const badEquipment = this.options.addEquipment
       ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
