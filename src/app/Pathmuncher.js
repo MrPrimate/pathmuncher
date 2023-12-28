@@ -1355,23 +1355,34 @@ export class Pathmuncher {
     this.result.class[0].system.boosts = this.boosts.class;
   }
 
-  #setSkills() {
-    setProperty(this.result.character, "system.skills.acr.rank", this.source.proficiencies.acrobatics / 2);
-    setProperty(this.result.character, "system.skills.arc.rank", this.source.proficiencies.arcana / 2);
-    setProperty(this.result.character, "system.skills.ath.rank", this.source.proficiencies.athletics / 2);
-    setProperty(this.result.character, "system.skills.cra.rank", this.source.proficiencies.crafting / 2);
-    setProperty(this.result.character, "system.skills.dec.rank", this.source.proficiencies.deception / 2);
-    setProperty(this.result.character, "system.skills.dip.rank", this.source.proficiencies.diplomacy / 2);
-    setProperty(this.result.character, "system.skills.itm.rank", this.source.proficiencies.intimidation / 2);
-    setProperty(this.result.character, "system.skills.med.rank", this.source.proficiencies.medicine / 2);
-    setProperty(this.result.character, "system.skills.nat.rank", this.source.proficiencies.nature / 2);
-    setProperty(this.result.character, "system.skills.occ.rank", this.source.proficiencies.occultism / 2);
-    setProperty(this.result.character, "system.skills.prf.rank", this.source.proficiencies.performance / 2);
-    setProperty(this.result.character, "system.skills.rel.rank", this.source.proficiencies.religion / 2);
-    setProperty(this.result.character, "system.skills.soc.rank", this.source.proficiencies.society / 2);
-    setProperty(this.result.character, "system.skills.ste.rank", this.source.proficiencies.stealth / 2);
-    setProperty(this.result.character, "system.skills.sur.rank", this.source.proficiencies.survival / 2);
-    setProperty(this.result.character, "system.skills.thi.rank", this.source.proficiencies.thievery / 2);
+  static SKILL_LOOKUP = {
+    "acrobatics": "acr",
+    "arcana": "arc",
+    "athletics": "ath",
+    "crafting": "cra",
+    "deception": "dec",
+    "diplomacy": "dip",
+    "intimidation": "itm",
+    "medicine": "med",
+    "nature": "nat",
+    "occultism": "occ",
+    "performance": "prf",
+    "religion": "rel",
+    "society": "soc",
+    "stealth": "ste",
+    "survival": "sur",
+    "thievery": "thi",
+  };
+
+  #setSkills(removeSpecials = false) {
+    for (const [key, value] of Object.entries(Pathmuncher.SKILL_LOOKUP)) {
+      const calculatedValue = removeSpecials
+        && (this.source.specials.some((s) => s.toLowerCase() === key)
+         || this.parsed.specials.some((s) => s.name.toLowerCase() === key))
+        ? 0
+        : this.source.proficiencies[key] / 2;
+      setProperty(this.result.character, `system.skills.${value}.rank`, calculatedValue);
+    };
   }
 
   #setSaves() {
@@ -2298,6 +2309,7 @@ export class Pathmuncher {
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
 
+    this.#setSkills();
     // final pass, include all
     this.#statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("feats");
@@ -2507,7 +2519,7 @@ export class Pathmuncher {
     this.#statusUpdate(6, 12, "Background");
     await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
 
-    this.#setSkills();
+    this.#setSkills(true);
 
     this.#statusUpdate(7, 12, "Class");
     await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
