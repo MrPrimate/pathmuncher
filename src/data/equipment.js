@@ -32,6 +32,9 @@ const REPLACES = [
 
 // this equipment is named differently in foundry vs pathbuilder
 export const EQUIPMENT_RENAME_STATIC_MAP = [
+  { pbName: "Inventor Power Suit", foundryName: "Power Suit" },
+  { pbName: "Inventor Power Suit (Heavy)", foundryName: "Power Suit" },
+  { pbName: "Inventor Subterfuge Suit", foundryName: "Subterfuge Suit" },
   { pbName: "Chain", foundryName: "Chain (10 feet)" },
   { pbName: "Oil", foundryName: "Oil (1 pint)" },
   { pbName: "Bracelets of Dashing", foundryName: "Bracelet of Dashing" },
@@ -212,3 +215,9 @@ export function IGNORED_EQUIPMENT_DISPLAY(pbName) {
   }
   return false;
 }
+
+export const GRANTED_ITEMS_LIST = [
+  "Inventor Power Suit",
+  "Inventor Power Suit (Heavy)",
+  "Inventor Subterfuge Suit",
+];
