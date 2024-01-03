@@ -1137,7 +1137,7 @@ export class Pathmuncher {
         ruleEntry.choiceQueryResults = choice.choiceQueryResults;
       }
 
-      const flagName = Pathmuncher.getFlag(document, ruleEntry);.
+      const flagName = Pathmuncher.getFlag(document, ruleEntry);
       // if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
       //   setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
       // }
