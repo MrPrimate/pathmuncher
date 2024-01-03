@@ -735,11 +735,13 @@ export class Pathmuncher {
     // return equipmentMatch;
   }
 
-  #createGrantedItem(document, parent, { originType = null, applyFeatLocation = false } = {}) {
+  #createGrantedItem(document, parent, { itemGrantName = null, originType = null, applyFeatLocation = false } = {}) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`);
-    const camelCase = Seasoning.slugD(document.system.slug ?? document.name);
-    setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
-    setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+    if (itemGrantName) {
+      const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
+      setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
+      setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+    }
     this.autoFeats.push(document);
     this.result.feats.push(document);
     const matchOptions = { ignoreAdded: true, featType: originType };
@@ -867,7 +869,7 @@ export class Pathmuncher {
   static getFlag(document, ruleSet) {
     return typeof ruleSet.flag === "string" && ruleSet.flag.length > 0
       ? ruleSet.flag.replace(/[^-a-z0-9]/gi, "")
-      : Seasoning.slugD(document.system.slug ?? document.system.name);
+      : Seasoning.slugD(document.system.slug ?? document.system.name ?? document.name);
   }
 
   async #evaluateChoices(document, choiceSet, choiceHint) {
@@ -1135,10 +1137,10 @@ export class Pathmuncher {
         ruleEntry.choiceQueryResults = choice.choiceQueryResults;
       }
 
-      const flagName = Pathmuncher.getFlag(document, ruleEntry);
-      if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
-        setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
-      }
+      const flagName = Pathmuncher.getFlag(document, ruleEntry);.
+      // if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
+      //   setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
+      // }
 
       logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
       const ruleFeature = uuid && typeof uuid === "string" ? await fromUuid(uuid) : undefined;
@@ -1150,7 +1152,14 @@ export class Pathmuncher {
         setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
         logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
 
-        if (choice) ruleEntry.selection = choice.value;
+        if (choice) {
+          ruleEntry.selection = choice.value;
+          setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
+        }
+
+        if (utils.isString(ruleEntry.rollOption)) {
+          ruleEntry.rollOption = `${ruleEntry.rollOption}:${flagName}`;
+        }
 
         if (ruleEntry.predicate && ruleEntry.key === "GrantItem") {
           logger.debug(`Checking for grantitem predicates`, {
@@ -1184,6 +1193,10 @@ export class Pathmuncher {
           logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
           // this.autoAddedFeatureRules[document._id].push(ruleEntry);
           // rulesToKeep.push(ruleEntry);
+          if (ruleEntry.key === "GrantItem" && ruleEntry.flag) {
+            this.autoAddedFeatureRules[document._id].push(ruleEntry);
+            rulesToKeep.push(ruleEntry);
+          }
           continue;
         } else {
           logger.debug(`Feature ${featureDoc.name} not found for ${document.name}, adding (${ruleFeature.id})`, ruleFeature);
@@ -1192,7 +1205,7 @@ export class Pathmuncher {
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
-          this.#createGrantedItem(featureDoc, document, { applyFeatLocation: false });
+          this.#createGrantedItem(featureDoc, document, { itemGrantName: flagName, applyFeatLocation: false });
           if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
       } else if (getProperty(choice, "nouuid")) {

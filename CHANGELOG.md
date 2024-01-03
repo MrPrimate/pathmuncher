@@ -1,3 +1,8 @@
+# 1.0.3
+
+- Better mapping coverage of renamed spells if legacy content module is not enabled.
+- Removal of some pre-remaster data fields still generated.
+
 # 1.0.2
 
 - More improvements to feat detection for child feats.
