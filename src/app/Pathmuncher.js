@@ -1925,7 +1925,17 @@ export class Pathmuncher {
         a.addedAutoId = "ignored";
         continue;
       }
+
       logger.debug("Generating armor for", a);
+      if (Seasoning.GRANTED_ITEMS_LIST().includes(a.pbName)) {
+        const existingItem = this.result.armor.find((i) => i.name === a.foundryName);
+        if (existingItem) {
+          a.added = true;
+          a.addedId = existingItem._id;
+          logger.debug(`Ignoring armor item ${a.pbName} as it has been granted by a feature`);
+          continue;
+        }
+      }
       const indexMatch = this.compendiumMatchers["equipment"].getMatch(a.foundryName, `${a.pbName} Armor`);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
@@ -1936,9 +1946,8 @@ export class Pathmuncher {
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = this.#adjustArmorItem(doc.toObject(), a);
       this.result.armor.push(itemData);
-      // eslint-disable-next-line require-atomic-updates
-      a.added = true;
       a.addedId = itemData._id;
+      a.added = true;
     }
   }
 

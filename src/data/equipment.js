@@ -200,7 +200,10 @@ export const RESTRICTED_EQUIPMENT = [
 ];
 
 export const IGNORED_EQUIPMENT = [
-  "Unarmored"
+  "Unarmored",
+  "Inventor Power Suit",
+  "Inventor Power Suit (Heavy)",
+  "Inventor Subterfuge Suit",
 ];
 
 const IGNORED_DISPLAY_POSTFIX = [
