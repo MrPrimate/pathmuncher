@@ -2,6 +2,7 @@
 
 - Better mapping coverage of renamed spells if legacy content module is not enabled.
 - Removal of some pre-remaster data fields still generated.
+- Improve some issues when importing Inventors not detecting correctly granted invention.
 
 # 1.0.2
 
