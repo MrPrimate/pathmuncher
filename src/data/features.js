@@ -198,6 +198,14 @@ const FEAT_RENAME_STATIC_MAP = [
   // Cleric +
   { pbName: "Decree of the Warsworn Ecstacy", foundryName: "Decree of Warsworn Ecstacy" },
   { pbName: "Decree of Warsworn Ecstacy", foundryName: "Decree of the Warsworn Ecstacy" },
+
+  // remaster
+  { pbName: "Lightning Reflexes", foundryName: "Reflex Expertise" },
+  { pbName: "Great Fortitude", foundryName: "Fortitude Expertise" },
+  { pbName: "Iron Will", foundryName: "Will Expertise" },
+  { pbName: "Alertness", foundryName: "Perception Expertise" },
+  { pbName: "Incredible Senses", foundryName: "Perception Legend" },
+  { pbName: "Vigilant Senses", foundryName: "Perception Mastery" },
 ];
 
 function generateDynamicNames(pbName) {
