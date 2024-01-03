@@ -175,7 +175,7 @@ CONSTANTS.DEFAULT_SETTINGS = {
     scope: "player",
     config: true,
     type: Boolean,
-    default: true,
+    default: false,
   },
 
   // debug
