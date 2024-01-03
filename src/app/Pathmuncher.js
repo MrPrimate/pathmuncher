@@ -1439,7 +1439,7 @@ export class Pathmuncher {
     setProperty(this.result.character, "system.details.level.value", this.source.level);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
-    setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
+    // setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
 
     if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
     this.size = Seasoning.getSizeValue(this.source.size);
@@ -1452,8 +1452,8 @@ export class Pathmuncher {
     this.#setSaves();
     this.#setMartials();
 
-    setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
-    setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
+    // setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
+    // setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
   }
 
   #indexFind(index, arrayOfNameMatches) {
