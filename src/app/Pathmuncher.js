@@ -1886,6 +1886,25 @@ export class Pathmuncher {
     }
   }
 
+  #adjustArmorItem(itemData, parsedArmor) {
+    itemData._id = foundry.utils.randomID();
+    itemData.system.equipped.value = parsedArmor.worn ?? false;
+    if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
+      itemData.system.equipped.inSlot = parsedArmor.worn ?? false;
+      itemData.system.quantity = parsedArmor.qty;
+
+      const isShield = parsedArmor.prof === "shield";
+      itemData.system.equipped.handsHeld = isShield && parsedArmor.worn ? 1 : 0;
+      itemData.system.equipped.carryType = isShield && parsedArmor.worn ? "held" : "worn";
+
+      Pathmuncher.applyRunes(parsedArmor, itemData, "armor");
+    }
+    if (parsedArmor.display) itemData.name = parsedArmor.display;
+
+    this.#resizeItem(itemData);
+    return itemData;
+  }
+
   async #generateArmorItems() {
     for (const a of this.parsed.armor) {
       if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
@@ -1902,22 +1921,7 @@ export class Pathmuncher {
       }
 
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const itemData = doc.toObject();
-      itemData._id = foundry.utils.randomID();
-      itemData.system.equipped.value = a.worn ?? false;
-      if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
-        itemData.system.equipped.inSlot = a.worn ?? false;
-        itemData.system.quantity = a.qty;
-
-        const isShield = a.prof === "shield";
-        itemData.system.equipped.handsHeld = isShield && a.worn ? 1 : 0;
-        itemData.system.equipped.carryType = isShield && a.worn ? "held" : "worn";
-
-        Pathmuncher.applyRunes(a, itemData, "armor");
-      }
-      if (a.display) itemData.name = a.display;
-
-      this.#resizeItem(itemData);
+      const itemData = this.#adjustArmorItem(doc.toObject(), a);
       this.result.armor.push(itemData);
       // eslint-disable-next-line require-atomic-updates
       a.added = true;
