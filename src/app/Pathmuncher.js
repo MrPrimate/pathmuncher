@@ -259,6 +259,8 @@ export class Pathmuncher {
   }
 
   #nameMap() {
+    let iRank = 0;
+    let featRank = 0;
     logger.debug("Starting Equipment Rename");
     this.source.equipment
       .filter((e) => e[0] && e[0] !== "undefined")
@@ -283,6 +285,27 @@ export class Pathmuncher {
           sourceType: "armor",
         }, e);
         this.parsed.armor.push(item);
+        // work around for now
+        if (e.name.startsWith("Inventor ")) {
+          this.parsed.feats.push({
+            name,
+            extra: "",
+            added: false,
+            addedId: null,
+            addedAutoId: null,
+            type: "Awarded Feat",
+            level: 1,
+            originalName: e.name,
+            rank: 0,
+            sourceType: "armor",
+            featChoiceRef: null,
+            hasChildren: null,
+            isChild: null,
+            isStandard: null,
+            parentFeatChoiceRef: null,
+          });
+          featRank++;
+        }
       });
     this.source.weapons
       .filter((e) => e && e !== "undefined")
@@ -301,7 +324,6 @@ export class Pathmuncher {
       });
     logger.debug("Finished Equipment Rename");
 
-    let i = 0;
     logger.debug("Starting Special Rename");
     [].concat(this.source.specials, SPECIAL_NAME_ADDITIONS(this.source.specials))
       .filter((special) =>
@@ -313,13 +335,13 @@ export class Pathmuncher {
       .forEach((special) => {
         const match = this.getFoundryFeatureName(special); // , true);
         if (!this.#processSpecialData(match.foundryName) && !Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-          this.parsed.specials.push({ name: match.foundryName, foundryName: match.foundryName, foundryValue: match.foundryValue, originalName: special, added: false, addedId: null, addedAutoId: null, rank: i, sourceType: "specials" });
-          i++;
+          this.parsed.specials.push({ name: match.foundryName, foundryName: match.foundryName, foundryValue: match.foundryValue, originalName: special, added: false, addedId: null, addedAutoId: null, rank: iRank, sourceType: "specials" });
+          iRank++;
         }
       });
     logger.debug("Finished Special Rename");
 
-    let y = 0;
+
     logger.debug("Starting Feat Rename");
     this.source.feats
       .filter((feat) =>
@@ -339,7 +361,7 @@ export class Pathmuncher {
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
-          rank: y,
+          rank: featRank,
           sourceType: "feats",
         };
         if (feat.length >= 7) {
@@ -365,7 +387,7 @@ export class Pathmuncher {
           data.parentFeatChoiceRef = null;
         }
         this.parsed.feats.push(data);
-        y++;
+        featRank++;
       });
     logger.debug("Finished Feat Rename");
     logger.debug("Name remapping results", {
