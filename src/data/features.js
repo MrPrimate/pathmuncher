@@ -31,6 +31,7 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Element)$/,
   /(.*) (Impulse Junction)$/,
   /(.*) (Gate Junction:).*$/,
+  /(.*) (Patron)$/,
 ];
 
 const PREFIX_PB_REMOVALS = [

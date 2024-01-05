@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Improve Witch Patron matching for remaster.
+
 # 1.0.3
 
 - Better mapping coverage of renamed spells if legacy content module is not enabled.
