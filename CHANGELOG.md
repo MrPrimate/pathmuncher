@@ -1,6 +1,7 @@
 # NEXT UP
 
 - Improve Witch Patron matching for remaster.
+- Fix Explorer's Clothing match for remaster.
 
 # 1.0.3
 
