@@ -72,7 +72,7 @@
       "Pathmuncher": {
         "FetchFailed": "Unable to fetch a character with Pathbuilder id {pathbuilderId}!",
         "NoId": "No Pathbuilder Id detected!",
-        "MissingItemsOpen": "The following items could not be added. They may have already been added in a previous import or cannot be matched to a foundry item. You may be able to find them with a manual search.",
+        "MissingItemsOpen": "The following could not be added. They may have a slightly different name or cannot be matched to a foundry item. You may be able to find them with a manual search. If it is marked as \"Special\", Pathmuncher has been unable to determine if it needs to do something with this. It might be a choice value, or may not be needed in the Foundry implementation.",
         "CompletedWithNotes": "Import completed with some notes.",
         "CompletedSuccess": "Import completed successfully.",
         "ImportNotes": "Pathmuncher Import Notes"
