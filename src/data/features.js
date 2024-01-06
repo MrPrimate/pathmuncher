@@ -336,3 +336,23 @@ const NO_AUTO_CHOICE_LIST = [
 export function NO_AUTO_CHOICE() {
   return NO_AUTO_CHOICE_LIST;
 }
+
+const BAD_IGNORE_FEATURES_LIST = [
+  // "Impulse Juntion",
+];
+
+const BAD_IGNORE_POSTFIX_PB_REMOVALS = [
+  // /(.*) (Impulse Junction)$/,
+];
+
+export function BAD_IGNORE_FEATURES(name) {
+  if (BAD_IGNORE_FEATURES_LIST.some((f) => f === name)) return true;
+
+  for (const reg of BAD_IGNORE_POSTFIX_PB_REMOVALS) {
+    const match = name.match(reg);
+    if (match) {
+      return true;
+    }
+  }
+  return false;
+};
