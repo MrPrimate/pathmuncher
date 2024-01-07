@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE, specialOnlyNameLookup } from "../data/features.js";
+import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE, specialOnlyNameLookup, BAD_IGNORE_FEATURES } from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -920,7 +920,7 @@ export class Pathmuncher {
       }
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
-      const choiceMatch = await this.#featureChoiceMatch(document, choices, true, cleansedChoiceSet.adjustName, choiceHint);
+      const choiceMatch = await this.#featureChoiceMatch(document, choices, true, !!cleansedChoiceSet.adjustName, choiceHint);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
         choiceMatch.choiceQueryResults = deepClone(choices);
@@ -1468,6 +1468,16 @@ export class Pathmuncher {
     });
   }
 
+  #setLanguages() {
+    const ancestryLanguages = this.result.ancestry[0]?.system.traits.languages?.value || [];
+    const ancestryLanguagesOn = !foundry.utils.isNewerVersion(game.system.version, "5.12.0");
+    const intLanguages = this.source.languages
+      .filter((l) => ancestryLanguagesOn && !ancestryLanguages.includes(l.toLowerCase()))
+      .map((l) => l.toLowerCase());
+    setProperty(this.result.character, "system.traits.languages.value", intLanguages);
+
+  }
+
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
     setProperty(this.result.character, "prototypeToken.name", this.source.name);
@@ -1479,8 +1489,6 @@ export class Pathmuncher {
     if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
     this.size = Seasoning.getSizeValue(this.source.size);
     setProperty(this.result.character, "system.traits.size.value", this.size);
-    setProperty(this.result.character, "system.traits.languages.value", this.source.languages.map((l) => l.toLowerCase()));
-
     this.#processSenses();
 
     this.#determineAbilityBoosts();
@@ -2604,6 +2612,7 @@ export class Pathmuncher {
     await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
 
     this.#setSkills(true);
+    this.#setLanguages();
 
     this.#statusUpdate(7, 12, "Class");
     await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
@@ -2841,12 +2850,14 @@ export class Pathmuncher {
       ? Object.values(this.check).filter((b) =>
         b.type === "feat"
         && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
+        && !BAD_IGNORE_FEATURES(b.details.name)
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
       : [];
     const badSpecials = this.options.addFeats
       ? Object.values(this.check).filter((b) =>
         (b.type === "special")
         && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
+        && !BAD_IGNORE_FEATURES(b.details.name)
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.originalName}</li>`)
       : [];
     const badEquipment = this.options.addEquipment

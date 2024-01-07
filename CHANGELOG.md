@@ -1,3 +1,7 @@
+# 1.0.5
+
+- Handle granted languages by Ancestries in PF2e v5.12.0
+
 # 1.0.4
 
 - Improve Witch Patron matching for remaster.
