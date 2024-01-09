@@ -765,7 +765,18 @@ export class Pathmuncher {
       setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
     }
     this.autoFeats.push(document);
-    this.result.feats.push(document);
+    let resultType = "feats";
+    switch (document.type) {
+      case "armor":
+        resultType = "armor";
+        break;
+      case "weapon":
+        resultType = "weapons";
+        break;
+      // no default
+    }
+
+    this.result[resultType].push(document);
     const matchOptions = { ignoreAdded: true, featType: originType };
     const featureMatch
       = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
@@ -1950,22 +1961,24 @@ export class Pathmuncher {
 
   async #generateArmorItems() {
     for (const a of this.parsed.armor) {
-      if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
-        a.added = true;
-        a.addedAutoId = "ignored";
-        continue;
-      }
-
       logger.debug("Generating armor for", a);
       if (Seasoning.GRANTED_ITEMS_LIST().includes(a.pbName)) {
         const existingItem = this.result.armor.find((i) => i.name === a.foundryName);
         if (existingItem) {
+          existingItem.system.equipped.inSlot = true;
+          existingItem.system.equipped.handsHeld = 0;
           a.added = true;
           a.addedId = existingItem._id;
           logger.debug(`Ignoring armor item ${a.pbName} as it has been granted by a feature`);
           continue;
         }
       }
+      if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
+        a.added = true;
+        a.addedAutoId = "ignored";
+        continue;
+      }
+
       const indexMatch = this.compendiumMatchers["equipment"].getMatch(a.foundryName, `${a.pbName} Armor`);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);

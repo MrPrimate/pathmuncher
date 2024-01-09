@@ -1,3 +1,7 @@
+# NEXT UP
+
+- Equip granted armor from Inventor.
+
 # 1.0.5
 
 - Handle granted languages by Ancestries in PF2e v5.12.0
