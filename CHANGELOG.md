@@ -1,6 +1,7 @@
-# NEXT UP
+# 1.0.6
 
 - Equip granted armor from Inventor.
+- Support Versatile Human heritage.
 
 # 1.0.5
 

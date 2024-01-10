@@ -207,6 +207,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Alertness", foundryName: "Perception Expertise" },
   { pbName: "Incredible Senses", foundryName: "Perception Legend" },
   { pbName: "Vigilant Senses", foundryName: "Perception Mastery" },
+  { pbName: "Versatile Heritage", foundryName: "Versatile Human" },
 ];
 
 function generateDynamicNames(pbName) {
