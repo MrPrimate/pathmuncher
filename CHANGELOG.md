@@ -1,3 +1,8 @@
+# 1.0.7
+
+- Energy Robe mappings.
+- Divine Ally mappings.
+
 # 1.0.6
 
 - Equip granted armor from Inventor.

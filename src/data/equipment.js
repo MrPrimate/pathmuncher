@@ -87,6 +87,10 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Bracers of Armor", foundryName: "Bands of Force" },
   { pbName: "Broom of Flying", foundryName: "Flying Broomstick" },
   { pbName: "Dagger of Venom", foundryName: "Serpent Dagger" },
+  { pbName: "Energy Robe (Fire)", foundryName: "Energy Robe of Fire" },
+  { pbName: "Energy Robe (Cold)", foundryName: "Energy Robe of Cold" },
+  { pbName: "Energy Robe (Acid)", foundryName: "Energy Robe of Acid" },
+  { pbName: "Energy Robe (Electricity)", foundryName: "Energy Robe of Electricity" },
   // these are actually matched to energy type witch Pathbuilder does not support
   { pbName: "Dragon's Breath Potion (Young)", foundryName: "Energy Breath Potion (Lesser)" },
   { pbName: "Dragon's Breath Potion (Adult)", foundryName: "Energy Breath Potion (Moderate)" },
