@@ -212,6 +212,9 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Divine Ally (Shield)", foundryName: "Shield Ally" },
   { pbName: "Divine Ally (Steed)", foundryName: "Steed Ally" },
   { pbName: "Divine Ally (Blade)", foundryName: "Blade Ally" },
+
+  // semi-official
+  { pbName: "Ifrit", foundryName: "Naari" },
 ];
 
 function generateDynamicNames(pbName) {

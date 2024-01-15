@@ -1,3 +1,7 @@
+# 1.0.8
+
+- Ifrit now called Naari in Foundry.
+
 # 1.0.7
 
 - Energy Robe mappings.
