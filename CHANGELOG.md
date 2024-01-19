@@ -1,3 +1,7 @@
+# 1.0.9
+
+- Improve name hint detection for things like the Human Versatile Feat lookups.
+
 # 1.0.8
 
 - Ifrit now called Naari in Foundry.

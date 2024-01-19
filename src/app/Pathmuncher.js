@@ -377,7 +377,7 @@ export class Pathmuncher {
               && data.featChoiceRef.replace(data.parentFeatChoiceRef, "").trim().toLowerCase().startsWith(f[0].toLowerCase()))
             )
           );
-          data.nameHint = parentFeatMatch?.[0];
+          data.nameHint = parentFeatMatch?.[0] ? this.getFoundryFeatureName(parentFeatMatch?.[0]).foundryName : undefined;
         } else {
           // probably an awarded feat
           data.featChoiceRef = null;
@@ -841,7 +841,7 @@ export class Pathmuncher {
         const hintMatch = matches.find((m) => m.slug === Seasoning.slug(choiceHint));
         if (hintMatch) return hintMatch;
       }
-      if (this.devMode) logger.warn(`MATCHES`, matches);
+      if (this.devMode) logger.warn(`MATCHES`, { matches, choiceHint });
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
       const existingMatch = false;
@@ -856,7 +856,7 @@ export class Pathmuncher {
         featMatch.added = true;
         featMatch.addedId = document._id;
       }
-      logger.debug("Choices evaluated", { choices, document, featMatch, match, matches });
+      logger.debug("Choices evaluated", { choices, document, featMatch, match, matches, choiceHint });
       return match.choice;
     } else {
       return undefined;
@@ -922,6 +922,7 @@ export class Pathmuncher {
         choiceSetRules,
         rollOptions,
         choices,
+        this: this,
       });
 
       if (cleansedChoiceSet.choices?.query) {
@@ -1354,8 +1355,9 @@ export class Pathmuncher {
     }
 
     if (hasProperty(document, "system.rules")) {
-      logger.debug(`Processing granted rules for core document ${document.name}`, duplicate(document));
-      await this.#addGrantedRules(document, originType, choiceHint);
+      logger.debug(`Processing granted rules for core document ${document.name}`, { document: duplicate(document), originType, choiceHint });
+      const docHint = choiceHint ?? document.name;
+      await this.#addGrantedRules(document, originType, docHint);
     }
   }
 
