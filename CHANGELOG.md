@@ -1,6 +1,7 @@
 # 1.0.9
 
 - Improve name hint detection for things like the Human Versatile Feat lookups.
+- Tweak algorithm for stepping through levels, this should help for some builds where the muncher could get confused importing classes with lots of options paths like the Kineticist.
 
 # 1.0.8
 

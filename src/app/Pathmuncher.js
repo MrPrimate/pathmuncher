@@ -473,7 +473,7 @@ export class Pathmuncher {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async #processGenericCompendiumLookup(type, name, target) {
+  async #processGenericCompendiumLookup(type, name, target, levelCap = 20) {
     logger.debug(`Checking for compendium documents for ${name} (${target}) in compendiums for ${type}`);
     const foundryName = this.getFoundryFeatureName(name).foundryName;
     const indexMatch = this.compendiumMatchers[type].getMatch(name, foundryName);
@@ -492,11 +492,17 @@ export class Pathmuncher {
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
-      await this.#addGrantedItems(itemData, { applyFeatLocation: target !== "class" });
+      await this.#addGrantedItems(itemData, { applyFeatLocation: target !== "class", levelCap });
       return true;
     } else {
-      this.bad.push({ pbName: name, type: target, details: { name } });
+      this.bad.push({ pbName: name, type: target, details: { name, levelCap } });
       return false;
+    }
+  }
+
+  async #processGrantedLookupItemsAtLevel(target, level) {
+    for (const document of this.result[target]) {
+      await this.#processGrantItemsAtLevel(document, level, { applyFeatLocation: target !== "class", levelCap: level });
     }
   }
 
@@ -983,7 +989,7 @@ export class Pathmuncher {
 
     if (
       hasProperty(document, "system.level.value")
-      && document.system.level.value > this.result.character.system.details.level.value
+      && document.system.level.value > getProperty(this.result.character, "system.details.level.value")
     ) {
       return;
     }
@@ -1187,15 +1193,16 @@ export class Pathmuncher {
   async #processGrantItemsAtLevel(document, level, { originType = null, applyFeatLocation = false, levelCap = 20 } = {}) {
     const featureItemMap = Object.entries(this.autoAddedFeatureItems[document._id])
       .sort(([, a], [, b]) => a.level - b.level);
-
-    for (const [key, grantedItemFeature] of featureItemMap) {
-      logger.debug(`Checking ${document.name} granted item ${grantedItemFeature.name}, level(${grantedItemFeature.level}) with key: ${key}`, grantedItemFeature);
-      if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
-      const feature = await fromUuid(grantedItemFeature.uuid);
+    for (const [key, grantedFeature] of featureItemMap) {
+      logger.debug(`Checking ${document.name} granted item ${grantedFeature.name}, level(${grantedFeature.level}) with key: ${key}`, grantedFeature);
+      if (grantedFeature.level > getProperty(this.result.character, "system.details.level.value")
+        || grantedFeature.level !== level
+      ) continue;
+      const feature = await fromUuid(grantedFeature.uuid);
       if (!feature) {
-        const data = { uuid: grantedItemFeature.uuid, grantedFeature: grantedItemFeature, feature };
+        const data = { uuid: grantedFeature.uuid, grantedFeature, feature };
         logger.warn("Unable to determine granted item feature, needs better parser", data);
-        this.failedFeatureItems[document._id][key] = grantedItemFeature;
+        this.failedFeatureItems[document._id][key] = grantedFeature;
         continue;
       }
       this.autoAddedFeatureIds.add(`${feature.id}${feature.type}`);
@@ -1206,7 +1213,7 @@ export class Pathmuncher {
       if (hasProperty(featureDoc, "system.rules")) {
         logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
         if (this.immediateDiveAdd) {
-          await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation });
+          await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation, levelCap });
         } else {
           this.subRuleDocuments[document._id].push(featureDoc);
         }
@@ -1224,7 +1231,12 @@ export class Pathmuncher {
       }
       this.failedFeatureItems[document._id] = {};
 
-      await this.#processGrantItemsAtLevel(document, 20, { originType, applyFeatLocation, levelCap });
+      // const characterLevel = getProperty(this.result.character, "system.details.level.value");
+      const characterLevel = this.characterLevel;
+
+      for (let i = 0; i <= Math.min(characterLevel, levelCap); i++) {
+        await this.#processGrantItemsAtLevel(document, i, { originType, applyFeatLocation, levelCap });
+      }
 
       if (!this.immediateDiveAdd) {
         await this.#delayedSubRuleDocuments({ originType, applyFeatLocation, choiceHint });
@@ -1371,7 +1383,8 @@ export class Pathmuncher {
   async #processCore() {
     setProperty(this.result.character, "name", this.source.name);
     setProperty(this.result.character, "prototypeToken.name", this.source.name);
-    setProperty(this.result.character, "system.details.level.value", this.source.level);
+    this.characterLevel = this.source.level;
+    setProperty(this.result.character, "system.details.level.value", 1);
     if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
     if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
     // setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
@@ -1453,20 +1466,21 @@ export class Pathmuncher {
 
   // eslint-disable-next-line complexity
   async #generateFeatItems(type,
-    { levelCap = null, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {}
+    { levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {}
   ) {
     logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${typeFilter}"`);
 
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
+        logger.debug(`Checking if  ${pBFeat.name} needs processing`, pBFeat);
         if (pBFeat.added) continue;
-        if (levelCap && (pBFeat.level ?? 20) > levelCap) continue;
+        if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
         if (typeFilter && pBFeat.type !== typeFilter) continue;
         if (excludeChild && pBFeat.isChild === true) continue;
         if (excludeParents && pBFeat.isParent === true) continue;
         if (excludeStandard && pBFeat.isStandard === true) continue;
         logger.debug(`Generating feature for ${pBFeat.name}`, pBFeat);
-        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeat, this: this });
+        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeatCloned: deepClone(pBFeat), pBFeat, this: this });
 
         const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
         const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
@@ -1512,6 +1526,7 @@ export class Pathmuncher {
           originType: typeFilter,
           applyFeatLocation: false,
           choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
+          levelCap,
         };
         await this.#addGrantedItems(docData, "feat", options);
       }
@@ -2276,7 +2291,9 @@ export class Pathmuncher {
   async #processFeats() {
     this.#sortParsedFeats();
     // pre pass for standard items
-    for (let i = 1; i <= this.result.character.system.details.level.value; i++) {
+    for (let i = 1; i <= this.characterLevel; i++) {
+      setProperty(this.result.character, "system.details.level.value", i);
+      if (i > 1) await this.#processGrantedLookupItemsAtLevel("class", i);
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true, excludeParents: true });
@@ -2284,7 +2301,7 @@ export class Pathmuncher {
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
     // prepass for non-child items
-    for (let i = 1; i <= this.result.character.system.details.level.value; i++) {
+    for (let i = 1; i <= this.characterLevel; i++) {
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true });
@@ -2361,7 +2378,7 @@ export class Pathmuncher {
 
         const objectSelectionRules = i.system.rules
           .filter((r) => {
-            const evaluateRules = ["RollOption", "ChoiceSet"].includes(r.key) && r.selection;
+            const evaluateRules = ["RollOption", "ChoiceSet"].includes(r.key) && (r.selection || r.domain === "all");
             return !includeFlagsOnly || evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
             // || (["ChoiceSet"].includes(r.key) && r.selection);
           })
@@ -2395,8 +2412,9 @@ export class Pathmuncher {
               const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
               // const genericDiscardRule = ["ChoiceSet", "GrantItem", "ActiveEffectLike", "Resistance", "Strike", "AdjustModifier"].includes(r.key);
               const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
-              const grantRuleFromItemFlag
-                = includeGrants && ["GrantItem"].includes(r.key) && r.uuid.startsWith("{item|flags");
+              const grantRuleFromItemFlag = includeGrants
+                && ["GrantItem"].includes(r.key)
+                && r.uuid.includes("{item|flags");
               const rollOptionsRule = ["RollOption"].includes(r.key);
 
               const notPassedDocumentRules
@@ -2507,7 +2525,7 @@ export class Pathmuncher {
     this.#setLanguages();
 
     this.#statusUpdate(7, 12, "Class");
-    await this.#processGenericCompendiumLookup("classes", this.source.class, "class");
+    await this.#processGenericCompendiumLookup("classes", this.source.class, "class", 1);
 
     this.#setAbilityBoosts();
 
