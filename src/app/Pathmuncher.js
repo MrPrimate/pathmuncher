@@ -71,6 +71,8 @@ export class Pathmuncher {
     this.promptRules = {};
     this.allFeatureRules = {};
     this.autoAddedFeatureRules = {};
+    this.failedFeatureItems = {};
+    this.subRuleDocuments = {};
     this.grantItemLookUp = {};
     this.autoFeats = [];
     this.keyAbility = null;
@@ -124,6 +126,8 @@ export class Pathmuncher {
     for (const type of Object.keys(compendiumMappings)) {
       this.compendiumMatchers[type] = new CompendiumMatcher({ type });
     }
+
+    this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
   }
 
   async #loadCompendiumMatchers() {
