@@ -2825,6 +2825,12 @@ export class Pathmuncher {
     });
   }
 
+  static async removeTempActors() {
+    for (const actor of game.actors.filter((a) => getProperty(a, "flags.pathmuncher.temp") === true)) {
+      await actor.delete();
+    }
+  }
+
   async updateActor() {
     await this.#removeDocumentsToBeUpdated();
 
@@ -2844,6 +2850,7 @@ export class Pathmuncher {
     await this.actor.update(this.result.character);
     await this.#createActorEmbeddedDocuments();
     await this.#restoreEmbeddedRuleLogic();
+    await Pathmuncher.removeTempActors();
   }
 
   async postImportCheck() {
