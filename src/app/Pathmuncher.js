@@ -1174,50 +1174,60 @@ export class Pathmuncher {
     });
   }
 
-  async #addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null } = {}) {
-    const immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
-    const subRuleDocuments = [];
+  async #delayedSubRuleDocuments({ originType, applyFeatLocation, choiceHint }) {
+    for (const subRuleDocument of this.subRuleDocuments[document._id]) {
+      logger.debug(
+        `Processing granted rules for granted item document ${subRuleDocument.name}`,
+        duplicate(subRuleDocument)
+      );
+      await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
+    }
+  }
+
+  async #processGrantItemsAtLevel(document, level, { originType = null, applyFeatLocation = false, levelCap = 20 } = {}) {
+    const featureItemMap = Object.entries(this.autoAddedFeatureItems[document._id])
+      .sort(([, a], [, b]) => a.level - b.level);
+
+    for (const [key, grantedItemFeature] of featureItemMap) {
+      logger.debug(`Checking ${document.name} granted item ${grantedItemFeature.name}, level(${grantedItemFeature.level}) with key: ${key}`, grantedItemFeature);
+      if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
+      const feature = await fromUuid(grantedItemFeature.uuid);
+      if (!feature) {
+        const data = { uuid: grantedItemFeature.uuid, grantedFeature: grantedItemFeature, feature };
+        logger.warn("Unable to determine granted item feature, needs better parser", data);
+        this.failedFeatureItems[document._id][key] = grantedItemFeature;
+        continue;
+      }
+      this.autoAddedFeatureIds.add(`${feature.id}${feature.type}`);
+      const featureDoc = feature.toObject();
+      featureDoc._id = foundry.utils.randomID();
+      setProperty(featureDoc.system, "location", document._id);
+      this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
+      if (hasProperty(featureDoc, "system.rules")) {
+        logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
+        if (this.immediateDiveAdd) {
+          await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation });
+        } else {
+          this.subRuleDocuments[document._id].push(featureDoc);
+        }
+      }
+    }
+    document.system.items = this.failedFeatureItems[document._id];
+  }
+
+  async #addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null, levelCap = 20 } = {}) {
+    this.subRuleDocuments[document._id] = [];
     if (hasProperty(document, "system.items")) {
       logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
       if (!this.autoAddedFeatureItems[document._id]) {
         this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
       }
-      const failedFeatureItems = {};
-      for (const [key, grantedItemFeature] of Object.entries(document.system.items).sort(([, a], [, b]) => a.level - b.level)) {
-        logger.debug(`Checking ${document.name} granted item ${grantedItemFeature.name}, level(${grantedItemFeature.level}) with key: ${key}`, grantedItemFeature);
-        if (grantedItemFeature.level > getProperty(this.result.character, "system.details.level.value")) continue;
-        const feature = await fromUuid(grantedItemFeature.uuid);
-        if (!feature) {
-          const data = { uuid: grantedItemFeature.uuid, grantedFeature: grantedItemFeature, feature };
-          logger.warn("Unable to determine granted item feature, needs better parser", data);
-          failedFeatureItems[key] = grantedItemFeature;
-          continue;
-        }
-        this.autoAddedFeatureIds.add(`${feature.id}${feature.type}`);
-        const featureDoc = feature.toObject();
-        featureDoc._id = foundry.utils.randomID();
-        setProperty(featureDoc.system, "location", document._id);
-        this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
-        if (hasProperty(featureDoc, "system.rules")) {
-          logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
-          if (immediateDiveAdd) {
-            await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation });
-          } else {
-            subRuleDocuments.push(featureDoc);
-          }
-        }
-      }
-      // eslint-disable-next-line require-atomic-updates
-      document.system.items = failedFeatureItems;
+      this.failedFeatureItems[document._id] = {};
 
-      if (!immediateDiveAdd) {
-        for (const subRuleDocument of subRuleDocuments) {
-          logger.debug(
-            `Processing granted rules for granted item document ${subRuleDocument.name}`,
-            duplicate(subRuleDocument)
-          );
-          await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
-        }
+      await this.#processGrantItemsAtLevel(document, 20, { originType, applyFeatLocation, levelCap });
+
+      if (!this.immediateDiveAdd) {
+        await this.#delayedSubRuleDocuments({ originType, applyFeatLocation, choiceHint });
       }
     }
 
