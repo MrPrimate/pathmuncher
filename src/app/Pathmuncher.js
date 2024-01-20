@@ -2309,7 +2309,7 @@ export class Pathmuncher {
   }
 
   async #generateTempActor(documents = [], includePassedDocumentsRules = false, includeGrants = false, includeFlagsOnly = false) {
-    const actorData = mergeObject({ type: "character" }, this.result.character);
+    const actorData = mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
     if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
       delete actorData.system.skills;
