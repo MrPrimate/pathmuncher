@@ -451,7 +451,7 @@ export class Pathmuncher {
   }
 
   // eslint-disable-next-line no-unused-vars
-  async #addDualClass(klass) {
+  #addDualClass(_klass) {
     if (!utils.allowDualClasses()) {
       if (this.source.dualClass && this.source.dualClass !== "") {
         logger.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`, {
@@ -470,143 +470,6 @@ export class Pathmuncher {
       return;
     }
     logger.info("Not processing dual class");
-
-    // // find the dual class
-    // const foundryName = this.getFoundryFeatureName(this.source.dualClass).foundryName;
-    // const indexMatch = this.compendiumMatchers["classes"].getMatch(this.source.dualClass, foundryName);
-
-    // if (!indexMatch) return;
-    // const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-    // const dualClass = doc.toObject();
-
-    // logger.debug(`Dual Class ${dualClass.name} found, squashing things together.`);
-
-    // klass.name = `${klass.name} - ${dualClass.name}`;
-    // const ruleEntry = {
-    //   domain: "all",
-    //   key: "RollOption",
-    //   option: `class:${dualClass.system.slug}`,
-    // };
-
-    // // Attacks
-    // ["advanced", "martial", "simple", "unarmed"].forEach((key) => {
-    //   if (dualClass.system.attacks[key] > klass.system.attacks[key]) {
-    //     klass.system.attacks[key] = dualClass.system.attacks[key];
-    //   }
-    // });
-    // if (klass.system.attacks.martial <= dualClass.system.attacks.other.rank) {
-    //   if (dualClass.system.attacks.other.rank === klass.system.attacks.other.rank) {
-    //     let mashed = `${klass.system.attacks.other.name}, ${dualClass.system.attacks.other.name}`;
-    //     mashed = mashed.replace("and ", "");
-    //     klass.system.attacks.other.name = [...new Set(mashed.split(","))].join(",");
-    //   }
-    //   if (dualClass.system.attacks.other.rank > klass.system.attacks.other.rank) {
-    //     klass.system.attacks.other.name = dualClass.system.attacks.other.name;
-    //     klass.system.attacks.other.rank = dualClass.system.attacks.other.rank;
-    //   }
-    // }
-    // if (
-    //   klass.system.attacks.martial >= dualClass.system.attacks.other.rank
-    //   && klass.system.attacks.martial >= klass.system.attacks.other.rank
-    // ) {
-    //   klass.system.attacks.other.rank = 0;
-    //   klass.system.attacks.other.name = "";
-    // }
-
-    // // Class DC
-    // if (dualClass.system.classDC > klass.system.classDC) {
-    //   klass.system.classDC = dualClass.system.classDC;
-    // }
-
-    // // Defenses
-    // ["heavy", "light", "medium", "unarmored"].forEach((key) => {
-    //   if (dualClass.system.defenses[key] > klass.system.defenses[key]) {
-    //     klass.system.defenses[key] = dualClass.system.defenses[key];
-    //   }
-    // });
-
-    // // Description
-    // klass.system.description.value = `${klass.system.description.value} ${dualClass.system.description.value}`;
-
-    // // HP
-    // if (dualClass.system.hp > klass.system.hp) {
-    //   klass.system.hp = dualClass.system.hp;
-    // }
-
-    // // Items
-    // Object.entries(dualClass.system.items).forEach((i) => {
-    //   if (Object.values(klass.system.items).some((x) => x.uuid === i[1].uuid && x.level > i[1].level)) {
-    //     Object.values(klass.system.items).find((x) => x.uuid === i[1].uuid).level = i[1].level;
-    //   } else if (!Object.values(klass.system.items).some((x) => x.uuid === i[1].uuid && x.level <= i[1].level)) {
-    //     klass.system.items[i[0]] = i[1];
-    //   }
-    // });
-
-    // // Key Ability
-    // dualClass.system.keyAbility.value.forEach((v) => {
-    //   if (!klass.system.keyAbility.value.includes(v)) {
-    //     klass.system.keyAbility.value.push(v);
-    //   }
-    // });
-
-    // // Perception
-    // if (dualClass.system.perception > klass.system.perception) klass.system.perception = dualClass.system.perception;
-
-    // // Rules
-    // klass.system.rules.push(ruleEntry);
-    // dualClass.system.rules.forEach((r) => {
-    //   if (!klass.system.rules.includes(r)) {
-    //     klass.system.rules.push(r);
-    //   }
-    // });
-    // klass.system.rules.forEach((r, i) => {
-    //   if (r.path !== undefined) {
-    //     const check = r.path.split(".");
-    //     if (
-    //       check.includes("data")
-    //       && check.includes("martial")
-    //       && check.includes("rank")
-    //       && klass.system.attacks.martial >= r.value
-    //     ) {
-    //       klass.system.rules.splice(i, 1);
-    //     }
-    //   }
-    // });
-
-    // // Saving Throws
-    // ["fortitude", "reflex", "will"].forEach((key) => {
-    //   if (dualClass.system.savingThrows[key] > klass.system.savingThrows[key]) {
-    //     klass.system.savingThrows[key] = dualClass.system.savingThrows[key];
-    //   }
-    // });
-
-    // // Skill Feat Levels
-    // dualClass.system.skillFeatLevels.value.forEach((v) => {
-    //   klass.system.skillFeatLevels.value.push(v);
-    // });
-    // klass.system.skillFeatLevels.value = [...new Set(klass.system.skillFeatLevels.value)].sort((a, b) => {
-    //   return a - b;
-    // });
-
-    // // Skill Increase Levels
-    // dualClass.system.skillIncreaseLevels.value.forEach((v) => {
-    //   klass.system.skillIncreaseLevels.value.push(v);
-    // });
-    // klass.system.skillIncreaseLevels.value = [...new Set(klass.system.skillIncreaseLevels.value)].sort((a, b) => {
-    //   return a - b;
-    // });
-
-    // // Trained Skills
-    // if (dualClass.system.trainedSkills.additional > klass.system.trainedSkills.additional) {
-    //   klass.system.trainedSkills.additional = dualClass.system.trainedSkills.additional;
-    // }
-    // dualClass.system.trainedSkills.value.forEach((v) => {
-    //   if (!klass.system.trainedSkills.value.includes(v)) {
-    //     klass.system.trainedSkills.value.push(v);
-    //   }
-    // });
-
-    // this.result.dualClass = dualClass;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -624,7 +487,7 @@ export class Pathmuncher {
       }
       if (target === "class") {
         itemData.system.keyAbility.selected = this.keyAbility;
-        await this.#addDualClass(itemData);
+        this.#addDualClass(itemData);
       }
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
