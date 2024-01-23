@@ -19,7 +19,7 @@ export function registerSheetButton() {
       // only for GMs or the owner of this character
       if (!data.owner || !data.actor) return;
 
-      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-hat-wizard"></i> ${CONSTANTS.MODULE_FULL_NAME}</a>`);
+      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-teeth-open"></i> ${CONSTANTS.MODULE_FULL_NAME}</a>`);
 
       button.click(() => {
         if (game.user.can("ACTOR_CREATE")) {
