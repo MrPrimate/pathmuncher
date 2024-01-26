@@ -1776,9 +1776,14 @@ export class Pathmuncher {
       parsedItem.runes.forEach((property) => {
         const resistantRegex = /Energy Resistant - (.*)/i;
         const resistantMatch = property.match(resistantRegex);
+        const vitalizingRegex = /Vitalizing(.*)/i;
+        const vitalizingMatch = property.match(vitalizingRegex);
+
         const rune = resistantMatch
           ? `${resistantMatch[1]} Resistant`
-          : property;
+          : vitalizingMatch
+            ? `Disrupting${vitalizingMatch[1]}`
+            : property;
         itemData.system.runes.property.push(Seasoning.slugD(rune));
       });
     }
