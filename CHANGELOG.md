@@ -1,3 +1,7 @@
+# Next up
+
+- Support for psychic amp module no longer needed for core psychic class.
+
 # 1.0.10
 
 - Vitalizing rune would not transfer and cause sheet breakage as it's still called Disrupting in the PF2e system at a data level.

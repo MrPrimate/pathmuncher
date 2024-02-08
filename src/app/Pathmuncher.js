@@ -2140,7 +2140,8 @@ export class Pathmuncher {
         spell,
       });
       if (itemData) this.result.spells.push(itemData);
-      if (spell.endsWith("(Amped)")) {
+      // only pull amps is the module is active
+      if (spell.endsWith("(Amped)") && game.modules.get("pf2e-psychic-amps")?.active) {
         const psychicSpell = spell.replace("(Amped)", "(Psychic)");
         const psychicItemData = await this.#loadSpell(psychicSpell, instance._id, {
           instance,
@@ -2322,10 +2323,10 @@ export class Pathmuncher {
     this.#statusUpdate(2, 5, "Feats");
     await this.#generateFeatItems("ancestryFeatures");
     this.#statusUpdate(3, 5, "Feats");
-    await this.#generateSpecialItems("ancestryFeatures");
-    this.#statusUpdate(4, 5, "Feats");
-    await this.#generateSpecialItems("classFeatures");
-    this.#statusUpdate(5, 5, "Feats");
+    // await this.#generateSpecialItems("ancestryFeatures");
+    // this.#statusUpdate(4, 5, "Feats");
+    // await this.#generateSpecialItems("classFeatures");
+    // this.#statusUpdate(5, 5, "Feats");
     await this.#generateSpecialItems("actions");
   }
 
