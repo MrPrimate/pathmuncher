@@ -1,6 +1,8 @@
-# Next up
+# 1.0.11
 
 - Support for psychic amp module no longer needed for core psychic class.
+- Bump minimum pf2e version to 5.13.0
+- Fix for some oddities when using an Ancient Elf and some dedications importing chosen content as class feats.
 
 # 1.0.10
 
