@@ -631,11 +631,24 @@ export class Pathmuncher {
   }
 
   #createGrantedItem(document, parent, { itemGrantName = null, originType = null, applyFeatLocation = false } = {}) {
-    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`);
+    logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`, {
+      document,
+      parent,
+      itemGrantName,
+      originType,
+      applyFeatLocation,
+    });
     if (itemGrantName) {
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
       setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
       setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+
+      console.warn(`${parent.name} has granted item ${document.name} (${camelCase})`, {
+        parent,
+        itemGrantName,
+        camelCase,
+        flag: getProperty(parent, `flags.pf2e.itemGrants.${camelCase}`),
+      });
     }
     this.autoFeats.push(document);
     let resultType = "feats";
@@ -1044,7 +1057,7 @@ export class Pathmuncher {
         ruleEntry.choiceQueryResults = choice.choiceQueryResults;
       }
 
-      const flagName = Pathmuncher.getFlag(document, ruleEntry);
+      const documentFlagName = Pathmuncher.getFlag(document, ruleEntry);
       // if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
       //   setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
       // }
@@ -1054,6 +1067,8 @@ export class Pathmuncher {
       // console.warn("ruleFeature", ruleFeature);
       if (ruleFeature) {
         const featureDoc = ruleFeature.toObject();
+        // const featureDocFlagName = Pathmuncher.getFlag(featureDoc, ruleEntry);
+        const featureDocFlagName = Seasoning.slugD(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
         featureDoc._id = foundry.utils.randomID();
         if (featureDoc.system.rules) this.allFeatureRules[featureDoc._id] = deepClone(featureDoc.system.rules);
         setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
@@ -1061,11 +1076,15 @@ export class Pathmuncher {
 
         if (choice) {
           ruleEntry.selection = choice.value;
-          setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
+          setProperty(document, `flags.pf2e.rulesSelections.${documentFlagName}`, choice.value);
         }
 
         if (utils.isString(ruleEntry.rollOption)) {
-          ruleEntry.rollOption = `${ruleEntry.rollOption}:${flagName}`;
+          ruleEntry.rollOption = `${ruleEntry.rollOption}:${documentFlagName}`;
+        }
+
+        if (ruleEntry.key === "GrantItem" && !ruleEntry.flag) {
+          ruleEntry.flag = featureDocFlagName;
         }
 
         if (ruleEntry.predicate && ruleEntry.key === "GrantItem") {
@@ -1112,7 +1131,7 @@ export class Pathmuncher {
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
-          this.#createGrantedItem(featureDoc, document, { itemGrantName: flagName, applyFeatLocation: false });
+          this.#createGrantedItem(featureDoc, document, { itemGrantName: featureDocFlagName, applyFeatLocation: false });
           if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
       } else if (getProperty(choice, "nouuid")) {
@@ -2327,7 +2346,7 @@ export class Pathmuncher {
     // this.#statusUpdate(4, 5, "Feats");
     // await this.#generateSpecialItems("classFeatures");
     // this.#statusUpdate(5, 5, "Feats");
-    await this.#generateSpecialItems("actions");
+    // await this.#generateSpecialItems("actions");
   }
 
   async #processEquipment() {
@@ -2644,7 +2663,7 @@ export class Pathmuncher {
                 r.choices = r.choiceQueryResults;
               }
             }
-            if (r.pathmuncherImport) delete r.pathmuncherImport;
+            if (r.pathmuncherImport) r.pathmuncherImport = undefined;
             return r;
           });
       }
