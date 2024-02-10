@@ -1,6 +1,6 @@
-# NEXTUP
+# 1.0.12
 
--FIx an issue importing Selfish Shield @timbolle
+- Fix an issue importing Selfish Shield @timbolle
 
 # 1.0.11
 
