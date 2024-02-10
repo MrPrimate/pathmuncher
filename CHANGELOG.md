@@ -1,3 +1,7 @@
+# NEXTUP
+
+-FIx an issue importing Selfish Shield @timbolle
+
 # 1.0.11
 
 - Support for psychic amp module no longer needed for core psychic class.
