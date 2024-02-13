@@ -1,3 +1,7 @@
+# 1.0.13
+
+- Some feature rules used strings rather than integers for level conditions, such as the Kobold. The munch now accounts for this. Draconic Exemplar is once more added.
+
 # 1.0.12
 
 - Fix an issue importing Selfish Shield @timbolle

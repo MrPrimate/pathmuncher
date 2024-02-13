@@ -1214,9 +1214,19 @@ export class Pathmuncher {
       .sort(([, a], [, b]) => a.level - b.level);
     for (const [key, grantedFeature] of featureItemMap) {
       logger.debug(`Checking ${document.name} granted item ${grantedFeature.name}, level(${grantedFeature.level}) with key: ${key}`, grantedFeature);
-      if (grantedFeature.level > getProperty(this.result.character, "system.details.level.value")
-        || grantedFeature.level !== level
-      ) continue;
+      if (parseInt(grantedFeature.level) > getProperty(this.result.character, "system.details.level.value")
+        || parseInt(grantedFeature.level) !== level
+      ) {
+        logger.debug(`Not processing ${grantedFeature.name} due to level data mismatch`, {
+          grantedFeature,
+          level,
+          levelCap,
+          greaterLevelCheck: parseInt(grantedFeature.level) > getProperty(this.result.character, "system.details.level.value"),
+          noLevelMatchCheck: parseInt(grantedFeature.level) !== level,
+          characterLevel: getProperty(this.result.character, "system.details.level.value"),
+        });
+        continue;
+      }
       const feature = await fromUuid(grantedFeature.uuid);
       if (!feature) {
         const data = { uuid: grantedFeature.uuid, grantedFeature, feature };
@@ -2334,6 +2344,12 @@ export class Pathmuncher {
       await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat", levelCap: i, excludeChild: true });
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
+
+    await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat" });
+    await this.#generateFeatItems("feats", { typeFilter: "Skill Feat" });
+    await this.#generateFeatItems("feats", { typeFilter: "Class Feat" });
+    await this.#generateFeatItems("feats", { typeFilter: "General Feat" });
+    await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat" });
 
     this.#setSkills();
     // final pass, include all
