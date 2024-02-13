@@ -1279,6 +1279,8 @@ export class Pathmuncher {
     }
   }
 
+  static KEY_LEVEL = [0, 1, 5, 5, 5, 5, 10, 10, 10, 10, 10, 15, 15, 15, 15, 15, 20, 20, 20, 20, 20];
+
   #determineAbilityBoosts() {
     const breakdown = getProperty(this.source, "abilities.breakdown");
     const useCustomStats
@@ -1293,7 +1295,10 @@ export class Pathmuncher {
       const classBoostMap = {};
       for (const [key, boosts] of Object.entries(this.source.abilities.breakdown.mapLevelledBoosts)) {
         if (key <= this.source.level) {
-          classBoostMap[key] = boosts.map((ability) => ability.toLowerCase());
+          const levelKey = Pathmuncher.KEY_LEVEL[key];
+          const existingBoosts = classBoostMap[levelKey] ?? [];
+          const newBoosts = boosts.map((ability) => ability.toLowerCase());
+          classBoostMap[levelKey] = existingBoosts.concat(newBoosts);
         }
       }
       setProperty(this.result.character, "system.build.attributes.boosts", classBoostMap);
