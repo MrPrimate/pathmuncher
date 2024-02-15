@@ -32,6 +32,7 @@ const REPLACES = [
 
 // this equipment is named differently in foundry vs pathbuilder
 export const EQUIPMENT_RENAME_STATIC_MAP = [
+  { pbName: "Basic Corrective Lenses", foundryName: "Corrective Lenses" },
   { pbName: "Inventor Power Suit", foundryName: "Power Suit" },
   { pbName: "Inventor Power Suit (Heavy)", foundryName: "Power Suit" },
   { pbName: "Inventor Subterfuge Suit", foundryName: "Subterfuge Suit" },
