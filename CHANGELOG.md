@@ -1,3 +1,7 @@
+# 1.0.14
+
+- Some runes did not import.
+
 # 1.0.13
 
 - Some feature rules used strings rather than integers for level conditions, such as the Kobold. The munch now accounts for this. Draconic Exemplar is once more added.

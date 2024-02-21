@@ -1812,12 +1812,14 @@ export class Pathmuncher {
         const resistantMatch = property.match(resistantRegex);
         const vitalizingRegex = /Vitalizing(.*)/i;
         const vitalizingMatch = property.match(vitalizingRegex);
+        const bigRegex = /(.*)\((Greater|Major)\)/i;
+        const bigMatch = property.match(bigRegex);
 
-        const rune = resistantMatch
-          ? `${resistantMatch[1]} Resistant`
-          : vitalizingMatch
-            ? `Disrupting${vitalizingMatch[1]}`
-            : property;
+        let rune = property;
+        if (resistantMatch) rune = `${resistantMatch[1]} Resistant`;
+        else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
+        else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
+
         itemData.system.runes.property.push(Seasoning.slugD(rune));
       });
     }
