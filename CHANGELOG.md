@@ -1,3 +1,8 @@
+# 1.0.15
+
+- Last survior/Lastwall Survivor mapping.
+- Clothing (Winter) mapping.
+
 # 1.0.14
 
 - Some runes did not import.
