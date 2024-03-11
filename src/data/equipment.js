@@ -43,6 +43,7 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Ladder", foundryName: "Ladder (10-foot)" },
   { pbName: "Mezmerizing Opal", foundryName: "Mesmerizing Opal" },
   // { pbName: "Explorer's Clothing", foundryName: "Clothing (Explorer's)" },
+  { pbName: "Clothing (Winter)", foundryName: "Clothing (Cold-Weather)" },
   { pbName: "Flaming Star (Greater)", foundryName: "Greater Flaming Star" },
   { pbName: "Potion of Lesser Darkvision", foundryName: "Darkvision Elixir (Lesser)" },
   { pbName: "Potion of Greater Darkvision", foundryName: "Darkvision Elixir (Greater)" },

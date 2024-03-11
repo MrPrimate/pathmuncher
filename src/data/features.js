@@ -125,6 +125,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Incredible Beastmaster's Companion", foundryName: "Incredible Beastmaster Companion" },
   { pbName: "Interrogation", foundryName: "Bolera's Interrogation" },
   { pbName: "Katana", foundryName: "Katana Weapon Familiarity" },
+  { pbName: "Last Survivor", foundryName: "Lastwall Survivor" },
   { pbName: "Liberator [Chaotic Good]", foundryName: "Liberator" },
   { pbName: "Lumberjack Dedication", foundryName: "Turpin Rowe Lumberjack Dedication" },
   { pbName: "Lumberjack", foundryName: "Lumber Consortium Laborer" },
