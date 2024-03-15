@@ -1,3 +1,7 @@
+# 1.0.16
+
+- Fix for not allowing all options for ChoiceSets like Armor Innovation (Muscular Exoskeleton would not display).
+
 # 1.0.15
 
 - Last survior/Lastwall Survivor mapping.

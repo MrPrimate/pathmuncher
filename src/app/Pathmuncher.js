@@ -1080,7 +1080,8 @@ export class Pathmuncher {
         }
 
         if (utils.isString(ruleEntry.rollOption)) {
-          ruleEntry.rollOption = `${ruleEntry.rollOption}:${documentFlagName}`;
+          const rollFlag = Seasoning.slug(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
+          ruleEntry.rollOption = `${ruleEntry.rollOption}:${rollFlag}`;
         }
 
         if (ruleEntry.key === "GrantItem" && !ruleEntry.flag) {
