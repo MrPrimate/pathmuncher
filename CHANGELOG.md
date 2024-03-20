@@ -1,3 +1,7 @@
+# 1.0.17
+
+- Fixed Skilled Human/Skilled Heritage match.
+
 # 1.0.16
 
 - Fix for not allowing all options for ChoiceSets like Armor Innovation (Muscular Exoskeleton would not display).
