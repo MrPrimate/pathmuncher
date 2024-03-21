@@ -1,6 +1,7 @@
 # 1.0.18
 
 - Belkzen Slayer/Slayer match.
+- Warden Ranger remaster focus spells will now import with the latest Pathbuilder release.
 
 # 1.0.17
 

@@ -2246,6 +2246,15 @@ export class Pathmuncher {
       await this.#processCasterSpells(instance, caster, spellEnhancements, forcePrepare);
     }
 
+    if (this.parsed.feats.some((f) => f.name === "Initiate Warden")) {
+      const spellData = foundry.utils.getProperty(this.source, "focus.Unassigned.General");
+      if (spellData) {
+        const existing = foundry.utils.getProperty(this.source, "focus.primal.wis") ?? {};
+        const merged = foundry.utils.mergeObject(existing, spellData);
+        foundry.utils.setProperty(this.source, "focus.primal.wis", merged);
+      }
+    }
+
     for (const tradition of ["occult", "primal", "divine", "arcane"]) {
       const traditionData = getProperty(this.source, `focus.${tradition}`);
       logger.debug(`Checking for focus tradition ${tradition}`);
