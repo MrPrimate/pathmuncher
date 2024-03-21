@@ -159,6 +159,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Skysage Dedication", foundryName: "Oatia Skysage Dedication" },
   { pbName: "Secret Lesson", foundryName: "Janatimo's Lessons" },
   { pbName: "Sentry Dedication", foundryName: "Lastwall Sentry Dedication" },
+  { pbName: "Slayer", foundryName: "Belkzen Slayer" },
   { pbName: "Stab and Snag", foundryName: "Stella's Stab and Snag" },
   { pbName: "Tenets of Evil", foundryName: "The Tenets of Evil" },
   { pbName: "Tenets of Good", foundryName: "The Tenets of Good" },

@@ -1,3 +1,7 @@
+# 1.0.18
+
+- Belkzen Slayer/Slayer match.
+
 # 1.0.17
 
 - Fixed Skilled Human/Skilled Heritage match.
