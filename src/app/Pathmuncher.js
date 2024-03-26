@@ -1407,11 +1407,10 @@ export class Pathmuncher {
 
   #setLanguages() {
     const ancestryLanguages = this.result.ancestry[0]?.system.traits.languages?.value || [];
-    const ancestryLanguagesOn = !foundry.utils.isNewerVersion(game.system.version, "5.12.0");
     const intLanguages = this.source.languages
-      .filter((l) => ancestryLanguagesOn && !ancestryLanguages.includes(l.toLowerCase()))
+      .filter((l) => !ancestryLanguages.includes(l.toLowerCase()))
       .map((l) => l.toLowerCase());
-    setProperty(this.result.character, "system.traits.languages.value", intLanguages);
+    setProperty(this.result.character, "system.details.languages.value", intLanguages);
 
   }
 

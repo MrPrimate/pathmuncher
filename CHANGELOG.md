@@ -1,6 +1,7 @@
 # Next up
 
 - Kineticist fixes.
+- Not all languages were added.
 
 # 1.0.18
 
