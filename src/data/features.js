@@ -216,6 +216,14 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Divine Ally (Blade)", foundryName: "Blade Ally" },
   { pbName: "Skilled Heritage", foundryName: "Skilled Human" },
 
+  // kinetisct
+  { pbName: "Air Element", foundryName: "Air Gate" },
+  { pbName: "Earth Element", foundryName: "Earth Gate" },
+  { pbName: "Fire Element", foundryName: "Fire Gate" },
+  { pbName: "Metal Element", foundryName: "Metal Gate" },
+  { pbName: "Water Element", foundryName: "Water Gate" },
+  { pbName: "Wood Element", foundryName: "Wood Gate" },
+
   // semi-official
   { pbName: "Ifrit", foundryName: "Naari" },
 ];

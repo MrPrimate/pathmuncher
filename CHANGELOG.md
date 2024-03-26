@@ -1,3 +1,7 @@
+# Next up
+
+- Kineticist fixes.
+
 # 1.0.18
 
 - Belkzen Slayer/Slayer match.
