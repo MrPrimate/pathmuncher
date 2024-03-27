@@ -8,7 +8,6 @@ const CONSTANTS = {
     // Enable options
     LOG_LEVEL: "log-level",
     RESTRICT_TO_TRUSTED: "restrict-to-trusted",
-    ADD_VISION_FEATS: "add-vision-feats",
     USE_CUSTOM_COMPENDIUM_MAPPINGS: "use-custom-compendium-mappings",
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
     USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
@@ -167,15 +166,6 @@ CONSTANTS.DEFAULT_SETTINGS = {
       deities: ["clerics.clerics-deities", "pf2e.deities"],
       backgrounds: ["pf2e.backgrounds"],
     },
-  },
-
-  [CONSTANTS.SETTINGS.ADD_VISION_FEATS]: {
-    name: `${CONSTANTS.FLAG_NAME}.Settings.AddVisionFeats.Name`,
-    hint: `${CONSTANTS.FLAG_NAME}.Settings.AddVisionFeats.Hint`,
-    scope: "player",
-    config: true,
-    type: Boolean,
-    default: false,
   },
 
   // debug

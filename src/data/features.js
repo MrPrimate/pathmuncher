@@ -311,17 +311,15 @@ const IGNORED_FEATS_LIST = [
 ];
 
 const IGNORED_SPECIALS_LIST = [
-
+  "Low-Light Vision", "Darkvision"
 ];
 
 export function IGNORED_FEATS() {
-  // const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
   return IGNORED_FEATS_LIST.concat(SHARED_IGNORE_LIST);
 }
 
 export function IGNORED_SPECIALS() {
-  const visionFeats = utils.setting("ADD_VISION_FEATS") ? [] : ["Low-Light Vision", "Darkvision"];
-  return IGNORED_SPECIALS_LIST.concat(SHARED_IGNORE_LIST, visionFeats);
+  return IGNORED_SPECIALS_LIST;
 }
 
 export function specialOnlyNameLookup(name) {

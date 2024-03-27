@@ -2,6 +2,7 @@
 
 - Kineticist fixes.
 - Not all languages were added.
+- Removed old darkvision and low-light-vision ancestry Features
 
 # 1.0.18
 
