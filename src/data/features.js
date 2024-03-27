@@ -1,7 +1,5 @@
 // these are features which are named differently in pathbuilder to foundry
 
-import utils from "../utils.js";
-
 const SKILL_LOOKUP = {
   "acrobatics": "acr",
   "arcana": "arc",
