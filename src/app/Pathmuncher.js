@@ -313,7 +313,7 @@ export class Pathmuncher {
       });
     this.source.weapons
       .filter((e) => e && e !== "undefined")
-      .forEach((e) => {
+      .forEach((e, i) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({
           foundryName: name,
@@ -325,6 +325,27 @@ export class Pathmuncher {
           sourceType: "weapons",
         }, e);
         this.parsed.weapons.push(item);
+        // for now assume first weapon is the weapon innovation
+        if (i === 0 && this.source.specials.includes("Weapon Innovation")) {
+          this.parsed.feats.push({
+            name,
+            extra: "",
+            added: false,
+            addedId: null,
+            addedAutoId: null,
+            type: "Awarded Feat",
+            level: 1,
+            originalName: e.name,
+            rank: 0,
+            sourceType: "weapons",
+            featChoiceRef: null,
+            hasChildren: null,
+            isChild: null,
+            isStandard: null,
+            parentFeatChoiceRef: null,
+          });
+          featRank++;
+        }
       });
     logger.debug("Finished Equipment Rename");
 
@@ -339,7 +360,17 @@ export class Pathmuncher {
       .forEach((special) => {
         const match = this.getFoundryFeatureName(special); // , true);
         if (!this.#processSpecialData(match.foundryName) && !Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-          this.parsed.specials.push({ name: match.foundryName, foundryName: match.foundryName, foundryValue: match.foundryValue, originalName: special, added: false, addedId: null, addedAutoId: null, rank: iRank, sourceType: "specials" });
+          this.parsed.specials.push({
+            name: match.foundryName,
+            foundryName: match.foundryName,
+            foundryValue: match.foundryValue,
+            originalName: special,
+            added: false,
+            addedId: null,
+            addedAutoId: null,
+            rank: iRank,
+            sourceType: "specials"
+          });
           iRank++;
         }
       });
@@ -394,6 +425,29 @@ export class Pathmuncher {
         featRank++;
       });
     logger.debug("Finished Feat Rename");
+
+    logger.debug("Checking for Inventions");
+    (this.source.inventorMods ?? []).forEach((mod) => {
+      const match = this.getFoundryFeatureName(mod.selection);
+      if (!Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
+        this.parsed.specials.push({
+          name: match.foundryName,
+          foundryName: match.foundryName,
+          foundryValue: match.foundryValue,
+          originalName: mod.selection,
+          isChild: true,
+          added: false,
+          addedId: null,
+          addedAutoId: null,
+          rank: iRank,
+          sourceType: "inventorMods",
+          parentFeatChoiceRef: mod.ref,
+          nameHint: this.getFoundryFeatureName(mod.ref).foundryName
+        });
+        iRank++;
+      }
+    });
+    logger.debug("Finished Inventions");
     logger.debug("Name remapping results", {
       parsed: this.parsed,
     });
