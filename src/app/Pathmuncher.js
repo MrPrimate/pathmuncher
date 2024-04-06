@@ -324,7 +324,6 @@ export class Pathmuncher {
           addedAutoId: null,
           sourceType: "weapons",
         }, e);
-        this.parsed.weapons.push(item);
         // for now assume first weapon is the weapon innovation
         if (i === 0 && this.source.specials.includes("Weapon Innovation")) {
           this.parsed.feats.push({
@@ -345,6 +344,8 @@ export class Pathmuncher {
             parentFeatChoiceRef: null,
           });
           featRank++;
+        } else {
+          this.parsed.weapons.push(item);
         }
       });
     logger.debug("Finished Equipment Rename");
