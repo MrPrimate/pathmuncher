@@ -685,7 +685,7 @@ export class Pathmuncher {
     // return equipmentMatch;
   }
 
-  #createGrantedItem(document, parent, { itemGrantName = null, originType = null, applyFeatLocation = false } = {}) {
+  #createGrantedItem(document, parent, { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false } = {}) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`, {
       document,
       parent,
@@ -693,7 +693,7 @@ export class Pathmuncher {
       originType,
       applyFeatLocation,
     });
-    if (itemGrantName) {
+    if (addGrantFlag) {
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
       setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
       setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
@@ -846,9 +846,18 @@ export class Pathmuncher {
       : Seasoning.slugD(document.system.slug ?? document.system.name ?? document.name);
   }
 
-  async #evaluateChoices(document, choiceSet, choiceHint) {
+  async #evaluateChoices(document, choiceSet, choiceHint, processedRules) {
     logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet, choiceHint });
-    const tempActor = await this.#generateTempActor([document], false, false, true);
+    const tempActor = await this.#generateTempActor({
+      documents: [document],
+      includePassedDocumentsRules: false,
+      // includeGrants: false,
+      // includePassedDocumentsRules: true,
+      includeGrants: false,
+      includeFlagsOnly: true,
+      processedRules,
+    });
+
     const cleansedChoiceSet = deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -932,8 +941,14 @@ export class Pathmuncher {
     return undefined;
   }
 
-  async #resolveInjectedUuid(document, ruleEntry) {
-    const tempActor = await this.#generateTempActor([document], false, false);
+  async #resolveInjectedUuid(document, ruleEntry, processedRules = []) {
+    const tempActor = await this.#generateTempActor({
+      documents: [document],
+      // includePassedDocumentsRules: true,
+      // includeGrants: true,
+      // includeFlagsOnly: true,
+      processedRules,
+    });
     const cleansedRuleEntry = deepClone(ruleEntry);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -942,14 +957,30 @@ export class Pathmuncher {
       // console.warn("Begining uuid resovle");
       const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
 
+      const tempItems = [];
+      const context = { parent: tempActor, render: false };
+      await grantItemRule.preCreate({
+        itemSource: item,
+        ruleSource: cleansedRuleEntry,
+        pendingItems: [item],
+        tempItems,
+        context,
+        reevaluation: true,
+      });
+
       logger.debug("uuid selection", {
         document,
         choiceSet: ruleEntry,
         item,
         grantItemRule,
         uuid,
+        tempItems,
       });
-      if (uuid) return uuid;
+
+      // TODO: use the tempitem here rather than the uuid
+      if (uuid || tempItems.length > 0) {
+        return { uuid, grantObject: tempItems[0] };
+      }
     } catch (err) {
       logger.error("Whoa! Something went major bad wrong during uuid evaluation", {
         err,
@@ -966,8 +997,15 @@ export class Pathmuncher {
     return undefined;
   }
 
-  async #checkRule(document, rule) {
-    const tempActor = await this.#generateTempActor([document], true);
+  async #checkRule(document, rule, otherDocuments = []) {
+    console.warn("Checking rule", { document, rule, otherDocuments })
+    const tempActor = await this.#generateTempActor({
+      documents: [document],
+      includePassedDocumentsRules: true,
+      // includeGrants: false,
+      // includeFlagsOnly: true,
+      otherDocs: otherDocuments,
+    });
     const cleansedRule = deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -1011,8 +1049,14 @@ export class Pathmuncher {
     }
   }
 
-  async #checkRulePredicate(document, rule) {
-    const tempActor = await this.#generateTempActor([document], true);
+  async #checkRulePredicate(document, rule, processedRules) {
+    const tempActor = await this.#generateTempActor({
+      documents: [document],
+      includePassedDocumentsRules: true,
+      // includeGrants: false,
+      // includeFlagsOnly: true,
+      processedRules,
+    });
     const cleansedRule = deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -1105,8 +1149,10 @@ export class Pathmuncher {
         }
       }
 
-      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry, choiceHint) : undefined;
-      const uuid = ruleEntry.key === "GrantItem" ? await this.#resolveInjectedUuid(document, ruleEntry) : choice?.value;
+      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry, choiceHint, rulesToKeep) : undefined;
+      const { uuid, grantObject } = ruleEntry.key === "GrantItem"
+        ? await this.#resolveInjectedUuid(document, ruleEntry, rulesToKeep)
+        : { uuid: choice?.value, grantObject: undefined };
 
       if (choice?.choiceQueryResults) {
         ruleEntry.choiceQueryResults = choice.choiceQueryResults;
@@ -1117,8 +1163,10 @@ export class Pathmuncher {
       //   setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
       // }
 
-      logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid });
-      const ruleFeature = uuid && typeof uuid === "string" ? await fromUuid(uuid) : undefined;
+      logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid, grantObject });
+      const ruleFeature = ruleEntry.key === "GrantItem" && grantObject
+        ? grantObject
+        : uuid && typeof uuid === "string" ? await fromUuid(uuid) : undefined;
       // console.warn("ruleFeature", ruleFeature);
       if (ruleFeature) {
         const featureDoc = ruleFeature.toObject();
@@ -1132,6 +1180,9 @@ export class Pathmuncher {
         if (choice) {
           ruleEntry.selection = choice.value;
           setProperty(document, `flags.pf2e.rulesSelections.${documentFlagName}`, choice.value);
+          if (choice.actorFlag) {
+            setProperty(this.result.character, `flags.pf2e.${documentFlagName}`, choice.value);
+          }
         }
 
         if (utils.isString(ruleEntry.rollOption)) {
@@ -1149,7 +1200,9 @@ export class Pathmuncher {
             document,
             featureDoc,
           });
-          const testResult = await this.#checkRule(featureDoc, ruleEntry);
+          const tempDoc = foundry.utils.deepClone(document);
+          tempDoc.system.rules = foundry.utils.deepClone(rulesToKeep);
+          const testResult = await this.#checkRule(featureDoc, ruleEntry, [tempDoc]);
           if (!testResult) {
             const data = { document, ruleEntry, featureDoc, testResult };
             logger.debug(
@@ -1180,14 +1233,23 @@ export class Pathmuncher {
             rulesToKeep.push(ruleEntry);
           }
           continue;
-        } else {
+        } else if (ruleEntry.key === "GrantItem" ) {
           logger.debug(`Feature ${featureDoc.name} not found for ${document.name}, adding (${ruleFeature.id})`, ruleFeature);
           if (ruleEntry.selection || ruleEntry.flag) {
             rulesToKeep.push(ruleEntry);
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
-          this.#createGrantedItem(featureDoc, document, { itemGrantName: featureDocFlagName, applyFeatLocation: false });
+          // this.#createGrantedItem(featureDoc, document, { itemGrantName: featureDocFlagName, applyFeatLocation: false });
+          console.warn(`Adding flags for ${document.name} (${documentFlagName})`, {
+            document,
+            featureDoc,
+            ruleEntry,
+            choice,
+            documentFlagName,
+          });
+          const flagName = ruleEntry.flag ?? documentFlagName;
+          this.#createGrantedItem(featureDoc, document, { addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false });
           if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
       } else if (getProperty(choice, "nouuid")) {
@@ -1293,6 +1355,7 @@ export class Pathmuncher {
       this.autoAddedFeatureIds.add(`${feature.id}${feature.type}`);
       const featureDoc = feature.toObject();
       featureDoc._id = foundry.utils.randomID();
+      // const featureDocFlagName = Seasoning.slugD(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
       setProperty(featureDoc.system, "location", document._id);
       this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
       if (hasProperty(featureDoc, "system.rules")) {
@@ -2447,7 +2510,9 @@ export class Pathmuncher {
     await this.#generateMoney();
   }
 
-  async #generateTempActor(documents = [], includePassedDocumentsRules = false, includeGrants = false, includeFlagsOnly = false) {
+  async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
+      includeFlagsOnly = false, processedRules = [], otherDocs = [],
+  } = {}) {
     const actorData = mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
     if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
@@ -2457,7 +2522,16 @@ export class Pathmuncher {
     const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = duplicate(this.result);
 
-    // console.warn("Initial temp actor", deepClone(actor));
+    console.warn("Initial temp actor", {
+      initialTempActor: deepClone(actor),
+      documents,
+      includePassedDocumentsRules,
+      includeGrants,
+      includeFlagsOnly,
+      processedRules,
+      otherDocs,
+      this: this,
+    });
 
     const currentItems = [
       ...currentState.deity,
@@ -2475,6 +2549,7 @@ export class Pathmuncher {
       // ...currentState.treasure,
       // ...currentState.money,
     ];
+    currentItems.push(...otherDocs.filter((d) => !currentItems.some((i) => i._id === d._id)));
     for (const doc of documents) {
       if (!currentItems.some((d) => d._id === doc._id)) {
         currentItems.push(deepClone(doc));
@@ -2486,7 +2561,12 @@ export class Pathmuncher {
       for (const i of deepClone(currentItems)) {
         if (!i.system.rules || i.system.rules.length === 0) continue;
         const isPassedDocument = documents.some((d) => d._id === i._id);
-        if (isPassedDocument && !includePassedDocumentsRules && !includeFlagsOnly) continue;
+        if (isPassedDocument && processedRules.length > 0) {
+          i.system.rules = foundry.utils.deepClone(processedRules);
+          continue;
+        } else if (isPassedDocument && !includePassedDocumentsRules && !includeFlagsOnly) {
+          continue;
+        }
 
         const objectSelectionRules = i.system.rules
           .filter((r) => {
@@ -2516,30 +2596,29 @@ export class Pathmuncher {
         if (i.system.rules) {
           i.system.rules = i.system.rules
             .filter((r) => {
+              const isOtherDocument = otherDocs.some((d) => d._id === i._id);
+              if (isOtherDocument) return true;
               const isPassedDocument = documents.some((d) => d._id === i._id);
               const isChoiceSetSelection = ["ChoiceSet"].includes(r.key) && r.selection;
-              // const choiceSetSelectionObject = isChoiceSetSelection && utils.isObject(r.selection);
               const choiceSetSelectionNotObject = isChoiceSetSelection && !utils.isObject(r.selection);
-              // const grantRuleWithFlag = includeGrants && ["GrantItem"].includes(r.key) && r.flag;
               const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
-              // const genericDiscardRule = ["ChoiceSet", "GrantItem", "ActiveEffectLike", "Resistance", "Strike", "AdjustModifier"].includes(r.key);
               const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
-              const grantRuleFromItemFlag = includeGrants
-                && ["GrantItem"].includes(r.key)
-                && r.uuid.includes("{item|flags");
-              const rollOptionsRule = ["RollOption"].includes(r.key);
+              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key)  && r.uuid.includes("{item|flags");
+              const includeGrantRuleFromItemFlag = includeGrants && grantRuleFromItemFlag;
+              const allowedMiscKeys = ["RollOption", "ActiveEffectLike"].includes(r.key);
 
               const notPassedDocumentRules
                 = !isPassedDocument
                 && (choiceSetSelectionNotObject
-                  // || grantRuleWithFlag
                   || grantRuleWithoutFlag
-                  || !genericDiscardRule);
+                  || !genericDiscardRule
+                  || includeGrantRuleFromItemFlag
+                  || allowedMiscKeys);
 
               const passedDocumentRules
                 = isPassedDocument
                 && includePassedDocumentsRules
-                && (isChoiceSetSelection || grantRuleWithoutFlag || grantRuleFromItemFlag || rollOptionsRule);
+                && (isChoiceSetSelection || grantRuleWithoutFlag || grantRuleFromItemFlag || allowedMiscKeys);
 
               return notPassedDocumentRules || passedDocumentRules;
             })
@@ -2551,39 +2630,13 @@ export class Pathmuncher {
               r.ignored = false;
               return r;
             });
+          if (documents.some((d) => d._id === i._id) && processedRules.length > 0) {
+            i.system.rules = foundry.utils.deepClone(processedRules);
+          }
         }
         return i;
       });
 
-      // const items2 = duplicate(currentItems).map((i) => {
-      //   if (i.system.items) i.system.items = [];
-      //   if (i.system.rules) i.system.rules = i.system.rules.filter((r) =>
-      //     (!documents.some((d) => d._id === i._id)
-      //     && ((["ChoiceSet",].includes(r.key) && r.selection)
-      //     //  || (["GrantItem"].includes(r.key) && r.flag)
-      //       || !["ChoiceSet", "GrantItem"].includes(r.key)
-      //     ))
-      //     || (includePassedDocumentsRules && documents.some((d) => d._id === i._id) && ["ChoiceSet",].includes(r.key) && r.selection)
-      //   ).map((r) => {
-      //     if ((typeof r.choices === 'string' || r.choices instanceof String)
-      //       || (typeof r.choices === 'object' && !Array.isArray(r.choices) && r.choices !== null && r.choiceQueryResults)
-      //     ) {
-      //       r.choices = r.choiceQueryResults;
-      //     }
-      //     r.ignored = false;
-      //     return r;
-      //   });
-      //   return i;
-      // });
-
-      // console.warn("temp items", {
-      //   documents: deepClone(currentItems),
-      //   items: deepClone(items),
-      //   // items2: deepClone(items2),
-      //   // diff: diffObject(items, items2),
-      //   includePassedDocumentsRules,
-      //   includeGrants,
-      // });
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
       // console.warn("restoring selection rules to temp items", ruleUpdates);
       await actor.updateEmbeddedDocuments("Item", ruleUpdates);
