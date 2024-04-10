@@ -1,3 +1,8 @@
+# Next up
+
+- With the latest Pathbuilder export much improved Inventor class handling.
+- Better handling of granted items with alterations, e.g. inventor weapons.
+
 # 1.0.18
 
 - Kineticist fixes.

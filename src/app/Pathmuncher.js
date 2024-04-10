@@ -698,7 +698,7 @@ export class Pathmuncher {
       setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
       setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
 
-      console.warn(`${parent.name} has granted item ${document.name} (${camelCase})`, {
+      logger.debug(`${parent.name} has granted item ${document.name} (${camelCase})`, {
         parent,
         itemGrantName,
         camelCase,
@@ -998,7 +998,7 @@ export class Pathmuncher {
   }
 
   async #checkRule(document, rule, otherDocuments = []) {
-    console.warn("Checking rule", { document, rule, otherDocuments })
+    logger.debug("Checking rule", { document, rule, otherDocuments })
     const tempActor = await this.#generateTempActor({
       documents: [document],
       includePassedDocumentsRules: true,
@@ -1136,8 +1136,9 @@ export class Pathmuncher {
         logger.debug(`Checking for predicates`, {
           ruleEntry,
           document,
+          rulesToKeep,
         });
-        const testResult = await this.#checkRulePredicate(duplicate(document), ruleEntry);
+        const testResult = await this.#checkRulePredicate(duplicate(document), ruleEntry, [rulesToKeep]);
         if (!testResult) {
           const data = { document, ruleEntry, testResult };
           logger.debug(
@@ -1241,7 +1242,7 @@ export class Pathmuncher {
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
           // this.#createGrantedItem(featureDoc, document, { itemGrantName: featureDocFlagName, applyFeatLocation: false });
-          console.warn(`Adding flags for ${document.name} (${documentFlagName})`, {
+          logger.debug(`Adding flags for ${document.name} (${documentFlagName})`, {
             document,
             featureDoc,
             ruleEntry,
@@ -2522,16 +2523,16 @@ export class Pathmuncher {
     const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = duplicate(this.result);
 
-    console.warn("Initial temp actor", {
-      initialTempActor: deepClone(actor),
-      documents,
-      includePassedDocumentsRules,
-      includeGrants,
-      includeFlagsOnly,
-      processedRules,
-      otherDocs,
-      this: this,
-    });
+    // console.warn("Initial temp actor", {
+    //   initialTempActor: deepClone(actor),
+    //   documents,
+    //   includePassedDocumentsRules,
+    //   includeGrants,
+    //   includeFlagsOnly,
+    //   processedRules,
+    //   otherDocs,
+    //   this: this,
+    // });
 
     const currentItems = [
       ...currentState.deity,
@@ -2603,7 +2604,7 @@ export class Pathmuncher {
               const choiceSetSelectionNotObject = isChoiceSetSelection && !utils.isObject(r.selection);
               const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
               const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
-              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key)  && r.uuid.includes("{item|flags");
+              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
               const includeGrantRuleFromItemFlag = includeGrants && grantRuleFromItemFlag;
               const allowedMiscKeys = ["RollOption", "ActiveEffectLike"].includes(r.key);
 
@@ -2618,7 +2619,7 @@ export class Pathmuncher {
               const passedDocumentRules
                 = isPassedDocument
                 && includePassedDocumentsRules
-                && (isChoiceSetSelection || grantRuleWithoutFlag || grantRuleFromItemFlag || allowedMiscKeys);
+                && (isChoiceSetSelection || grantRuleWithoutFlag || includeGrantRuleFromItemFlag || allowedMiscKeys);
 
               return notPassedDocumentRules || passedDocumentRules;
             })
@@ -2630,15 +2631,25 @@ export class Pathmuncher {
               r.ignored = false;
               return r;
             });
-          if (documents.some((d) => d._id === i._id) && processedRules.length > 0) {
-            i.system.rules = foundry.utils.deepClone(processedRules);
+          if (documents.some((d) => d._id === i._id) && processedRules.length > 0 && includeFlagsOnly) {
+            i.system.rules = foundry.utils.deepClone(processedRules).filter((r) => {
+              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
+              if (!grantRuleFromItemFlag) return true;
+              if (grantRuleFromItemFlag && r.alterations) return true;
+              return false;
+            });
           }
         }
         return i;
       });
 
+      logger.debug("Creating temp actor items", items);
       await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-      // console.warn("restoring selection rules to temp items", ruleUpdates);
+      // for (const item of items) {
+      //   console.warn("Item", item);
+      //   await actor.createEmbeddedDocuments("Item", [item], { keepId: true });
+      // }
+      logger.debug("restoring selection rules to temp items", ruleUpdates);
       await actor.updateEmbeddedDocuments("Item", ruleUpdates);
 
       const itemUpdates = [];
@@ -2651,7 +2662,7 @@ export class Pathmuncher {
         });
       }
 
-      // console.warn("restoring feature items to temp items", itemUpdates);
+      logger.debug("Restoring temp item items");
       await actor.updateEmbeddedDocuments("Item", itemUpdates);
 
       logger.debug("Final temp actor", actor);
