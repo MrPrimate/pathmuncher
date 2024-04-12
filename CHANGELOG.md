@@ -1,4 +1,4 @@
-# Next up
+# 1.1.0
 
 - With the latest Pathbuilder export much improved Inventor class handling.
 - Better handling of granted items with alterations, e.g. inventor weapons.
