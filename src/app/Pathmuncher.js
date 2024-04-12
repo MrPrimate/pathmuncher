@@ -977,7 +977,6 @@ export class Pathmuncher {
         tempItems,
       });
 
-      // TODO: use the tempitem here rather than the uuid
       if (uuid || tempItems.length > 0) {
         return { uuid, grantObject: tempItems[0] };
       }
@@ -998,7 +997,7 @@ export class Pathmuncher {
   }
 
   async #checkRule(document, rule, otherDocuments = []) {
-    logger.debug("Checking rule", { document, rule, otherDocuments })
+    logger.debug("Checking rule", { document, rule, otherDocuments });
     const tempActor = await this.#generateTempActor({
       documents: [document],
       includePassedDocumentsRules: true,
@@ -1234,7 +1233,7 @@ export class Pathmuncher {
             rulesToKeep.push(ruleEntry);
           }
           continue;
-        } else if (ruleEntry.key === "GrantItem" ) {
+        } else if (ruleEntry.key === "GrantItem") {
           logger.debug(`Feature ${featureDoc.name} not found for ${document.name}, adding (${ruleFeature.id})`, ruleFeature);
           if (ruleEntry.selection || ruleEntry.flag) {
             rulesToKeep.push(ruleEntry);
@@ -2512,8 +2511,8 @@ export class Pathmuncher {
   }
 
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
-      includeFlagsOnly = false, processedRules = [], otherDocs = [],
-  } = {}) {
+    includeFlagsOnly = false, processedRules = [], otherDocs = [] } = {}
+  ) {
     const actorData = mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
     if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
