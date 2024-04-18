@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Fix issue with Speciality Crafting failing to import selected choices correctly. @wintermute_wrath
+
 # 1.1.0
 
 - With the latest Pathbuilder export much improved Inventor class handling.

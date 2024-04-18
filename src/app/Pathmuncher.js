@@ -2600,7 +2600,7 @@ export class Pathmuncher {
               if (isOtherDocument) return true;
               const isPassedDocument = documents.some((d) => d._id === i._id);
               const isChoiceSetSelection = ["ChoiceSet"].includes(r.key) && r.selection;
-              const choiceSetSelectionNotObject = isChoiceSetSelection && !utils.isObject(r.selection);
+              // const choiceSetSelectionNotObject = isChoiceSetSelection && !utils.isObject(r.selection);
               const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
               const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
               const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
@@ -2609,8 +2609,8 @@ export class Pathmuncher {
 
               const notPassedDocumentRules
                 = !isPassedDocument
-                && (choiceSetSelectionNotObject
-                  || grantRuleWithoutFlag
+                && (grantRuleWithoutFlag
+                  // || choiceSetSelectionNotObject
                   || !genericDiscardRule
                   || includeGrantRuleFromItemFlag
                   || allowedMiscKeys);
@@ -2803,7 +2803,8 @@ export class Pathmuncher {
         item.system.rules = item.system.rules
           .filter((r) => {
             const excludedKeys = ["ActiveEffectLike", "AdjustModifier", "Resistance", "Strike"].includes(r.key);
-            const grantItemWithFlags = ["GrantItem"].includes(r.key) && (hasProperty(r, "flag") || getProperty(r, "pathmuncherImport"));
+            const grantItemWithFlags = ["GrantItem"].includes(r.key)
+              && (hasProperty(r, "flag") || getProperty(r, "pathmuncherImport"));
             const objectSelection = ["ChoiceSet"].includes(r.key) && utils.isObject(r.selection);
             return !excludedKeys && !grantItemWithFlags && !objectSelection;
           })
@@ -2811,6 +2812,12 @@ export class Pathmuncher {
             if (r.key === "ChoiceSet") {
               if ((utils.isString(r.choices) || utils.isObject(r.choices)) && r.choiceQueryResults) {
                 r.choices = r.choiceQueryResults;
+              }
+              if (Array.isArray(r.choices)) {
+                r.choices = r.choices.map((c) => {
+                  delete c.predicate;
+                  return c;
+                });
               }
             }
             if (r.pathmuncherImport) r.pathmuncherImport = undefined;
