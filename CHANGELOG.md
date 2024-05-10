@@ -1,3 +1,7 @@
+# 1.1.2
+
+- Small improvement to Inventor Weapon detection based on improvements to Pathbuilder export data. (Thaks Redrazor!)
+
 # 1.1.1
 
 - Fix issue with Speciality Crafting failing to import selected choices correctly. @wintermute_wrath

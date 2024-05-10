@@ -313,7 +313,7 @@ export class Pathmuncher {
       });
     this.source.weapons
       .filter((e) => e && e !== "undefined")
-      .forEach((e, i) => {
+      .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
         const item = mergeObject({
           foundryName: name,
@@ -325,7 +325,7 @@ export class Pathmuncher {
           sourceType: "weapons",
         }, e);
         // for now assume first weapon is the weapon innovation
-        if (i === 0 && this.source.specials.includes("Weapon Innovation")) {
+        if (e.isInventor) {
           this.parsed.feats.push({
             name,
             extra: "",
