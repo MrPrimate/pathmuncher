@@ -1,3 +1,8 @@
+# 1.2.0
+
+- Remove deprecation messags when running in v12.
+- Foundry v12/pf2e v6.0.0 support.
+
 # 1.1.2
 
 - Small improvement to Inventor Weapon detection based on improvements to Pathbuilder export data. (Thaks Redrazor!)
