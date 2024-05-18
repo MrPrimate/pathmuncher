@@ -250,7 +250,7 @@ export class Pathmuncher {
       damageType: "B",
       increasedDice: false
     };
-    const weapon = mergeObject({
+    const weapon = foundry.utils.mergeObject({
       foundryName: name,
       pbName: mockE.name,
       originalName: mockE.name,
@@ -279,7 +279,7 @@ export class Pathmuncher {
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = mergeObject({
+        const item = foundry.utils.mergeObject({
           foundryName: name,
           pbName: e.name,
           originalName: e.name,
@@ -315,7 +315,7 @@ export class Pathmuncher {
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = mergeObject({
+        const item = foundry.utils.mergeObject({
           foundryName: name,
           pbName: e.name,
           originalName: e.name,
@@ -502,7 +502,7 @@ export class Pathmuncher {
         senses.push({ type: "scent" });
       }
     });
-    setProperty(this.result.character, "system.traits.senses", senses);
+    foundry.utils.setProperty(this.result.character, "system.traits.senses", senses);
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -695,14 +695,14 @@ export class Pathmuncher {
     });
     if (addGrantFlag) {
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
-      setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
-      setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+      foundry.utils.setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
+      foundry.utils.setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
 
       logger.debug(`${parent.name} has granted item ${document.name} (${camelCase})`, {
         parent,
         itemGrantName,
         camelCase,
-        flag: getProperty(parent, `flags.pf2e.itemGrants.${camelCase}`),
+        flag: foundry.utils.getProperty(parent, `flags.pf2e.itemGrants.${camelCase}`),
       });
     }
     this.autoFeats.push(document);
@@ -735,7 +735,7 @@ export class Pathmuncher {
         logger.warn(`create Granted Item Existing match for ${document.name}`, { featureMatch, existingMatch, document });
       }
       // console.warn(`Match for ${document.name} createGrantedItem`, { featureMatch, existingMatch, document });
-      if (hasProperty(featureMatch, "added") && !existingMatch) {
+      if (foundry.utils.hasProperty(featureMatch, "added") && !existingMatch) {
         featureMatch.added = true;
         featureMatch.addedId = document._id;
         if (applyFeatLocation) this.#generateFoundryFeatLocation(document, featureMatch);
@@ -793,7 +793,7 @@ export class Pathmuncher {
         logger.warn(`Feature Choice Existing match for ${document.name}`, { featMatch, existingMatch, document });
       }
       // console.warn(`Match for ${document.name} featureChoiceMatch`, { match, featMatch, existingMatch, document });
-      if (adjustName && hasProperty(featMatch, "added") && !existingMatch) {
+      if (adjustName && foundry.utils.hasProperty(featMatch, "added") && !existingMatch) {
         featMatch.added = true;
         featMatch.addedId = document._id;
       }
@@ -858,7 +858,7 @@ export class Pathmuncher {
       processedRules,
     });
 
-    const cleansedChoiceSet = deepClone(choiceSet);
+    const cleansedChoiceSet = foundry.utils.deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item });
@@ -885,7 +885,7 @@ export class Pathmuncher {
       const choiceMatch = await this.#featureChoiceMatch(document, choices, true, !!cleansedChoiceSet.adjustName, choiceHint);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
-        choiceMatch.choiceQueryResults = deepClone(choices);
+        choiceMatch.choiceQueryResults = foundry.utils.deepClone(choices);
         return choiceMatch;
       }
 
@@ -896,30 +896,30 @@ export class Pathmuncher {
         }
       }
 
-      let tempSet = deepClone(choiceSet);
+      let tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
       await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet, pendingItems: [item], tempItems: [] });
       // console.warn("chociesetdata", {
       //   choiceSetRules,
       //   selection: choiceSetRules.selection,
-      //   choiceSet: deepClone(choiceSet),
-      //   tempSet: deepClone(tempSet),
+      //   choiceSet: foundry.utils.deepClone(choiceSet),
+      //   tempSet: foundry.utils.deepClone(tempSet),
       // });
       if (tempSet.selection) {
         const lookedUpChoice = choices.find((c) => c.value === tempSet.selection);
         logger.debug("lookedUpChoice", lookedUpChoice);
-        if (lookedUpChoice) lookedUpChoice.choiceQueryResults = deepClone(choices);
+        if (lookedUpChoice) lookedUpChoice.choiceQueryResults = foundry.utils.deepClone(choices);
         // set some common lookups here, e.g. deities are often not set!
         if (lookedUpChoice && cleansedChoiceSet.flag === "deity") {
           if (lookedUpChoice.label && lookedUpChoice.label !== "") {
-            setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
+            foundry.utils.setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
             await this.#processGenericCompendiumLookup("deities", lookedUpChoice.label, "deity");
             const camelCase = Seasoning.slugD(this.result.deity[0].system.slug);
-            setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, {
+            foundry.utils.setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, {
               id: this.result.deity[0]._id,
               onDelete: "detach",
             });
-            setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
+            foundry.utils.setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
             this.autoAddedFeatureIds.add(`${lookedUpChoice.value.split(".").pop()}deity`);
           }
         }
@@ -929,8 +929,8 @@ export class Pathmuncher {
       logger.error("Whoa! Something went major bad wrong during choice evaluation", {
         err,
         tempActor: tempActor.toObject(),
-        document: duplicate(document),
-        choiceSet: duplicate(cleansedChoiceSet),
+        document: foundry.utils.duplicate(document),
+        choiceSet: foundry.utils.duplicate(cleansedChoiceSet),
       });
       throw err;
     } finally {
@@ -949,7 +949,7 @@ export class Pathmuncher {
       // includeFlagsOnly: true,
       processedRules,
     });
-    const cleansedRuleEntry = deepClone(ruleEntry);
+    const cleansedRuleEntry = foundry.utils.deepClone(ruleEntry);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       // console.warn("creating grant item");
@@ -984,8 +984,8 @@ export class Pathmuncher {
       logger.error("Whoa! Something went major bad wrong during uuid evaluation", {
         err,
         tempActor: tempActor.toObject(),
-        document: duplicate(document),
-        ruleEntry: duplicate(cleansedRuleEntry),
+        document: foundry.utils.duplicate(document),
+        ruleEntry: foundry.utils.duplicate(cleansedRuleEntry),
       });
       throw err;
     } finally {
@@ -1005,7 +1005,7 @@ export class Pathmuncher {
       // includeFlagsOnly: true,
       otherDocs: otherDocuments,
     });
-    const cleansedRule = deepClone(rule);
+    const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
@@ -1056,7 +1056,7 @@ export class Pathmuncher {
       // includeFlagsOnly: true,
       processedRules,
     });
-    const cleansedRule = deepClone(rule);
+    const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
@@ -1096,17 +1096,17 @@ export class Pathmuncher {
   // eslint-disable-next-line complexity, no-unused-vars
   async #addGrantedRules(document, originType = null, choiceHint = null) {
     if (document.system.rules.length === 0) return;
-    logger.debug(`addGrantedRules for ${document.name}`, duplicate(document));
+    logger.debug(`addGrantedRules for ${document.name}`, foundry.utils.duplicate(document));
 
     if (
-      hasProperty(document, "system.level.value")
-      && document.system.level.value > getProperty(this.result.character, "system.details.level.value")
+      foundry.utils.hasProperty(document, "system.level.value")
+      && document.system.level.value > foundry.utils.getProperty(this.result.character, "system.details.level.value")
     ) {
       return;
     }
 
     const rulesToKeep = [];
-    this.allFeatureRules[document._id] = deepClone(document.system.rules);
+    this.allFeatureRules[document._id] = foundry.utils.deepClone(document.system.rules);
     this.autoAddedFeatureRules[document._id] = [];
     this.promptRules[document._id] = [];
     let featureRenamed = false;
@@ -1127,8 +1127,8 @@ export class Pathmuncher {
       }
       logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`, {
         ruleEntry,
-        docRules: deepClone(document.system.rules),
-        document: deepClone(document),
+        docRules: foundry.utils.deepClone(document.system.rules),
+        document: foundry.utils.deepClone(document),
       });
 
       if (ruleEntry.key === "ChoiceSet" && ruleEntry.predicate) {
@@ -1137,7 +1137,7 @@ export class Pathmuncher {
           document,
           rulesToKeep,
         });
-        const testResult = await this.#checkRulePredicate(duplicate(document), ruleEntry, [rulesToKeep]);
+        const testResult = await this.#checkRulePredicate(foundry.utils.duplicate(document), ruleEntry, [rulesToKeep]);
         if (!testResult) {
           const data = { document, ruleEntry, testResult };
           logger.debug(
@@ -1159,8 +1159,8 @@ export class Pathmuncher {
       }
 
       const documentFlagName = Pathmuncher.getFlag(document, ruleEntry);
-      // if (flagName && choice?.value && !hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
-      //   setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
+      // if (flagName && choice?.value && !foundry.utils.hasProperty(document, `flags.pf2e.rulesSelections.${flagName}`)) {
+      //   foundry.utils.setProperty(document, `flags.pf2e.rulesSelections.${flagName}`, choice.value);
       // }
 
       logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid, grantObject });
@@ -1173,15 +1173,15 @@ export class Pathmuncher {
         // const featureDocFlagName = Pathmuncher.getFlag(featureDoc, ruleEntry);
         const featureDocFlagName = Seasoning.slugD(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
         featureDoc._id = foundry.utils.randomID();
-        if (featureDoc.system.rules) this.allFeatureRules[featureDoc._id] = deepClone(featureDoc.system.rules);
-        setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
+        if (featureDoc.system.rules) this.allFeatureRules[featureDoc._id] = foundry.utils.deepClone(featureDoc.system.rules);
+        foundry.utils.setProperty(featureDoc, "flags.pathmuncher.origin.uuid", uuid);
         logger.debug(`Found rule feature ${featureDoc.name} for ${document.name} for`, ruleEntry);
 
         if (choice) {
           ruleEntry.selection = choice.value;
-          setProperty(document, `flags.pf2e.rulesSelections.${documentFlagName}`, choice.value);
+          foundry.utils.setProperty(document, `flags.pf2e.rulesSelections.${documentFlagName}`, choice.value);
           if (choice.actorFlag) {
-            setProperty(this.result.character, `flags.pf2e.${documentFlagName}`, choice.value);
+            foundry.utils.setProperty(this.result.character, `flags.pf2e.${documentFlagName}`, choice.value);
           }
         }
 
@@ -1222,7 +1222,7 @@ export class Pathmuncher {
           }
         }
 
-        // setProperty(ruleEntry, `preselectChoices.${ruleEntry.flag}`, ruleEntry.selection ?? ruleEntry.uuid);
+        // foundry.utils.setProperty(ruleEntry, `preselectChoices.${ruleEntry.flag}`, ruleEntry.selection ?? ruleEntry.uuid);
 
         if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
           logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
@@ -1250,15 +1250,15 @@ export class Pathmuncher {
           });
           const flagName = ruleEntry.flag ?? documentFlagName;
           this.#createGrantedItem(featureDoc, document, { addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false });
-          if (hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
+          if (foundry.utils.hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         }
-      } else if (getProperty(choice, "nouuid")) {
+      } else if (foundry.utils.getProperty(choice, "nouuid")) {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
         if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if (choice.label) document.name = `${document.name} (${choice.label})`;
         rulesToKeep.push(ruleEntry);
-      } else if (choice && uuid && !hasProperty(ruleEntry, "selection")) {
+      } else if (choice && uuid && !foundry.utils.hasProperty(ruleEntry, "selection")) {
         logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
         // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
@@ -1284,7 +1284,7 @@ export class Pathmuncher {
           && (ruleEntry.flag || ruleEntry.selection || ruleEntry.uuid.startsWith("Compendium"))
         ) {
           rulesToKeep.push(ruleEntry);
-        } else if (ruleEntry.key === "ChoiceSet" && !hasProperty(ruleEntry, "flag")) {
+        } else if (ruleEntry.key === "ChoiceSet" && !foundry.utils.hasProperty(ruleEntry, "flag")) {
           logger.debug("Prompting user for choices", ruleEntry);
           this.promptRules[document._id].push(ruleEntry);
           rulesToKeep.push(ruleEntry);
@@ -1301,19 +1301,19 @@ export class Pathmuncher {
       this.autoAddedFeatureRules[document._id].push(ruleEntry);
 
       logger.debug(`End result for ${document.name} for a ${ruleEntry.key}`, {
-        document: deepClone(document),
-        rulesToKeep: deepClone(rulesToKeep),
-        ruleEntry: deepClone(ruleEntry),
-        choice: deepClone(choice),
-        uuid: deepClone(uuid),
+        document: foundry.utils.deepClone(document),
+        rulesToKeep: foundry.utils.deepClone(rulesToKeep),
+        ruleEntry: foundry.utils.deepClone(ruleEntry),
+        choice: foundry.utils.deepClone(choice),
+        uuid: foundry.utils.deepClone(uuid),
       });
     }
     // eslint-disable-next-line require-atomic-updates
     document.system.rules = rulesToKeep;
 
     logger.debug(`Final status for ${document.name}`, {
-      document: deepClone(document),
-      rulesToKeep: deepClone(rulesToKeep),
+      document: foundry.utils.deepClone(document),
+      rulesToKeep: foundry.utils.deepClone(rulesToKeep),
     });
   }
 
@@ -1321,7 +1321,7 @@ export class Pathmuncher {
     for (const subRuleDocument of this.subRuleDocuments[document._id]) {
       logger.debug(
         `Processing granted rules for granted item document ${subRuleDocument.name}`,
-        duplicate(subRuleDocument)
+        foundry.utils.duplicate(subRuleDocument)
       );
       await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
     }
@@ -1332,16 +1332,16 @@ export class Pathmuncher {
       .sort(([, a], [, b]) => a.level - b.level);
     for (const [key, grantedFeature] of featureItemMap) {
       logger.debug(`Checking ${document.name} granted item ${grantedFeature.name}, level(${grantedFeature.level}) with key: ${key}`, grantedFeature);
-      if (parseInt(grantedFeature.level) > getProperty(this.result.character, "system.details.level.value")
+      if (parseInt(grantedFeature.level) > foundry.utils.getProperty(this.result.character, "system.details.level.value")
         || parseInt(grantedFeature.level) !== level
       ) {
         logger.debug(`Not processing ${grantedFeature.name} due to level data mismatch`, {
           grantedFeature,
           level,
           levelCap,
-          greaterLevelCheck: parseInt(grantedFeature.level) > getProperty(this.result.character, "system.details.level.value"),
+          greaterLevelCheck: parseInt(grantedFeature.level) > foundry.utils.getProperty(this.result.character, "system.details.level.value"),
           noLevelMatchCheck: parseInt(grantedFeature.level) !== level,
-          characterLevel: getProperty(this.result.character, "system.details.level.value"),
+          characterLevel: foundry.utils.getProperty(this.result.character, "system.details.level.value"),
         });
         continue;
       }
@@ -1356,10 +1356,10 @@ export class Pathmuncher {
       const featureDoc = feature.toObject();
       featureDoc._id = foundry.utils.randomID();
       // const featureDocFlagName = Seasoning.slugD(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
-      setProperty(featureDoc.system, "location", document._id);
+      foundry.utils.setProperty(featureDoc.system, "location", document._id);
       this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
-      if (hasProperty(featureDoc, "system.rules")) {
-        logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, duplicate(featureDoc));
+      if (foundry.utils.hasProperty(featureDoc, "system.rules")) {
+        logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, foundry.utils.duplicate(featureDoc));
         if (this.immediateDiveAdd) {
           await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation, levelCap });
         } else {
@@ -1372,14 +1372,14 @@ export class Pathmuncher {
 
   async #addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null, levelCap = 20 } = {}) {
     this.subRuleDocuments[document._id] = [];
-    if (hasProperty(document, "system.items")) {
-      logger.debug(`addGrantedItems for ${document.name}`, duplicate(document));
+    if (foundry.utils.hasProperty(document, "system.items")) {
+      logger.debug(`addGrantedItems for ${document.name}`, foundry.utils.duplicate(document));
       if (!this.autoAddedFeatureItems[document._id]) {
-        this.autoAddedFeatureItems[document._id] = duplicate(document.system.items);
+        this.autoAddedFeatureItems[document._id] = foundry.utils.duplicate(document.system.items);
       }
       this.failedFeatureItems[document._id] = {};
 
-      // const characterLevel = getProperty(this.result.character, "system.details.level.value");
+      // const characterLevel = foundry.utils.getProperty(this.result.character, "system.details.level.value");
       const characterLevel = this.characterLevel;
 
       for (let i = 0; i <= Math.min(characterLevel, levelCap); i++) {
@@ -1391,8 +1391,8 @@ export class Pathmuncher {
       }
     }
 
-    if (hasProperty(document, "system.rules")) {
-      logger.debug(`Processing granted rules for core document ${document.name}`, { document: duplicate(document), originType, choiceHint });
+    if (foundry.utils.hasProperty(document, "system.rules")) {
+      logger.debug(`Processing granted rules for core document ${document.name}`, { document: foundry.utils.duplicate(document), originType, choiceHint });
       const docHint = choiceHint ?? document.name;
       await this.#addGrantedRules(document, originType, docHint);
     }
@@ -1401,7 +1401,7 @@ export class Pathmuncher {
   static KEY_LEVEL = [0, 1, 5, 5, 5, 5, 10, 10, 10, 10, 10, 15, 15, 15, 15, 15, 20, 20, 20, 20, 20];
 
   #determineAbilityBoosts() {
-    const breakdown = getProperty(this.source, "abilities.breakdown");
+    const breakdown = foundry.utils.getProperty(this.source, "abilities.breakdown");
     const useCustomStats
       = breakdown
       && breakdown.ancestryFree.length === 0
@@ -1420,7 +1420,7 @@ export class Pathmuncher {
           classBoostMap[levelKey] = existingBoosts.concat(newBoosts);
         }
       }
-      setProperty(this.result.character, "system.build.attributes.boosts", classBoostMap);
+      foundry.utils.setProperty(this.result.character, "system.build.attributes.boosts", classBoostMap);
       this.boosts.class = classBoostMap;
 
       // ancestry
@@ -1428,7 +1428,7 @@ export class Pathmuncher {
       this.boosts.custom = true;
       ["str", "dex", "con", "int", "wis", "cha"].forEach((key) => {
         const mod = Math.min(Math.max(Math.trunc((this.source.abilities[key] - 10) / 2), -5), 10) || 0;
-        setProperty(this.result.character, `system.abilities.${key}.mod`, mod);
+        foundry.utils.setProperty(this.result.character, `system.abilities.${key}.mod`, mod);
       });
     }
 
@@ -1437,12 +1437,12 @@ export class Pathmuncher {
     } else {
       this.keyAbility = this.source.keyability;
     }
-    setProperty(this.result.character, "system.details.keyability.value", this.keyAbility);
+    foundry.utils.setProperty(this.result.character, "system.details.keyability.value", this.keyAbility);
   }
 
   #generateBackgroundAbilityBoosts() {
     if (!this.result.background[0]) return;
-    const breakdown = getProperty(this.source, "abilities.breakdown");
+    const breakdown = foundry.utils.getProperty(this.source, "abilities.breakdown");
     for (const boost of breakdown.backgroundBoosts) {
       for (const [key, boostSet] of Object.entries(this.result.background[0].system.boosts)) {
         if (this.result.background[0].system.boosts[key].selected) continue;
@@ -1456,7 +1456,7 @@ export class Pathmuncher {
 
   #generateAncestryAbilityBoosts() {
     if (!this.result.ancestry[0]) return;
-    const breakdown = getProperty(this.source, "abilities.breakdown");
+    const breakdown = foundry.utils.getProperty(this.source, "abilities.breakdown");
     const boosts = [];
     breakdown.ancestryBoosts.concat(breakdown.ancestryFree).forEach((boost) => {
       for (const [key, boostSet] of Object.entries(this.result.ancestry[0].system.boosts)) {
@@ -1469,7 +1469,7 @@ export class Pathmuncher {
       }
     });
     if (breakdown.ancestryBoosts.length === 0) {
-      setProperty(this.result.ancestry[0], "system.alternateAncestryBoosts", boosts);
+      foundry.utils.setProperty(this.result.ancestry[0], "system.alternateAncestryBoosts", boosts);
     }
   }
 
@@ -1507,19 +1507,19 @@ export class Pathmuncher {
          || this.parsed.specials.some((s) => s.name.toLowerCase() === key))
         ? 0
         : this.source.proficiencies[key] / 2;
-      setProperty(this.result.character, `system.skills.${value}.rank`, calculatedValue);
+      foundry.utils.setProperty(this.result.character, `system.skills.${value}.rank`, calculatedValue);
     };
   }
 
   #setSaves() {
     ["fortitude", "reflex", "will"].forEach((key) => {
-      setProperty(this.result.character, `system.savingThrows.${key}`, this.source.proficiencies[key] / 2);
+      foundry.utils.setProperty(this.result.character, `system.savingThrows.${key}`, this.source.proficiencies[key] / 2);
     });
   }
 
   #setMartials() {
     ["advanced", "heavy", "light", "medium", "unarmored", "martial", "simple", "unarmed"].forEach((key) => {
-      setProperty(this.result.character, `system.martial.${key}.rank`, this.source.proficiencies[key] / 2);
+      foundry.utils.setProperty(this.result.character, `system.martial.${key}.rank`, this.source.proficiencies[key] / 2);
     });
   }
 
@@ -1528,30 +1528,30 @@ export class Pathmuncher {
     const intLanguages = this.source.languages
       .filter((l) => !ancestryLanguages.includes(l.toLowerCase()))
       .map((l) => l.toLowerCase());
-    setProperty(this.result.character, "system.details.languages.value", intLanguages);
+    foundry.utils.setProperty(this.result.character, "system.details.languages.value", intLanguages);
 
   }
 
   async #processCore() {
-    setProperty(this.result.character, "name", this.source.name);
-    setProperty(this.result.character, "prototypeToken.name", this.source.name);
+    foundry.utils.setProperty(this.result.character, "name", this.source.name);
+    foundry.utils.setProperty(this.result.character, "prototypeToken.name", this.source.name);
     this.characterLevel = this.source.level;
-    setProperty(this.result.character, "system.details.level.value", 1);
-    if (this.source.age !== "Not set") setProperty(this.result.character, "system.details.age.value", this.source.age);
-    if (this.source.gender !== "Not set") setProperty(this.result.character, "system.details.gender.value", this.source.gender);
-    // setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
+    foundry.utils.setProperty(this.result.character, "system.details.level.value", 1);
+    if (this.source.age !== "Not set") foundry.utils.setProperty(this.result.character, "system.details.age.value", this.source.age);
+    if (this.source.gender !== "Not set") foundry.utils.setProperty(this.result.character, "system.details.gender.value", this.source.gender);
+    // foundry.utils.setProperty(this.result.character, "system.details.alignment.value", this.source.alignment);
 
-    if (this.source.deity !== "Not set") setProperty(this.result.character, "system.details.deity.value", this.source.deity);
+    if (this.source.deity !== "Not set") foundry.utils.setProperty(this.result.character, "system.details.deity.value", this.source.deity);
     this.size = Seasoning.getSizeValue(this.source.size);
-    setProperty(this.result.character, "system.traits.size.value", this.size);
+    foundry.utils.setProperty(this.result.character, "system.traits.size.value", this.size);
     this.#processSenses();
 
     this.#determineAbilityBoosts();
     this.#setSaves();
     this.#setMartials();
 
-    // setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
-    // setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
+    // foundry.utils.setProperty(this.result.character, "system.attributes.perception.rank", this.source.proficiencies.perception / 2);
+    // foundry.utils.setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
   }
 
   #indexFind(index, arrayOfNameMatches) {
@@ -1632,7 +1632,7 @@ export class Pathmuncher {
         if (excludeParents && pBFeat.isParent === true) continue;
         if (excludeStandard && pBFeat.isStandard === true) continue;
         logger.debug(`Generating feature for ${pBFeat.name}`, pBFeat);
-        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeatCloned: deepClone(pBFeat), pBFeat, this: this });
+        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeatCloned: foundry.utils.deepClone(pBFeat), pBFeat, this: this });
 
         const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
         const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
@@ -1905,7 +1905,7 @@ export class Pathmuncher {
           }
         }
       });
-    } else if (hasProperty(itemData, "system.runes.potency")) {
+    } else if (foundry.utils.hasProperty(itemData, "system.runes.potency")) {
       itemData.system.runes.potency = parsedItem.pot;
       if (type === "weapon") {
         const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str);
@@ -1924,7 +1924,7 @@ export class Pathmuncher {
       itemData.system.equipped.invested = true;
     }
 
-    if (hasProperty(itemData, "system.runes.property")) {
+    if (foundry.utils.hasProperty(itemData, "system.runes.property")) {
       parsedItem.runes.forEach((property) => {
         const resistantRegex = /Energy Resistant - (.*)/i;
         const resistantMatch = property.match(resistantRegex);
@@ -2246,7 +2246,7 @@ export class Pathmuncher {
 
       for (const spell of preparedAtLevel) {
         // if (spellNames.includes(spellName)) continue;
-        const parsedSpell = getProperty(spellNames, spell);
+        const parsedSpell = foundry.utils.getProperty(spellNames, spell);
         const itemData = parsedSpell
           ? this.result.spells.find((s) => s._id === parsedSpell)
           : await this.#loadSpell(spell, instance._id, {
@@ -2276,7 +2276,7 @@ export class Pathmuncher {
             spellEnhancements,
             instance,
           });
-          if (itemData && !hasProperty(spellNames, itemData.name)) {
+          if (itemData && !foundry.utils.hasProperty(spellNames, itemData.name)) {
             itemData.system.location.heightenedLevel = level;
             spellNames[spell] = itemData._id;
             this.result.spells.push(itemData);
@@ -2323,7 +2323,7 @@ export class Pathmuncher {
       logger.debug("focus spell details", { ritual, spellName: ritualName });
 
       const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName);
-      if (!indexMatch || !hasProperty(indexMatch, "system.ritual")) {
+      if (!indexMatch || !foundry.utils.hasProperty(indexMatch, "system.ritual")) {
         logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName });
         this.bad.push({ pbName: ritual, type: "spell", details: { originalName: ritual, name: ritualName } });
         continue;
@@ -2345,8 +2345,8 @@ export class Pathmuncher {
       logger.debug("Generated caster instance", instance);
       const spellEnhancements = Seasoning.getSpellCastingFeatureAdjustment(caster.name);
       let forcePrepare = false;
-      if (hasProperty(spellEnhancements, "showSlotless")) {
-        instance.system.showSlotlessLevels.value = getProperty(spellEnhancements, "showSlotless");
+      if (foundry.utils.hasProperty(spellEnhancements, "showSlotless")) {
+        instance.system.showSlotlessLevels.value = foundry.utils.getProperty(spellEnhancements, "showSlotless");
       } else if (
         caster.spellcastingType === "prepared"
         && ![this.source.class, this.source.dualClass].includes(caster.name)
@@ -2373,11 +2373,11 @@ export class Pathmuncher {
     }
 
     for (const tradition of ["occult", "primal", "divine", "arcane"]) {
-      const traditionData = getProperty(this.source, `focus.${tradition}`);
+      const traditionData = foundry.utils.getProperty(this.source, `focus.${tradition}`);
       logger.debug(`Checking for focus tradition ${tradition}`);
       if (!traditionData) continue;
       for (const ability of ["str", "dex", "con", "int", "wis", "cha"]) {
-        const abilityData = getProperty(traditionData, ability);
+        const abilityData = foundry.utils.getProperty(traditionData, ability);
         logger.debug(`Checking for focus tradition ${tradition} with ability ${ability}`);
         if (!abilityData) continue;
         logger.debug("Generating focus spellcasting ", { tradition, traditionData, ability });
@@ -2391,8 +2391,8 @@ export class Pathmuncher {
       }
     }
 
-    setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
-    setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
+    foundry.utils.setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
+    foundry.utils.setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
   }
 
   async #generateLores() {
@@ -2454,14 +2454,14 @@ export class Pathmuncher {
         uuids.push({ uuid: doc.uuid });
       }
     }
-    setProperty(this.result.character, "system.crafting.formulas", uuids);
+    foundry.utils.setProperty(this.result.character, "system.crafting.formulas", uuids);
   }
 
   async #processFeats() {
     this.#sortParsedFeats();
     // pre pass for standard items
     for (let i = 1; i <= this.characterLevel; i++) {
-      setProperty(this.result.character, "system.details.level.value", i);
+      foundry.utils.setProperty(this.result.character, "system.details.level.value", i);
       if (i > 1) await this.#processGrantedLookupItemsAtLevel("class", i);
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
@@ -2513,17 +2513,17 @@ export class Pathmuncher {
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
     includeFlagsOnly = false, processedRules = [], otherDocs = [] } = {}
   ) {
-    const actorData = mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
+    const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
     if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
       delete actorData.system.skills;
     }
 
     const actor = await Actor.create(actorData, { renderSheet: false });
-    const currentState = duplicate(this.result);
+    const currentState = foundry.utils.duplicate(this.result);
 
     // console.warn("Initial temp actor", {
-    //   initialTempActor: deepClone(actor),
+    //   initialTempActor: foundry.utils.deepClone(actor),
     //   documents,
     //   includePassedDocumentsRules,
     //   includeGrants,
@@ -2552,13 +2552,13 @@ export class Pathmuncher {
     currentItems.push(...otherDocs.filter((d) => !currentItems.some((i) => i._id === d._id)));
     for (const doc of documents) {
       if (!currentItems.some((d) => d._id === doc._id)) {
-        currentItems.push(deepClone(doc));
+        currentItems.push(foundry.utils.deepClone(doc));
       }
     }
     try {
       // if the rule selected is an object, id doesn't take on import
       const ruleUpdates = [];
-      for (const i of deepClone(currentItems)) {
+      for (const i of foundry.utils.deepClone(currentItems)) {
         if (!i.system.rules || i.system.rules.length === 0) continue;
         const isPassedDocument = documents.some((d) => d._id === i._id);
         if (isPassedDocument && processedRules.length > 0) {
@@ -2589,9 +2589,9 @@ export class Pathmuncher {
         }
       }
 
-      // console.warn("Rule updates", duplicate(ruleUpdates));
+      // console.warn("Rule updates", foundry.utils.duplicate(ruleUpdates));
 
-      const items = duplicate(currentItems).map((i) => {
+      const items = foundry.utils.duplicate(currentItems).map((i) => {
         if (i.system.items) i.system.items = [];
         if (i.system.rules) {
           i.system.rules = i.system.rules
@@ -2656,7 +2656,7 @@ export class Pathmuncher {
         itemUpdates.push({
           _id: `${key}`,
           system: {
-            items: deepClone(value),
+            items: foundry.utils.deepClone(value),
           },
         });
       }
@@ -2669,7 +2669,7 @@ export class Pathmuncher {
       logger.error("Temp actor creation failed", {
         actor,
         documents,
-        thisData: deepClone(this.result),
+        thisData: foundry.utils.deepClone(this.result),
         actorData,
         err,
         currentItems,
@@ -2787,14 +2787,14 @@ export class Pathmuncher {
   async #createAndUpdateItemsWithRuleRestore(items) {
     const ruleUpdates = [];
 
-    const newItems = deepClone(items);
+    const newItems = foundry.utils.deepClone(items);
 
     for (const item of newItems) {
       if (item.system.rules?.length > 0) {
         ruleUpdates.push({
           _id: item._id,
           system: {
-            rules: deepClone(item.system.rules).map((r) => {
+            rules: foundry.utils.deepClone(item.system.rules).map((r) => {
               delete r.choiceQueryResults;
               return r;
             }),
@@ -2804,7 +2804,7 @@ export class Pathmuncher {
           .filter((r) => {
             const excludedKeys = ["ActiveEffectLike", "AdjustModifier", "Resistance", "Strike"].includes(r.key);
             const grantItemWithFlags = ["GrantItem"].includes(r.key)
-              && (hasProperty(r, "flag") || getProperty(r, "pathmuncherImport"));
+              && (foundry.utils.hasProperty(r, "flag") || foundry.utils.getProperty(r, "pathmuncherImport"));
             const objectSelection = ["ChoiceSet"].includes(r.key) && utils.isObject(r.selection);
             return !excludedKeys && !grantItemWithFlags && !objectSelection;
           })
@@ -2877,14 +2877,14 @@ export class Pathmuncher {
   async #restoreEmbeddedRuleLogic() {
     const importedItems = this.actor.items.map((i) => i._id);
     // Loop back over items and add rule and item progression data back in.
-    logger.debug("Restoring logic", { currentActor: duplicate(this.actor) });
+    logger.debug("Restoring logic", { currentActor: foundry.utils.duplicate(this.actor) });
     const itemUpdates = [];
     for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
       if (importedItems.includes(key)) {
         itemUpdates.push({
           _id: `${key}`,
           system: {
-            items: deepClone(value),
+            items: foundry.utils.deepClone(value),
           },
         });
       }
@@ -2899,7 +2899,7 @@ export class Pathmuncher {
   }
 
   static async removeTempActors() {
-    for (const actor of game.actors.filter((a) => getProperty(a, "flags.pathmuncher.temp") === true)) {
+    for (const actor of game.actors.filter((a) => foundry.utils.getProperty(a, "flags.pathmuncher.temp") === true)) {
       await actor.delete();
     }
   }
@@ -2916,7 +2916,7 @@ export class Pathmuncher {
     }
 
     if (!this.boosts.custom) {
-      setProperty(this.result.character, `system.abilities`, null);
+      foundry.utils.setProperty(this.result.character, `system.abilities`, null);
     }
 
     logger.debug("Generated result", this.result);

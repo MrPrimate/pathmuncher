@@ -60,7 +60,7 @@ export class PetShop {
   }
 
   #buildCore(petData) {
-    setProperty(petData, "system.attributes.value", this.parent.system.details.level.value * 5);
+    foundry.utils.setProperty(petData, "system.attributes.value", this.parent.system.details.level.value * 5);
     return petData;
   }
 

@@ -38,7 +38,7 @@ const utils = {
 
   setFlags: async (actor, flags) => {
     let updateData = {};
-    setProperty(updateData, `flags.${CONSTANTS.FLAG_NAME}`, flags);
+    foundry.utils.setProperty(updateData, `flags.${CONSTANTS.FLAG_NAME}`, flags);
     await actor.update(updateData);
     return actor;
   },
@@ -88,12 +88,12 @@ const utils = {
   },
 
   allowDualClasses: () => {
-    return (isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "dualClassVariant"));
-    // || (!isNewerVersion("5.9.0", game.version) && when remaster supports dualclass then add here
+    return (foundry.utils.isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "dualClassVariant"));
+    // || (!foundry.utils.isNewerVersion("5.9.0", game.version) && when remaster supports dualclass then add here
   },
 
   allowAncestryParagon: () => {
-    return (isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "ancestryParagonVariant"));
+    return (foundry.utils.isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "ancestryParagonVariant"));
   }
 
 };

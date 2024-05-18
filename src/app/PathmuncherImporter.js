@@ -9,7 +9,7 @@ export class PathmuncherImporter extends FormApplication {
   constructor(options, actor) {
     super(options);
     this.actor = game.actors.get(actor.id ? actor.id : actor._id);
-    this.backup = duplicate(this.actor);
+    this.backup = foundry.utils.duplicate(this.actor);
     this.mode = "number";
   }
 

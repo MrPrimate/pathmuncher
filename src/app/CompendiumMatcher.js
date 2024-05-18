@@ -93,7 +93,7 @@ export class CompendiumMatcher {
 
   static checkForFilters(i, filters) {
     for (const [key, value] of Object.entries(filters)) {
-      if (getProperty(i, key) !== value) {
+      if (foundry.utils.getProperty(i, key) !== value) {
         return false;
       }
     }

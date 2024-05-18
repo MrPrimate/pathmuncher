@@ -15,7 +15,7 @@ export class CompendiumSelector extends FormApplication {
   }
 
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       id: "pathmuncher-compendium-selector",
       template: `${CONSTANTS.PATH}/templates/compendium-selector.hbs`,
       width: 722,
