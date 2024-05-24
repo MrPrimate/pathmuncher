@@ -73,7 +73,7 @@ export class Pathmuncher {
     this.autoAddedFeatureRules = {};
     this.failedFeatureItems = {};
     this.subRuleDocuments = {};
-    this.grantItemLookUp = {};
+    this.grantItemLookUp = new Set();
     this.autoFeats = [];
     this.keyAbility = null;
     this.boosts = {
@@ -694,6 +694,8 @@ export class Pathmuncher {
       applyFeatLocation,
     });
     if (addGrantFlag) {
+      const uuid = foundry.utils.getProperty(document, "flags.core.sourceId");
+      if (uuid) this.grantItemLookUp.add(uuid);
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
       foundry.utils.setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
       foundry.utils.setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
@@ -873,6 +875,7 @@ export class Pathmuncher {
         rollOptions,
         choices,
         this: this,
+        tempActor,
       });
 
       if (cleansedChoiceSet.choices?.query) {
@@ -1111,18 +1114,24 @@ export class Pathmuncher {
     this.promptRules[document._id] = [];
     let featureRenamed = false;
 
+
+    const addRuleToKeep = (ruleEntry) => {
+      if (rulesToKeep.includes(ruleEntry)) return;
+      rulesToKeep.push(ruleEntry);
+    };
+
     for (const ruleEntry of document.system.rules) {
       logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
       if (!["ChoiceSet", "GrantItem"].includes(ruleEntry.key)) {
         // size work around due to Pathbuilder not always adding the right size to json
         if (ruleEntry.key === "CreatureSize") this.size = ruleEntry.value;
         this.autoAddedFeatureRules[document._id].push(ruleEntry);
-        rulesToKeep.push(ruleEntry);
+        addRuleToKeep(ruleEntry);
         continue;
       }
       if (NO_AUTO_CHOICE().includes(document.name)) {
         logger.debug(`Deliberately skipping ${document.name} auto choice detection`);
-        rulesToKeep.push(ruleEntry);
+        addRuleToKeep(ruleEntry);
         continue;
       }
       logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`, {
@@ -1144,12 +1153,14 @@ export class Pathmuncher {
             `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
             data
           );
-          rulesToKeep.push(ruleEntry);
+          addRuleToKeep(ruleEntry);
           continue;
         }
       }
 
-      const choice = ruleEntry.key === "ChoiceSet" ? await this.#evaluateChoices(document, ruleEntry, choiceHint, rulesToKeep) : undefined;
+      const choice = ruleEntry.key === "ChoiceSet"
+        ? await this.#evaluateChoices(document, ruleEntry, choiceHint, rulesToKeep)
+        : undefined;
       const { uuid, grantObject } = ruleEntry.key === "GrantItem"
         ? await this.#resolveInjectedUuid(document, ruleEntry, rulesToKeep)
         : { uuid: choice?.value, grantObject: undefined };
@@ -1209,7 +1220,7 @@ export class Pathmuncher {
               `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
               data
             );
-            rulesToKeep.push(ruleEntry);
+            addRuleToKeep(ruleEntry);
             // this.autoAddedFeatureRules[document._id].push(ruleEntry);
             continue;
           } else {
@@ -1218,7 +1229,7 @@ export class Pathmuncher {
             // eslint-disable-next-line max-depth
             // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
             ruleEntry.pathmuncherImport = true;
-            rulesToKeep.push(ruleEntry);
+            addRuleToKeep(ruleEntry);
           }
         }
 
@@ -1227,16 +1238,16 @@ export class Pathmuncher {
         if (this.autoAddedFeatureIds.has(`${ruleFeature.id}${ruleFeature.type}`)) {
           logger.debug(`Feature ${featureDoc.name} found for ${document.name}, but has already been added (${ruleFeature.id})`, ruleFeature);
           // this.autoAddedFeatureRules[document._id].push(ruleEntry);
-          // rulesToKeep.push(ruleEntry);
+          // addRuleToKeep(ruleEntry);
           if (ruleEntry.key === "GrantItem" && ruleEntry.flag) {
             this.autoAddedFeatureRules[document._id].push(ruleEntry);
-            rulesToKeep.push(ruleEntry);
+            addRuleToKeep(ruleEntry);
           }
           continue;
         } else if (ruleEntry.key === "GrantItem") {
           logger.debug(`Feature ${featureDoc.name} not found for ${document.name}, adding (${ruleFeature.id})`, ruleFeature);
           if (ruleEntry.selection || ruleEntry.flag) {
-            rulesToKeep.push(ruleEntry);
+            addRuleToKeep(ruleEntry);
           }
           this.autoAddedFeatureIds.add(`${ruleFeature.id}${ruleFeature.type}`);
           featureDoc._id = foundry.utils.randomID();
@@ -1257,7 +1268,7 @@ export class Pathmuncher {
         if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
         if (choice.label) document.name = `${document.name} (${choice.label})`;
-        rulesToKeep.push(ruleEntry);
+        addRuleToKeep(ruleEntry);
       } else if (choice && uuid && !foundry.utils.hasProperty(ruleEntry, "selection")) {
         logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
         // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
@@ -1270,7 +1281,7 @@ export class Pathmuncher {
           document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
           featureRenamed = true;
         }
-        rulesToKeep.push(ruleEntry);
+        addRuleToKeep(ruleEntry);
       } else {
         logger.debug(`Final rule fallback for ${document.name}`, ruleEntry);
         const data = {
@@ -1278,19 +1289,20 @@ export class Pathmuncher {
           document,
           ruleEntry,
           choice,
+          Pathmuncher: this,
         };
         if (
           ruleEntry.key === "GrantItem"
           && (ruleEntry.flag || ruleEntry.selection || ruleEntry.uuid.startsWith("Compendium"))
         ) {
-          rulesToKeep.push(ruleEntry);
+          addRuleToKeep(ruleEntry);
         } else if (ruleEntry.key === "ChoiceSet" && !foundry.utils.hasProperty(ruleEntry, "flag")) {
           logger.debug("Prompting user for choices", ruleEntry);
           this.promptRules[document._id].push(ruleEntry);
-          rulesToKeep.push(ruleEntry);
+          addRuleToKeep(ruleEntry);
         } else if (ruleEntry.key === "ChoiceSet" && !choice && !uuid) {
           logger.warn("Unable to determine choice asking", data);
-          rulesToKeep.push(ruleEntry);
+          addRuleToKeep(ruleEntry);
           this.promptRules[document._id].push(ruleEntry);
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
