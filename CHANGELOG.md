@@ -1,3 +1,7 @@
+# 1.2.1
+
+- Some small tweaks to handle higher level dual gate kineticists correctly.
+
 # 1.2.0
 
 - Remove deprecation messags when running in v12.

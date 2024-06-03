@@ -30,6 +30,8 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Impulse Junction)$/,
   /(.*) (Gate Junction:).*$/,
   /(.*) (Patron)$/,
+  // /(Fork) the Path/,
+  // /(Expand) the Portal/,
 ];
 
 const PREFIX_PB_REMOVALS = [
@@ -42,8 +44,8 @@ const PREFIX_PB_REMOVALS = [
 ];
 
 const POSTFIX_PB_SPLIT_AND_KEEP = [
-  /(.*) (Impulse Junction)$/,
-  /(.*) Gate Junction: (.*)$/,
+  /(\w+) (Impulse) Junction/,
+  /(\w+) Gate Junction: (\w+) /,
 ];
 
 const PARENTHESIS = [

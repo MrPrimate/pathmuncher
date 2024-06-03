@@ -858,6 +858,7 @@ export class Pathmuncher {
       includeGrants: false,
       includeFlagsOnly: true,
       processedRules,
+      excludeAddedGrants: true,
     });
 
     const cleansedChoiceSet = foundry.utils.deepClone(choiceSet);
@@ -1004,9 +1005,11 @@ export class Pathmuncher {
     const tempActor = await this.#generateTempActor({
       documents: [document],
       includePassedDocumentsRules: true,
-      // includeGrants: false,
+      includeGrants: false,
       // includeFlagsOnly: true,
       otherDocs: otherDocuments,
+      // include otherDOcs and grants?
+      excludeAddedGrants: true,
     });
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
@@ -2523,7 +2526,7 @@ export class Pathmuncher {
   }
 
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
-    includeFlagsOnly = false, processedRules = [], otherDocs = [] } = {}
+    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false } = {}
   ) {
     const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
@@ -2534,16 +2537,17 @@ export class Pathmuncher {
     const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = foundry.utils.duplicate(this.result);
 
-    // console.warn("Initial temp actor", {
-    //   initialTempActor: foundry.utils.deepClone(actor),
-    //   documents,
-    //   includePassedDocumentsRules,
-    //   includeGrants,
-    //   includeFlagsOnly,
-    //   processedRules,
-    //   otherDocs,
-    //   this: this,
-    // });
+    console.warn("Initial temp actor", {
+      initialTempActor: foundry.utils.deepClone(actor),
+      documents,
+      includePassedDocumentsRules,
+      includeGrants,
+      includeFlagsOnly,
+      processedRules,
+      otherDocs,
+      excludeAddedGrants,
+      this: this,
+    });
 
     const currentItems = [
       ...currentState.deity,
@@ -2560,8 +2564,8 @@ export class Pathmuncher {
       // ...currentState.armor,
       // ...currentState.treasure,
       // ...currentState.money,
-    ];
-    currentItems.push(...otherDocs.filter((d) => !currentItems.some((i) => i._id === d._id)));
+    ].filter((i) => !otherDocs.some((o) => i._id === o._id));
+    currentItems.push(...otherDocs);
     for (const doc of documents) {
       if (!currentItems.some((d) => d._id === doc._id)) {
         currentItems.push(foundry.utils.deepClone(doc));
@@ -2583,8 +2587,7 @@ export class Pathmuncher {
         const objectSelectionRules = i.system.rules
           .filter((r) => {
             const evaluateRules = ["RollOption", "ChoiceSet"].includes(r.key) && (r.selection || r.domain === "all");
-            return !includeFlagsOnly || evaluateRules; // && ["RollOption", "GrantItem", "ChoiceSet", "ActiveEffectLike"].includes(r.key);
-            // || (["ChoiceSet"].includes(r.key) && r.selection);
+            return !includeFlagsOnly || evaluateRules || ["ActiveEffectLike"].includes(r.key);
           })
           .map((r) => {
             r.ignored = false;
@@ -2607,30 +2610,36 @@ export class Pathmuncher {
         if (i.system.items) i.system.items = [];
         if (i.system.rules) {
           i.system.rules = i.system.rules
+            // eslint-disable-next-line complexity
             .filter((r) => {
+              const allowedMiscKeys = ["RollOption", "ActiveEffectLike"].includes(r.key);
+              if (allowedMiscKeys) return true;
               const isOtherDocument = otherDocs.some((d) => d._id === i._id);
+              const excludeAddedGrant = excludeAddedGrants && ["GrantItem"].includes(r.key) && this.grantItemLookUp.has(r.uuid);
+              const otherDocumentGrantRules = isOtherDocument && excludeAddedGrant;
+              if (otherDocumentGrantRules) return false;
               if (isOtherDocument) return true;
+
               const isPassedDocument = documents.some((d) => d._id === i._id);
               const isChoiceSetSelection = ["ChoiceSet"].includes(r.key) && r.selection;
-              // const choiceSetSelectionNotObject = isChoiceSetSelection && !utils.isObject(r.selection);
               const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
+              // if (excludeAddedGrant && grantRuleWithoutFlag) return false;
               const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
-              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
-              const includeGrantRuleFromItemFlag = includeGrants && grantRuleFromItemFlag;
-              const allowedMiscKeys = ["RollOption", "ActiveEffectLike"].includes(r.key);
+              const grantRuleFromItemFlag = includeGrants && ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
 
               const notPassedDocumentRules
                 = !isPassedDocument
+                // && !excludeAddedGrant
                 && (grantRuleWithoutFlag
                   // || choiceSetSelectionNotObject
                   || !genericDiscardRule
-                  || includeGrantRuleFromItemFlag
-                  || allowedMiscKeys);
+                  || grantRuleFromItemFlag);
 
               const passedDocumentRules
                 = isPassedDocument
                 && includePassedDocumentsRules
-                && (isChoiceSetSelection || grantRuleWithoutFlag || includeGrantRuleFromItemFlag || allowedMiscKeys);
+                // && !excludeAddedGrant
+                && (isChoiceSetSelection || grantRuleWithoutFlag || grantRuleFromItemFlag);
 
               return notPassedDocumentRules || passedDocumentRules;
             })
@@ -2644,6 +2653,10 @@ export class Pathmuncher {
             });
           if (documents.some((d) => d._id === i._id) && processedRules.length > 0 && includeFlagsOnly) {
             i.system.rules = foundry.utils.deepClone(processedRules).filter((r) => {
+              const excludeAddedGrant = excludeAddedGrants && ["GrantItem"].includes(r.key) && this.grantItemLookUp.has(r.uuid);
+              if (excludeAddedGrant) return false;
+              const noGrants = !includeGrants && !["GrantItem"].includes(r.key);
+              if (noGrants) return false;
               const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
               if (!grantRuleFromItemFlag) return true;
               if (grantRuleFromItemFlag && r.alterations) return true;
