@@ -619,6 +619,13 @@ export class Pathmuncher {
   }
 
   #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+    if (utils.isObject(slug)) {
+      if (slug.size) {
+        slug = slug.size;
+      } else {
+        return undefined;
+      }
+    }
     if (type === "feats" && document) {
       const hintMatch = this.parsed[type].find((f) =>
         (!ignoreAdded || (ignoreAdded && !f.added))
@@ -762,7 +769,11 @@ export class Pathmuncher {
   async #featureChoiceMatch(document, choices, ignoreAdded, adjustName, choiceHint = null) {
     const matches = [];
     for (const choice of choices) {
-      const doc = adjustName ? game.i18n.localize(choice.label) : await fromUuid(choice.value);
+      const doc = adjustName
+        ? game.i18n.localize(choice.label)
+        : utils.isString(choice.value)
+          ? await fromUuid(choice.value)
+          : null;
       if (!doc) continue;
       const slug = adjustName
         ? Seasoning.slug(doc)
