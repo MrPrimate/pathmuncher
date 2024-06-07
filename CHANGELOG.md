@@ -1,3 +1,7 @@
+# 1.2.2
+
+- Awakened animals would not parse.
+
 # 1.2.1
 
 - Some small tweaks to handle higher level dual gate kineticists correctly.
