@@ -1,3 +1,7 @@
+# 1.2.3
+
+- Support v12 6.0.3
+
 # 1.2.2
 
 - Awakened animals would not parse.

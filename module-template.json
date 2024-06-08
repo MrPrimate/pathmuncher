@@ -37,7 +37,7 @@
         "type": "system",
         "compatibility": {
           "minimum": "5.14.0",
-          "verified": "6.0.0"
+          "verified": "6.0.3"
         }
       }
     ]

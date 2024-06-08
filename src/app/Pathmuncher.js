@@ -913,7 +913,15 @@ export class Pathmuncher {
 
       let tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
-      await choiceSetRules.preCreate({ itemSource: item, ruleSource: tempSet, pendingItems: [item], tempItems: [] });
+      await choiceSetRules.preCreate({
+        itemSource: item,
+        ruleSource: tempSet,
+        pendingItems: [item],
+        tempItems: [],
+        operation: {
+          keepId: 1,
+        },
+      });
       // console.warn("chociesetdata", {
       //   choiceSetRules,
       //   selection: choiceSetRules.selection,
@@ -981,6 +989,10 @@ export class Pathmuncher {
         tempItems,
         context,
         reevaluation: true,
+        operation: {
+          keepId: 0,
+
+        }
       });
 
       logger.debug("uuid selection", {
