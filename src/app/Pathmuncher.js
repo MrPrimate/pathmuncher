@@ -769,9 +769,18 @@ export class Pathmuncher {
   async #featureChoiceMatch(document, choices, ignoreAdded, adjustName, choiceHint = null) {
     const matches = [];
     for (const choice of choices) {
+      // console.warn(`Choice eval`, {
+      //   choice,
+      //   document,
+      //   ignoreAdded,
+      //   adjustName,
+      //   choiceHint,
+      //   isUuid: utils.isString(choice.value) ? Pathmuncher.isUuid(choice.value) : "not a string",
+      //   isString: utils.isString(choice.value),
+      // });
       const doc = adjustName
         ? game.i18n.localize(choice.label)
-        : utils.isString(choice.value)
+        : utils.isString(choice.value) && Pathmuncher.isUuid(choice.value)
           ? await fromUuid(choice.value)
           : null;
       if (!doc) continue;
@@ -876,7 +885,11 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item });
-      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+      const rollOptions = [
+        tempActor.getRollOptions(),
+        // item.getRollOptions("item"),
+        item.getRollOptions("parent"),
+      ].flat();
       const choices = await choiceSetRules.inflateChoices(rollOptions, []);
 
       logger.debug("Starting choice evaluation", {
@@ -888,6 +901,7 @@ export class Pathmuncher {
         choices,
         this: this,
         tempActor,
+        choiceHint,
       });
 
       if (cleansedChoiceSet.choices?.query) {
@@ -1040,7 +1054,7 @@ export class Pathmuncher {
       const ruleElement = cleansedRule.key === "ChoiceSet"
         ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
         : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
-      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
 
       if (rule.predicate) {
         const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
@@ -1091,7 +1105,7 @@ export class Pathmuncher {
       const ruleElement = cleansedRule.key === "ChoiceSet"
         ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
         : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
-      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("item")].flat();
+      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
 
       if (rule.predicate) {
         const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
@@ -1120,6 +1134,10 @@ export class Pathmuncher {
       return new RegExp(`\\(${escaped}\\) \\(${escaped}\\)$`);
     })();
     return name.replace(pattern, `(${localLabel})`);
+  }
+
+  static isUuid(uuid) {
+    return uuid.match(/Compendium\.(?<origin>[^.]+)\.(?<packName>[^.]+)\.(?<docType>Actor|JournalEntry|Item|Macro|RollTable)\.(?<docName>[^.]+)/g,);
   }
 
   // eslint-disable-next-line complexity, no-unused-vars
@@ -1203,7 +1221,7 @@ export class Pathmuncher {
       logger.debug(`UUID for ${document.name}: "${uuid}"`, { document, ruleEntry, choice, uuid, grantObject });
       const ruleFeature = ruleEntry.key === "GrantItem" && grantObject
         ? grantObject
-        : uuid && typeof uuid === "string" ? await fromUuid(uuid) : undefined;
+        : uuid && typeof uuid === "string" && Pathmuncher.isUuid(uuid) ? await fromUuid(uuid) : undefined;
       // console.warn("ruleFeature", ruleFeature);
       if (ruleFeature) {
         const featureDoc = ruleFeature.toObject();

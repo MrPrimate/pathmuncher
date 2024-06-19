@@ -1,3 +1,7 @@
+# 1.2.4
+
+- Some choices would attempt to load an item as a UUID when it was not valid.
+
 # 1.2.3
 
 - Support v12 6.0.3
