@@ -1,6 +1,6 @@
 # 1.2.5
 
-- If Starfinder field test module is active, search compendiums for matches. To support json export facility in Hephaistos (https://hephaistos.online).
+- If Starfinder field test module is active, search compendiums for matches. To support json export facility in Hephaistos 2E (https://sf2e.hephaistos.online/).
 
 # 1.2.4
 
