@@ -1,3 +1,7 @@
+# 1.2.5
+
+- If Starfinder field test module is active, search compendiums for matches. To support json export facility in Hephaistos (https://hephaistos.online).
+
 # 1.2.4
 
 - Some choices would attempt to load an item as a UUID when it was not valid.
