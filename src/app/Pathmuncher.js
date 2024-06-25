@@ -1537,33 +1537,33 @@ export class Pathmuncher {
     this.result.class[0].system.boosts = this.boosts.class;
   }
 
-  static SKILL_LOOKUP = {
-    "acrobatics": "acr",
-    "arcana": "arc",
-    "athletics": "ath",
-    "crafting": "cra",
-    "deception": "dec",
-    "diplomacy": "dip",
-    "intimidation": "itm",
-    "medicine": "med",
-    "nature": "nat",
-    "occultism": "occ",
-    "performance": "prf",
-    "religion": "rel",
-    "society": "soc",
-    "stealth": "ste",
-    "survival": "sur",
-    "thievery": "thi",
-  };
+  static SKILL_LOOKUP = [
+    "acrobatics",
+    "arcana",
+    "athletics",
+    "crafting",
+    "deception",
+    "diplomacy",
+    "intimidation",
+    "medicine",
+    "nature",
+    "occultism",
+    "performance",
+    "religion",
+    "society",
+    "stealth",
+    "survival",
+    "thievery",
+  ];
 
   #setSkills(removeSpecials = false) {
-    for (const [key, value] of Object.entries(Pathmuncher.SKILL_LOOKUP)) {
+    for (const skill of Pathmuncher.SKILL_LOOKUP) {
       const calculatedValue = removeSpecials
-        && (this.source.specials.some((s) => s.toLowerCase() === key)
-         || this.parsed.specials.some((s) => s.name.toLowerCase() === key))
+        && (this.source.specials.some((s) => s.toLowerCase() === skill)
+         || this.parsed.specials.some((s) => s.name.toLowerCase() === skill))
         ? 0
-        : this.source.proficiencies[key] / 2;
-      foundry.utils.setProperty(this.result.character, `system.skills.${value}.rank`, calculatedValue);
+        : this.source.proficiencies[skill] / 2;
+      foundry.utils.setProperty(this.result.character, `system.skills.${skill}.rank`, calculatedValue);
     };
   }
 
