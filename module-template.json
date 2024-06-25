@@ -11,7 +11,7 @@
   "readme": "https://github.com/MrPrimate/pathmuncher/blob/main/README.md",
   "changelog": "https://github.com/MrPrimate/pathmuncher/blob/main/CHANGELOG.md",
   "compatibility": {
-    "minimum": "11.315",
+    "minimum": "12.325",
     "verified": 12
   },
   "authors": [
@@ -36,8 +36,8 @@
         "id": "pf2e",
         "type": "system",
         "compatibility": {
-          "minimum": "5.14.0",
-          "verified": "6.0.3"
+          "minimum": "6.0.3",
+          "verified": "6.0.4"
         }
       }
     ]
