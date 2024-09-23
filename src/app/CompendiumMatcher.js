@@ -114,7 +114,7 @@ export class CompendiumMatcher {
           && CompendiumMatcher.checkForFilters(i, filters))
         ?? index.find((i) =>
           ((i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(pbName)
-          && CompendiumMatcher.checkForFilters(i, filters))
+          && CompendiumMatcher.checkForFilters(i, filters)),
         );
 
       if (indexMatch) {

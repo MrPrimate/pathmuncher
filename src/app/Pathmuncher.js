@@ -34,7 +34,7 @@ export class Pathmuncher {
   constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, adjustBlendedSlots = true,
     addMoney = true, addLores = true, addWeapons = true, addArmor = true, addTreasure = true, addDeity = true,
     addName = true, addClass = true, addBackground = true, addHeritage = true, addAncestry = true,
-    statusCallback = null } = {}
+    statusCallback = null } = {},
   ) {
     this.devMode = game.modules.get("pathmuncher").version === "999.0.0";
     this.actor = actor;
@@ -147,13 +147,13 @@ export class Pathmuncher {
     }
     if (pathbuilderId) {
       const jsonData = await foundry.utils.fetchJsonWithTimeout(
-        `https://www.pathbuilder2e.com/json.php?id=${pathbuilderId}`
+        `https://www.pathbuilder2e.com/json.php?id=${pathbuilderId}`,
       );
       if (jsonData.success) {
         this.source = jsonData.build;
       } else {
         ui.notifications.warn(
-          game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.FetchFailed`, { pathbuilderId })
+          game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.FetchFailed`, { pathbuilderId }),
         );
       }
     } else {
@@ -248,7 +248,7 @@ export class Pathmuncher {
       display: e[0],
       runes: [],
       damageType: "B",
-      increasedDice: false
+      increasedDice: false,
     };
     const weapon = foundry.utils.mergeObject({
       foundryName: name,
@@ -356,7 +356,7 @@ export class Pathmuncher {
         special
         && special !== "undefined"
         && special !== "Not Selected"
-        && special !== this.source.heritage
+        && special !== this.source.heritage,
       )
       .forEach((special) => {
         const match = this.getFoundryFeatureName(special); // , true);
@@ -370,7 +370,7 @@ export class Pathmuncher {
             addedId: null,
             addedAutoId: null,
             rank: iRank,
-            sourceType: "specials"
+            sourceType: "specials",
           });
           iRank++;
         }
@@ -383,7 +383,7 @@ export class Pathmuncher {
       .filter((feat) =>
         feat[0]
         && feat[0] !== "undefined"
-        && feat[0] !== "Not Selected"
+        && feat[0] !== "Not Selected",
         // && feat[0] !== this.source.heritage
       )
       .forEach((feat) => {
@@ -411,7 +411,7 @@ export class Pathmuncher {
             && (data.featChoiceRef.toLowerCase().startsWith(f[0].toLowerCase())
             || (data.parentFeatChoiceRef
               && data.featChoiceRef.replace(data.parentFeatChoiceRef, "").trim().toLowerCase().startsWith(f[0].toLowerCase()))
-            )
+            ),
           );
           data.nameHint = parentFeatMatch?.[0] ? this.getFoundryFeatureName(parentFeatMatch?.[0]).foundryName : undefined;
         } else {
@@ -443,7 +443,7 @@ export class Pathmuncher {
           rank: iRank,
           sourceType: "inventorMods",
           parentFeatChoiceRef: mod.ref,
-          nameHint: this.getFoundryFeatureName(mod.ref).foundryName
+          nameHint: this.getFoundryFeatureName(mod.ref).foundryName,
         });
         iRank++;
       }
@@ -614,7 +614,7 @@ export class Pathmuncher {
         === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
         || slug
           === Seasoning.slug(
-            Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass)
+            Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass),
           )));
   }
 
@@ -632,7 +632,7 @@ export class Pathmuncher {
         && f.isChild
         && f.nameHint
         && Seasoning.slug(document.name) === Seasoning.slug(f.nameHint)
-        && this.#slugNameMatch(f, slug)
+        && this.#slugNameMatch(f, slug),
       );
       if (hintMatch) {
         hintMatch.rank = -10;
@@ -647,7 +647,7 @@ export class Pathmuncher {
           || f.type === featType
         )
         && !f.isChoice
-        && this.#slugNameMatch(f, slug)
+        && this.#slugNameMatch(f, slug),
     );
     if (parsedMatch || !document) return parsedMatch;
 
@@ -657,7 +657,7 @@ export class Pathmuncher {
       && f.added
       && !f.isChoice
       && Seasoning.slug(f.name) === (document.system.slug ?? Seasoning.slug(document.name))
-      && Seasoning.slug(f.extra) === slug
+      && Seasoning.slug(f.extra) === slug,
     );
     if (extraMatch) return extraMatch;
 
@@ -755,7 +755,7 @@ export class Pathmuncher {
     if (document.type !== "action")
       logger.warn(
         `Unable to find parsed feature match for granted feature ${document.name}. This might not be an issue, but might indicate feature duplication.`,
-        { document, parent }
+        { document, parent },
       );
   }
 
@@ -1006,7 +1006,7 @@ export class Pathmuncher {
         operation: {
           keepId: 0,
 
-        }
+        },
       });
 
       logger.debug("uuid selection", {
@@ -1137,7 +1137,7 @@ export class Pathmuncher {
   }
 
   static isUuid(uuid) {
-    return uuid.match(/Compendium\.(?<origin>[^.]+)\.(?<packName>[^.]+)\.(?<docType>Actor|JournalEntry|Item|Macro|RollTable)\.(?<docName>[^.]+)/g,);
+    return uuid.match(/Compendium\.(?<origin>[^.]+)\.(?<packName>[^.]+)\.(?<docType>Actor|JournalEntry|Item|Macro|RollTable)\.(?<docName>[^.]+)/g);
   }
 
   // eslint-disable-next-line complexity, no-unused-vars
@@ -1195,7 +1195,7 @@ export class Pathmuncher {
           const data = { document, ruleEntry, testResult };
           logger.debug(
             `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
-            data
+            data,
           );
           addRuleToKeep(ruleEntry);
           continue;
@@ -1262,7 +1262,7 @@ export class Pathmuncher {
             const data = { document, ruleEntry, featureDoc, testResult };
             logger.debug(
               `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
-              data
+              data,
             );
             addRuleToKeep(ruleEntry);
             // this.autoAddedFeatureRules[document._id].push(ruleEntry);
@@ -1377,7 +1377,7 @@ export class Pathmuncher {
     for (const subRuleDocument of this.subRuleDocuments[document._id]) {
       logger.debug(
         `Processing granted rules for granted item document ${subRuleDocument.name}`,
-        foundry.utils.duplicate(subRuleDocument)
+        foundry.utils.duplicate(subRuleDocument),
       );
       await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
     }
@@ -1525,7 +1525,8 @@ export class Pathmuncher {
       }
     });
     if (breakdown.ancestryBoosts.length === 0) {
-      foundry.utils.setProperty(this.result.ancestry[0], "system.alternateAncestryBoosts", boosts);
+      const alternativeBoosts = new Set(breakdown.ancestryFree.map((b) => b.toLowerCase()));
+      foundry.utils.setProperty(this.result.ancestry[0], "system.alternateAncestryBoosts", Array.from(alternativeBoosts));
     }
   }
 
@@ -1674,7 +1675,7 @@ export class Pathmuncher {
 
   // eslint-disable-next-line complexity
   async #generateFeatItems(type,
-    { levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {}
+    { levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {},
   ) {
     logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${typeFilter}"`);
 
@@ -2128,7 +2129,7 @@ export class Pathmuncher {
     // this spell caster type is not a class, determine class tradition based on ability
     const abilityTradition = this.source.spellCasters.find((c) =>
       [this.source.class, this.source.dualClass].includes(c.name)
-      && c.ability === caster.ability
+      && c.ability === caster.ability,
     );
     if (abilityTradition) return abilityTradition.magicTradition;
     // if no type and multiple spell casters, then return the first spell casting type
@@ -2453,8 +2454,9 @@ export class Pathmuncher {
 
   async #generateLores() {
     for (const lore of this.source.lores) {
+      const loreName = lore[0];
       const data = {
-        name: lore[0],
+        name: loreName.trim() === "" ? "Unknown Lore" : loreName,
         type: "lore",
         system: {
           proficient: {
@@ -2567,7 +2569,7 @@ export class Pathmuncher {
   }
 
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
-    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false } = {}
+    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false } = {},
   ) {
     const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
@@ -2578,17 +2580,17 @@ export class Pathmuncher {
     const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = foundry.utils.duplicate(this.result);
 
-    console.warn("Initial temp actor", {
-      initialTempActor: foundry.utils.deepClone(actor),
-      documents,
-      includePassedDocumentsRules,
-      includeGrants,
-      includeFlagsOnly,
-      processedRules,
-      otherDocs,
-      excludeAddedGrants,
-      this: this,
-    });
+    // console.warn("Initial temp actor", {
+    //   initialTempActor: foundry.utils.deepClone(actor),
+    //   documents,
+    //   includePassedDocumentsRules,
+    //   includeGrants,
+    //   includeFlagsOnly,
+    //   processedRules,
+    //   otherDocs,
+    //   excludeAddedGrants,
+    //   this: this,
+    // });
 
     const currentItems = [
       ...currentState.deity,
@@ -2785,7 +2787,7 @@ export class Pathmuncher {
   async #removeDocumentsToBeUpdated() {
     const moneyIds = this.actor.items.filter((i) =>
       i.type === "treasure"
-      && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name)
+      && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name),
     );
     const classIds = this.actor.items.filter((i) => i.type === "class").map((i) => i._id);
     const deityIds = this.actor.items.filter((i) => i.type === "deity").map((i) => i._id);
@@ -2839,7 +2841,7 @@ export class Pathmuncher {
       || (!this.options.addWeapons && weaponIds.includes(i._id))
       || (!this.options.addArmor && armorIds.includes(i._id))
       || (!this.options.addLores && loreIds.includes(i._id))
-      || (!this.options.addSpells && spellIds.includes(i._id))
+      || (!this.options.addSpells && spellIds.includes(i._id)),
     ).map((i) => i._id);
 
     const deleteIds = this.actor.items.filter((i) => !keepIds.includes(i._id)).map((i) => i._id);
@@ -3015,14 +3017,14 @@ export class Pathmuncher {
       ? Object.values(this.check).filter((b) =>
         b.type === "feat"
         && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
-        && !BAD_IGNORE_FEATURES(b.details.name)
+        && !BAD_IGNORE_FEATURES(b.details.name),
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
       : [];
     const badSpecials = this.options.addFeats
       ? Object.values(this.check).filter((b) =>
         (b.type === "special")
         && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
-        && !BAD_IGNORE_FEATURES(b.details.name)
+        && !BAD_IGNORE_FEATURES(b.details.name),
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.originalName}</li>`)
       : [];
     const badEquipment = this.options.addEquipment

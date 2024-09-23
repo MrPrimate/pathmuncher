@@ -90,7 +90,7 @@ export class Seasoning {
     "consumable",
     "equipment",
     "treasure",
-    "weapon"
+    "weapon",
   ]);
 
   static isPhysicalItemType(type) {

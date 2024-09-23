@@ -52,7 +52,7 @@ const utils = {
     let folder = game.folders.contents.find((f) =>
       f.type === entityType && f.name === folderName
       // if a root folder we want to match the root id for the parent folder
-      && (root ? root.id : null) === (f.folder?.id ?? null)
+      && (root ? root.id : null) === (f.folder?.id ?? null),
     );
     // console.warn(`Looking for ${root} ${entityType} ${folderName}`);
     // console.warn(folder);
@@ -64,7 +64,7 @@ const utils = {
         color: folderColor,
         parent: (root) ? root.id : null,
       },
-      { displaySheet: false }
+      { displaySheet: false },
     );
     return folder;
   },
@@ -94,7 +94,7 @@ const utils = {
 
   allowAncestryParagon: () => {
     return (foundry.utils.isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "ancestryParagonVariant"));
-  }
+  },
 
 };
 

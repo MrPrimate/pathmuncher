@@ -16,7 +16,7 @@ class ResetSettingsDialog extends FormApplication {
     return new Dialog({
       title: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Title`),
       content: `<p class="${CONSTANTS.FLAG_NAME}-dialog-important">${game.i18n.localize(
-        `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Content`
+        `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Content`,
       )}</p>`,
       buttons: {
         confirm: {

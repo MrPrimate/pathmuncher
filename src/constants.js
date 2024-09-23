@@ -62,7 +62,7 @@ const CONSTANTS = {
     ancestryFeatures: [
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
       "pf2e.ancestryfeatures",
-      "pf2e-legacy-content.ancestry-features-legacy"
+      "pf2e-legacy-content.ancestry-features-legacy",
     ],
     classFeatures: [
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
@@ -177,7 +177,7 @@ CONSTANTS.DEFAULT_SETTINGS = {
       OFF: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.off`,
     },
     default: "WARN",
-  }
+  },
 
 };
 

@@ -35,7 +35,7 @@ export class PetShop {
     const existingPet = game.actors.find((a) =>
       a.type === type.toLowerCase()
       && a.name === petName
-      && a.system.master.id === this.parent._id
+      && a.system.master.id === this.parent._id,
     );
 
     if (existingPet) return existingPet.toObject();

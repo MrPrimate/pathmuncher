@@ -311,7 +311,7 @@ const IGNORED_FEATS_LIST = [
 ];
 
 const IGNORED_SPECIALS_LIST = [
-  "Low-Light Vision", "Darkvision"
+  "Low-Light Vision", "Darkvision",
 ];
 
 export function IGNORED_FEATS() {

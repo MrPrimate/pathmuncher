@@ -1,3 +1,8 @@
+# 1.3.1
+
+- Alternative ancestry boosts would not get added for some ancestries.
+- If a Lore skill was left blank on Pathbuilder, character import would fail.
+
 # 1.3.0
 
 - v12 only
