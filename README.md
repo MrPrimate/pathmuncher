@@ -9,6 +9,14 @@ Import characters from Pathbuilder to Foundry Pathfinder 2e.
 
 ![gif-preview](./docs/demo.gif)
 
+## How To
+
+1. Build your character in [Pathbuilder(https://pathbuilder2e.com/)].
+2. Export your character using "Export JSON" from Pathbuilder via the burger menu
+3. Click the Pathmuncher icon in the characters title bar.
+4. Enter the 6 digit user ID number from the pathbuilder in the bottom section
+5. Import the character.
+
 ## About
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
