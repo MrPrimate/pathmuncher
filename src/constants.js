@@ -24,6 +24,7 @@ const CONSTANTS = {
     "Skill Feat",
     "General Feat",
     "Awarded Feat",
+    "Mythic Feat",
   ],
 
   ACTOR_FLAGS: {

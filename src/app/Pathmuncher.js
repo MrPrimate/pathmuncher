@@ -483,6 +483,16 @@ export class Pathmuncher {
       });
       this.source.background = match[1];
     }
+
+    this.parsed.specials = this.parsed.specials.map((s) => {
+      const mythicMatch = / Calling$/;
+      if (mythicMatch.test(s.name)) {
+        s.type = "Mythic Feat";
+        s.level = "calling";
+        s.sourceType = "mythicCalling";
+      }
+      return s;
+    });
   }
 
   async #prepare() {
@@ -1684,6 +1694,7 @@ export class Pathmuncher {
         logger.debug(`Checking if  ${pBFeat.name} needs processing`, pBFeat);
         if (pBFeat.added) continue;
         if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
+        if (utils.isString(levelCap) && pBFeat.level !== levelCap) continue;
         if (typeFilter && pBFeat.type !== typeFilter) continue;
         if (excludeChild && pBFeat.isChild === true) continue;
         if (excludeParents && pBFeat.isParent === true) continue;
@@ -1742,36 +1753,36 @@ export class Pathmuncher {
     }
   }
 
-  async #generateSpecialItems(type) {
-    for (const special of this.parsed.specials) {
-      if (special.added) continue;
-      logger.debug("Generating special for", special);
-      const indexMatch = this.#findInPackIndexes(type, [special.name, special.originalName]);
-      if (!indexMatch) {
-        logger.debug(`Unable to match special ${special.name}`, { special: special.name, type });
-        this.check[special.originalName] = {
-          name: special.name,
-          type: "special",
-          details: { displayName: special.name, name: special.name, originalName: special.originalName, special },
-        };
-        continue;
-      }
-      special.added = true;
-      if (this.check[special.originalName]) delete this.check[special.originalName];
-      if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
-        logger.debug("Special included in class features auto add", { special: special.name, type });
-        special.addedAutoId = `${indexMatch._id}_${indexMatch.type}`;
-        continue;
-      }
+  // async #generateSpecialItems(type) {
+  //   for (const special of this.parsed.specials) {
+  //     if (special.added) continue;
+  //     logger.debug("Generating special for", special);
+  //     const indexMatch = this.#findInPackIndexes(type, [special.name, special.originalName]);
+  //     if (!indexMatch) {
+  //       logger.debug(`Unable to match special ${special.name}`, { special: special.name, type });
+  //       this.check[special.originalName] = {
+  //         name: special.name,
+  //         type: "special",
+  //         details: { displayName: special.name, name: special.name, originalName: special.originalName, special },
+  //       };
+  //       continue;
+  //     }
+  //     special.added = true;
+  //     if (this.check[special.originalName]) delete this.check[special.originalName];
+  //     if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
+  //       logger.debug("Special included in class features auto add", { special: special.name, type });
+  //       special.addedAutoId = `${indexMatch._id}_${indexMatch.type}`;
+  //       continue;
+  //     }
 
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const docData = doc.toObject();
-      docData._id = foundry.utils.randomID();
-      special.addedId = docData._id;
-      this.result.feats.push(docData);
-      await this.#addGrantedItems(docData, { applyFeatLocation: true });
-    }
-  }
+  //     const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+  //     const docData = doc.toObject();
+  //     docData._id = foundry.utils.randomID();
+  //     special.addedId = docData._id;
+  //     this.result.feats.push(docData);
+  //     await this.#addGrantedItems(docData, { applyFeatLocation: true });
+  //   }
+  // }
 
   #resizeItem(item) {
     if (Seasoning.isPhysicalItemType(item.type)) {
@@ -2517,10 +2528,12 @@ export class Pathmuncher {
 
   async #processFeats() {
     this.#sortParsedFeats();
+    await this.#generateFeatItems("classFeatures", { typeFilter: "Mythic Feat", levelCap: "calling" });
     // pre pass for standard items
     for (let i = 1; i <= this.characterLevel; i++) {
       foundry.utils.setProperty(this.result.character, "system.details.level.value", i);
       if (i > 1) await this.#processGrantedLookupItemsAtLevel("class", i);
+      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true, excludeParents: true });
@@ -2529,6 +2542,7 @@ export class Pathmuncher {
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
     // prepass for non-child items
     for (let i = 1; i <= this.characterLevel; i++) {
+      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true });
@@ -2537,6 +2551,7 @@ export class Pathmuncher {
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
 
+    await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Skill Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Class Feat" });
