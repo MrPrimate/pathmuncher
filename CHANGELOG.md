@@ -1,3 +1,7 @@
+# 1.3.2
+
+- Mythic feats added to correct section and mythic callings now imported.
+
 # 1.3.1
 
 - Alternative ancestry boosts would not get added for some ancestries.
