@@ -111,7 +111,7 @@ export class Seasoning {
       return `ancestry-${pathbuilderFeatLevel}`;
     } else if (pathbuilderFeatType === "Class Feat") {
       return `class-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Mythic Feat") {
+    } else if (["Mythic Feat", "Destiny Mythic Feat"].includes(pathbuilderFeatType)) {
       return `mythic-${pathbuilderFeatLevel}`;
     } else if (pathbuilderFeatType === "Skill Feat") {
       return `skill-${pathbuilderFeatLevel}`;

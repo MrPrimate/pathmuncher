@@ -2533,16 +2533,16 @@ export class Pathmuncher {
     for (let i = 1; i <= this.characterLevel; i++) {
       foundry.utils.setProperty(this.result.character, "system.details.level.value", i);
       if (i > 1) await this.#processGrantedLookupItemsAtLevel("class", i);
-      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Destiny Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true, excludeParents: true });
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
     // prepass for non-child items
     for (let i = 1; i <= this.characterLevel; i++) {
-      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true });
       await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true });
@@ -2551,7 +2551,6 @@ export class Pathmuncher {
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
 
-    await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Skill Feat" });
     await this.#generateFeatItems("feats", { typeFilter: "Class Feat" });
