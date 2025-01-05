@@ -1,3 +1,7 @@
+# 1.3.4
+
+- Some weapon runes did not match up, and some weapon materials could not be chosen.
+
 # 1.3.3
 
 - Mythic feats added to correct section and mythic callings now imported.
