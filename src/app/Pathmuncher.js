@@ -2005,6 +2005,7 @@ export class Pathmuncher {
         if (resistantMatch) rune = `${resistantMatch[1]} Resistant`;
         else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
         else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
+        else if (property === "Quickstrike") rune = "speed";
 
         itemData.system.runes.property.push(Seasoning.slugD(rune));
       });
@@ -2012,7 +2013,7 @@ export class Pathmuncher {
 
     if (parsedItem.mat) {
       const material = parsedItem.mat.split(" (")[0];
-      itemData.system.material.type = Seasoning.slugD(material);
+      itemData.system.material.type = Seasoning.slug(material);
       itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
     }
   }
