@@ -308,6 +308,8 @@ const IGNORED_FEATS_LIST = [
   // sizes
   // "Medium",
   // "Small",
+
+  "Reincarnation Feat",
 ];
 
 const IGNORED_SPECIALS_LIST = [

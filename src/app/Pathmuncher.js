@@ -422,6 +422,14 @@ export class Pathmuncher {
           data.isStandard = null;
           data.parentFeatChoiceRef = null;
         }
+
+        if (data.type === "Reincarnation Feat") {
+          const original = this.source.feats.find((f) => f[0] === "Reincarnation Feat");
+          data.type = "Ancestry Feat";
+          data.featChoiceRef = original[4];
+          data.hasChildren = original[5] === "parentChoice";
+          data.parentFeatChoiceRef = null;
+        }
         this.parsed.feats.push(data);
         featRank++;
       });
@@ -1005,6 +1013,7 @@ export class Pathmuncher {
       const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
 
       const tempItems = [];
+      let itemUpdates = [];
       const context = { parent: tempActor, render: false };
       await grantItemRule.preCreate({
         itemSource: item,
@@ -1015,8 +1024,8 @@ export class Pathmuncher {
         reevaluation: true,
         operation: {
           keepId: 0,
-
         },
+        itemUpdates,
       });
 
       logger.debug("uuid selection", {
@@ -1026,6 +1035,7 @@ export class Pathmuncher {
         grantItemRule,
         uuid,
         tempItems,
+        itemUpdates,
       });
 
       if (uuid || tempItems.length > 0) {

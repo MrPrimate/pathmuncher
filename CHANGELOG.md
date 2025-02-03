@@ -1,3 +1,9 @@
+# 1.3.5
+
+- Reincarnation Feat is handled differently in Pathbuilder vs Foundry, import improvements.
+- Fixes for some PF2e system changes. @lordluk101
+
+
 # 1.3.4
 
 - Some weapon runes did not match up, and some weapon materials could not be chosen.
