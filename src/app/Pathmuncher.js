@@ -2016,6 +2016,7 @@ export class Pathmuncher {
         else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
         else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
         else if (property === "Quickstrike") rune = "speed";
+        else if (property === "Animated") rune = "dancing";
 
         itemData.system.runes.property.push(Seasoning.slugD(rune));
       });
