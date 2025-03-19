@@ -1,3 +1,7 @@
+# 1.3.7
+
+- Option to not display name in titlebar.
+
 # 1.3.6
 
 - The Dancing/Animated property was not applied correctly to weapons.
