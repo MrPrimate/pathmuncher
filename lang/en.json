@@ -2,6 +2,10 @@
   "pathmuncher": {
     "ModuleName": "Pathmuncher",
     "Settings": {
+      "DisplayTitle": {
+        "Name": "Display name in actor header?",
+        "Hint": "If unchecked will only display icon for Pathmuncher in the actors header bar."
+      },
       "Reset": {
         "Title": "Reset settings to default",
         "Label": "Reset Pathmuncher Settings",

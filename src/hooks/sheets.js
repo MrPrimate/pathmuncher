@@ -20,7 +20,11 @@ export function registerSheetButton() {
       if (!data.owner || !data.actor) return;
       if (!game.user.can("ACTOR_CREATE")) return;
 
-      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-teeth-open"></i> ${CONSTANTS.MODULE_FULL_NAME}</a>`);
+      const text = utils.setting("DISPLAY_TITLE")
+        ? CONSTANTS.MODULE_FULL_NAME
+        : "";
+
+      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-teeth-open"></i> ${text}</a>`);
 
       button.click(() => {
         if (game.user.can("ACTOR_CREATE")) {

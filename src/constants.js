@@ -11,6 +11,7 @@ const CONSTANTS = {
     USE_CUSTOM_COMPENDIUM_MAPPINGS: "use-custom-compendium-mappings",
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
     USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
+    DISPLAY_TITLE: "display-title",
   },
 
   FEAT_PRIORITY: [
@@ -131,6 +132,16 @@ const CONSTANTS = {
 
 CONSTANTS.DEFAULT_SETTINGS = {
   // Enable options
+
+  [CONSTANTS.SETTINGS.DISPLAY_TITLE]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.DisplayTitle.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.DisplayTitle.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+  },
+
   [CONSTANTS.SETTINGS.RESTRICT_TO_TRUSTED]: {
     name: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Name`,
     hint: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Hint`,
