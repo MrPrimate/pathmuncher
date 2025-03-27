@@ -1,3 +1,7 @@
+# 1.3.8
+
+- Outlaw mapping
+
 # 1.3.7
 
 - Option to not display name in titlebar.
