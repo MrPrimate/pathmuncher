@@ -138,6 +138,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Miraculous Spells", foundryName: "Miraculous Spell" },
   { pbName: "Multifarious", foundryName: "Multifarious Muse" },
   { pbName: "Mystic", foundryName: "Nexian Mystic" },
+  { pbName: "Outlaw", foundryName: "Alkenstar Outlaw" },
   { pbName: "Paladin [Lawful Good]", foundryName: "Paladin" },
   { pbName: "Parry", foundryName: "Aldori Parry" },
   { pbName: "Polymath", foundryName: "Polymath Muse" },
