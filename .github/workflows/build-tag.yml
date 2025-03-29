@@ -1,0 +1,49 @@
+name: pathmuncher build tag (no latest)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run lint
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Get Version              # Run the script that returns the version from `module.json`
+      shell: bash
+      id: get-version
+      run: echo "release_version=$(node ./.github/workflows/get-version.js)" >> $GITHUB_OUTPUT
+    - name: Build module.json
+      run: node ./.github/workflows/build-module-json.js | jq . > module.json
+    - run: npm ci
+    - name: Webpack
+      run: npm run build
+    - name: Create Release Zip
+      run: zip -r ./pathmuncher.zip module.json dist templates css lang LICENSE.md       # Add folders/files here
+    - name: Create Release                                # Create an additional release for this version
+      id: create_versioned_release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: false # set to false if you do not want to allow updates on existing releases
+        name: Release ${{ steps.get-version.outputs.release_version }} # Use the version in the name "${{ env.version }}"
+        draft: false
+        prerelease: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: './module.json,./pathmuncher.zip'    # don't forget to rename module zip thing
+        tag: ${{ steps.get-version.outputs.release_version }} # Use the version as the tag
