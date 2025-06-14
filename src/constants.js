@@ -60,7 +60,10 @@ const CONSTANTS = {
       "starfinder-field-test-for-pf2e.feats",
       "pf2e.feats-srd",
       "pf2e-playtest-data.war-of-immortals-playtest-class-feats",
+      "pf2e-playtest-data.battlecry-playtest-class-feats",
+      "pf2e-playtest-data.impossible-playtest-class-feats",
       "pf2e-legacy-content.feats-legacy",
+      "pf2e-playtest-data.impossible-playtest-runes",
     ],
     ancestryFeatures: [
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
@@ -77,12 +80,17 @@ const CONSTANTS = {
       "starfinder-field-test-for-pf2e.class-features",
       "pf2e.classfeatures",
       "pf2e-playtest-data.war-of-immortals-playtest-class-features",
+      "pf2e-playtest-data.battlecry-playtest-class-features",
+      "pf2e-playtest-data.impossible-playtest-class-features",
       "pf2e-legacy-content.class-features-legacy",
+      "pf2e-playtest-data.impossible-playtest-runes",
     ],
     actions: [
       "starfinder-field-test-for-pf2e.actions",
       "pf2e.actionspf2e",
       "pf2e-playtest-data.war-of-immortals-playtest-actions",
+      "pf2e-playtest-data.battlecry-playtest-actions",
+      "pf2e-playtest-data.impossible-playtest-actions",
       "pf2e-legacy-content.actions-legacy",
     ],
     spells: [
@@ -90,6 +98,7 @@ const CONSTANTS = {
       "starfinder-field-test-for-pf2e.spells",
       "pf2e.spells-srd",
       "pf2e-playtest-data.war-of-immortals-playtest-spells",
+      "pf2e-playtest-data.impossible-playtest-spells",
       "pf2e-legacy-content.spells-legacy",
     ],
     classes: [
@@ -97,6 +106,8 @@ const CONSTANTS = {
       "starfinder-field-test-for-pf2e.classes",
       "pf2e.classes",
       "pf2e-playtest-data.war-of-immortals-playtest-classes",
+      "pf2e-playtest-data.battlecry-playtest-classes",
+      "pf2e-playtest-data.impossible-playtest-classes",
       "pf2e-legacy-content.classes-legacy",
     ],
     ancestries: [

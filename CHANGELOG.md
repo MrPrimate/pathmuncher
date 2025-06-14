@@ -1,3 +1,7 @@
+# 1.3.9
+
+- Add Impossible and Battlecry playtest compendiums to default lookups.
+
 # 1.3.8
 
 - Outlaw mapping
