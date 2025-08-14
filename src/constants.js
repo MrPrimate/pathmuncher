@@ -59,6 +59,7 @@ const CONSTANTS = {
       "clerics.clerics-features",
       "starfinder-field-test-for-pf2e.feats",
       "pf2e.feats-srd",
+      "sf2e-anachronism.feats",
       "pf2e-playtest-data.war-of-immortals-playtest-class-feats",
       "pf2e-playtest-data.battlecry-playtest-class-feats",
       "pf2e-playtest-data.impossible-playtest-class-feats",
@@ -68,6 +69,7 @@ const CONSTANTS = {
     ancestryFeatures: [
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-features",
       "pf2e.ancestryfeatures",
+      "sf2e-anachronism.ancestry-features",
       "pf2e-legacy-content.ancestry-features-legacy",
     ],
     classFeatures: [
@@ -79,6 +81,7 @@ const CONSTANTS = {
       "clerics.clerics-features",
       "starfinder-field-test-for-pf2e.class-features",
       "pf2e.classfeatures",
+      "sf2e-anachronism.class-features",
       "pf2e-playtest-data.war-of-immortals-playtest-class-features",
       "pf2e-playtest-data.battlecry-playtest-class-features",
       "pf2e-playtest-data.impossible-playtest-class-features",
@@ -88,6 +91,7 @@ const CONSTANTS = {
     actions: [
       "starfinder-field-test-for-pf2e.actions",
       "pf2e.actionspf2e",
+      "sf2e-anachronism.actions",
       "pf2e-playtest-data.war-of-immortals-playtest-actions",
       "pf2e-playtest-data.battlecry-playtest-actions",
       "pf2e-playtest-data.impossible-playtest-actions",
@@ -97,6 +101,7 @@ const CONSTANTS = {
       "pf2e-psychic-amps.psychic-psi-cantrips",
       "starfinder-field-test-for-pf2e.spells",
       "pf2e.spells-srd",
+      "sf2e-anachronism.spells",
       "pf2e-playtest-data.war-of-immortals-playtest-spells",
       "pf2e-playtest-data.impossible-playtest-spells",
       "pf2e-legacy-content.spells-legacy",
@@ -105,6 +110,7 @@ const CONSTANTS = {
       "clerics.clerics-features",
       "starfinder-field-test-for-pf2e.classes",
       "pf2e.classes",
+      "sf2e-anachronism.classes",
       "pf2e-playtest-data.war-of-immortals-playtest-classes",
       "pf2e-playtest-data.battlecry-playtest-classes",
       "pf2e-playtest-data.impossible-playtest-classes",
@@ -115,6 +121,7 @@ const CONSTANTS = {
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-ancestries",
       "starfinder-field-test-for-pf2e.ancestries",
       "pf2e.ancestries",
+      "sf2e-anachronism.ancestries",
       "pf2e-legacy-content.ancestries-legacy",
     ],
     heritages: [
@@ -122,18 +129,20 @@ const CONSTANTS = {
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-heritages",
       "starfinder-field-test-for-pf2e.heritages",
       "pf2e.heritages",
+      "sf2e-anachronism.heritages",
       "pf2e-legacy-content.heritages-legacy",
     ],
     equipment: [
       "battlezoo-ancestries-dragons-pf2e.pf2e-battlezoo-dragon-equipment",
       "battlezoo-ancestries-year-of-monsters-pf2e.yom-equipment",
       "pf2e.equipment-srd",
+      "sf2e-anachronism.equipment",
       "starfinder-field-test-for-pf2e.equipment",
       "pf2e-legacy-content.equipment-legacy",
     ],
     formulas: ["pf2e.equipment-srd", "pf2e-legacy-content.formulas-legacy"],
-    deities: ["pf2e.deities", "pf2e-legacy-content.deities-legacy"],
-    backgrounds: ["pf2e.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
+    deities: ["pf2e.deities", "sf2e-anachronism.deities", "pf2e-legacy-content.deities-legacy"],
+    backgrounds: ["pf2e.backgrounds", "sf2e-anachronism.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
   },
 
   GET_DEFAULT_SETTINGS() {

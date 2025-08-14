@@ -1,3 +1,7 @@
+# 1.3.10
+
+- Built in support for SF2e Anachronism for when importing data from Hephaistos 2E.
+
 # 1.3.9
 
 - Add Impossible and Battlecry playtest compendiums to default lookups.
