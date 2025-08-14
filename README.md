@@ -5,7 +5,7 @@
 ![Foundry Minimum Compatible Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FMrPrimate%2Fpathmuncher%2Fmain%2Fmodule-template.json&label=Foundry%20Version&query=$.compatibility.minimum&colorB=orange)
 ![Foundry Verified Compatible Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FMrPrimate%2Fpathmuncher%2Fmain%2Fmodule-template.json&label=Foundry%20Version&query=$.compatibility.verified&colorB=green)
 
-Import characters from Pathbuilder to Foundry Pathfinder 2e.
+Import characters from Pathbuilder (or Hephaistos 2E) to Foundry Pathfinder 2e.
 
 ![gif-preview](./docs/demo.gif)
 
