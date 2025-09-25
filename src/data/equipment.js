@@ -22,6 +22,7 @@ const SPLITS = [
 
 const SPLITS_INVERT = [
   /^(.*): (.*)/,
+  /^(Charm of Resistance) - (.*)/,
 ];
 
 const REPLACES = [

@@ -1,5 +1,9 @@
 // these are features which are named differently in pathbuilder to foundry
 
+export const IGNORE_MULTISELECT = [
+  "Gate Junction",
+];
+
 const SKILL_LOOKUP = {
   "acrobatics": "acr",
   "arcana": "arc",
@@ -46,6 +50,11 @@ const PREFIX_PB_REMOVALS = [
 const POSTFIX_PB_SPLIT_AND_KEEP = [
   /(\w+) (Impulse) Junction/,
   /(\w+) Gate Junction: (\w+) /,
+  /(\w+) Gate Junction: (.*)$/,
+];
+
+const POSTFIX_PB_SPLIT_AND_KEEP_2 = [
+  // /\w+ (Gate Junction): (\w+ \w+)$/,
 ];
 
 const PARENTHESIS = [
@@ -354,6 +363,12 @@ export function SPECIAL_NAME_ADDITIONS(specials) {
       const match = special.match(reg);
       if (match) {
         newSpecials.push(match[2]);
+      }
+    }
+    for (const reg of POSTFIX_PB_SPLIT_AND_KEEP_2) {
+      const match = special.match(reg);
+      if (match) {
+        newSpecials.push(`${match[1]} (${match[2]})`);
       }
     }
   }
