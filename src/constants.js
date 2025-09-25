@@ -203,6 +203,7 @@ CONSTANTS.DEFAULT_SETTINGS = {
     config: true,
     type: String,
     choices: {
+      VERBOSE: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.verbose`,
       DEBUG: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.debug`,
       INFO: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.info`,
       WARN: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.warn`,
