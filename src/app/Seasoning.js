@@ -36,8 +36,12 @@ export class Seasoning {
     return FEAT_SPELLCASTING.find((f) => f.name === name);
   }
 
+  static getFoundryEquipment(pbName) {
+    return Seasoning.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
+  }
+
   static getFoundryEquipmentName(pbName) {
-    return Seasoning.EQUIPMENT_RENAME_MAP(pbName).find((map) => map.pbName == pbName)?.foundryName ?? pbName;
+    return Seasoning.getFoundryEquipment(pbName)?.foundryName ?? pbName;
   }
 
   // static getFoundryFeatureName(pbName) {

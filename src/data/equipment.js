@@ -9,7 +9,7 @@ const SWAPS = [
 const POSTFIX_PB_REMOVALS = [
   /(.*) (- Melee)$/,
   /(.*) (- Ranged)$/,
-  /(Charm of Resistance .*) - (.*)/,
+  /(.*) - (.*)/,
 ];
 
 const PARENTHESIS = [

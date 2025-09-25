@@ -1,7 +1,13 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { SPECIAL_NAME_ADDITIONS, NO_AUTO_CHOICE, specialOnlyNameLookup, BAD_IGNORE_FEATURES } from "../data/features.js";
+import {
+  SPECIAL_NAME_ADDITIONS,
+  NO_AUTO_CHOICE,
+  specialOnlyNameLookup,
+  BAD_IGNORE_FEATURES,
+  IGNORE_MULTISELECT,
+} from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -202,7 +208,8 @@ export class Pathmuncher {
   }
 
   #nameMapSourceEquipment(e) {
-    const name = Seasoning.getFoundryEquipmentName(e[0]);
+    const mappingData = Seasoning.getFoundryEquipment(e[0]);
+    const name = mappingData?.foundryName ?? e[0];
     const containerKey = Object.keys(this.source.equipmentContainers)
       .find((key) => this.source.equipmentContainers[key].containerName === name);
 
@@ -226,6 +233,7 @@ export class Pathmuncher {
       foundryId,
       invested: e[2] === "Invested",
       sourceType: "equipment",
+      extra: mappingData?.details ?? undefined,
     };
     this.parsed.equipment.push(item);
   }
@@ -656,6 +664,14 @@ export class Pathmuncher {
         hintMatch.rank = -10;
         return hintMatch;
       }
+    } else if (type === "equipment" && document) {
+      const extraMatch = this.parsed[type].find((e) =>
+        (!ignoreAdded || (ignoreAdded && !e.added))
+        && e.extra
+        && Seasoning.slug(e.foundryName) === (document.system.slug ?? Seasoning.slug(document.name))
+        && Seasoning.slug(e.extra) === slug,
+      );
+      if (extraMatch) return extraMatch;
     }
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
     const parsedMatch = this.parsed[type].find((f) =>
@@ -697,6 +713,10 @@ export class Pathmuncher {
   }
 
   #findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+    if (["equipment", "consumable"].includes(document.type)) {
+      const equipmentMatch = this.#parsedFeatureMatch("equipment", document, slug, { ignoreAdded });
+      return equipmentMatch;
+    }
     // console.warn("Finding all feature matches", { document, slug, ignoreAdded, isChoiceMatch, featType });
     const featMatch = this.#parsedFeatureMatch("feats", document, slug, { ignoreAdded, featType });
     if (featMatch) return featMatch;
@@ -808,6 +828,17 @@ export class Pathmuncher {
           ? Seasoning.slug(doc.name)
           : doc.system.slug;
       const featMatch = this.#findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch: false });
+      // if (document.name === "Charm of Resistance") {
+      //   console.warn({
+      //     doc,
+      //     document,
+      //     choice,
+      //     featMatch,
+      //     slug,
+      //     ignoreAdded,
+      //     choiceHint,
+      //   })
+      // }
       if (featMatch) {
         matches.push({
           slug,
@@ -820,19 +851,17 @@ export class Pathmuncher {
     if (matches.length > 0) {
       if (choiceHint) {
         const hintMatch = matches.find((m) => m.slug === Seasoning.slug(choiceHint));
-        if (hintMatch) return hintMatch;
+        if (hintMatch) return hintMatch.choice ?? hintMatch;
       }
       if (this.devMode) logger.warn(`MATCHES`, { matches, choiceHint });
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
       const existingMatch = false;
-      // featMatch.sourceType
-      //   ? this.parsed[featMatch.sourceType].some((f) => f.addedId === document._id)
-      //   : false;
+
       if (this.devMode && existingMatch) {
         logger.warn(`Feature Choice Existing match for ${document.name}`, { featMatch, existingMatch, document });
       }
-      // console.warn(`Match for ${document.name} featureChoiceMatch`, { match, featMatch, existingMatch, document });
+
       if (adjustName && foundry.utils.hasProperty(featMatch, "added") && !existingMatch) {
         featMatch.added = true;
         featMatch.addedId = document._id;
@@ -891,8 +920,6 @@ export class Pathmuncher {
     const tempActor = await this.#generateTempActor({
       documents: [document],
       includePassedDocumentsRules: false,
-      // includeGrants: false,
-      // includePassedDocumentsRules: true,
       includeGrants: false,
       includeFlagsOnly: true,
       processedRules,
@@ -1166,7 +1193,8 @@ export class Pathmuncher {
     logger.debug(`addGrantedRules for ${document.name}`, foundry.utils.duplicate(document));
 
     if (
-      foundry.utils.hasProperty(document, "system.level.value")
+      !["equipment", "consumable", "armor", "backpack", "kit", "treasure", "weapon", "shield"].includes(document.type)
+      && foundry.utils.hasProperty(document, "system.level.value")
       && document.system.level.value > foundry.utils.getProperty(this.result.character, "system.details.level.value")
     ) {
       return;
@@ -1758,7 +1786,7 @@ export class Pathmuncher {
           choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
           levelCap,
         };
-        await this.#addGrantedItems(docData, "feat", options);
+        await this.#addGrantedItems(docData, options);
       }
     }
   }
