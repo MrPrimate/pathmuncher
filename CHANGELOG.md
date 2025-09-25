@@ -1,3 +1,10 @@
+# 1.4.0
+
+- Some choices, notably on kineticist builds, were not copied correctly.
+- Some improvements to feature renaming.
+- Some name mapping improvements.
+- Handle equipments such as Cloak of resistance with choice
+
 # 1.3.10
 
 - Built in support for SF2e Anachronism for when importing data from Hephaistos 2E.
