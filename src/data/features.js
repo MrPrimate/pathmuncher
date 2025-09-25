@@ -130,6 +130,7 @@ const FEAT_RENAME_STATIC_MAP = [
   { pbName: "Lumberjack Dedication", foundryName: "Turpin Rowe Lumberjack Dedication" },
   { pbName: "Lumberjack", foundryName: "Lumber Consortium Laborer" },
   { pbName: "Maestro", foundryName: "Maestro Muse" },
+  { pbName: "Mercenary", foundryName: "Molthuni Mercenary" },
   { pbName: "Major Lesson I", foundryName: "Major Lesson" },
   { pbName: "Major Lesson II", foundryName: "Major Lesson" },
   { pbName: "Major Lesson III", foundryName: "Major Lesson" },
@@ -227,6 +228,16 @@ const FEAT_RENAME_STATIC_MAP = [
 
   // semi-official
   { pbName: "Ifrit", foundryName: "Naari" },
+
+  // dragonblood
+  { pbName: "Adamantine", foundryName: "Adamantine Dragon" },
+  { pbName: "Conspirator", foundryName: "Conspirator Dragon" },
+  { pbName: "Diabolical", foundryName: "Diabolical Dragon" },
+  { pbName: "Empyreal", foundryName: "Empyreal Dragon" },
+  { pbName: "Fortune", foundryName: "Fortune Dragon" },
+  { pbName: "Horned", foundryName: "Horned Dragon" },
+  { pbName: "Mirage", foundryName: "Mirage Dragon" },
+  { pbName: "Omen", foundryName: "Omen Dragon" },
 ];
 
 function generateDynamicNames(pbName) {
