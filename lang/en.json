@@ -22,6 +22,7 @@
       "LogLevel": {
         "Name": "Log Level",
         "Hint": "The level of logs to place into the console.",
+        "verbose": "VERBOSE - Pointlessly detailed logs",
         "debug": "DEBUG - Lots of details",
         "info": "INFO - Informative messages",
         "warn": "WARN - Warnings & warnings only",

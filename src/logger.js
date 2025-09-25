@@ -8,7 +8,7 @@ const logger = {
     }
 
     const setting = utils.setting("LOG_LEVEL");
-    const logLevels = ["DEBUG", "INFO", "WARN", "ERR", "OFF"];
+    const logLevels = ["VERBOSE", "DEBUG", "INFO", "WARN", "ERR", "OFF"];
     const logLevelIndex = logLevels.indexOf(logLevel.toUpperCase());
     if (setting == "OFF" || logLevelIndex === -1 || logLevelIndex < logLevels.indexOf(setting)) {
       return false;
@@ -34,6 +34,13 @@ const logger = {
     }
     msg = `${CONSTANTS.MODULE_NAME} | ${logLevel} > ${msg}`;
     switch (logLevel) {
+      case "VERBOSE":
+        if (payload) {
+          console.verbose(msg, ...payload); // eslint-disable-line no-console
+        } else {
+          console.verbose(msg); // eslint-disable-line no-console
+        }
+        break;
       case "DEBUG":
         if (payload) {
           console.debug(msg, ...payload); // eslint-disable-line no-console
@@ -65,6 +72,10 @@ const logger = {
       default:
         break;
     }
+  },
+
+  verbose: (...data) => {
+    logger.log("VERBOSE", ...data);
   },
 
   debug: (...data) => {
