@@ -887,7 +887,7 @@ export class Pathmuncher {
   }
 
   async #evaluateChoices(document, choiceSet, choiceHint, processedRules) {
-    logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet, choiceHint });
+    logger.debug(`Evaluating choices for ${document.name}`, { document, choiceSet, choiceHint, processedRules });
     const tempActor = await this.#generateTempActor({
       documents: [document],
       includePassedDocumentsRules: false,
@@ -1008,7 +1008,7 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       // console.warn("creating grant item");
-      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item });
+      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item, suppressWarnings: true });
       // console.warn("Begining uuid resovle");
       const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
 
@@ -1072,8 +1072,8 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item, suppressWarnings: true })
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item, suppressWarnings: true });
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
 
       if (rule.predicate) {
@@ -1123,8 +1123,8 @@ export class Pathmuncher {
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item })
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item });
+        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item, suppressWarnings: true })
+        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item, suppressWarnings: true });
       const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
 
       if (rule.predicate) {
@@ -1185,7 +1185,7 @@ export class Pathmuncher {
     };
 
     for (const ruleEntry of document.system.rules) {
-      logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, ruleEntry);
+      logger.debug(`Ping ${document.name} rule key: ${ruleEntry.key}`, foundry.utils.deepClone(ruleEntry));
       if (!["ChoiceSet", "GrantItem"].includes(ruleEntry.key)) {
         // size work around due to Pathbuilder not always adding the right size to json
         if (ruleEntry.key === "CreatureSize") this.size = ruleEntry.value;
@@ -1199,23 +1199,23 @@ export class Pathmuncher {
         continue;
       }
       logger.debug(`Checking ${document.name} rule key: ${ruleEntry.key}`, {
-        ruleEntry,
+        ruleEntry: foundry.utils.deepClone(ruleEntry),
         docRules: foundry.utils.deepClone(document.system.rules),
         document: foundry.utils.deepClone(document),
       });
 
       if (ruleEntry.key === "ChoiceSet" && ruleEntry.predicate) {
-        logger.debug(`Checking for predicates`, {
+        logger.debug(`Checking for predicates`, foundry.utils.deepClone({
           ruleEntry,
           document,
           rulesToKeep,
-        });
+        }));
         const testResult = await this.#checkRulePredicate(foundry.utils.duplicate(document), ruleEntry, [rulesToKeep]);
         if (!testResult) {
           const data = { document, ruleEntry, testResult };
           logger.debug(
             `The test failed for ${document.name} rule key: ${ruleEntry.key} (This is probably not a problem).`,
-            data,
+            foundry.utils.deepClone(data),
           );
           addRuleToKeep(ruleEntry);
           continue;
@@ -1411,7 +1411,7 @@ export class Pathmuncher {
       if (parseInt(grantedFeature.level) > foundry.utils.getProperty(this.result.character, "system.details.level.value")
         || parseInt(grantedFeature.level) !== level
       ) {
-        logger.debug(`Not processing ${grantedFeature.name} due to level data mismatch`, {
+        logger.verbose(`Not processing ${grantedFeature.name} due to level data mismatch`, {
           grantedFeature,
           level,
           levelCap,
@@ -1701,7 +1701,7 @@ export class Pathmuncher {
 
     for (const featArray of [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
-        logger.debug(`Checking if  ${pBFeat.name} needs processing`, pBFeat);
+        logger.verbose(`Checking if ${pBFeat.name} needs processing`, pBFeat);
         if (pBFeat.added) continue;
         if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
         if (utils.isString(levelCap) && pBFeat.level !== levelCap) continue;
@@ -2551,6 +2551,7 @@ export class Pathmuncher {
       await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "Destiny Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
       await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true, excludeParents: true });
+      await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat", levelCap: i, excludeChild: true, excludeParents: true });
     }
     await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
     // prepass for non-child items
@@ -2595,7 +2596,8 @@ export class Pathmuncher {
   }
 
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
-    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false } = {},
+    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false, continueOnProcessedRules = true,
+    removePassedDocuments = false } = {},
   ) {
     const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
     actorData.name = `Mr Temp (${this.result.character.name})`;
@@ -2648,7 +2650,8 @@ export class Pathmuncher {
         const isPassedDocument = documents.some((d) => d._id === i._id);
         if (isPassedDocument && processedRules.length > 0) {
           i.system.rules = foundry.utils.deepClone(processedRules);
-          continue;
+          if (this.devMode) logger.warn(`${i.name} is passed document`, foundry.utils.deepClone(i));
+          if (continueOnProcessedRules) continue;
         } else if (isPassedDocument && !includePassedDocumentsRules && !includeFlagsOnly) {
           continue;
         }
@@ -2663,6 +2666,12 @@ export class Pathmuncher {
             return r;
           });
 
+        if (this.devMode) logger.warn(`${i.name}`, {
+          objectSelectionRules: foundry.utils.duplicate(objectSelectionRules),
+          isPassedDocument,
+          iRules: foundry.utils.duplicate(i.system.rules),
+        });
+
         if (objectSelectionRules.length > 0) {
           ruleUpdates.push({
             _id: i._id,
@@ -2673,7 +2682,7 @@ export class Pathmuncher {
         }
       }
 
-      // console.warn("Rule updates", foundry.utils.duplicate(ruleUpdates));
+      if (this.devMode) logger.warn("Rule updates", foundry.utils.duplicate(ruleUpdates));
 
       const items = foundry.utils.duplicate(currentItems).map((i) => {
         if (i.system.items) i.system.items = [];
@@ -2920,7 +2929,7 @@ export class Pathmuncher {
       }
     }
 
-    logger.debug("Creating items", newItems);
+    logger.debug(`Creating items ${newItems.map((i) => i.name).join(", ")}`, newItems);
     await this.actor.createEmbeddedDocuments("Item", newItems, { keepId: true });
     logger.debug("Rule updates", ruleUpdates);
     await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
