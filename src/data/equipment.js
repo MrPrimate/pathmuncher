@@ -133,7 +133,11 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Wand of Manifold Missiles (5th-Level Spell)", foundryName: "Wand of Shardstorm (5th-Rank Spell)" },
   { pbName: "Wand of Manifold Missiles (7th-Level Spell)", foundryName: "Wand of Shardstorm (7th-Rank Spell)" },
   { pbName: "Black Powder (Dose or Round)", foundryName: "Black Powder (Dose)" },
-
+  { pbName: "Weapon Striking", foundryName: "Striking" },
+  { pbName: "Weapon Striking (Greater)", foundryName: "Striking (Greater)" },
+  { pbName: "Weapon Striking (Major)", foundryName: "Striking (Major)" },
+  { pbName: "Weapon Striking (Lesser)", foundryName: "Striking (Lesser)" },
+  { pbName: "Weapon Striking (Moderate)", foundryName: "Striking (Moderate)" },
 ];
 
 // function ammunitionMatch(pbName) {

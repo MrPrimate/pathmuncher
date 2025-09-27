@@ -55,20 +55,22 @@ export class CompendiumMatcher {
   }
 
   getSlugMatch(pbName, foundryName) {
+    const foundrySlug = Seasoning.slug(foundryName);
+    const pbSlug = Seasoning.slug(pbName);
     for (const [packName, index] of Object.entries(this.indexes)) {
       logger.debug(`Checking for compendium documents for ${pbName} (${foundryName}) in ${packName}`, {
         pbName,
         foundryName,
         packName,
         // index,
-        // foundrySlug: Seasoning.slug(foundryName),
-        // pbSlug: Seasoning.slug(pbName),
+        foundrySlug,
+        pbSlug,
         // foundryMatch: index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(foundryName)),
         // pbMatch: index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(pbName)),
         // pbSlugMatch: (null ?? Seasoning.slug("Phase Bolt (Psychic)")) === Seasoning.slug("Phase Bolt (Psychic)"),
       });
-      const indexMatch = index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(foundryName))
-        ?? index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(pbName));
+      const indexMatch = index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === foundrySlug)
+        ?? index.find((i) => (i.system.slug ?? Seasoning.slug(i.name)) === pbSlug);
 
       if (indexMatch) {
         logger.debug(`Found slug based compendium document for ${pbName} (${foundryName}) in ${packName} with id ${indexMatch._id}`);
@@ -101,19 +103,24 @@ export class CompendiumMatcher {
   }
 
   getNameMatchWithFilter(pbName, foundryName, filters = {}) {
+    const foundrySlug = Seasoning.slug(foundryName);
+    const pbSlug = Seasoning.slug(pbName);
+    logger.debug(`Looking for compendium document for ${pbName} (${foundryName}) with filters`, { pbName, foundryName, filters, foundrySlug, pbSlug });
     for (const [packName, index] of Object.entries(this.indexes)) {
       logger.debug(`Checking for compendium documents for ${pbName} (${foundryName}) in ${packName}`, {
         pbName,
         foundryName,
         filters,
         packName,
+        foundrySlug,
+        pbSlug,
         // index,
       });
       const indexMatch = index.find((i) =>
-        ((i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(foundryName))
+        ((i.system.slug ?? Seasoning.slug(i.name)) === foundrySlug)
           && CompendiumMatcher.checkForFilters(i, filters))
         ?? index.find((i) =>
-          ((i.system.slug ?? Seasoning.slug(i.name)) === Seasoning.slug(pbName)
+          ((i.system.slug ?? Seasoning.slug(i.name)) === pbSlug
           && CompendiumMatcher.checkForFilters(i, filters)),
         );
 

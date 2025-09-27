@@ -140,7 +140,10 @@ const CONSTANTS = {
       "starfinder-field-test-for-pf2e.equipment",
       "pf2e-legacy-content.equipment-legacy",
     ],
-    formulas: ["pf2e.equipment-srd", "pf2e-legacy-content.formulas-legacy"],
+    formulas: [
+      "pf2e.equipment-srd",
+      "pf2e-legacy-content.formulas-legacy",
+    ],
     deities: ["pf2e.deities", "sf2e-anachronism.deities", "pf2e-legacy-content.deities-legacy"],
     backgrounds: ["pf2e.backgrounds", "sf2e-anachronism.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
   },

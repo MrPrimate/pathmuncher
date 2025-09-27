@@ -2444,8 +2444,8 @@ export class Pathmuncher {
       logger.debug("ritual spell details", { ritual, spellName: ritualName });
 
       const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName);
-      if (!indexMatch || !foundry.utils.hasProperty(indexMatch, "system.ritual")) {
-        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName, ritualCompendium });
+      if (!indexMatch || !foundry.utils.hasProperty(indexMatch, "i.system.ritual")) {
+        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName, indexMatch });
         this.bad.push({ pbName: ritual, type: "ritual", details: { originalName: ritual, name: ritualName } });
         continue;
       }
@@ -2566,9 +2566,11 @@ export class Pathmuncher {
 
     for (const formulaSource of this.source.formula) {
       for (const formulaName of formulaSource.known) {
-        const indexMatch = this.compendiumMatchers["formulas"].getMatch(formulaName, formulaName);
+        const mappingData = Seasoning.getFoundryEquipment(formulaName);
+        const foundryName = mappingData?.foundryName ?? formulaName;
+        const indexMatch = this.compendiumMatchers["formulas"].getMatch(foundryName, formulaName);
         if (!indexMatch) {
-          logger.error(`Unable to match formula ${formulaName}`, { formulaSource, name: formulaName });
+          logger.error(`Unable to match formula ${formulaName}`, { formulaSource, mappingData, foundryName, formulaName });
           this.bad.push({ pbName: formulaName, type: "formula", details: { formulaSource, name: formulaName } });
           continue;
         }
