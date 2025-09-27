@@ -1,3 +1,9 @@
+# 1.4.2
+
+- Fixes to ritual import
+- Missing formula's on import were not displayed.
+- Improve formula name detection.
+
 # 1.4.1
 
 - Ancient Elf Dedications would not process any rules on import.
