@@ -1205,7 +1205,15 @@ export class Pathmuncher {
       !["equipment", "consumable", "armor", "backpack", "kit", "treasure", "weapon", "shield"].includes(document.type)
       && foundry.utils.hasProperty(document, "system.level.value")
       && document.system.level.value > foundry.utils.getProperty(this.result.character, "system.details.level.value")
+      // ancient elf can grant a dedication at level 1
+      && !(document.system.slug ?? Seasoning.slug(document.name)).endsWith("-dedication")
     ) {
+      logger.warn(`Not granting due to level restrictions`, {
+        document, originType,
+        choiceHint,
+        character: foundry.utils.getProperty(this.result.character, "system"),
+        characterLevel: foundry.utils.getProperty(this.result.character, "system.details.level.value"),
+      });
       return;
     }
 

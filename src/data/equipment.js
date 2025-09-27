@@ -61,7 +61,7 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Moderate Swapping Stone", foundryName: "Moderate Bonmuan Swapping Stone" },
   { pbName: "Greater Swapping Stone", foundryName: "Greater Bonmuan Swapping Stone" },
   { pbName: "Heartstone", foundryName: "Skarja's Heartstone" },
-  { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
+  // { pbName: "Bullets (10 rounds)", foundryName: "Sling Bullets" },
   { pbName: "Hide", foundryName: "Hide Armor" },
   { pbName: "Soverign Glue", foundryName: "Sovereign Glue" },
   { pbName: "Axe Musket - Melee", foundryName: "Axe Musket" },
@@ -134,6 +134,19 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Wand of Manifold Missiles (7th-Level Spell)", foundryName: "Wand of Shardstorm (7th-Rank Spell)" },
 
 ];
+
+// function ammunitionMatch(pbName) {
+//   const ammoRegex = /^(.*) Ammunition( (\d+) Shots)?/;
+//   const match = pbName.match(ammoRegex);
+//   if (!match) return [];
+//   const results = [];
+//   results.push({
+//     pbName,
+//     foundryName: `Rounds (${match[1]})`,
+//     details: match[1],
+//     amount: match[3] ? parseInt(match[3]) : 10,
+//   });
+// }
 
 function dynamicNamesSteps(pbName) {
   const result = [];
