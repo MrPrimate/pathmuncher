@@ -1,3 +1,7 @@
+# 1.4.1
+
+- Ancient Elf Dedications would not process any rules on import.
+
 # 1.4.0
 
 - Some choices, notably on kineticist builds, were not copied correctly.
