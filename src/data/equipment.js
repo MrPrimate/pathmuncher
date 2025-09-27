@@ -132,6 +132,7 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Wand of Manifold Missiles (3rd-Level Spell)", foundryName: "Wand of Shardstorm (3rd-Rank Spell)" },
   { pbName: "Wand of Manifold Missiles (5th-Level Spell)", foundryName: "Wand of Shardstorm (5th-Rank Spell)" },
   { pbName: "Wand of Manifold Missiles (7th-Level Spell)", foundryName: "Wand of Shardstorm (7th-Rank Spell)" },
+  { pbName: "Black Powder (Dose or Round)", foundryName: "Black Powder (Dose)" },
 
 ];
 

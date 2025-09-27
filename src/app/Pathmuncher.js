@@ -37,31 +37,31 @@ export class Pathmuncher {
     return match ?? { pbName, foundryName: pbName, details: undefined };
   }
 
-  constructor(actor, { addFeats = true, addEquipment = true, addSpells = true, adjustBlendedSlots = true,
-    addMoney = true, addLores = true, addWeapons = true, addArmor = true, addTreasure = true, addDeity = true,
-    addName = true, addClass = true, addBackground = true, addHeritage = true, addAncestry = true,
-    statusCallback = null } = {},
-  ) {
+  static DEFAULTS = {
+    addFeats: true,
+    addEquipment: true,
+    addSpells: true,
+    adjustBlendedSlots: true,
+    addMoney: true,
+    addLores: true,
+    addWeapons: true,
+    addArmor: true,
+    addTreasure: true,
+    addDeity: true,
+    addName: true,
+    addClass: true,
+    addBackground: true,
+    addHeritage: true,
+    addAncestry: true,
+    statusCallback: null,
+    addFamiliars: true,
+    addFormulas: true,
+  };
+
+  constructor(actor, options = {}) {
     this.devMode = game.modules.get("pathmuncher").version === "999.0.0";
     this.actor = actor;
-    // note not all these options do anything yet!
-    this.options = {
-      addTreasure,
-      addMoney,
-      addFeats,
-      addSpells,
-      adjustBlendedSlots,
-      addEquipment,
-      addLores,
-      addWeapons,
-      addArmor,
-      addDeity,
-      addName,
-      addClass,
-      addBackground,
-      addHeritage,
-      addAncestry,
-    };
+    this.options = foundry.utils.mergeObject(CONSTANTS.ACTOR_FLAGS, options, { inplace: false });
     this.source = null;
     this.parsed = {
       specials: [],
@@ -124,7 +124,7 @@ export class Pathmuncher {
     };
     this.check = {};
     this.bad = [];
-    this.statusCallback = statusCallback;
+    this.statusCallback = this.options.statusCallback;
     this.compendiumMatchers = {};
     const compendiumMappings = utils.setting("USE_CUSTOM_COMPENDIUM_MAPPINGS")
       ? utils.setting("CUSTOM_COMPENDIUM_MAPPINGS")
@@ -2441,12 +2441,12 @@ export class Pathmuncher {
 
     for (const ritual of this.source.rituals) {
       const ritualName = ritual.split("(")[0].trim();
-      logger.debug("focus spell details", { ritual, spellName: ritualName });
+      logger.debug("ritual spell details", { ritual, spellName: ritualName });
 
       const indexMatch = this.compendiumMatchers["spells"].getNameMatchWithFilter(ritualName, ritualName);
       if (!indexMatch || !foundry.utils.hasProperty(indexMatch, "system.ritual")) {
-        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName });
-        this.bad.push({ pbName: ritual, type: "spell", details: { originalName: ritual, name: ritualName } });
+        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName, ritualCompendium });
+        this.bad.push({ pbName: ritual, type: "ritual", details: { originalName: ritual, name: ritualName } });
         continue;
       }
 
@@ -3117,7 +3117,7 @@ export class Pathmuncher {
       ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
       : [];
     const badWeapons = this.options.addWeapons
-      ? this.bad.filter((b) => b.type === "weapons").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Weapons")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "weapon").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Weapons")}: ${b.pbName}</li>`)
       : [];
     const badArmor = this.options.addArmor
       ? this.bad.filter((b) => b.type === "armor").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Armor")}: ${b.pbName}</li>`)
@@ -3126,13 +3126,16 @@ export class Pathmuncher {
       ? this.bad.filter((b) => b.type === "spellcasting").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spellcasting")}: ${b.pbName}</li>`)
       : [];
     const badSpells = this.options.addSpells
-      ? this.bad.filter((b) => b.type === "spells").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "spell").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
       : [];
     const badFamiliars = this.options.addFamiliars
-      ? this.bad.filter((b) => b.type === "familiars").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Familiars")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "familiar").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Familiars")}: ${b.pbName}</li>`)
       : [];
     const badFormulas = this.options.addFormulas
-      ? this.bad.filter((b) => b.type === "formulas").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Formulas")}: ${b.pbName}</li>`)
+      ? this.bad.filter((b) => b.type === "formula").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Formulas")}: ${b.pbName}</li>`)
+      : [];
+    const badRituals = this.options.addSpells
+      ? this.bad.filter((b) => b.type === "ritual").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Rituals")}: ${b.pbName}</li>`)
       : [];
     const totalBad = [
       ...badClass,
@@ -3150,6 +3153,7 @@ export class Pathmuncher {
       ...badSpells,
       ...badFamiliars,
       ...badFormulas,
+      ...badRituals,
     ];
 
     let warning = "";
