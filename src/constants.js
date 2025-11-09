@@ -12,6 +12,7 @@ const CONSTANTS = {
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
     USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
     DISPLAY_TITLE: "display-title",
+    AUTO_CREATE_TEMP_FOLDER: "auto-create-temp-folder",
   },
 
   FEAT_PRIORITY: [
@@ -148,6 +149,8 @@ const CONSTANTS = {
     backgrounds: ["pf2e.backgrounds", "sf2e-anachronism.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
   },
 
+  TEMP_FOLDER_FOUNDRY_MIN_VERSION: "13",
+
   GET_DEFAULT_SETTINGS() {
     return foundry.utils.deepClone(CONSTANTS.DEFAULT_SETTINGS);
   },
@@ -214,6 +217,16 @@ CONSTANTS.DEFAULT_SETTINGS = {
       OFF: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.off`,
     },
     default: "WARN",
+  },
+
+  [CONSTANTS.SETTINGS.AUTO_CREATE_TEMP_FOLDER]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: debouncedReload,
   },
 
 };

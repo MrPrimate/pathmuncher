@@ -33,6 +33,10 @@
         "Title": "Use custom compendium mappings?",
         "Label": "Custom Compendium Mappings",
         "Hint": "This is useful for things like Battlezoo or Cleric+ modules, or even if you have your own compendium of custom feats."
+      },
+      "AutoCreateTempFolder": {
+        "Name": "Automatically create folders?",
+        "Hint": "Creates required folders whenever a GM user logs in."
       }
     },
     "Dialogs": {
@@ -95,7 +99,8 @@
     },
     "Chat": {},
     "Notifications": {
-      "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user."
+      "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user.",
+      "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually."
     },
     "Labels": {
       "Character": "Character details",
@@ -134,7 +139,8 @@
     },
     "Folders": {
       "Familiar": "Familiars",
-      "Familiars": "Familiars"
+      "Familiars": "Familiars",
+      "PathmuncherTemp": "PathmuncherTemp"
     },
     "CompendiumGroups": {
       "feats": "Feats",

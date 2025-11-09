@@ -57,6 +57,20 @@ const utils = {
     // console.warn(`Looking for ${root} ${entityType} ${folderName}`);
     // console.warn(folder);
     if (folder) return folder;
+
+    if (!Folder.canUserCreate(game.user))
+    {
+      const errorMsg = game.i18n.format(
+        `${CONSTANTS.FLAG_NAME}.Notifications.CreateFolderError`,
+        {
+          userName: game.user.name,
+          folderName: folderName
+        }
+      );
+      ui.notifications.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
     folder = await Folder.create(
       {
         name: folderName,
