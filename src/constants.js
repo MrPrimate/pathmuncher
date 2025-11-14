@@ -12,6 +12,9 @@ const CONSTANTS = {
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
     USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
     DISPLAY_TITLE: "display-title",
+    AUTO_CREATE_TEMP_FOLDER: "auto-create-temp-folder",
+    USE_TEMP_FOLDER: "use-temp-folder",
+    ACTIVE_GM: "active-gm",
   },
 
   FEAT_PRIORITY: [
@@ -165,6 +168,25 @@ CONSTANTS.DEFAULT_SETTINGS = {
     default: true,
   },
 
+  [CONSTANTS.SETTINGS.AUTO_CREATE_TEMP_FOLDER]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: debouncedReload,
+  },
+
+  [CONSTANTS.SETTINGS.USE_TEMP_FOLDER]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.UseTempFolder.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.UseTempFolder.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+  },
+
   [CONSTANTS.SETTINGS.RESTRICT_TO_TRUSTED]: {
     name: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Name`,
     hint: `${CONSTANTS.FLAG_NAME}.Settings.RestrictToTrusted.Hint`,
@@ -214,6 +236,13 @@ CONSTANTS.DEFAULT_SETTINGS = {
       OFF: `${CONSTANTS.FLAG_NAME}.Settings.LogLevel.off`,
     },
     default: "WARN",
+  },
+
+  [CONSTANTS.SETTINGS.ACTIVE_GM]: {
+    scope: "world",
+    config: false,
+    type: String,
+    default: "",
   },
 
 };

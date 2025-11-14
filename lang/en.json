@@ -33,6 +33,14 @@
         "Title": "Use custom compendium mappings?",
         "Label": "Custom Compendium Mappings",
         "Hint": "This is useful for things like Battlezoo or Cleric+ modules, or even if you have your own compendium of custom feats."
+      },
+      "AutoCreateTempFolder": {
+        "Name": "Automatically create folders?",
+        "Hint": "Creates required folders whenever a GM user logs in."
+      },
+      "UseTempFolder": {
+        "Name": "Use temporary folder for imports?",
+        "Hint": "Imports will go into a temporary folder which you can then move things out of later. This is useful for allowing players to import their own characters without cluttering up the main actor directory with temporary actors created during munching."
       }
     },
     "Dialogs": {
@@ -95,7 +103,8 @@
     },
     "Chat": {},
     "Notifications": {
-      "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user."
+      "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user.",
+      "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually."
     },
     "Labels": {
       "Character": "Character details",
@@ -134,7 +143,8 @@
     },
     "Folders": {
       "Familiar": "Familiars",
-      "Familiars": "Familiars"
+      "Familiars": "Familiars",
+      "PathmuncherTemp": "Pathmuncher Scratchpad"
     },
     "CompendiumGroups": {
       "feats": "Feats",

@@ -1,5 +1,6 @@
 import { CompendiumSelector } from "../app/CompendiumSelector.js";
 import CONSTANTS from "../constants.js";
+import utils from "../utils.js";
 
 async function resetSettings() {
   for (const [name, data] of Object.entries(CONSTANTS.GET_DEFAULT_SETTINGS())) {
@@ -33,6 +34,16 @@ class ResetSettingsDialog extends FormApplication {
       },
       default: "cancel",
     });
+  }
+}
+
+export async function processActiveGM() {
+  // determine if this user is the active gm/first active in current session
+  if (game.user.isGM) {
+    const currentGMUser = game.users.get(utils.setting("ACTIVE_GM"));
+    if ((currentGMUser && !currentGMUser.active) || !currentGMUser) {
+      await utils.updateSetting("ACTIVE_GM", game.user.id);
+    }
   }
 }
 
