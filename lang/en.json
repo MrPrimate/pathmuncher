@@ -37,6 +37,10 @@
       "AutoCreateTempFolder": {
         "Name": "Automatically create folders?",
         "Hint": "Creates required folders whenever a GM user logs in."
+      },
+      "UseTempFolder": {
+        "Name": "Use temporary folder for imports?",
+        "Hint": "Imports will go into a temporary folder which you can then move things out of later. This is useful for allowing players to import their own characters without cluttering up the main actor directory with temporary actors created during munching."
       }
     },
     "Dialogs": {
@@ -140,7 +144,7 @@
     "Folders": {
       "Familiar": "Familiars",
       "Familiars": "Familiars",
-      "PathmuncherTemp": "PathmuncherTemp"
+      "PathmuncherTemp": "Pathmuncher Scratchpad"
     },
     "CompendiumGroups": {
       "feats": "Feats",

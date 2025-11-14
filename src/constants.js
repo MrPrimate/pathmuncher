@@ -13,6 +13,8 @@ const CONSTANTS = {
     USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
     DISPLAY_TITLE: "display-title",
     AUTO_CREATE_TEMP_FOLDER: "auto-create-temp-folder",
+    USE_TEMP_FOLDER: "use-temp-folder",
+    ACTIVE_GM: "active-gm",
   },
 
   FEAT_PRIORITY: [
@@ -149,8 +151,6 @@ const CONSTANTS = {
     backgrounds: ["pf2e.backgrounds", "sf2e-anachronism.backgrounds", "pf2e-legacy-content.backgrounds-legacy"],
   },
 
-  TEMP_FOLDER_FOUNDRY_MIN_VERSION: "13",
-
   GET_DEFAULT_SETTINGS() {
     return foundry.utils.deepClone(CONSTANTS.DEFAULT_SETTINGS);
   },
@@ -166,6 +166,25 @@ CONSTANTS.DEFAULT_SETTINGS = {
     config: true,
     type: Boolean,
     default: true,
+  },
+
+  [CONSTANTS.SETTINGS.AUTO_CREATE_TEMP_FOLDER]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
+    onChange: debouncedReload,
+  },
+
+  [CONSTANTS.SETTINGS.USE_TEMP_FOLDER]: {
+    name: `${CONSTANTS.FLAG_NAME}.Settings.UseTempFolder.Name`,
+    hint: `${CONSTANTS.FLAG_NAME}.Settings.UseTempFolder.Hint`,
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false,
   },
 
   [CONSTANTS.SETTINGS.RESTRICT_TO_TRUSTED]: {
@@ -219,14 +238,11 @@ CONSTANTS.DEFAULT_SETTINGS = {
     default: "WARN",
   },
 
-  [CONSTANTS.SETTINGS.AUTO_CREATE_TEMP_FOLDER]: {
-    name: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Name`,
-    hint: `${CONSTANTS.FLAG_NAME}.Settings.AutoCreateTempFolder.Hint`,
+  [CONSTANTS.SETTINGS.ACTIVE_GM]: {
     scope: "world",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: debouncedReload,
+    config: false,
+    type: String,
+    default: "",
   },
 
 };

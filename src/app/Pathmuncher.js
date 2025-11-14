@@ -134,7 +134,7 @@ export class Pathmuncher {
     }
 
     this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
-    
+
     this.tempActorCounter = 1;
     this.tempActorFolderName = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Folders.PathmuncherTemp`);
   }
@@ -1027,7 +1027,7 @@ export class Pathmuncher {
       });
       throw err;
     } finally {
-      await this.#tryDeleteTempActor(tempActor);
+      await utils.deleteActor(tempActor);
     }
 
     logger.debug("Evaluate Choices failed", { choiceSet: cleansedChoiceSet, tempActor, document });
@@ -1088,7 +1088,7 @@ export class Pathmuncher {
       });
       throw err;
     } finally {
-      await this.#tryDeleteTempActor(tempActor);
+      await utils.deleteActor(tempActor);
     }
 
     logger.debug("Evaluate UUID failed", { choiceSet: cleansedRuleEntry, tempActor, document });
@@ -1145,7 +1145,7 @@ export class Pathmuncher {
       });
       throw err;
     } finally {
-      await this.#tryDeleteTempActor(tempActor);
+      await utils.deleteActor(tempActor);
     }
   }
 
@@ -1179,7 +1179,7 @@ export class Pathmuncher {
       });
       throw err;
     } finally {
-      await this.#tryDeleteTempActor(tempActor);
+      await utils.deleteActor(tempActor);
     }
   }
 
@@ -2841,29 +2841,16 @@ export class Pathmuncher {
   }
 
   #setTempActorName(actorData) {
-    if (!foundry.utils.isNewerVersion(game.version, CONSTANTS.TEMP_FOLDER_FOUNDRY_MIN_VERSION)) {
-      actorData.name = `Mr Temp (${this.result.character.name})`;
-      return;
-    }
-
     const formattedNum = this.tempActorCounter.toString().padStart(4, "0");
     actorData.name = `Mr Temp (${this.result.character.name}) ${formattedNum}`;
     this.tempActorCounter += 1;
   }
 
   async #setTempActorFolder(actorData) {
-    if (!foundry.utils.isNewerVersion(game.version, CONSTANTS.TEMP_FOLDER_FOUNDRY_MIN_VERSION)) {
-      return;
-    }
-    
+    if (!utils.setting("USE_TEMP_FOLDER")) return;
+
     let tempActorFolder = await utils.getOrCreateFolder(null, "Actor", this.tempActorFolderName);
     actorData.folder = tempActorFolder?.id;
-  }
-
-  async #tryDeleteTempActor(tempActor) {
-    if (tempActor.canUserModify(game.user, "delete")) {
-      await Actor.deleteDocuments([tempActor._id]);
-    }
   }
 
   async processCharacter() {
@@ -3085,14 +3072,6 @@ export class Pathmuncher {
     });
   }
 
-  static async removeTempActors() {
-    for (const actor of game.actors.filter((a) => foundry.utils.getProperty(a, "flags.pathmuncher.temp") === true)) {
-      if (actor.canUserModify(game.user, "delete")) {
-        await actor.delete();
-      }
-    }
-  }
-
   async updateActor() {
     await this.#removeDocumentsToBeUpdated();
 
@@ -3112,7 +3091,7 @@ export class Pathmuncher {
     await this.actor.update(this.result.character);
     await this.#createActorEmbeddedDocuments();
     await this.#restoreEmbeddedRuleLogic();
-    await Pathmuncher.removeTempActors();
+    await utils.removeTempActors();
   }
 
   async postImportCheck() {
