@@ -1,3 +1,7 @@
+# 1.4.3
+
+- Work around for players unable to delete actors in v13. The code will now test that a user is allowed to delete an actor. There are new options to create the temporary actors that Pathmuncher creates in a folder. There will be deleted when the GM logs in or imports from Pathbuilder. Thanks to @shriakhilc .
+
 # 1.4.2
 
 - Fixes to ritual import
