@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
+import { RUNE_ITEM_MAP } from "../data/equipment.js";
 import {
   SPECIAL_NAME_ADDITIONS,
   NO_AUTO_CHOICE,
@@ -1897,55 +1898,59 @@ export class Pathmuncher {
     }
   }
 
+  async #generateEquipmentItem(e) {
+    if (e.pbName === "Adventurer's Pack") return;
+    if (e.added) return;
+    if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
+      e.added = true;
+      e.addedAutoId = "ignored";
+      return;
+    }
+    logger.debug("Generating item for", e);
+    const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.foundryName);
+    if (!indexMatch) {
+      logger.error(`Unable to match ${e.pbName}`, e);
+      this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
+      return;
+    }
+
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+    if (doc.type != "kit") {
+      const itemData = doc.toObject();
+      itemData._id = e.foundryId || foundry.utils.randomID();
+      itemData.system.quantity = e.qty;
+      const type = doc.type === "treasure" ? "treasure" : "equipment";
+      if (e.inContainer) {
+        const containerMatch = this.parsed.equipment.find((con) => con.container?.id === e.inContainer);
+        if (containerMatch) {
+          itemData.system.containerId = containerMatch.foundryId;
+          itemData.system.equipped.carryType = "stowed";
+        }
+      }
+      if (e.invested) {
+        itemData.system.equipped.carryType = "worn";
+        itemData.system.equipped.invested = true;
+        itemData.system.equipped.inSlot = true;
+        itemData.system.equipped.handsHeld = 0;
+      }
+      this.#resizeItem(itemData);
+      this.result[type].push(itemData);
+
+      const options = {
+        applyFeatLocation: false,
+        choiceHint: e.extra && e.extra !== "" ? e.extra : null,
+      };
+      await this.#addGrantedItems(itemData, options);
+      // eslint-disable-next-line require-atomic-updates
+      e.addedId = itemData._id;
+    }
+    // eslint-disable-next-line require-atomic-updates
+    e.added = true;
+  }
+
   async #generateEquipmentItems() {
     for (const e of this.parsed.equipment) {
-      if (e.pbName === "Adventurer's Pack") continue;
-      if (e.added) continue;
-      if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
-        e.added = true;
-        e.addedAutoId = "ignored";
-        continue;
-      }
-      logger.debug("Generating item for", e);
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.foundryName);
-      if (!indexMatch) {
-        logger.error(`Unable to match ${e.pbName}`, e);
-        this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
-        continue;
-      }
-
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      if (doc.type != "kit") {
-        const itemData = doc.toObject();
-        itemData._id = e.foundryId || foundry.utils.randomID();
-        itemData.system.quantity = e.qty;
-        const type = doc.type === "treasure" ? "treasure" : "equipment";
-        if (e.inContainer) {
-          const containerMatch = this.parsed.equipment.find((con) => con.container?.id === e.inContainer);
-          if (containerMatch) {
-            itemData.system.containerId = containerMatch.foundryId;
-            itemData.system.equipped.carryType = "stowed";
-          }
-        }
-        if (e.invested) {
-          itemData.system.equipped.carryType = "worn";
-          itemData.system.equipped.invested = true;
-          itemData.system.equipped.inSlot = true;
-          itemData.system.equipped.handsHeld = 0;
-        }
-        this.#resizeItem(itemData);
-        this.result[type].push(itemData);
-
-        const options = {
-          applyFeatLocation: false,
-          choiceHint: e.extra && e.extra !== "" ? e.extra : null,
-        };
-        await this.#addGrantedItems(itemData, options);
-        // eslint-disable-next-line require-atomic-updates
-        e.addedId = itemData._id;
-      }
-      // eslint-disable-next-line require-atomic-updates
-      e.added = true;
+      await this.#generateEquipmentItem(e);
     }
   }
 
@@ -2008,7 +2013,7 @@ export class Pathmuncher {
   ];
 
   // eslint-disable-next-line complexity
-  static applyRunes(parsedItem, itemData, type) {
+  async applyRunes(parsedItem, itemData, type) {
     if (itemData.type == "shield") {
       parsedItem.runes.forEach((rune) => {
         if (rune.startsWith("Reinforcing")) {
@@ -2047,7 +2052,7 @@ export class Pathmuncher {
     }
 
     if (foundry.utils.hasProperty(itemData, "system.runes.property")) {
-      parsedItem.runes.forEach((property) => {
+      for (const property of parsedItem.runes) {
         const resistantRegex = /Energy Resistant - (.*)/i;
         const resistantMatch = property.match(resistantRegex);
         const vitalizingRegex = /Vitalizing(.*)/i;
@@ -2062,8 +2067,17 @@ export class Pathmuncher {
         else if (property === "Quickstrike") rune = "speed";
         else if (property === "Animated") rune = "dancing";
 
-        itemData.system.runes.property.push(Seasoning.slugD(rune));
-      });
+        const runeItem = RUNE_ITEM_MAP[property];
+        console.warn("Processing rune property", { property, runeItem });
+        if (runeItem) {
+          await this.#generateEquipmentItem({
+            foundryName: property,
+            pbName: runeItem,
+          });
+        } else {
+          itemData.system.runes.property.push(Seasoning.slugD(rune));
+        }
+      }
     }
 
     if (parsedItem.mat) {
@@ -2090,7 +2104,7 @@ export class Pathmuncher {
     // because some shields don't have damage dice, but come in as weapons on pathbuilder
     if (itemData.type === "weapon") {
       if (data.die) itemData.system.damage.die = data.die;
-      Pathmuncher.applyRunes(data, itemData, "weapon");
+      await this.applyRunes(data, itemData, "weapon");
     }
 
     if (data.display.startsWith("Large ") || data.increasedDice) {
@@ -2117,7 +2131,7 @@ export class Pathmuncher {
     }
   }
 
-  #adjustArmorItem(itemData, parsedArmor) {
+  async #adjustArmorItem(itemData, parsedArmor) {
     itemData._id = foundry.utils.randomID();
     itemData.system.equipped.value = parsedArmor.worn ?? false;
     if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
@@ -2128,8 +2142,9 @@ export class Pathmuncher {
       itemData.system.equipped.handsHeld = isShield && parsedArmor.worn ? 1 : 0;
       itemData.system.equipped.carryType = isShield && parsedArmor.worn ? "held" : "worn";
 
-      Pathmuncher.applyRunes(parsedArmor, itemData, "armor");
+      await this.applyRunes(parsedArmor, itemData, "armor");
     }
+    // eslint-disable-next-line require-atomic-updates
     if (parsedArmor.display) itemData.name = parsedArmor.display;
 
     this.#resizeItem(itemData);
@@ -2164,9 +2179,11 @@ export class Pathmuncher {
       }
 
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const itemData = this.#adjustArmorItem(doc.toObject(), a);
+      const itemData = await this.#adjustArmorItem(doc.toObject(), a);
       this.result.armor.push(itemData);
+      // eslint-disable-next-line require-atomic-updates
       a.addedId = itemData._id;
+      // eslint-disable-next-line require-atomic-updates
       a.added = true;
     }
   }

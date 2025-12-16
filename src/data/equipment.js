@@ -249,3 +249,12 @@ export const GRANTED_ITEMS_LIST = [
   "Inventor Power Suit (Heavy)",
   "Inventor Subterfuge Suit",
 ];
+
+export const RUNE_ITEM_MAP = {
+  "Clan Dagger Blessing": "Bolka's Blessing",
+  "Clan Dagger Blessing (Greater)": "Bolka's Blessing (Greater)",
+  "Clan Dagger Oath": "Kols's Oath",
+  "Clan Dagger Oath (Greater)": "Kols's Oath (Greater)",
+  "Clan Dagger Strength": "Trudd's Strength",
+  "Clan Dagger Strength (Greater)": "Trudd's Strength (Greater)",
+};
