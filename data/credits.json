@@ -1,0 +1,49 @@
+{
+    "_id": "penfpVFkOqZYpmkU",
+    "img": "icons/sundries/gaming/playing-cards-grey.webp",
+    "name": "Credstick",
+    "system": {
+        "slug": "credstick",
+        "baseItem": null,
+        "bulk": {
+            "value": 0
+        },
+        "category": "credstick",
+        "containerId": null,
+        "description": {
+            "value": ""
+        },
+        "hardness": 0,
+        "hp": {
+            "max": 0,
+            "value": 0
+        },
+        "level": {
+            "value": 0
+        },
+        "material": {
+            "grade": null,
+            "type": null
+        },
+        "price": {
+            "per": 1,
+            "value": {
+                "sp": 1
+            }
+        },
+        "publication": {
+            "license": "ORC",
+            "remaster": true,
+            "title": "Starfinder Player Core"
+        },
+        "quantity": 1,
+        "rules": [],
+        "size": "med",
+        "temporary": false,
+        "traits": {
+            "rarity": "common",
+            "value": []
+        }
+    },
+    "type": "treasure"
+}

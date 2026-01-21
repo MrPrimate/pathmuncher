@@ -744,14 +744,14 @@ export class Pathmuncher {
       const uuid = foundry.utils.getProperty(document, "flags.core.sourceId");
       if (uuid) this.grantItemLookUp.add(uuid);
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
-      foundry.utils.setProperty(parent, `flags.pf2e.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
-      foundry.utils.setProperty(document, "flags.pf2e.grantedBy", { id: parent._id, onDelete: "cascade" });
+      foundry.utils.setProperty(parent, `flags.${game.system.id}.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
+      foundry.utils.setProperty(document, `flags.${game.system.id}.grantedBy`, { id: parent._id, onDelete: "cascade" });
 
       logger.debug(`${parent.name} has granted item ${document.name} (${camelCase})`, {
         parent,
         itemGrantName,
         camelCase,
-        flag: foundry.utils.getProperty(parent, `flags.pf2e.itemGrants.${camelCase}`),
+        flag: foundry.utils.getProperty(parent, `flags.${game.system.id}.itemGrants.${camelCase}`),
       });
     }
     this.autoFeats.push(document);
@@ -1009,11 +1009,11 @@ export class Pathmuncher {
             foundry.utils.setProperty(this.result.character, "system.details.deity.value", lookedUpChoice.label);
             await this.#processGenericCompendiumLookup("deities", lookedUpChoice.label, "deity");
             const camelCase = Seasoning.slugD(this.result.deity[0].system.slug);
-            foundry.utils.setProperty(document, `flags.pf2e.itemGrants.${camelCase}`, {
+            foundry.utils.setProperty(document, `flags.${game.system.id}.itemGrants.${camelCase}`, {
               id: this.result.deity[0]._id,
               onDelete: "detach",
             });
-            foundry.utils.setProperty(this.result.deity[0], "flags.pf2e.grantedBy", { id: document._id, onDelete: "cascade" });
+            foundry.utils.setProperty(this.result.deity[0], `flags.${game.system.id}.grantedBy`, { id: document._id, onDelete: "cascade" });
             this.autoAddedFeatureIds.add(`${lookedUpChoice.value.split(".").pop()}deity`);
           }
         }
@@ -1305,9 +1305,9 @@ export class Pathmuncher {
 
         if (choice) {
           ruleEntry.selection = choice.value;
-          foundry.utils.setProperty(document, `flags.pf2e.rulesSelections.${documentFlagName}`, choice.value);
+          foundry.utils.setProperty(document, `flags.${game.system.id}.rulesSelections.${documentFlagName}`, choice.value);
           if (choice.actorFlag) {
-            foundry.utils.setProperty(this.result.character, `flags.pf2e.${documentFlagName}`, choice.value);
+            foundry.utils.setProperty(this.result.character, `flags.${game.system.id}.${documentFlagName}`, choice.value);
           }
         }
 
@@ -1840,7 +1840,7 @@ export class Pathmuncher {
   }
 
   async #generateAdventurersPack() {
-    const defaultCompendium = game.packs.get("pf2e.equipment-srd");
+    const defaultCompendium = game.packs.get("pf2e.equipment-srd") ?? game.packs.get("sf2e.equipment");
     const index = await defaultCompendium.getIndex({ fields: ["name", "type", "system.slug"] });
 
 
@@ -2012,6 +2012,46 @@ export class Pathmuncher {
     "majorResilient",
   ];
 
+  async #applyPropertyRunes(parsedItem, itemData) {
+    if (foundry.utils.hasProperty(itemData, "system.runes.property")) {
+      for (const property of parsedItem.runes) {
+        const resistantRegex = /Energy Resistant - (.*)/i;
+        const resistantMatch = property.match(resistantRegex);
+        const vitalizingRegex = /Vitalizing(.*)/i;
+        const vitalizingMatch = property.match(vitalizingRegex);
+        const bigRegex = /(.*)\((Greater|Major)\)/i;
+        const bigMatch = property.match(bigRegex);
+
+        let rune = property;
+        if (resistantMatch) rune = `${resistantMatch[1]} Resistant`;
+        else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
+        else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
+        else if (property === "Quickstrike") rune = "speed";
+        else if (property === "Animated") rune = "dancing";
+
+        const runeItem = RUNE_ITEM_MAP[property];
+        logger.debug("Processing rune property", { property, runeItem });
+        if (runeItem) {
+          await this.#generateEquipmentItem({
+            foundryName: property,
+            pbName: runeItem,
+          });
+        } else {
+          itemData.system.runes.property.push(Seasoning.slugD(rune));
+        }
+      }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async #applyMaterial(parsedItem, itemData) {
+    if (parsedItem.mat) {
+      const material = parsedItem.mat.split(" (")[0];
+      itemData.system.material.type = Seasoning.slug(material);
+      itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
+    }
+  }
+
   // eslint-disable-next-line complexity
   async applyRunes(parsedItem, itemData, type) {
     if (itemData.type == "shield") {
@@ -2051,40 +2091,68 @@ export class Pathmuncher {
       itemData.system.equipped.invested = true;
     }
 
-    if (foundry.utils.hasProperty(itemData, "system.runes.property")) {
-      for (const property of parsedItem.runes) {
-        const resistantRegex = /Energy Resistant - (.*)/i;
-        const resistantMatch = property.match(resistantRegex);
-        const vitalizingRegex = /Vitalizing(.*)/i;
-        const vitalizingMatch = property.match(vitalizingRegex);
-        const bigRegex = /(.*)\((Greater|Major)\)/i;
-        const bigMatch = property.match(bigRegex);
+    await this.#applyPropertyRunes(parsedItem, itemData);
+    await this.#applyMaterial(parsedItem, itemData);
+  }
 
-        let rune = property;
-        if (resistantMatch) rune = `${resistantMatch[1]} Resistant`;
-        else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
-        else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
-        else if (property === "Quickstrike") rune = "speed";
-        else if (property === "Animated") rune = "dancing";
+  static GRADE_SCALE = [
+    { type: "commercial", pot: 0, res: 0, str: 0 },
+    { type: "tactical", pot: 1, res: 0, str: 0 },
+    { type: "advanced", pot: 1, res: 1, str: 1 },
+    { type: "superior", pot: 2, res: 1, str: 1 },
+    { type: "elite", pot: 2, res: 2, str: 2 },
+    { type: "ultimate", pot: 3, res: 2, str: 2 },
+    { type: "paragon", pot: 3, res: 3, str: 3 },
+  ];
 
-        const runeItem = RUNE_ITEM_MAP[property];
-        console.warn("Processing rune property", { property, runeItem });
-        if (runeItem) {
-          await this.#generateEquipmentItem({
-            foundryName: property,
-            pbName: runeItem,
-          });
-        } else {
-          itemData.system.runes.property.push(Seasoning.slugD(rune));
-        }
-      }
+  async #addSubitemsToTechUpgrades(itemData, name) {
+    const foundryName = RUNE_ITEM_MAP[name] ?? name;
+    logger.debug("Processing rune property", { itemData, name, foundryName });
+
+    const indexMatch = this.compendiumMatchers["equipment"].getMatch(name, foundryName);
+    if (!indexMatch) {
+      logger.error(`Unable to match ${name}`, itemData);
+      this.bad.push({ pbName: name, type: "equipment", details: { foundryName, pbName: name } });
+      return;
     }
 
-    if (parsedItem.mat) {
-      const material = parsedItem.mat.split(" (")[0];
-      itemData.system.material.type = Seasoning.slug(material);
-      itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+
+    const subItemData = doc.toObject();
+    subItemData._id = foundry.utils.randomID();
+    subItemData.system.equipped.carryType = "installed";
+
+    this.#resizeItem(subItemData);
+    itemData.system.subitems.push(subItemData);
+  }
+
+  async #applyTechUpgrades(parsedItem, itemData, type) {
+    if (itemData.type == "shield") {
+      // not yet handled
     }
+
+    const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str ?? "");
+    const resilient = Pathmuncher.RESILIENT_SCALE.indexOf(parsedItem.res ?? "");
+
+    const grade = type === "weapon"
+      ? Pathmuncher.GRADE_SCALE.find((g) =>
+        g.pot === (parsedItem.pot ?? 0)
+        && g.str === striking,
+      )
+      : Pathmuncher.GRADE_SCALE.find((g) =>
+        g.pot === (parsedItem.pot ?? 0)
+        && g.res === resilient,
+      );
+
+    if (grade) {
+      itemData.system.grade = grade.type;
+    }
+
+    // await this.#applyPropertyRunes(parsedItem, itemData);
+    for (const property of parsedItem.runes) {
+      await this.#addSubitemsToTechUpgrades(itemData, property);
+    }
+    await this.#applyMaterial(parsedItem, itemData);
   }
 
   async #createWeaponItem(data) {
@@ -2104,7 +2172,11 @@ export class Pathmuncher {
     // because some shields don't have damage dice, but come in as weapons on pathbuilder
     if (itemData.type === "weapon") {
       if (data.die) itemData.system.damage.die = data.die;
-      await this.applyRunes(data, itemData, "weapon");
+      if (game.system.id === "pf2e") {
+        await this.applyRunes(data, itemData, "weapon");
+      } else if (game.system.id === "sf2e") {
+        await this.#applyTechUpgrades(data, itemData, "weapon");
+      }
     }
 
     if (data.display.startsWith("Large ") || data.increasedDice) {
@@ -2142,7 +2214,11 @@ export class Pathmuncher {
       itemData.system.equipped.handsHeld = isShield && parsedArmor.worn ? 1 : 0;
       itemData.system.equipped.carryType = isShield && parsedArmor.worn ? "held" : "worn";
 
-      await this.applyRunes(parsedArmor, itemData, "armor");
+      if (game.system.id === "pf2e") {
+        await this.applyRunes(parsedArmor, itemData, "armor");
+      } else if (game.system.id === "sf2e") {
+        await this.#applyTechUpgrades(parsedArmor, itemData, "armor");
+      }
     }
     // eslint-disable-next-line require-atomic-updates
     if (parsedArmor.display) itemData.name = parsedArmor.display;
@@ -2560,20 +2636,31 @@ export class Pathmuncher {
   }
 
   async #generateMoney() {
-    const compendium = game.packs.get("pf2e.equipment-srd");
+    const compendium = game.packs.get("pf2e.equipment-srd") ?? game.packs.get("sf2e.equipment");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-    const moneyLookup = [
-      { slug: "platinum-pieces", type: "pp" },
-      { slug: "gold-pieces", type: "gp" },
-      { slug: "silver-pieces", type: "sp" },
-      { slug: "copper-pieces", type: "cp" },
-    ];
+    const moneyLookup = game.system.id === "pf2e"
+      ? [
+        { slug: "platinum-pieces", type: "pp" },
+        { slug: "gold-pieces", type: "gp" },
+        { slug: "silver-pieces", type: "sp" },
+        { slug: "copper-pieces", type: "cp" },
+      ]
+      : [
+        { slug: "upb", type: "upb" },
+        { slug: "credstick", type: "sp" },
+      ];
 
     for (const lookup of moneyLookup) {
       const indexMatch = index.find((i) => i.system.slug === lookup.slug);
       if (indexMatch) {
         const doc = await compendium.getDocument(indexMatch._id);
         const itemData = doc.toObject();
+        itemData._id = foundry.utils.randomID();
+        itemData.system.quantity = this.source.money[lookup.type];
+        this.result.money.push(itemData);
+      } else if (lookup.slug === "credstick") {
+        const itemData = await foundry.utils.fetchJsonWithTimeout(`modules/${CONSTANTS.MODULE_NAME}/data/credits.json`);
+        if (!itemData) continue;
         itemData._id = foundry.utils.randomID();
         itemData.system.quantity = this.source.money[lookup.type];
         this.result.money.push(itemData);

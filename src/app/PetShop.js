@@ -65,7 +65,7 @@ export class PetShop {
   }
 
   async #generatePetFeatures(pet, json) {
-    const compendium = game.packs.get("pf2e.familiar-abilities");
+    const compendium = game.packs.get("pf2e.familiar-abilities") ?? game.packs.get("sf2e.familiar-abilities");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
     this.result.features[pet._id] = [];
     this.bad[pet._id] = [];
@@ -106,6 +106,10 @@ export class PetShop {
     const petData = this.type === "familiar" && this.pathbuilderJson.familiars
       ? this.pathbuilderJson.familiars
       : this.pathbuilderJson.pets.filter((p) => this.type === p.type.toLowerCase());
+    if (!petData || petData.length === 0) {
+      logger.debug(`No ${this.type} data found in Pathbuilder JSON`, { pathbuilderJson: this.pathbuilderJson });
+      return;
+    }
     await this.ensureFolder(utils.capitalize(this.type));
     for (const petJson of petData) {
       await this.buildPet(petJson);

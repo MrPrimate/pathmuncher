@@ -138,6 +138,8 @@ export const EQUIPMENT_RENAME_STATIC_MAP = [
   { pbName: "Weapon Striking (Major)", foundryName: "Striking (Major)" },
   { pbName: "Weapon Striking (Lesser)", foundryName: "Striking (Lesser)" },
   { pbName: "Weapon Striking (Moderate)", foundryName: "Striking (Moderate)" },
+  { pbName: "Travel Suit", foundryName: "Abadarcorp Travel Suit" },
+  { pbName: "Imperial Plate", foundryName: "Veskarium Imperial Plate" },
 ];
 
 // function ammunitionMatch(pbName) {
