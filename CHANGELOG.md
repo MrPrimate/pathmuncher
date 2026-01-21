@@ -1,3 +1,7 @@
+# 1.5.0
+
+- Starfinder 2e support. Currently Pathbuilder does not export the grade on shields. This will be added when Pathbuilder supports this property in exports.
+
 # 1.4.4
 
 - Clan Dagger Filigrees are implemented as runes in Pathbuilder and caused issues when importing. Pathmuncher will now add the appropriate item. @elsweyrfondue
