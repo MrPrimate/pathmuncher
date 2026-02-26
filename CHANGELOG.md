@@ -1,3 +1,7 @@
+# 1.6.0
+
+- Fixes for changes on Pathbuilder site with Character downloads failing.
+
 # 1.5.0
 
 - Starfinder 2e support. Currently Pathbuilder does not export the grade on shields. This will be added when Pathbuilder supports this property in exports.
