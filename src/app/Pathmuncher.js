@@ -157,7 +157,7 @@ export class Pathmuncher {
     }
     if (pathbuilderId) {
       const jsonData = await foundry.utils.fetchJsonWithTimeout(
-        `https://www.pathbuilder2e.com/json.php?id=${pathbuilderId}`,
+        `https://pathbuilder2e.com/json.php?id=${pathbuilderId}`,
       );
       if (jsonData.success) {
         this.source = jsonData.build;
