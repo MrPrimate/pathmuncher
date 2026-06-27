@@ -11,7 +11,7 @@
   "changelog": "https://github.com/MrPrimate/pathmuncher/blob/main/CHANGELOG.md",
   "compatibility": {
     "minimum": "12.325",
-    "verified": 13
+    "verified": 14
   },
   "authors": [
     {
@@ -36,7 +36,7 @@
         "type": "system",
         "compatibility": {
           "minimum": "6.0.3",
-          "verified": "7.5.1"
+          "verified": "8.2.0"
         }
       },
       {
@@ -44,7 +44,7 @@
         "type": "system",
         "compatibility": {
           "minimum": "0.0.1",
-          "verified": "0.0.1"
+          "verified": "1.2.0"
         }
       }
     ]
