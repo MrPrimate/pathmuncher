@@ -166,6 +166,35 @@ export class Pathmuncher {
   }
 
   /**
+   * Fills in fields that older Pathbuilder exports leave out (equipmentContainers, focus,
+   * blendedSpells, prepared, ...), so the rest of the import can rely on them. Updates in place.
+   */
+  static normaliseSource(source) {
+    for (const key of ["feats", "specials", "lores", "equipment", "weapons", "armor", "spellCasters", "formula",
+      "pets", "familiars", "rituals", "inventorMods", "resistances", "languages"]) {
+      if (!Array.isArray(source[key])) source[key] = [];
+    }
+    for (const key of ["equipmentContainers", "focus", "money", "mods", "proficiencies", "specificProficiencies"]) {
+      if (!utils.isObject(source[key])) source[key] = {};
+    }
+    for (const coin of ["pp", "gp", "sp", "cp"]) {
+      source.money[coin] ??= 0;
+    }
+    for (const formula of source.formula) {
+      if (!Array.isArray(formula.known)) formula.known = [];
+    }
+    for (const caster of source.spellCasters) {
+      for (const key of ["spells", "prepared", "blendedSpells"]) {
+        if (!Array.isArray(caster[key])) caster[key] = [];
+      }
+      if (!Array.isArray(caster.perDay)) caster.perDay = [];
+      caster.perDay = Array.from({ length: 11 }, (_, i) => caster.perDay[i] ?? 0);
+      caster.innate ??= false;
+    }
+    return source;
+  }
+
+  /**
    * Fetches the build for a Pathbuilder JSON export id into this.source.
    * Returns true on success; failures are reported to the user and return false.
    */
@@ -2640,8 +2669,11 @@ export class Pathmuncher {
       }
     }
 
-    foundry.utils.setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
-    foundry.utils.setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
+    // older exports have no focus pool; leave it to the system rather than write undefined
+    if (Number.isInteger(this.source.focusPoints)) {
+      foundry.utils.setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
+      foundry.utils.setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
+    }
   }
 
   async #generateLores() {
@@ -2996,6 +3028,7 @@ export class Pathmuncher {
   async processCharacter() {
     this.processed = false;
     if (!this.source) return false;
+    Pathmuncher.normaliseSource(this.source);
     await this.#prepare();
     this.#statusUpdate(1, 12, "Character");
     await this.#processCore();
@@ -3210,9 +3243,8 @@ export class Pathmuncher {
     logger.debug("Restoring granted item logic", itemUpdates);
     await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
 
-    await this.actor.update({
-      "system.resources.focus": this.result.character.system.resources.focus,
-    });
+    const focus = foundry.utils.getProperty(this.result.character, "system.resources.focus");
+    if (focus) await this.actor.update({ "system.resources.focus": focus });
   }
 
   async updateActor() {
