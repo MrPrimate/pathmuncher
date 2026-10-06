@@ -1520,13 +1520,13 @@ export class Pathmuncher {
     });
   }
 
-  async #delayedSubRuleDocuments({ originType, applyFeatLocation, choiceHint }) {
+  async #delayedSubRuleDocuments(document, { originType, applyFeatLocation, choiceHint, levelCap }) {
     for (const subRuleDocument of this.subRuleDocuments[document._id]) {
       logger.debug(
         `Processing granted rules for granted item document ${subRuleDocument.name}`,
         foundry.utils.duplicate(subRuleDocument),
       );
-      await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint });
+      await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint, levelCap });
     }
   }
 
@@ -1590,7 +1590,7 @@ export class Pathmuncher {
       }
 
       if (!this.immediateDiveAdd) {
-        await this.#delayedSubRuleDocuments({ originType, applyFeatLocation, choiceHint });
+        await this.#delayedSubRuleDocuments(document, { originType, applyFeatLocation, choiceHint, levelCap });
       }
     }
 
@@ -1938,9 +1938,10 @@ export class Pathmuncher {
       const name = Seasoning.getFoundryEquipmentName(data.containerName);
       const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.containerName, name);
       const id = foundry.utils.randomID();
+      // no compendium match: a plain container with the Pathbuilder name, built in memory only
       const doc = indexMatch
         ? await indexMatch.pack.getDocument(indexMatch.i._id)
-        : await Item.create({ name: data.containerName, type: "backpack" }, { temporary: true });
+        : new Item.implementation({ name: data.containerName, type: "backpack" });
       const itemData = doc.toObject();
       itemData._id = id;
       this.#resizeItem(itemData);

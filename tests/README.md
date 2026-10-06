@@ -57,6 +57,8 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
     list as part of the fix that closed it.
 - `importer.test.js`: drives the real importer dialog. Bad input, fetch failures and processing
   failures must leave the actor untouched. A failed update must save a pre-import copy.
+- `processing.test.js`: processing details. Unmatched containers are created on the actor only
+  (never as world items), and the deep-dive setting gives the same character on or off.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.
