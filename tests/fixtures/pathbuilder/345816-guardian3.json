@@ -1,0 +1,371 @@
+{
+  "success": true,
+  "build": {
+    "name": "Drakthar",
+    "class": "Guardian",
+    "dualClass": null,
+    "level": 3,
+    "xp": 0,
+    "ancestry": "Minotaur",
+    "heritage": "Custom Mixed Heritage",
+    "background": "Relentless Dedication",
+    "alignment": "N",
+    "gender": "Not set",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 3,
+    "sizeName": "Large",
+    "keyability": "str",
+    "languages": [
+      "None selected"
+    ],
+    "rituals": [],
+    "resistances": [
+      "physical 2"
+    ],
+    "inventorMods": [],
+    "abilities": {
+      "str": 18,
+      "dex": 12,
+      "con": 18,
+      "int": 8,
+      "wis": 14,
+      "cha": 8,
+      "breakdown": {
+        "ancestryFree": [],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": [],
+        "classBoosts": [],
+        "mapLevelledBoosts": {
+          "1": [
+            "Str",
+            "Con",
+            "Dex",
+            "Wis"
+          ]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 10,
+      "classhp": 12,
+      "bonushp": 0,
+      "bonushpPerLevel": 1,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 2,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 4,
+      "heavy": 2,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 2,
+      "simple": 2,
+      "unarmed": 2,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 2,
+      "crafting": 2,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 2,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 2,
+      "thievery": 0,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Shield Block",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Canny Acumen",
+        "Reflex",
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Diehard",
+        null,
+        "Awarded Feat",
+        3
+      ],
+      [
+        "Reactive Shield",
+        null,
+        "Awarded Feat",
+        2
+      ],
+      [
+        "Custom Mixed Heritage",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Defensive Advance",
+        null,
+        "Class Feat",
+        1,
+        "Guardian Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Unburdened Iron",
+        null,
+        "Ancestry Feat",
+        1,
+        "Minotaur Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Hefty Hauler",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Shielding Taunt",
+        null,
+        "Class Feat",
+        2,
+        "Guardian Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Bastion Dedication",
+        null,
+        "Archetype Feat",
+        2,
+        "Free Archetype 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Toughness",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Guardian's Armor",
+      "Taunt",
+      "Intercept Attack",
+      "Ever Ready",
+      "Darkvision",
+      "Dwarf",
+      "No special vision",
+      "Tough to Kill",
+      "Custom Mixed Heritage"
+    ],
+    "lores": [
+      [
+        "Warfare",
+        2
+      ]
+    ],
+    "equipmentContainers": {
+      "f62b4b69-3efe-4da4-8fb9-01ef83a5153e": {
+        "containerName": "Backpack",
+        "bagOfHolding": false,
+        "backpack": true,
+        "augmentations": false
+      }
+    },
+    "equipment": [
+      [
+        "Backpack",
+        1,
+        "Invested"
+      ],
+      [
+        "Bedroll",
+        1,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Chalk",
+        10,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Flint and Steel",
+        1,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Rope",
+        1,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Rations",
+        2,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Waterskin",
+        2,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Soap",
+        1,
+        "f62b4b69-3efe-4da4-8fb9-01ef83a5153e",
+        "Invested"
+      ],
+      [
+        "Ten-Foot Pole",
+        1,
+        "Invested"
+      ],
+      [
+        "Climbing Kit",
+        1,
+        "Invested"
+      ]
+    ],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Warhammer",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d8",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Warhammer",
+        "runes": [],
+        "damageType": "B",
+        "attack": 9,
+        "damageBonus": 4,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false,
+        "grade": ""
+      },
+      {
+        "name": "Longsword",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d8",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Longsword",
+        "runes": [],
+        "damageType": "S",
+        "attack": 9,
+        "damageBonus": 4,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false,
+        "grade": ""
+      }
+    ],
+    "money": {
+      "cp": 4,
+      "sp": 9,
+      "gp": 11,
+      "pp": 0
+    },
+    "armor": [
+      {
+        "name": "Splint Mail",
+        "qty": 1,
+        "prof": "heavy",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Splint Mail",
+        "worn": true,
+        "runes": [],
+        "grade": ""
+      },
+      {
+        "name": "Splint Mail",
+        "qty": 1,
+        "prof": "light",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Studded Leather",
+        "worn": false,
+        "runes": [],
+        "grade": ""
+      },
+      {
+        "name": "Steel Shield",
+        "qty": 1,
+        "prof": "shield",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "",
+        "worn": true,
+        "runes": [],
+        "grade": ""
+      }
+    ],
+    "spellCasters": [],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 5,
+      "acAbilityBonus": 1,
+      "acItemBonus": 5,
+      "acTotal": 21,
+      "shieldBonus": "2"
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

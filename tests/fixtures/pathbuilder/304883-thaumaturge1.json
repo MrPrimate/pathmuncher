@@ -1,0 +1,341 @@
+{
+  "success": true,
+  "build": {
+    "name": "Kurama",
+    "class": "Thaumaturge",
+    "dualClass": null,
+    "level": 1,
+    "ancestry": "Kitsune",
+    "heritage": "Empty Sky Kitsune",
+    "background": "Thrill-Seeker",
+    "alignment": "N",
+    "gender": "Male",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "cha",
+    "languages": [
+      "Common"
+    ],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "attributes": {
+      "ancestryhp": 8,
+      "classhp": 8,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "abilities": {
+      "str": 10,
+      "dex": 12,
+      "con": 14,
+      "int": 10,
+      "wis": 14,
+      "cha": 18,
+      "breakdown": {
+        "ancestryFree": [
+          "Wis"
+        ],
+        "ancestryBoosts": [
+          "Cha"
+        ],
+        "ancestryFlaws": [],
+        "backgroundBoosts": [
+          "Con",
+          "Cha"
+        ],
+        "classBoosts": [
+          "Cha"
+        ],
+        "mapLevelledBoosts": {
+          "1": [
+            "Cha",
+            "Con",
+            "Wis",
+            "Dex"
+          ]
+        }
+      }
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 2,
+      "will": 4,
+      "heavy": 0,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 2,
+      "simple": 2,
+      "unarmed": 2,
+      "castingArcane": 0,
+      "castingDivine": 2,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 0,
+      "arcana": 2,
+      "athletics": 2,
+      "crafting": 0,
+      "deception": 2,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 2,
+      "nature": 2,
+      "occultism": 2,
+      "performance": 2,
+      "religion": 2,
+      "society": 0,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Combat Climber",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Dubious Knowledge",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Kitsune Spell Familiarity",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Empty Sky Kitsune",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Root to Life",
+        null,
+        "Class Feat",
+        1,
+        "Thaumaturge Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Foxfire",
+        null,
+        "Ancestry Feat",
+        1,
+        "Kitsune Feat 1",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Esoteric Lore",
+      "Exploit Vulnerability",
+      "Regalia Initiate Benefit",
+      "Low-Light Vision",
+      "Regalia",
+      "Implement's Empowerment",
+      "Change Shape (Kitsune)",
+      "Empty Sky Kitsune"
+    ],
+    "lores": [
+      [
+        "Esoteric",
+        2
+      ],
+      [
+        "Engineering",
+        2
+      ]
+    ],
+    "equipmentContainers": {
+      "c5386a4a-7eaf-4406-8052-9dbbbf8ea384": {
+        "containerName": "Backpack",
+        "bagOfHolding": false,
+        "backpack": true
+      }
+    },
+    "equipment": [
+      [
+        "Backpack",
+        1,
+        "Invested"
+      ],
+      [
+        "Bedroll",
+        1,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Chalk",
+        10,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Flint and Steel",
+        1,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Rope",
+        1,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Rations",
+        2,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Torch",
+        5,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Waterskin",
+        1,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ],
+      [
+        "Soap",
+        1,
+        "c5386a4a-7eaf-4406-8052-9dbbbf8ea384",
+        "Invested"
+      ]
+    ],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Special Unarmed Foxfire",
+        "qty": 1,
+        "prof": "unarmed",
+        "die": "d4",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Special Unarmed Foxfire",
+        "runes": [],
+        "damageType": "E or F",
+        "attack": 4,
+        "damageBonus": 0,
+        "extraDamage": [
+          "+2 physical"
+        ],
+        "increasedDice": false,
+        "isInventor": false
+      },
+      {
+        "name": "Longsword",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d8",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Longsword",
+        "runes": [],
+        "damageType": "S",
+        "attack": 3,
+        "damageBonus": 0,
+        "extraDamage": [
+          "+2 physical"
+        ],
+        "increasedDice": false,
+        "isInventor": false
+      }
+    ],
+    "money": {
+      "cp": 0,
+      "sp": 5,
+      "gp": 12,
+      "pp": 0
+    },
+    "armor": [
+      {
+        "name": "Studded Leather Armor",
+        "qty": 1,
+        "prof": "light",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Studded Leather",
+        "worn": true,
+        "runes": []
+      }
+    ],
+    "spellCasters": [
+      {
+        "name": "Kitsune Spell Familiarity",
+        "magicTradition": "divine",
+        "spellcastingType": "prepared",
+        "ability": "cha",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "innate": true,
+        "perDay": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": [
+              "Daze"
+            ]
+          }
+        ],
+        "prepared": [],
+        "blendedSpells": []
+      }
+    ],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 3,
+      "acAbilityBonus": 1,
+      "acItemBonus": 2,
+      "acTotal": 16,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

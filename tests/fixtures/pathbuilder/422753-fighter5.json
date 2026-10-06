@@ -1,0 +1,336 @@
+{
+  "success": true,
+  "build": {
+    "name": "August [Kholo, F]",
+    "class": "Fighter",
+    "dualClass": null,
+    "level": 5,
+    "xp": 0,
+    "ancestry": "Kholo",
+    "heritage": "Great Kholo",
+    "background": "Farmhand",
+    "alignment": "N",
+    "gender": "Not set",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "str",
+    "languages": [
+      "Aklo",
+      "Common",
+      "Draconic",
+      "Fey",
+      "Kholo",
+      "Sakvroth"
+    ],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 18,
+      "dex": 10,
+      "con": 16,
+      "int": 16,
+      "wis": 16,
+      "cha": 10,
+      "breakdown": {
+        "ancestryFree": [
+          "Str",
+          "Con"
+        ],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": [
+          "Wis",
+          "Int"
+        ],
+        "classBoosts": [
+          "Str"
+        ],
+        "mapLevelledBoosts": {
+          "1": [
+            "Str",
+            "Con",
+            "Wis",
+            "Int"
+          ],
+          "5": [
+            "Con",
+            "Str",
+            "Wis",
+            "Int"
+          ]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 8,
+      "classhp": 10,
+      "bonushp": 2,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 4,
+      "heavy": 2,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 2,
+      "martial": 4,
+      "simple": 4,
+      "unarmed": 4,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 2,
+      "arcana": 2,
+      "athletics": 4,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 2,
+      "occultism": 2,
+      "performance": 0,
+      "religion": 2,
+      "society": 2,
+      "stealth": 2,
+      "survival": 4,
+      "thievery": 0,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Shield Block",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Assurance",
+        "Athletics",
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Additional Lore",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Great Kholo",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Fleet",
+        null,
+        "General Feat",
+        1,
+        "a5245f8a-39ef-4469-81f2-0ff8bbe323ed",
+        "standardChoice",
+        null
+      ],
+      [
+        "Sudden Charge",
+        null,
+        "Class Feat",
+        1,
+        "Fighter Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Kholo Lore",
+        null,
+        "Ancestry Feat",
+        1,
+        "Gnoll Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Additional Lore",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Double Slice",
+        null,
+        "Class Feat",
+        2,
+        "Fighter Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Exemplar Dedication",
+        null,
+        "Archetype Feat",
+        2,
+        "Free Archetype 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Armor Proficiency",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Contract Negotiator",
+        null,
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Twin Parry",
+        null,
+        "Class Feat",
+        4,
+        "Fighter Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Basic Glory",
+        null,
+        "Archetype Feat",
+        4,
+        "Free Archetype 4",
+        "parentChoice",
+        null
+      ],
+      [
+        "Twin Stars",
+        null,
+        "Exemplar Feat",
+        4,
+        "Basic GloryFree Archetype 4",
+        "childChoice",
+        "Free Archetype 4"
+      ],
+      [
+        "Crunch",
+        null,
+        "Ancestry Feat",
+        5,
+        "Gnoll Feat 5",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Reactive Strike",
+      "Low-Light Vision",
+      "Bite (Kholo)",
+      "Shift Immanence",
+      "Barrow's Edge",
+      "Bravery",
+      "Not Selected",
+      "Great Kholo"
+    ],
+    "lores": [
+      [
+        "Farming",
+        2
+      ],
+      [
+        "Kholo",
+        4
+      ],
+      [
+        "Legal",
+        4
+      ]
+    ],
+    "equipmentContainers": {},
+    "equipment": [],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Lion Scythe",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d6",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Lion Scythe",
+        "runes": [],
+        "damageType": "S",
+        "attack": 13,
+        "damageBonus": 4,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false,
+        "grade": ""
+      }
+    ],
+    "money": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 15,
+      "pp": 0
+    },
+    "armor": [
+      {
+        "name": "Full Plate",
+        "qty": 1,
+        "prof": "heavy",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Full Plate",
+        "worn": true,
+        "runes": [],
+        "grade": ""
+      }
+    ],
+    "spellCasters": [],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 7,
+      "acAbilityBonus": 0,
+      "acItemBonus": 6,
+      "acTotal": 23,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

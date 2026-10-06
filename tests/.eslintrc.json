@@ -1,0 +1,25 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true
+  },
+  "globals": {
+    "pmt": "readonly",
+    "Actor": "readonly",
+    "Hooks": "readonly",
+    "game": "readonly",
+    "ui": "readonly",
+    "foundry": "readonly"
+  },
+  "rules": {
+    "complexity": "off",
+    "max-depth": "off",
+    "max-statements": "off",
+    "max-lines-per-function": "off",
+    "max-nested-callbacks": "off",
+    "no-await-in-loop": "off",
+    "no-continue": "off",
+    "no-loop-func": "off"
+  }
+}

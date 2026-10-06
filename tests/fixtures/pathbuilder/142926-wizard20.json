@@ -1,0 +1,644 @@
+{
+  "success": true,
+  "build": {
+    "name": "Kirlak Bookeater",
+    "class": "Wizard",
+    "level": 20,
+    "ancestry": "Dwarf",
+    "heritage": "Elemental Heart Dwarf",
+    "background": "Scholar (Arcana)",
+    "alignment": "N",
+    "gender": "Not set",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 2,
+    "keyability": "int",
+    "languages": [],
+    "attributes": {
+      "ancestryhp": 10,
+      "classhp": 6,
+      "bonushp": 0,
+      "bonushpPerLevel": 1,
+      "speed": 20,
+      "speedBonus": 0
+    },
+    "abilities": {
+      "str": 14,
+      "dex": 18,
+      "con": 19,
+      "int": 22,
+      "wis": 20,
+      "cha": 18
+    },
+    "proficiencies": {
+      "classDC": 8,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 6,
+      "heavy": 0,
+      "medium": 0,
+      "light": 0,
+      "unarmored": 4,
+      "advanced": 0,
+      "martial": 0,
+      "simple": 0,
+      "unarmed": 4,
+      "castingArcane": 8,
+      "castingDivine": 2,
+      "castingOccult": 2,
+      "castingPrimal": 0,
+      "acrobatics": 2,
+      "arcana": 8,
+      "athletics": 0,
+      "crafting": 8,
+      "deception": 0,
+      "diplomacy": 2,
+      "intimidation": 0,
+      "medicine": 2,
+      "nature": 2,
+      "occultism": 4,
+      "performance": 0,
+      "religion": 4,
+      "society": 2,
+      "stealth": 2,
+      "survival": 2,
+      "thievery": 2
+    },
+    "feats": [
+      [
+        "Assurance",
+        "Arcana"
+      ],
+      [
+        "Additional Lore",
+        null
+      ],
+      [
+        "Widen Spell",
+        null,
+        "Wizard Feat",
+        1
+      ],
+      [
+        "Clan Pistol",
+        null,
+        "Ancestry Feat",
+        1
+      ],
+      [
+        "Elemental Heart Dwarf",
+        null,
+        "Heritage",
+        1
+      ],
+      [
+        "Dwarven Hold Education",
+        null,
+        "Ancestry Feat",
+        1
+      ],
+      [
+        "Counterspell",
+        null,
+        "Class Feat",
+        1
+      ],
+      [
+        "Alchemical Crafting",
+        null,
+        "Skill Feat",
+        2
+      ],
+      [
+        "Eschew Materials",
+        null,
+        "Class Feat",
+        2
+      ],
+      [
+        "Cleric Dedication",
+        null,
+        "Archetype Feat",
+        2
+      ],
+      [
+        "Explosive Savant",
+        null,
+        "Ancestry Feat",
+        3
+      ],
+      [
+        "Specialty Crafting",
+        null,
+        "General Feat",
+        3
+      ],
+      [
+        "Arcane Sense",
+        null,
+        "Skill Feat",
+        4
+      ],
+      [
+        "Spellbook Prodigy",
+        null,
+        "Class Feat",
+        4
+      ],
+      [
+        "Basic Cleric Spellcasting",
+        null,
+        "Archetype Feat",
+        4
+      ],
+      [
+        "Energy Ablation",
+        null,
+        "Wizard Feat",
+        4
+      ],
+      [
+        "Surface Culture",
+        null,
+        "Ancestry Feat",
+        5
+      ],
+      [
+        "Assured Identification",
+        null,
+        "Skill Feat",
+        6
+      ],
+      [
+        "Cantrip Expansion",
+        null,
+        "Class Feat",
+        6
+      ],
+      [
+        "Basic Dogma",
+        null,
+        "Archetype Feat",
+        6
+      ],
+      [
+        "Cantrip Expansion",
+        null,
+        "Cleric Feat",
+        6
+      ],
+      [
+        "Blast Resistance",
+        null,
+        "Ancestry Feat",
+        7
+      ],
+      [
+        "Recognize Spell",
+        null,
+        "General Feat",
+        7
+      ],
+      [
+        "Quick Recognition",
+        null,
+        "Skill Feat",
+        8
+      ],
+      [
+        "Advanced School Spell",
+        null,
+        "Class Feat",
+        8
+      ],
+      [
+        "Divine Breadth",
+        null,
+        "Archetype Feat",
+        8
+      ],
+      [
+        "Demolitionist",
+        null,
+        "Ancestry Feat",
+        9
+      ],
+      [
+        "Quick Identification",
+        null,
+        "Skill Feat",
+        10
+      ],
+      [
+        "Overwhelming Energy",
+        null,
+        "Class Feat",
+        10
+      ],
+      [
+        "Advanced Dogma",
+        null,
+        "Archetype Feat",
+        10
+      ],
+      [
+        "Domain Initiate",
+        null,
+        "Cleric Feat",
+        10
+      ],
+      [
+        "Magical Crafting",
+        null,
+        "General Feat",
+        11
+      ],
+      [
+        "Mountain's Stoutness",
+        null,
+        "Ancestry Feat",
+        11
+      ],
+      [
+        "Multilingual",
+        null,
+        "Skill Feat",
+        12
+      ],
+      [
+        "Clever Counterspell",
+        null,
+        "Class Feat",
+        12
+      ],
+      [
+        "Advanced Dogma",
+        null,
+        "Archetype Feat",
+        12
+      ],
+      [
+        "Communal Healing",
+        null,
+        "Cleric Feat",
+        12
+      ],
+      [
+        "Crafter'S Instinct",
+        null,
+        "Ancestry Feat",
+        13
+      ],
+      [
+        "Impeccable Crafter",
+        null,
+        "Skill Feat",
+        14
+      ],
+      [
+        "Scroll Savant",
+        null,
+        "Class Feat",
+        14
+      ],
+      [
+        "Advanced Dogma",
+        null,
+        "Archetype Feat",
+        14
+      ],
+      [
+        "Improved Communal Healing",
+        null,
+        "Cleric Feat",
+        14
+      ],
+      [
+        "Ancestral Paragon",
+        null,
+        "General Feat",
+        15
+      ],
+      [
+        "Fire Savvy",
+        null,
+        "Ancestry Feat",
+        15
+      ],
+      [
+        "Explosive Expert",
+        null,
+        "Ancestry Feat",
+        15
+      ],
+      [
+        "Legendary Professional",
+        null,
+        "Skill Feat",
+        16
+      ],
+      [
+        "Reflect Spell",
+        null,
+        "Class Feat",
+        16
+      ],
+      [
+        "Loremaster Dedication",
+        null,
+        "Archetype Feat",
+        16
+      ],
+      [
+        "Forge-Blessed Shot",
+        null,
+        "Ancestry Feat",
+        17
+      ],
+      [
+        "Unified Theory",
+        null,
+        "Skill Feat",
+        18
+      ],
+      [
+        "Infinite Possibilities",
+        null,
+        "Class Feat",
+        18
+      ],
+      [
+        "Loremaster's Etude",
+        null,
+        "Archetype Feat",
+        18
+      ],
+      [
+        "Orthographic Mastery",
+        null,
+        "General Feat",
+        19
+      ],
+      [
+        "Defy the Darkness",
+        null,
+        "Ancestry Feat",
+        19
+      ],
+      [
+        "Craft Anything",
+        null,
+        "Skill Feat",
+        20
+      ],
+      [
+        "Archwizard's Might",
+        null,
+        "Class Feat",
+        20
+      ],
+      [
+        "Magical Edification",
+        null,
+        "Archetype Feat",
+        20
+      ]
+    ],
+    "specials": [
+      "Arcane School: Universalist",
+      "Arcane Thesis: Metamagical Experimentation",
+      "Energy Emanation",
+      "Spellbook",
+      "Drain Bonded Item",
+      "Arcane Bond",
+      "Darkvision",
+      "Engineering",
+      "Firearm",
+      "Arcana",
+      "Lightning Reflexes",
+      "Occultism",
+      "Expert Spellcaster",
+      "Not Selected",
+      "Magical Fortitude",
+      "Domain: Magic",
+      "Wizard Weapon Expertise",
+      "Alertness",
+      "Not Selected",
+      "Defensive Robes",
+      "Weapon Specialization",
+      "Crafting",
+      "Master Spellcaster",
+      "Occultism",
+      "Not Selected",
+      "Not Selected",
+      "Resolve",
+      "Lore: Academia",
+      "Charisma",
+      "Legendary Spellcaster",
+      "Archwizard's Spellcraft",
+      "Not Selected",
+      "Lore: Academia",
+      "Not Selected",
+      "Elemental Heart Dwarf"
+    ],
+    "lores": [
+      [
+        "Academia",
+        4
+      ],
+      [
+        "Engineering",
+        8
+      ],
+      [
+        "Firearm",
+        8
+      ],
+      [
+        "Dwarven Sub Culture",
+        8
+      ],
+      [
+        "Loremaster",
+        0
+      ]
+    ],
+    "equipment": [],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [],
+    "money": {
+      "pp": 0,
+      "gp": 15,
+      "sp": 0,
+      "cp": 0
+    },
+    "armor": [],
+    "spellCasters": [
+      {
+        "name": "Caster Arcane Sense",
+        "magicTradition": "arcane",
+        "spellcastingType": "prepared",
+        "ability": "cha",
+        "proficiency": 8,
+        "focusPoints": 0,
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": [
+              "Detect Magic"
+            ]
+          }
+        ],
+        "perDay": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "Magical Edification",
+        "magicTradition": "occult",
+        "spellcastingType": "prepared",
+        "ability": "cha",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": [
+              "Message",
+              "Guidance",
+              "Sigil"
+            ]
+          }
+        ],
+        "perDay": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "Archetype Cleric",
+        "magicTradition": "divine",
+        "spellcastingType": "prepared",
+        "ability": "wis",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": []
+          },
+          {
+            "spellLevel": 1,
+            "list": []
+          },
+          {
+            "spellLevel": 2,
+            "list": []
+          },
+          {
+            "spellLevel": 3,
+            "list": []
+          }
+        ],
+        "perDay": [
+          4,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "Wizard",
+        "magicTradition": "arcane",
+        "spellcastingType": "prepared",
+        "ability": "int",
+        "proficiency": 8,
+        "focusPoints": 0,
+        "spells": [],
+        "perDay": [
+          7,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          2
+        ]
+      },
+      {
+        "name": "Focus Spells",
+        "magicTradition": "focus",
+        "spellcastingType": "",
+        "ability": "int",
+        "proficiency": 8,
+        "focusPoints": 2,
+        "spells": [
+          {
+            "spellLevel": 1,
+            "list": [
+              "Magic's Vessel",
+              "Loremaster's Etude"
+            ]
+          }
+        ],
+        "perDay": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "formula": [],
+    "pets": [],
+    "acTotal": {
+      "acProfBonus": 24,
+      "acAbilityBonus": 4,
+      "acItemBonus": 3,
+      "acTotal": 41
+    }
+  }
+}

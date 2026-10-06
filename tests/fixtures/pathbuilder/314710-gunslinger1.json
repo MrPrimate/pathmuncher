@@ -1,0 +1,245 @@
+{
+  "success": true,
+  "build": {
+    "name": "Montgomery Fisher",
+    "class": "Gunslinger",
+    "dualClass": null,
+    "level": 1,
+    "ancestry": "Fleshwarp",
+    "heritage": "Beastkin",
+    "background": "Back-Alley Doctor",
+    "alignment": "N",
+    "gender": "Male",
+    "age": "37",
+    "deity": "Not set",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "dex",
+    "languages": [
+      "Common",
+      "Iruxi",
+      "Jotun"
+    ],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 14,
+      "dex": 16,
+      "con": 14,
+      "int": 12,
+      "wis": 12,
+      "cha": 10,
+      "breakdown": {
+        "ancestryFree": [
+          "Str",
+          "Dex"
+        ],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": [
+          "Con",
+          "Int"
+        ],
+        "classBoosts": [
+          "Dex"
+        ],
+        "mapLevelledBoosts": {
+          "1": [
+            "Dex",
+            "Con",
+            "Wis",
+            "Str"
+          ]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 10,
+      "classhp": 8,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 2,
+      "heavy": 0,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 2,
+      "simple": 2,
+      "unarmed": 2,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 2,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 2,
+      "diplomacy": 0,
+      "intimidation": 2,
+      "medicine": 2,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 2,
+      "thievery": 2
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Risky Surgery",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Beastkin",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Living Weapon",
+        null,
+        "Ancestry Feat",
+        1,
+        "Fleshwarp Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Dual-Weapon Reload",
+        null,
+        "Class Feat",
+        1,
+        "Gunslinger Feat 1",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Change Shape (Beastkin)",
+      "Medium",
+      "Into the Fray",
+      "Unusual Anatomy",
+      "Low-Light Vision",
+      "Way of the Drifter",
+      "Reloading Strike",
+      "Singular Expertise",
+      "Beastkin"
+    ],
+    "lores": [
+      [
+        "Underworld",
+        2
+      ]
+    ],
+    "equipmentContainers": {},
+    "equipment": [],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [
+        "Coat Pistol"
+      ],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Axe Musket - Melee",
+        "qty": 1,
+        "prof": "martial",
+        "die": "d8",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Axe Musket - Melee",
+        "runes": [],
+        "damageType": "S",
+        "attack": 5,
+        "damageBonus": 2,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false
+      },
+      {
+        "name": "Coat Pistol",
+        "qty": 1,
+        "prof": "simple",
+        "die": "d4",
+        "pot": 0,
+        "str": "",
+        "mat": null,
+        "display": "Coat Pistol",
+        "runes": [],
+        "damageType": "P",
+        "attack": 8,
+        "damageBonus": 0,
+        "extraDamage": [
+          "+1 Circumstance"
+        ],
+        "increasedDice": false,
+        "isInventor": false
+      }
+    ],
+    "money": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 4,
+      "pp": 0
+    },
+    "armor": [
+      {
+        "name": "Leather Armor",
+        "qty": 1,
+        "prof": "light",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Leather",
+        "worn": true,
+        "runes": []
+      },
+      {
+        "name": "Leather Armor",
+        "qty": 1,
+        "prof": "light",
+        "pot": 0,
+        "res": "",
+        "mat": null,
+        "display": "Studded Leather",
+        "worn": false,
+        "runes": []
+      }
+    ],
+    "spellCasters": [],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 3,
+      "acAbilityBonus": 3,
+      "acItemBonus": 1,
+      "acTotal": 17,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

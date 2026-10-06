@@ -5,10 +5,11 @@
   "description": "Foundry VTT module for integrating Pathfinder 2e Pathbuilder characters",
   "private": true,
   "scripts": {
-    "lint": "npx eslint src/",
-    "lint-fix": "npx eslint src/ --fix",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "lint": "npx eslint src/ tests/",
+    "lint-fix": "npx eslint src/ tests/ --fix",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/unit/setup.mjs --test --test-concurrency=1 \"tests/unit/**/*.test.mjs\"",
+    "build": "webpack",
+    "test:foundry": "node tests/foundry/run.mjs"
   },
   "devDependencies": {
     "eslint": "^8.52.0",

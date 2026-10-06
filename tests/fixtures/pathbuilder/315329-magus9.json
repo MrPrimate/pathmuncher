@@ -1,0 +1,693 @@
+{
+  "success": true,
+  "build": {
+    "name": "Therendil Silberblatt",
+    "class": "Magus",
+    "dualClass": null,
+    "level": 9,
+    "xp": 0,
+    "ancestry": "Elf",
+    "heritage": "Ancient Elf",
+    "background": "Emissary",
+    "alignment": "N",
+    "gender": "male",
+    "age": "148",
+    "deity": "Calistria",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "dex",
+    "languages": [
+      "Aklo",
+      "Common",
+      "Draconic",
+      "Dwarven",
+      "Elven",
+      "Empyrean",
+      "Fey",
+      "Goblin"
+    ],
+    "rituals": [
+      "Elemental Sentinel"
+    ],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 10,
+      "dex": 20,
+      "con": 14,
+      "int": 18,
+      "wis": 14,
+      "cha": 14,
+      "breakdown": {
+        "ancestryFree": [
+          "Con"
+        ],
+        "ancestryBoosts": [
+          "Dex",
+          "Int"
+        ],
+        "ancestryFlaws": [
+          "Con"
+        ],
+        "backgroundBoosts": [
+          "Int",
+          "Dex"
+        ],
+        "classBoosts": [
+          "Dex"
+        ],
+        "mapLevelledBoosts": {
+          "1": [
+            "Dex",
+            "Int",
+            "Cha",
+            "Wis"
+          ],
+          "2": [
+            "Wis"
+          ],
+          "3": [
+            "Int"
+          ],
+          "4": [
+            "Con"
+          ],
+          "5": [
+            "Dex"
+          ],
+          "7": [
+            "Dex"
+          ],
+          "8": [
+            "Con"
+          ],
+          "9": [
+            "Cha"
+          ]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 6,
+      "classhp": 8,
+      "bonushp": 0,
+      "bonushpPerLevel": 1,
+      "speed": 30,
+      "speedBonus": 5
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 6,
+      "heavy": 0,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 4,
+      "simple": 4,
+      "unarmed": 4,
+      "castingArcane": 4,
+      "castingDivine": 0,
+      "castingOccult": 2,
+      "castingPrimal": 0,
+      "acrobatics": 2,
+      "arcana": 6,
+      "athletics": 0,
+      "crafting": 6,
+      "deception": 2,
+      "diplomacy": 2,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 0,
+      "occultism": 2,
+      "performance": 2,
+      "religion": 2,
+      "society": 2,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {
+      "Arcana": {
+        "Item Bonus": 1
+      }
+    },
+    "feats": [
+      [
+        "Multilingual",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Ancient Elf",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "parentChoice",
+        null
+      ],
+      [
+        "Psychic Dedication",
+        null,
+        "Archetype Feat",
+        1,
+        "Heritage FeatMultitalented",
+        "childChoice",
+        "Heritage Feat"
+      ],
+      [
+        "Nimble Elf",
+        null,
+        "Ancestry Feat",
+        1,
+        "Elf Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Improvise Tool",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Expansive Spellstrike",
+        null,
+        "Class Feat",
+        2,
+        "Magus Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Soulforger Dedication",
+        null,
+        "Archetype Feat",
+        2,
+        "Free Archetype 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Robust Health",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Magical Crafting",
+        null,
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Running Recharge",
+        null,
+        "Class Feat",
+        4,
+        "Magus Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Soul Flare",
+        null,
+        "Archetype Feat",
+        4,
+        "Free Archetype 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Elven Weapon Familiarity",
+        null,
+        "Ancestry Feat",
+        5,
+        "Elf Feat 5",
+        "standardChoice",
+        null
+      ],
+      [
+        "Magical Shorthand",
+        null,
+        "Skill Feat",
+        6,
+        "Skill Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Psi Development",
+        null,
+        "Class Feat",
+        6,
+        "Magus Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Soul Arsenal",
+        null,
+        "Archetype Feat",
+        6,
+        "Free Archetype 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Toughness",
+        null,
+        "General Feat",
+        7,
+        "General Feat 7",
+        "standardChoice",
+        null
+      ],
+      [
+        "Signature Crafting",
+        null,
+        "Skill Feat",
+        8,
+        "Skill Feat 8",
+        "standardChoice",
+        null
+      ],
+      [
+        "Reactive Strike",
+        null,
+        "Class Feat",
+        8,
+        "Magus Feat 8",
+        "standardChoice",
+        null
+      ],
+      [
+        "Basic Thoughtform",
+        null,
+        "Archetype Feat",
+        8,
+        "Free Archetype 8",
+        "parentChoice",
+        null
+      ],
+      [
+        "Warp Space",
+        null,
+        "Psychic Feat",
+        8,
+        "Basic ThoughtformFree Archetype 8",
+        "childChoice",
+        "Free Archetype 8"
+      ],
+      [
+        "Elf Step",
+        null,
+        "Ancestry Feat",
+        9,
+        "Elf Feat 9",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Magus Spellcasting",
+      "Spellstrike",
+      "Spellstrike Specifics",
+      "Arcane Cascade",
+      "Laughing Shadow",
+      "Conflux Spells",
+      "Spellbook",
+      "Low-Light Vision",
+      "Intelligence",
+      "The Tangible Dream",
+      "Standard Cantrip: Shield (Archetype)",
+      "Manifest Soulforged Armament",
+      "Heroic Heart",
+      "Reflex Expertise",
+      "Weapon Expertise",
+      "Unique Cantrip: Imaginary Weapon",
+      "Planar Pain",
+      "Studious Spell: Gecko Grip",
+      "Studious Spell: Blur",
+      "Studious Spells",
+      "Weapon Specialization",
+      "Perception Expertise",
+      "Expert Spellcaster",
+      "Twofold Will",
+      "Ancient Elf"
+    ],
+    "lores": [
+      [
+        "A City",
+        2
+      ],
+      [
+        "Demon",
+        0
+      ]
+    ],
+    "equipmentContainers": {},
+    "equipment": [
+      [
+        "Ring of Wizardry (Type I)",
+        1,
+        "Invested"
+      ]
+    ],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [
+      {
+        "name": "Rapier",
+        "qty": 1,
+        "prof": "simple",
+        "die": "d6",
+        "pot": 1,
+        "str": "striking",
+        "mat": null,
+        "display": "+1 Striking Rapier",
+        "runes": [],
+        "damageType": "P",
+        "attack": 19,
+        "damageBonus": 2,
+        "extraDamage": [],
+        "increasedDice": false,
+        "isInventor": false,
+        "grade": ""
+      }
+    ],
+    "money": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 0,
+      "pp": 0
+    },
+    "armor": [
+      {
+        "name": "Leaf Weave",
+        "qty": 1,
+        "prof": "light",
+        "pot": 1,
+        "res": "",
+        "mat": null,
+        "display": "+1 Leaf Weave",
+        "worn": true,
+        "runes": [],
+        "grade": ""
+      }
+    ],
+    "spellCasters": [
+      {
+        "name": "Magus",
+        "magicTradition": "arcane",
+        "spellcastingType": "prepared",
+        "ability": "int",
+        "proficiency": 4,
+        "focusPoints": 0,
+        "innate": false,
+        "perDay": [
+          5,
+          4,
+          2,
+          2,
+          2,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spells": [
+          {
+            "spellLevel": 1,
+            "list": [
+              "Create Water",
+              "Sure Strike",
+              "Tailwind",
+              "Gentle Landing",
+              "Charm",
+              "Thunderstrike",
+              "Shielded Arm",
+              "Illusory Object"
+            ]
+          },
+          {
+            "spellLevel": 0,
+            "list": [
+              "Bullhorn",
+              "Detect Magic",
+              "Electric Arc",
+              "Message",
+              "Prestidigitation",
+              "Tangle Vine",
+              "Telekinetic Hand",
+              "Gouging Claw"
+            ]
+          },
+          {
+            "spellLevel": 2,
+            "list": [
+              "Blazing Bolt",
+              "Warping Pull",
+              "Brine Dragon Bile",
+              "Darkvision",
+              "Create Food",
+              "Gecko Grip",
+              "Water Breathing",
+              "Blur"
+            ]
+          },
+          {
+            "spellLevel": 3,
+            "list": [
+              "Time Jump",
+              "Shared Invisibility",
+              "Cozy Cabin",
+              "Radiant Globe"
+            ]
+          },
+          {
+            "spellLevel": 4,
+            "list": [
+              "Draw the Lightning",
+              "Unfettered Movement",
+              "Translocate",
+              "Mercurial Stride"
+            ]
+          },
+          {
+            "spellLevel": 5,
+            "list": [
+              "Wall of Stone",
+              "Plasma Whirl"
+            ]
+          }
+        ],
+        "prepared": [
+          {
+            "spellLevel": 0,
+            "list": [
+              "Bullhorn",
+              "Electric Arc",
+              "Prestidigitation",
+              "Message",
+              "Telekinetic Hand"
+            ]
+          },
+          {
+            "spellLevel": 1,
+            "list": [
+              "Illusory Object",
+              "Sure Strike",
+              "Create Water",
+              "Gentle Landing"
+            ]
+          },
+          {
+            "spellLevel": 2,
+            "list": [
+              "Blur",
+              "Gecko Grip"
+            ]
+          },
+          {
+            "spellLevel": 3,
+            "list": [
+              "Shared Invisibility",
+              "Radiant Globe"
+            ]
+          },
+          {
+            "spellLevel": 4,
+            "list": [
+              "Draw the Lightning",
+              "Mercurial Stride"
+            ]
+          },
+          {
+            "spellLevel": 5,
+            "list": [
+              "Wall of Stone"
+            ]
+          }
+        ],
+        "blendedSpells": []
+      },
+      {
+        "name": "Archetype Psychic",
+        "magicTradition": "occult",
+        "spellcastingType": "spontaneous",
+        "ability": "int",
+        "proficiency": 2,
+        "focusPoints": 0,
+        "innate": false,
+        "perDay": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": []
+          }
+        ],
+        "prepared": [],
+        "blendedSpells": []
+      }
+    ],
+    "focusPoints": 2,
+    "focus": {
+      "arcane": {
+        "int": {
+          "abilityBonus": 4,
+          "proficiency": 4,
+          "itemBonus": 0,
+          "focusCantrips": [],
+          "focusSpells": [
+            "Dimensional Assault"
+          ]
+        }
+      },
+      "occult": {
+        "int": {
+          "abilityBonus": 4,
+          "proficiency": 2,
+          "itemBonus": 0,
+          "focusCantrips": [
+            "Shield (Archetype)",
+            "Imaginary Weapon"
+          ],
+          "focusSpells": []
+        }
+      }
+    },
+    "formula": [
+      {
+        "type": "other",
+        "known": [
+          "Antidote (Lesser)",
+          "Bookthief Brew",
+          "Cognitive Mutagen (Lesser)",
+          "Drakeheart Mutagen (Lesser)",
+          "Eagle Eye Elixir (Lesser)",
+          "Forensic Dye",
+          "Smoke Ball (Lesser)",
+          "Blindpepper Tube",
+          "Camouflage Dye (Lesser)",
+          "Elixir of Life (Minor)",
+          "Infiltrator's Elixir",
+          "Soothing Tonic (Lesser)",
+          "Weapon Potency +1",
+          "Predator's Claw",
+          "Navigator's Star",
+          "Oil of Potency",
+          "Jade Cat",
+          "Potency Crystal",
+          "Wolf Fang",
+          "Bronze Bull Pendant",
+          "Cheetah's Elixir (Lesser)",
+          "Bottled Lightning (Lesser)",
+          "Antiplague (Lesser)",
+          "Black Powder (Dose or Round)",
+          "Alchemist's Fire (Lesser)",
+          "Silvertongue Mutagen (Lesser)",
+          "Theatrical Mutagen (Lesser)",
+          "Self-Immolating Note",
+          "Glow Rod",
+          "Alchemical Fuse",
+          "Ghost Charge (Lesser)",
+          "Skeptic's Elixir (Lesser)",
+          "Popdust",
+          "Tallow Bomb (Lesser)",
+          "Emetic Paste (Lesser)",
+          "Origin Unguent",
+          "Lethargy Poison",
+          "Darkvision Elixir (Lesser)",
+          "Bottled Catharsis (Lesser)",
+          "Energy Mutagen (Moderate)",
+          "Impossible Cake",
+          "Glue Bomb (Moderate)",
+          "Steelscour (moderate)",
+          "Weapon Striking",
+          "Cooling Elixir (Lesser)",
+          "Witchwarg Elixir (Lesser)",
+          "Life Shot (Minor)",
+          "Oxygen Ooze",
+          "Stone Body Mutagen (Lesser)",
+          "Soothing Powder (Lesser)",
+          "Fury Cocktail (Lesser)",
+          "Bane Ammunition (Lesser)",
+          "Elemental Ammunition (Lesser)",
+          "Skunk Bomb (Lesser)",
+          "Peshpine Grenade (Lesser)",
+          "Dust Pods",
+          "Battering Snare",
+          "Alarm Snare",
+          "Hampering Snare",
+          "Tar Rocket Snare",
+          "Pummeling Snare",
+          "Nauseating Snare"
+        ]
+      }
+    ],
+    "acTotal": {
+      "acProfBonus": 11,
+      "acAbilityBonus": 4,
+      "acItemBonus": 2,
+      "acTotal": 27,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

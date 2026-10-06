@@ -1,0 +1,106 @@
+// Every Pathbuilder fixture imports without errors and matches its build, apart from the known gaps
+// listed here. When a fix closes a gap the test fails until the entry is removed, so this list stays
+// an accurate record of what pathmuncher still gets wrong. Prompts are the pf2e choices the user
+// still has to answer during the import, by the item that raised them.
+(() => {
+  const { test } = pmt;
+
+  const EXPECTATIONS = {
+    "315329-magus9": {
+      prompts: ["The Tangible Dream"],
+      knownGaps: [
+        "formulas 61 (expected 62)",
+      ],
+    },
+    "142926-wizard20": {
+      prompts: [
+        "Elemental Heart Dwarf",
+        "Arcane School",
+        "Arcane Thesis",
+        "Deity (Cleric)",
+        "Specialty Crafting",
+        "Domain Initiate",
+        "Ancestral Paragon",
+      ],
+      knownGaps: [
+        "feat missing: Dwarven Hold Education [Ancestry Feat 1]",
+        "feat in bonus feats: Counterspell [Class Feat 1] (expected class)",
+        "feat missing: Eschew Materials [Class Feat 2]",
+        "feat in bonus feats: Cleric Dedication [Archetype Feat 2] (expected class)",
+        "feat in bonus feats: Explosive Savant [Ancestry Feat 3] (expected ancestry)",
+        "feat in bonus feats: Basic Cleric Spellcasting [Archetype Feat 4] (expected class)",
+        "feat in bonus feats: Energy Ablation [Wizard Feat 4] (expected class)",
+        "feat in bonus feats: Basic Dogma [Archetype Feat 6] (expected class)",
+        "feat in bonus feats: Blast Resistance [Ancestry Feat 7] (expected ancestry)",
+        "feat in bonus feats: Divine Breadth [Archetype Feat 8] (expected class)",
+        "feat in bonus feats: Advanced Dogma [Archetype Feat 10] (expected class)",
+        "feat in bonus feats: Mountain's Stoutness [Ancestry Feat 11] (expected ancestry)",
+        "feat in bonus feats: Advanced Dogma [Archetype Feat 12] (expected class)",
+        "feat in bonus feats: Communal Healing [Cleric Feat 12] (expected class)",
+        "feat missing: Impeccable Crafter [Skill Feat 14]",
+        "feat missing: Scroll Savant [Class Feat 14]",
+        "feat in bonus feats: Advanced Dogma [Archetype Feat 14] (expected class)",
+        "feat missing: Improved Communal Healing [Cleric Feat 14]",
+        "feat in bonus feats: Fire Savvy [Ancestry Feat 15] (expected ancestry)",
+        "feat in bonus feats: Explosive Expert [Ancestry Feat 15] (expected ancestry)",
+        "feat in bonus feats: Loremaster Dedication [Archetype Feat 16] (expected class)",
+        "feat in bonus feats: Loremaster's Etude [Archetype Feat 18] (expected class)",
+        "feat in bonus feats: Defy the Darkness [Ancestry Feat 19] (expected ancestry)",
+        "feat in bonus feats: Magical Edification [Archetype Feat 20] (expected class)",
+      ],
+    },
+    "304883-thaumaturge1": {
+      prompts: ["Foxfire"],
+      knownGaps: [],
+    },
+    "314710-gunslinger1": {
+      prompts: ["Living Weapon"],
+      knownGaps: [],
+    },
+    "345816-guardian3": {
+      prompts: [],
+      knownGaps: [
+        "core heritage: expected Custom Mixed Heritage, got null",
+        "feat missing: Custom Mixed Heritage [Heritage 1]",
+      ],
+    },
+    "422753-fighter5": {
+      prompts: [
+        "Fighter",
+        "Barrow's Edge",
+        "Barrow's Edge (Grant me a new item.)",
+        "Divine Spark and Ikons",
+        "Bands of Imprisonment",
+        "Exemplar Dedication",
+        "Fighter Weapon Mastery",
+      ],
+      knownGaps: [
+        "feat in bonus feats: Fleet [General Feat 1] (expected general)",
+      ],
+    },
+  };
+
+  for (const [name, expectation] of Object.entries(EXPECTATIONS)) {
+    test(`fixture ${name}: imports and matches the build`, async (t) => {
+      const exportJson = foundry.utils.deepClone(pmt.fixtures[name]);
+      t.ok(exportJson, `fixture ${name} missing`);
+      const build = exportJson.build;
+      await pmt.useBuildVariants(t, build);
+      const prompts = pmt.answerPrompts(t, build);
+      const worldItems = new Set(game.items.map((i) => i.id));
+      const actor = await pmt.actor(t, name);
+
+      await pmt.importBuild(actor, exportJson);
+
+      const problems = pmt.compareWithBuild(actor, build);
+      const unexpected = problems.filter((p) => !expectation.knownGaps.includes(p));
+      const fixed = expectation.knownGaps.filter((p) => !problems.includes(p));
+      t.log.push(...problems.map((p) => `known: ${p}`).filter((p) => !unexpected.includes(p.slice(7))));
+      t.deepEqual(unexpected, [], "new differences from the build:");
+      t.deepEqual(fixed, [], "known gaps that no longer occur (remove them from EXPECTATIONS):");
+      t.deepEqual(prompts.map((p) => p.item), expectation.prompts, "pf2e prompts during the import:");
+      t.deepEqual(game.items.filter((i) => !worldItems.has(i.id)).map((i) => i.name), [], "world items created");
+      t.deepEqual(game.actors.filter((a) => a.getFlag("pathmuncher", "temp")).map((a) => a.name), [], "temp actors left");
+    });
+  }
+})();
