@@ -7,20 +7,20 @@
   background-size: 50px 1px;
   background-repeat: repeat-x;
   background-position-x: 35px;
-  width: 330px;
-  min-width: 330px;
+  width: 380px;
+  min-width: 380px;
 }
 .pathmuncher #divInner{
   left: 0;
   position: sticky;
 }
 .pathmuncher #divOuter{
-  width: 285px;
+  width: 335px;
   overflow: hidden;
 }
 .pathmuncher #divCode, .pathmuncher #divJson {
   border: 1px solid black;
-  width: 300px;
+  width: 350px;
   margin: 0 auto;
   padding: 5px;
 }

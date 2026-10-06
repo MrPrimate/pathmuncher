@@ -150,25 +150,57 @@ export class Pathmuncher {
     if (this.statusCallback) this.statusCallback(total, count, type, prefixLabel);
   }
 
+  /**
+   * Returns the build from Pathbuilder JSON, either the full export ({ success, build }) or the
+   * build object on its own, or null if it doesn't look like a Pathbuilder build.
+   */
+  static getBuildFromJson(jsonData) {
+    if (!utils.isObject(jsonData)) return null;
+    if (jsonData.success === false) return null;
+    const build = utils.isObject(jsonData.build) ? jsonData.build : jsonData;
+    const isBuild = utils.isString(build.name)
+      && utils.isString(build.class)
+      && Array.isArray(build.feats)
+      && utils.isObject(build.abilities);
+    return isBuild ? build : null;
+  }
+
+  /**
+   * Fetches the build for a Pathbuilder JSON export id into this.source.
+   * Returns true on success; failures are reported to the user and return false.
+   */
   async fetchPathbuilder(pathbuilderId) {
     if (!pathbuilderId) {
       const flags = utils.getFlags(this.actor);
       pathbuilderId = flags?.pathbuilderId;
     }
-    if (pathbuilderId) {
-      const jsonData = await foundry.utils.fetchJsonWithTimeout(
+    if (!pathbuilderId) {
+      ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.NoId`));
+      return false;
+    }
+
+    let jsonData;
+    try {
+      jsonData = await foundry.utils.fetchJsonWithTimeout(
         `https://pathbuilder2e.com/json.php?id=${pathbuilderId}`,
       );
-      if (jsonData.success) {
-        this.source = jsonData.build;
-      } else {
-        ui.notifications.warn(
-          game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.FetchFailed`, { pathbuilderId }),
-        );
-      }
-    } else {
-      ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.NoId`));
+    } catch (error) {
+      logger.error("Unable to fetch from Pathbuilder", { pathbuilderId, error });
+      ui.notifications.error(
+        game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.FetchError`, { pathbuilderId }),
+      );
+      return false;
     }
+
+    const build = Pathmuncher.getBuildFromJson(jsonData);
+    if (!build) {
+      ui.notifications.warn(
+        game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.FetchFailed`, { pathbuilderId }),
+      );
+      return false;
+    }
+    this.source = build;
+    return true;
   }
 
   #generateFoundryFeatLocation(document, feature) {
@@ -2957,8 +2989,13 @@ export class Pathmuncher {
     actorData.folder = tempActorFolder?.id;
   }
 
+  /**
+   * Builds the import result from this.source without changing the actor.
+   * Returns false if there is no usable source; processing errors are thrown.
+   */
   async processCharacter() {
-    if (!this.source) return;
+    this.processed = false;
+    if (!this.source) return false;
     await this.#prepare();
     this.#statusUpdate(1, 12, "Character");
     await this.#processCore();
@@ -2992,6 +3029,8 @@ export class Pathmuncher {
     await this.#processRituals();
     this.#statusUpdate(12, 12, "Lores");
     await this.#generateLores();
+    this.processed = true;
+    return true;
   }
 
   async #removeDocumentsToBeUpdated() {
@@ -3177,6 +3216,10 @@ export class Pathmuncher {
   }
 
   async updateActor() {
+    // removing the actor's items is only safe once a complete result has been built
+    if (!this.processed) {
+      throw new Error("Pathmuncher: updateActor called before processCharacter completed");
+    }
     await this.#removeDocumentsToBeUpdated();
 
     if (!this.options.addName) {

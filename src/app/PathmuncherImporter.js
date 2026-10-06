@@ -9,7 +9,6 @@ export class PathmuncherImporter extends FormApplication {
   constructor(options, actor) {
     super(options);
     this.actor = game.actors.get(actor.id ? actor.id : actor._id);
-    this.backup = foundry.utils.duplicate(this.actor);
     this.mode = "number";
   }
 
@@ -82,28 +81,48 @@ export class PathmuncherImporter extends FormApplication {
     };
     logger.debug("Pathmuncher options", options);
 
-    await utils.setFlags(this.actor, options);
-
     const statusBar = document.getElementById("pathmuncher-import-progress");
-    statusBar.classList.toggle("import-hidden");
-
     const pathmuncher = new Pathmuncher(this.actor, options);
-    if (this.mode === "number") {
-      await pathmuncher.fetchPathbuilder(pathbuilderId);
-    } else if (this.mode === "json") {
+    try {
+      // nothing on the actor changes until there is a valid build and it has been fully processed
+      if (!(await this.#loadSource(pathmuncher, formData))) return;
+
+      await utils.setFlags(this.actor, options);
+      statusBar.classList.remove("import-hidden");
+
+      logger.debug("Pathmuncher Source", pathmuncher.source);
       try {
-        const jsonData = JSON.parse(formData.textBoxBuildJSON.trim());
-        pathmuncher.source = jsonData.build;
-      } catch (err) {
-        ui.notifications.error("Unable to parse JSON data");
+        await pathmuncher.processCharacter();
+      } catch (error) {
+        logger.error("Pathmuncher processing failed", { error, pathmuncher });
+        ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ProcessingFailed`, {
+          error: error.message ?? error,
+        }));
+        await utils.removeTempActors();
         return;
       }
+      logger.debug("Post processed character", pathmuncher);
+
+      const actorBackup = this.actor.toObject();
+      try {
+        await pathmuncher.updateActor();
+      } catch (error) {
+        logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
+        const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
+        ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.UpdateFailed`, {
+          actor: this.actor.name,
+          error: error.message ?? error,
+          backup: backup?.name ?? "",
+        }), { permanent: true });
+        await utils.removeTempActors();
+        return;
+      }
+    } finally {
+      statusBar?.classList.add("import-hidden");
+      const button = document.getElementById("pathmuncher-button");
+      if (button) button.disabled = false;
     }
 
-    logger.debug("Pathmuncher Source", pathmuncher.source);
-    await pathmuncher.processCharacter();
-    logger.debug("Post processed character", pathmuncher);
-    await pathmuncher.updateActor();
     logger.debug("Final import details", {
       actor: this.actor,
       pathmuncher,
@@ -123,6 +142,50 @@ export class PathmuncherImporter extends FormApplication {
     }
     this.close();
     await pathmuncher.postImportCheck();
+  }
+
+  /**
+   * Loads the build into pathmuncher.source from the Pathbuilder id or the pasted JSON.
+   * Returns false, having told the user why, if there is no usable build.
+   */
+  async #loadSource(pathmuncher, formData) {
+    if (this.mode === "number") {
+      return pathmuncher.fetchPathbuilder(formData.textBoxBuildID);
+    }
+
+    let jsonData;
+    try {
+      jsonData = JSON.parse(formData.textBoxBuildJSON.trim());
+    } catch (error) {
+      logger.error("Unable to parse JSON data", error);
+      ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.InvalidJson`));
+      return false;
+    }
+    const build = Pathmuncher.getBuildFromJson(jsonData);
+    if (!build) {
+      ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.InvalidBuild`));
+      return false;
+    }
+    pathmuncher.source = build;
+    return true;
+  }
+
+  /**
+   * Saves the pre-import actor data as a new actor, so a failed update can be recovered by hand.
+   */
+  static async #saveBackupActor(actorBackup) {
+    try {
+      const data = foundry.utils.deepClone(actorBackup);
+      delete data._id;
+      delete data.folder;
+      data.name = `${actorBackup.name} (${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Labels.PreImportBackup`)})`;
+      if (data.prototypeToken) data.prototypeToken.name = data.name;
+      foundry.utils.setProperty(data, "flags.pathmuncher.temp", false);
+      return await Actor.create(data, { renderSheet: false });
+    } catch (error) {
+      logger.error("Unable to save a backup of the actor", { error, actorBackup });
+      return null;
+    }
   }
 
 }

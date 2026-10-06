@@ -85,6 +85,11 @@
       "Pathmuncher": {
         "FetchFailed": "Unable to fetch a character with Pathbuilder id {pathbuilderId}!",
         "NoId": "No Pathbuilder Id detected!",
+        "FetchError": "Unable to reach Pathbuilder for id {pathbuilderId}. Check the id, or export the character as JSON and paste it instead.",
+        "InvalidJson": "Unable to parse JSON data.",
+        "InvalidBuild": "This does not look like a Pathbuilder export, so nothing was changed. Paste the JSON from Pathbuilder's \"Export JSON\" option.",
+        "ProcessingFailed": "Pathmuncher could not process this character, so nothing was changed: {error}",
+        "UpdateFailed": "Pathmuncher failed while updating {actor}: {error}. A copy of the character from before the import was saved as \"{backup}\".",
         "MissingItemsOpen": "The following could not be added. They may have a slightly different name or cannot be matched to a foundry item. You may be able to find them with a manual search. If it is marked as \"Special\", Pathmuncher has been unable to determine if it needs to do something with this. It might be a choice value, or may not be needed in the Foundry implementation.",
         "CompletedWithNotes": "Import completed with some notes.",
         "CompletedSuccess": "Import completed successfully.",
@@ -107,6 +112,7 @@
       "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually."
     },
     "Labels": {
+      "PreImportBackup": "pre-import backup",
       "Character": "Character details",
       "Feats": "Feats",
       "Equipment": "Equipment",

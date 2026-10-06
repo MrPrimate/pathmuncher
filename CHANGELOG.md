@@ -1,3 +1,7 @@
+# 1.6.2
+
+- The Pathbuilder ID entry box only displayed six digits, hiding the seventh digit of newer Pathbuilder character IDs. The box now shows seven digits.
+
 # 1.6.0
 
 - Fixes for changes on Pathbuilder site with Character downloads failing.
