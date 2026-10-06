@@ -57,6 +57,12 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
     list as part of the fix that closed it.
 - `importer.test.js`: drives the real importer dialog. Bad input, fetch failures and processing
   failures must leave the actor untouched. A failed update must save a pre-import copy.
+- `reimport.test.js`: importing over an existing character.
+  - Imported items are flagged and replaced.
+  - Effects and conditions are always kept.
+  - Hand-added items are offered in the keep dialog; cancelling changes nothing.
+  - Actors imported before items were flagged are replaced without asking.
+  - Unticked options (money, armor, formulas) leave their items alone.
 
 Add new behaviour tests next to these as plain scripts that call `pmt.test(name, async (t) => ...)`.
 `lib.js` documents the helpers:

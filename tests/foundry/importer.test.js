@@ -3,17 +3,16 @@
   const { test } = pmt;
   const gunslinger = () => foundry.utils.deepClone(pmt.fixtures["314710-gunslinger1"]);
 
-  // An imported character that also has an effect, a condition and a homebrew item.
+  // An imported character that also has an effect, a condition and items added by hand (kept if the
+  // import gets as far as asking about them).
   const preparedActor = async (ctx, label) => {
     const exportJson = gunslinger();
     await pmt.useBuildVariants(ctx, exportJson.build);
     pmt.answerPrompts(ctx, exportJson.build);
+    pmt.answerKeepDialog(ctx);
     const actor = await pmt.actor(ctx, label);
     await pmt.importBuild(actor, exportJson);
-    const pack = game.packs.get("pf2e.equipment-effects");
-    const effect = await pack.getDocument((await pack.getIndex()).contents[0]._id);
-    await actor.createEmbeddedDocuments("Item", [effect.toObject(), { name: "Homebrew Trinket", type: "equipment" }]);
-    await actor.toggleCondition("frightened");
+    await pmt.addHandItems(actor);
     return actor;
   };
 

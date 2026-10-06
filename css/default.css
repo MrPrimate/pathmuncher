@@ -118,3 +118,26 @@
 .pathmuncher-compendium-selector .button {
   margin-bottom: 10px;
 }
+
+.pathmuncher-keep-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.pathmuncher-keep-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pathmuncher-keep-item img {
+  border: none;
+  flex: 0 0 24px;
+}
+
+.pathmuncher-keep-type {
+  opacity: 0.7;
+}

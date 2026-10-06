@@ -140,13 +140,67 @@
     return notes;
   };
 
-  /** Imports a Pathbuilder export onto the actor the way the importer does, without the dialog. */
-  pmt.importBuild = async (actor, exportJson, options = {}) => {
+  /**
+   * Imports a Pathbuilder export onto the actor the way the importer does, without the dialog.
+   * updateOptions go to updateActor (keepItemIds); by default hand-added items are kept.
+   */
+  pmt.importBuild = async (actor, exportJson, options = {}, updateOptions = {}) => {
     const pm = new (api().Pathmuncher)(actor, options);
     pm.source = foundry.utils.deepClone(api().Pathmuncher.getBuildFromJson(exportJson));
     await pm.processCharacter();
-    await pm.updateActor();
+    await pm.updateActor(updateOptions);
     return pm;
+  };
+
+  /**
+   * Answers the importer's "keep items added by hand?" dialog. decide receives the item ids offered
+   * and returns the ids to keep, or null to cancel the import. Returns the ids offered each time.
+   */
+  pmt.answerKeepDialog = (ctx, decide = (ids) => ids) => {
+    const offered = [];
+    const hook = Hooks.on("renderDialogV2", (app) => {
+      if (!app.options.classes?.includes("pathmuncher-keep-dialog") || app.__pmtAnswered) return;
+      app.__pmtAnswered = true;
+      const boxes = [...app.element.querySelectorAll('input[name="keep"]')];
+      const ids = boxes.map((b) => b.value);
+      offered.push(ids);
+      const keep = decide(ids);
+      setTimeout(() => {
+        if (keep === null) {
+          app.element.querySelector('button[data-action="cancel"]').click();
+        } else {
+          for (const box of boxes) box.checked = keep.includes(box.value);
+          app.element.querySelector('button[data-action="import"]').click();
+        }
+      }, 20);
+    });
+    ctx.cleanup(() => Hooks.off("renderDialogV2", hook));
+    return offered;
+  };
+
+  /** Adds an effect, a condition, a homebrew item and a compendium feat, as a user might in play. */
+  pmt.addHandItems = async (actor) => {
+    const effects = game.packs.get("pf2e.equipment-effects");
+    const effect = await effects.getDocument((await effects.getIndex()).contents[0]._id);
+    const feats = game.packs.get("pf2e.feats-srd");
+    const featEntry = (await feats.getIndex({ fields: ["system.slug"] })).find((f) => f.system.slug === "incredible-initiative");
+    const feat = await feats.getDocument(featEntry._id);
+    // pf2e does not return created items in the order given, so find them afterwards
+    const before = new Set(actor.items.map((i) => i.id));
+    await actor.createEmbeddedDocuments("Item", [
+      effect.toObject(),
+      { name: "Homebrew Trinket", type: "equipment" },
+      feat.toObject(),
+    ]);
+    await actor.toggleCondition("frightened");
+    const added = actor.items.filter((i) => !before.has(i.id));
+    const find = (fn) => added.find(fn)?.id;
+    return {
+      effect: find((i) => i.type === "effect"),
+      trinket: find((i) => i.name === "Homebrew Trinket"),
+      feat: find((i) => i.type === "feat" && i.slug === "incredible-initiative"),
+      condition: find((i) => i.type === "condition"),
+    };
   };
 
   /** Opens the importer dialog for the actor, fills it in like a user and presses Import. */

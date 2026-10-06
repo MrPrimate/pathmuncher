@@ -87,7 +87,6 @@ export class PathmuncherImporter extends FormApplication {
       // nothing on the actor changes until there is a valid build and it has been fully processed
       if (!(await this.#loadSource(pathmuncher, formData))) return;
 
-      await utils.setFlags(this.actor, options);
       statusBar.classList.remove("import-hidden");
 
       logger.debug("Pathmuncher Source", pathmuncher.source);
@@ -103,9 +102,23 @@ export class PathmuncherImporter extends FormApplication {
       }
       logger.debug("Post processed character", pathmuncher);
 
+      // items the import would replace that pathmuncher didn't create: the user decides
+      let keepItemIds;
+      const handAdded = pathmuncher.findHandAddedItems();
+      if (handAdded.length > 0) {
+        keepItemIds = await PathmuncherImporter.#chooseItemsToKeep(handAdded);
+        if (keepItemIds === null) {
+          ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
+          await utils.removeTempActors();
+          return;
+        }
+      }
+
       const actorBackup = this.actor.toObject();
       try {
-        await pathmuncher.updateActor();
+        await pathmuncher.updateActor({ keepItemIds });
+        // remembered for the next import of this actor; only once the import has succeeded
+        await utils.setFlags(this.actor, options);
       } catch (error) {
         logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
         const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
@@ -168,6 +181,45 @@ export class PathmuncherImporter extends FormApplication {
     }
     pathmuncher.source = build;
     return true;
+  }
+
+  /**
+   * Asks which hand-added items to keep. Resolves to the ids to keep, or null if the user cancels.
+   */
+  static async #chooseItemsToKeep(items) {
+    const escape = (text) => String(text).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+    const rows = items
+      .map((item) => `<label class="pathmuncher-keep-item">
+        <input type="checkbox" name="keep" value="${item.id}" checked>
+        <img src="${escape(item.img)}" width="24" height="24"> ${escape(item.name)}
+        <span class="pathmuncher-keep-type">(${escape(game.i18n.localize(`TYPES.Item.${item.type}`))})</span>
+      </label>`)
+      .join("");
+    const content = `<p>${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Content`)}</p>
+      <div class="pathmuncher-keep-items">${rows}</div>`;
+
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Title`) },
+      position: { width: 480 },
+      classes: ["pathmuncher-keep-dialog"],
+      content,
+      rejectClose: false,
+      buttons: [
+        {
+          action: "import",
+          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Import`),
+          icon: "fas fa-file-import",
+          default: true,
+          callback: (_event, button) => [...button.form.querySelectorAll('input[name="keep"]:checked')].map((i) => i.value),
+        },
+        {
+          action: "cancel",
+          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Cancel`),
+          icon: "fas fa-times",
+        },
+      ],
+    });
+    return Array.isArray(result) ? result : null;
   }
 
   /**

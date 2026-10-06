@@ -127,8 +127,9 @@ export class PetShop {
     const features = [];
     for (const petData of this.result.pets) {
       for (const feature of this.result.features[petData._id].filter((f) => f.system.rules?.some((r) => r.key === "ActiveEffectLike"))) {
-        if (!this.parent.items.some((i) => i.type === "effect" && i.system.slug === feature.system.slug)) {
-          features.push(feature);
+        if (!this.parent.items.some((i) => i.type === feature.type && i.system.slug === feature.system.slug)) {
+          // copied onto the master as an imported item, so a re-import replaces it rather than asking
+          features.push(foundry.utils.mergeObject(feature, { flags: { [CONSTANTS.FLAG_NAME]: { imported: true } } }, { inplace: false }));
         }
       }
     }

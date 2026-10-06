@@ -89,11 +89,18 @@
         "InvalidJson": "Unable to parse JSON data.",
         "InvalidBuild": "This does not look like a Pathbuilder export, so nothing was changed. Paste the JSON from Pathbuilder's \"Export JSON\" option.",
         "ProcessingFailed": "Pathmuncher could not process this character, so nothing was changed: {error}",
+        "ImportCancelled": "Import cancelled; nothing was changed.",
         "UpdateFailed": "Pathmuncher failed while updating {actor}: {error}. A copy of the character from before the import was saved as \"{backup}\".",
         "MissingItemsOpen": "The following could not be added. They may have a slightly different name or cannot be matched to a foundry item. You may be able to find them with a manual search. If it is marked as \"Special\", Pathmuncher has been unable to determine if it needs to do something with this. It might be a choice value, or may not be needed in the Foundry implementation.",
         "CompletedWithNotes": "Import completed with some notes.",
         "CompletedSuccess": "Import completed successfully.",
         "ImportNotes": "Pathmuncher Import Notes"
+      },
+      "KeepItems": {
+        "Title": "Pathmuncher | Keep items added by hand?",
+        "Content": "These items were not added by a Pathmuncher import, but are in categories this import replaces. Ticked items are kept; unticked items are deleted. Items you keep that are also in the Pathbuilder build will appear twice.",
+        "Import": "Import",
+        "Cancel": "Cancel import"
       },
       "CompendiumSelector": {
         "Select": "Select lookup type...",

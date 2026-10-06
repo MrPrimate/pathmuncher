@@ -3066,71 +3066,74 @@ export class Pathmuncher {
     return true;
   }
 
-  async #removeDocumentsToBeUpdated() {
-    const moneyIds = this.actor.items.filter((i) =>
-      i.type === "treasure"
-      && ["Platinum Pieces", "Gold Pieces", "Silver Pieces", "Copper Pieces"].includes(i.name),
-    );
-    const classIds = this.actor.items.filter((i) => i.type === "class").map((i) => i._id);
-    const deityIds = this.actor.items.filter((i) => i.type === "deity").map((i) => i._id);
-    const backgroundIds = this.actor.items.filter((i) => i.type === "background").map((i) => i._id);
-    const heritageIds = this.actor.items.filter((i) => i.type === "heritage").map((i) => i._id);
-    const ancestryIds = this.actor.items.filter((i) => i.type === "ancestry").map((i) => i._id);
-    const treasureIds = this.actor.items
-      .filter((i) => i.type === "treasure" && !moneyIds.includes(i.id))
-      .map((i) => i._id);
-    const featIds = this.actor.items.filter((i) => i.type === "feat").map((i) => i._id);
-    const actionIds = this.actor.items.filter((i) => i.type === "action").map((i) => i._id);
-    const equipmentIds = this.actor.items
-      .filter((i) => i.type === "equipment" || i.type === "backpack" || i.type === "consumable")
-      .map((i) => i._id);
-    const weaponIds = this.actor.items.filter((i) => i.type === "weapon").map((i) => i._id);
-    const armorIds = this.actor.items.filter((i) => i.type === "armor").map((i) => i._id);
-    const loreIds = this.actor.items.filter((i) => i.type === "lore").map((i) => i._id);
-    const spellIds = this.actor.items
-      .filter((i) => i.type === "spell" || i.type === "spellcastingEntry")
-      .map((i) => i._id);
-    const formulaIds = this.actor.system.formulas;
+  static COIN_SLUGS = ["platinum-pieces", "gold-pieces", "silver-pieces", "copper-pieces", "upb", "credstick"];
 
-    logger.debug("ids", {
-      moneyIds,
-      deityIds,
-      classIds,
-      backgroundIds,
-      heritageIds,
-      ancestryIds,
-      treasureIds,
-      featIds,
-      actionIds,
-      equipmentIds,
-      weaponIds,
-      armorIds,
-      loreIds,
-      spellIds,
-      formulaIds,
-    });
-    // eslint-disable-next-line complexity
-    const keepIds = this.actor.items.filter((i) =>
-      (!this.options.addMoney && moneyIds.includes(i._id))
-      || (!this.options.addClass && classIds.includes(i._id))
-      || (!this.options.addDeity && deityIds.includes(i._id))
-      || (!this.options.addBackground && backgroundIds.includes(i._id))
-      || (!this.options.addHeritage && heritageIds.includes(i._id))
-      || (!this.options.addAncestry && ancestryIds.includes(i._id))
-      || (!this.options.addTreasure && treasureIds.includes(i._id))
-      || (!this.options.addFeats && (featIds.includes(i._id) || actionIds.includes(i._id)))
-      || (!this.options.addEquipment && equipmentIds.includes(i._id))
-      || (!this.options.addWeapons && weaponIds.includes(i._id))
-      || (!this.options.addArmor && armorIds.includes(i._id))
-      || (!this.options.addLores && loreIds.includes(i._id))
-      || (!this.options.addSpells && spellIds.includes(i._id)),
-    ).map((i) => i._id);
+  /**
+   * The import option that replaces this kind of item, or null for items an import never touches
+   * (effects, conditions and any other type pathmuncher does not create).
+   */
+  static IMPORT_OPTION_BY_ITEM_TYPE = {
+    treasure: "addTreasure",
+    class: "addClass",
+    deity: "addDeity",
+    background: "addBackground",
+    heritage: "addHeritage",
+    ancestry: "addAncestry",
+    feat: "addFeats",
+    action: "addFeats",
+    equipment: "addEquipment",
+    backpack: "addEquipment",
+    consumable: "addEquipment",
+    book: "addEquipment",
+    weapon: "addWeapons",
+    armor: "addArmor",
+    shield: "addArmor",
+    lore: "addLores",
+    spell: "addSpells",
+    spellcastingEntry: "addSpells",
+  };
 
-    const deleteIds = this.actor.items.filter((i) => !keepIds.includes(i._id)).map((i) => i._id);
-    logger.debug("ids", {
-      deleteIds,
-      keepIds,
+  static importOptionForItem(item) {
+    if (item.type === "treasure" && Pathmuncher.COIN_SLUGS.includes(item.system?.slug)) return "addMoney";
+    return Pathmuncher.IMPORT_OPTION_BY_ITEM_TYPE[item.type] ?? null;
+  }
+
+  /** Items this import will replace: those whose import option is ticked. */
+  #replaceableItems() {
+    return this.actor.items.filter((i) => {
+      const option = Pathmuncher.importOptionForItem(i);
+      return option !== null && this.options[option];
     });
+  }
+
+  /**
+   * Items the import would replace that pathmuncher did not create: added by hand after an import
+   * (homebrew, loot) or present before the first import. Items granted by one of these count with it.
+   * Actors imported before pathmuncher flagged its items have no flagged items; for those, everything
+   * in an imported category is treated as imported, as it always was.
+   */
+  findHandAddedItems() {
+    const isImported = (item) => foundry.utils.getProperty(item, `flags.${CONSTANTS.FLAG_NAME}.imported`) === true;
+    const legacyImport = !this.actor.items.some(isImported)
+      && foundry.utils.hasProperty(this.actor, `flags.${CONSTANTS.FLAG_NAME}.addFeats`);
+    if (legacyImport) return [];
+
+    const ownedByImport = (item, seen = new Set()) => {
+      if (isImported(item)) return true;
+      const grantedBy = this.actor.items.get(item.flags[game.system.id]?.grantedBy?.id);
+      if (!grantedBy || seen.has(grantedBy.id)) return false;
+      seen.add(grantedBy.id);
+      return ownedByImport(grantedBy, seen);
+    };
+    return this.#replaceableItems().filter((i) => !ownedByImport(i));
+  }
+
+  async #removeDocumentsToBeUpdated(keepItemIds) {
+    const keep = new Set(keepItemIds);
+    const deleteIds = this.#replaceableItems()
+      .filter((i) => !keep.has(i.id))
+      .map((i) => i.id);
+    logger.debug("Removing items before import", { deleteIds, keepItemIds });
     await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
   }
 
@@ -3140,6 +3143,8 @@ export class Pathmuncher {
     const newItems = foundry.utils.deepClone(items);
 
     for (const item of newItems) {
+      // marks the item as pathmuncher's, so a re-import can tell it from items added by hand
+      foundry.utils.setProperty(item, `flags.${CONSTANTS.FLAG_NAME}.imported`, true);
       if (item.system.rules?.length > 0) {
         ruleUpdates.push({
           _id: item._id,
@@ -3247,19 +3252,24 @@ export class Pathmuncher {
     if (focus) await this.actor.update({ "system.resources.focus": focus });
   }
 
-  async updateActor() {
+  /**
+   * Replaces the actor's imported items with the processed result.
+   * keepItemIds: items in replaced categories to keep anyway; defaults to every item added by hand
+   * (findHandAddedItems), so nothing pathmuncher did not create is removed unless asked.
+   */
+  async updateActor({ keepItemIds = this.findHandAddedItems().map((i) => i.id) } = {}) {
     // removing the actor's items is only safe once a complete result has been built
     if (!this.processed) {
       throw new Error("Pathmuncher: updateActor called before processCharacter completed");
     }
-    await this.#removeDocumentsToBeUpdated();
+    await this.#removeDocumentsToBeUpdated(keepItemIds);
 
     if (!this.options.addName) {
       delete this.result.character.name;
       delete this.result.character.prototypeToken.name;
     }
     if (!this.options.addFormulas) {
-      delete this.result.character.system.formulas;
+      delete this.result.character.system.crafting?.formulas;
     }
 
     if (!this.boosts.custom) {
