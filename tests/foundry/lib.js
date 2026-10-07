@@ -238,6 +238,74 @@
 
   pmt.itemKeys = (actor) => actor.items.map((i) => `${i.type}:${i.name}`).sort();
 
+  /** The system's own compendium item of a type, by name or slug. */
+  pmt.findCompendiumItem = async (type, name) => {
+    const slug = sluggify(name);
+    for (const pack of game.packs.filter((p) => p.documentName === "Item" && p.metadata.packageName === game.system.id)) {
+      const index = await pack.getIndex({ fields: ["system.slug"] });
+      const entry = index.find((e) => e.type === type && ((e.system?.slug ?? sluggify(e.name)) === slug || e.name === name));
+      if (entry) return pack.getDocument(entry._id);
+    }
+    return null;
+  };
+
+  /**
+   * Which feat group and slot Pathbuilder put a feat in, from its slot label (feat[4]) and type, or
+   * null for feats that come from somewhere else (child choices, awarded and heritage feats).
+   * Labels: "Magus Feat 2", "Elf Feat 1", "Skill Feat 2", "General Feat 3", "Free Archetype 2".
+   */
+  pmt.pathbuilderSlot = ([, , type, level, label, choice]) => {
+    if (!label || choice === "childChoice" || ["Awarded Feat", "Heritage"].includes(type)) return null;
+    if ((/^[0-9a-f]{8}-[0-9a-f]{4}-/).test(String(label))) return { groupId: "bonus", slotId: null }; // custom feat choice
+    const n = Number(String(label).match(/(\d+)$/)?.[1] ?? level);
+    if ((/^Free Archetype/).test(label)) return { groupId: "archetype", slotId: `archetype-${n}` };
+    if ((/^Skill Feat/).test(label)) return { groupId: "skill", slotId: `skill-${n}` };
+    if ((/^General Feat/).test(label)) return { groupId: "general", slotId: `general-${n}` };
+    if (type === "Ancestry Feat") return { groupId: "ancestry", slotId: `ancestry-${n}` };
+    return { groupId: "class", slotId: `class-${n}` };
+  };
+
+  /**
+   * Builds the character the way a user does on the sheet: set the level, drop the ancestry,
+   * heritage, background and class, then drop each feat into the slot Pathbuilder used
+   * (actor.feats.insertFeat, as the sheet's drop handler does). Answer prompts with
+   * pmt.answerPrompts first. Returns the names it could not find in the system's compendiums.
+   */
+  pmt.buildByHand = async (actor, build) => {
+    const missing = [];
+    await actor.update({ "system.details.level.value": build.level });
+    for (const [type, name] of [["ancestry", build.ancestry], ["heritage", build.heritage], ["background", build.background], ["class", build.class]]) {
+      const doc = await pmt.findCompendiumItem(type, name);
+      if (doc) await actor.createEmbeddedDocuments("Item", [doc.toObject()]);
+      else missing.push(`${type}: ${name}`);
+    }
+    for (const feat of build.feats ?? []) {
+      const slot = pmt.pathbuilderSlot(feat);
+      if (!slot) continue;
+      const doc = await pmt.findCompendiumItem("feat", feat[0]);
+      if (!doc) {
+        missing.push(`feat: ${feat[0]}`);
+        continue;
+      }
+      await actor.feats.insertFeat(doc, slot);
+    }
+    return missing;
+  };
+
+  /**
+   * The parts of a character a comparison with a hand-built twin looks at: core items, class
+   * features with their levels, and each slotted feat with the level it was taken at.
+   */
+  pmt.characterShape = (actor) => ({
+    core: ["ancestry", "heritage", "background", "class"].map((k) => actor[k]?.name ?? null),
+    classFeatures: actor.itemTypes.feat
+      .filter((f) => f.system.location === actor.class?.id)
+      .map((f) => `${f.slug} @${f.system.level.value}`).sort(),
+    slots: actor.itemTypes.feat
+      .filter((f) => (/^(ancestry|class|skill|general|archetype)-\d+$/).test(f.system.location ?? ""))
+      .map((f) => `${f.system.location}: ${f.slug} taken ${f.system.level.taken}`).sort(),
+  });
+
   // ---------------------------------------------------------------- comparing with the build
 
   const variants = (...names) => {
@@ -334,8 +402,10 @@
       if (t.endsWith("feat") && t !== "awarded feat") return "class";
       return null;
     };
-    for (const [name, extra, type, level] of build.feats ?? []) {
+    for (const [name, extra, type, level, label] of build.feats ?? []) {
       if (!name || name === "Not Selected") continue;
+      // a UUID slot label is Pathbuilder's "Custom Feat Choice": an extra feat, so a bonus feat
+      const isCustomChoice = (/^[0-9a-f]{8}-[0-9a-f]{4}-/).test(String(label ?? ""));
       const vs = variants(name, extra);
       const feat = [...vs].map((v) => feats.get(v)).find(Boolean);
       if (!feat) {
@@ -344,10 +414,24 @@
         continue;
       }
       const group = [...vs].map((v) => groups.get(v)).find(Boolean);
-      const expected = expectedGroup(type);
+      const expected = isCustomChoice ? "bonus" : expectedGroup(type);
       if (feat.flags.pf2e?.grantedBy || group?.endsWith(":child")) continue;
-      if (group === "bonus") problems.push(`feat in bonus feats: ${name} [${type} ${level}] (expected ${expected})`);
+      if (group === "bonus" && expected !== "bonus") problems.push(`feat in bonus feats: ${name} [${type} ${level}] (expected ${expected})`);
       else if (expected && group !== expected) problems.push(`feat in ${group} group: ${name} [${type} ${level}] (expected ${expected})`);
+    }
+
+    // what the system itself would record: class features at the level the class grants them,
+    // slotted feats taken at their slot's level
+    const classGrants = new Map(Object.values(actor.class?.system.items ?? {}).map((g) => [g.uuid, g.level]));
+    for (const f of actor.itemTypes.feat) {
+      const grantLevel = classGrants.get(f.sourceId);
+      if (f.system.location === actor.class?.id && grantLevel !== undefined && f.system.level.value !== grantLevel) {
+        problems.push(`class feature ${f.name}: level ${f.system.level.value} (class grants it at ${grantLevel})`);
+      }
+      const slotLevel = Number(String(f.system.location ?? "").match(/^(?:ancestry|class|skill|general|archetype)-(\d+)$/)?.[1]);
+      if (slotLevel && f.system.level.taken !== slotLevel) {
+        problems.push(`feat ${f.name} in ${f.system.location}: taken at ${f.system.level.taken ?? null}`);
+      }
     }
 
     // the same feat more often than the build takes it (e.g. granted by the class and imported again).

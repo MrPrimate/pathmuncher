@@ -55,6 +55,12 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
     choices the user still has to answer.
   - Any new difference fails the test. So does a known gap that has gone away: remove it from the
     list as part of the fix that closed it.
+- `handbuilt.test.js`: builds a twin of each fixture by hand, the way a user does on the sheet.
+  - `pmt.buildByHand` sets the level, drops the ancestry, heritage, background and class, then puts
+    each feat into the slot Pathbuilder labelled it with, through `actor.feats.insertFeat`.
+  - The import must match the twin's core items, its class features and their levels, and its
+    slotted feats with the level each was taken at.
+  - `KNOWN_DIFFERENCES` lists what still differs.
 - `importer.test.js`: drives the real importer dialog. Bad input, fetch failures and processing
   failures must leave the actor untouched. A failed update must save a pre-import copy.
 - `processing.test.js`: processing details. Unmatched containers are created on the actor only

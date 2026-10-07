@@ -237,6 +237,8 @@ export class Pathmuncher {
       const location = Seasoning.getFoundryFeatLocation(feature.type, feature.level);
       if (location && !this.usedLocations.has(location)) {
         document.system.location = location;
+        // as the system records when a feat is dropped into a slot
+        foundry.utils.setProperty(document, "system.level.taken", parseInt(feature.level));
         this.usedLocations.add(location);
       }
     }
@@ -1232,6 +1234,18 @@ export class Pathmuncher {
     return name.replace(pattern, `(${localLabel})`);
   }
 
+  /**
+   * The item name after a ChoiceSet selection, as the system names it: "Name (Choice)" when the rule's
+   * adjustName is true, the rule's own pattern when it is a string, otherwise unchanged.
+   */
+  static choiceAdjustedName(name, ruleEntry, choice, flag) {
+    if (ruleEntry.adjustName === true) return Pathmuncher.adjustDocumentName(name, choice.label);
+    if (utils.isString(ruleEntry.adjustName)) {
+      return game.i18n.format(ruleEntry.adjustName, { [ruleEntry.flag ?? flag]: game.i18n.localize(choice.label) });
+    }
+    return name;
+  }
+
   static isUuid(uuid) {
     return uuid.match(/Compendium\.(?<origin>[^.]+)\.(?<packName>[^.]+)\.(?<docType>Actor|JournalEntry|Item|Macro|RollTable)\.(?<docName>[^.]+)/g);
   }
@@ -1261,7 +1275,6 @@ export class Pathmuncher {
     this.allFeatureRules[document._id] = foundry.utils.deepClone(document.system.rules);
     this.autoAddedFeatureRules[document._id] = [];
     this.promptRules[document._id] = [];
-    let featureRenamed = false;
 
 
     const addRuleToKeep = (ruleEntry) => {
@@ -1433,21 +1446,11 @@ export class Pathmuncher {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
         if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
-        if (ruleEntry.adjustName && choice.label) document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
         addRuleToKeep(ruleEntry);
       } else if (choice && uuid && !foundry.utils.hasProperty(ruleEntry, "selection")) {
         logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
         // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
         ruleEntry.selection = choice.value;
-        if (
-          ((!ruleEntry.adjustName && choice.label && typeof uuid === "object")
-          || (!choice.adjustName && choice.label))
-          // || ruleEntry.adjustName)
-          && !featureRenamed
-        ) {
-          document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
-          featureRenamed = true;
-        }
         addRuleToKeep(ruleEntry);
       } else {
         logger.debug(`Final rule fallback for ${document.name}`, ruleEntry);
@@ -1474,9 +1477,8 @@ export class Pathmuncher {
         }
         logger.warn("Unable to determine granted rule feature, needs better parser", data);
       }
-      if (ruleEntry.adjustName && choice?.label && !featureRenamed) {
-        logger.verbose(`Adjusting name for ${document.name} due to adjustName`, { choice, ruleEntry, document });
-        document.name = Pathmuncher.adjustDocumentName(document.name, choice.label);
+      if (ruleEntry.key === "ChoiceSet" && choice?.label) {
+        document.name = Pathmuncher.choiceAdjustedName(document.name, ruleEntry, choice, documentFlagName);
       }
       this.autoAddedFeatureRules[document._id].push(ruleEntry);
 
@@ -1537,6 +1539,8 @@ export class Pathmuncher {
       featureDoc._id = foundry.utils.randomID();
       // const featureDocFlagName = Seasoning.slugD(featureDoc.system.slug ?? featureDoc.system.name ?? featureDoc.name);
       foundry.utils.setProperty(featureDoc.system, "location", document._id);
+      // a shared feature (e.g. Weapon Expertise) has its own level; the class decides when it is gained
+      if (featureDoc.system.level) featureDoc.system.level.value = parseInt(grantedFeature.level);
       this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
       if (foundry.utils.hasProperty(featureDoc, "system.rules")) {
         logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, foundry.utils.duplicate(featureDoc));

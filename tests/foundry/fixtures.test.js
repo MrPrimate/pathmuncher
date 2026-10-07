@@ -85,13 +85,11 @@
       prompts: [
         "Fighter",
         "Barrow's Edge",
-        "Barrow's Edge (Grant me a new item.)",
+        "Barrow's Edge",
         "Exemplar Dedication",
         "Fighter Weapon Mastery",
       ],
-      knownGaps: [
-        "feat in bonus feats: Fleet [General Feat 1] (expected general)",
-      ],
+      knownGaps: [],
     },
   };
 
