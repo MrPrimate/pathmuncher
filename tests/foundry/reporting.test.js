@@ -10,19 +10,21 @@
     const actor = await pmt.actor(t, "report");
     const pm = await pmt.importBuild(actor, exportJson);
 
-    let content = null;
-    const hook = Hooks.on("renderDialog", (dialog) => {
-      content = dialog.data.content;
-      setTimeout(() => dialog.close(), 20);
+    let text = null;
+    const hook = Hooks.on("renderDialogV2", (dialog) => {
+      if (!dialog.options.classes?.includes("pathmuncher-report")) return;
+      text = dialog.element.querySelector(".window-content").innerText;
+      setTimeout(() => dialog.element.querySelector("button[data-action='ok']")?.click(), 20);
     });
-    t.cleanup(() => Hooks.off("renderDialog", hook));
+    t.cleanup(() => Hooks.off("renderDialogV2", hook));
     await pm.postImportCheck();
     await pmt.sleep(300);
 
-    t.ok(content, "no report dialog");
-    const text = content.replace(/<[^>]+>/g, "\n");
-    for (const miss of ["Heroic Heart", "Planar Pain"]) {
-      t.ok(text.includes(`Specials: ${miss}`), `report should list ${miss}`);
+    const specials = pm.getImportReport().find((g) => g.type === "special");
+    t.deepEqual(specials?.names, ["Heroic Heart", "Planar Pain"], "unmatched specials in the report");
+    t.ok(text, "no report dialog");
+    for (const miss of ["Specials", "Heroic Heart", "Planar Pain", "Formulas", "Elemental Ammunition (Lesser)"]) {
+      t.ok(text.includes(miss), `report should show ${miss}`);
     }
     for (const label of ["Spellbook", "Spellstrike Specifics", "Intelligence", "Gecko Grip", "Blur", "Shield (Archetype)"]) {
       t.ok(!text.includes(label), `report should not list ${label}`);
@@ -82,13 +84,11 @@
     const actor = await pmt.actor(t, "blended", {
       flags: { pathmuncher: { ...ACTOR_FLAGS, addSpells: true, adjustBlendedSlots: false } },
     });
-    const app = new (game.modules.get("pathmuncher").api.PathmuncherImporter)({}, actor);
+    const app = await pmt.openImporter(actor);
     t.cleanup(() => app.close());
-    await app.render(true);
-    for (let i = 0; i < 50 && !app.element?.[0]?.querySelector("#checkBoxBlendedSlots"); i++) await pmt.sleep(100);
-    const el = app.element[0];
-    t.equal(el.querySelector("#checkBoxSpells").checked, true, "spells");
-    t.equal(el.querySelector("#checkBoxBlendedSlots").checked, false, "blended slots");
+    const el = app.element;
+    t.equal(el.querySelector("input[name='options.addSpells']").checked, true, "spells");
+    t.equal(el.querySelector("input[name='options.adjustBlendedSlots']").checked, false, "blended slots");
   });
 
   test("processing: Pathbuilder parent and child choices are parsed as such", async (t) => {

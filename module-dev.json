@@ -10,8 +10,9 @@
   "readme": "https://github.com/MrPrimate/pathmuncher/blob/main/README.md",
   "changelog": "https://github.com/MrPrimate/pathmuncher/blob/main/CHANGELOG.md",
   "compatibility": {
-    "minimum": "12.325",
-    "verified": 13
+    "minimum": "14",
+    "verified": "14.368",
+    "maximum": "14"
   },
   "authors": [
     {
@@ -35,21 +36,23 @@
         "id": "pf2e",
         "type": "system",
         "compatibility": {
-          "minimum": "6.0.3",
-          "verified": "7.2.3"
+          "minimum": "8.0.0",
+          "verified": "8.5.1"
         }
       },
       {
         "id": "sf2e",
         "type": "system",
         "compatibility": {
-          "minimum": "0.0.1",
-          "verified": "0.0.1"
+          "minimum": "1.0.0",
+          "verified": "1.5.1"
         }
       }
     ]
   },
-  "esmodules": ["src/module.js"],
+  "esmodules": [
+    "src/module.js"
+  ],
   "styles": [
     "./css/default.css"
   ],

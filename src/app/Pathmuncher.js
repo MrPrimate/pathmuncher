@@ -145,8 +145,9 @@ export class Pathmuncher {
     }
   }
 
-  #statusUpdate(total, count, type, prefixLabel) {
-    if (this.statusCallback) this.statusCallback(total, count, type, prefixLabel);
+  /** Reports progress: step of total for the stage type (a Labels key), e.g. (5, 12, "Heritage"). */
+  #statusUpdate(step, total, type, prefixLabel) {
+    if (this.statusCallback) this.statusCallback(step, total, type, prefixLabel);
   }
 
   /**
@@ -3353,121 +3354,71 @@ export class Pathmuncher {
       .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
   }
 
-  async postImportCheck() {
-    const badClass = this.options.addClass
-      ? this.bad.filter((b) => b.type === "class").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Class")}: ${b.pbName}</li>`)
+  /**
+   * What the import could not match, by category, for the post-import report: an array of
+   * { type, label, names } for the categories that have any, in the order they are shown.
+   */
+  getImportReport() {
+    const bad = (type, option, filter = () => true) => (this.options[option]
+      ? this.bad.filter((b) => b.type === type && filter(b)).map((b) => b.pbName)
+      : []);
+    const unmatchedFeats = this.options.addFeats
+      ? Object.values(this.check)
+        .filter((b) => b.type === "feat"
+          && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
+          && !BAD_IGNORE_FEATURES(b.details.name))
+        .map((b) => b.details.name)
       : [];
-    const badHeritage = this.options.addHeritage
-      ? this.bad.filter((b) => b.type === "heritage").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Heritage")}: ${b.pbName}</li>`)
-      : [];
-    const badAncestry = this.options.addAncestry
-      ? this.bad.filter((b) => b.type === "ancestry").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Ancestry")}: ${b.pbName}</li>`)
-      : [];
-    const badBackground = this.options.addBackground
-      ? this.bad.filter((b) => b.type === "background").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Background")}: ${b.pbName}</li>`)
-      : [];
-    const badDeity = this.options.addDeity
-      ? this.bad.filter((b) => b.type === "deity" && b.pbName !== "Not set" && b.pbName !== "").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Deity")}: ${b.pbName}</li>`)
-      : [];
-    const badFeats = this.options.addFeats
-      ? this.bad.filter((b) => b.type === "feat").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.pbName}</li>`)
-      : [];
-    const badFeats2 = this.options.addFeats
-      ? Object.values(this.check).filter((b) =>
-        b.type === "feat"
-        && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
-        && !BAD_IGNORE_FEATURES(b.details.name),
-      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
-      : [];
-    const badSpecials = this.options.addFeats
-      ? this.getUnmatchedSpecials().map((name) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${name}</li>`)
-      : [];
-    const badEquipment = this.options.addEquipment
-      ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)
-      : [];
-    const badWeapons = this.options.addWeapons
-      ? this.bad.filter((b) => b.type === "weapon").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Weapons")}: ${b.pbName}</li>`)
-      : [];
-    const badArmor = this.options.addArmor
-      ? this.bad.filter((b) => b.type === "armor").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Armor")}: ${b.pbName}</li>`)
-      : [];
-    const badSpellcasting = this.options.addSpells
-      ? this.bad.filter((b) => b.type === "spellcasting").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spellcasting")}: ${b.pbName}</li>`)
-      : [];
-    const badSpells = this.options.addSpells
-      ? this.bad.filter((b) => b.type === "spell").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Spells")}: ${b.pbName}</li>`)
-      : [];
-    const badFamiliars = this.options.addFamiliars
-      ? this.bad.filter((b) => b.type === "familiar").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Familiars")}: ${b.pbName}</li>`)
-      : [];
-    const badFormulas = this.options.addFormulas
-      ? this.bad.filter((b) => b.type === "formula").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Formulas")}: ${b.pbName}</li>`)
-      : [];
-    const badRituals = this.options.addSpells
-      ? this.bad.filter((b) => b.type === "ritual").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Rituals")}: ${b.pbName}</li>`)
-      : [];
-    const totalBad = [
-      ...badClass,
-      ...badAncestry,
-      ...badHeritage,
-      ...badBackground,
-      ...badDeity,
-      ...badFeats,
-      ...badFeats2,
-      ...badSpecials,
-      ...badEquipment,
-      ...badWeapons,
-      ...badArmor,
-      ...badSpellcasting,
-      ...badSpells,
-      ...badFamiliars,
-      ...badFormulas,
-      ...badRituals,
+    const groups = [
+      ["class", bad("class", "addClass")],
+      ["ancestry", bad("ancestry", "addAncestry")],
+      ["heritage", bad("heritage", "addHeritage")],
+      ["background", bad("background", "addBackground")],
+      ["deity", bad("deity", "addDeity", (b) => b.pbName && b.pbName !== "Not set")],
+      ["feat", [...bad("feat", "addFeats"), ...unmatchedFeats]],
+      ["special", this.options.addFeats ? this.getUnmatchedSpecials() : []],
+      ["equipment", bad("equipment", "addEquipment")],
+      ["weapon", bad("weapon", "addWeapons")],
+      ["armor", bad("armor", "addArmor")],
+      ["spellcasting", bad("spellcasting", "addSpells")],
+      ["spell", bad("spell", "addSpells")],
+      ["ritual", bad("ritual", "addSpells")],
+      ["formula", bad("formula", "addFormulas")],
+      ["familiar", bad("familiar", "addFamiliars")],
     ];
+    const labels = {
+      class: "Class", ancestry: "Ancestry", heritage: "Heritage", background: "Background", deity: "Deity",
+      feat: "Feats", special: "Specials", equipment: "Equipment", weapon: "Weapons", armor: "Armor",
+      spellcasting: "Spellcasting", spell: "Spells", ritual: "Rituals", formula: "Formulas", familiar: "Familiars",
+    };
+    return groups
+      .map(([type, names]) => ({ type, label: game.i18n.localize(`pathmuncher.Labels.${labels[type]}`), names: [...new Set(names)] }))
+      .filter((group) => group.names.length > 0);
+  }
 
-    let warning = "";
+  async postImportCheck() {
+    const report = this.getImportReport();
+    logger.debug("Post import report", { report, focusPool: this.result.focusPool });
 
-    if (totalBad.length > 0) {
-      warning += `<p>${game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.MissingItemsOpen")}</p><ul>${totalBad.join("\n")}</ul><br>`;
-    }
-
-    logger.debug("Bad thing check", {
-      badClass,
-      badAncestry,
-      badHeritage,
-      badBackground,
-      badDeity,
-      badFeats,
-      badFeats2,
-      badSpecials,
-      badEquipment,
-      badWeapons,
-      badArmor,
-      badSpellcasting,
-      badSpells,
-      badFamiliars,
-      badFormulas,
-      totalBad,
-      count: totalBad.length,
-      focusPool: this.result.focusPool,
-      warning,
-    });
-
-    if (totalBad.length > 0) {
-      ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
-      new Dialog({
-        title: game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.ImportNotes"),
-        content: warning,
-        buttons: {
-          yes: {
-            icon: "<i class='fas fa-check'></i>",
-            label: game.i18n.localize("pathmuncher.Labels.Finished"),
-          },
-        },
-        default: "yes",
-      }).render(true);
-    } else {
+    if (report.length === 0) {
       ui.notifications.info(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedSuccess"));
+      return;
     }
+
+    ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
+    const escape = foundry.utils.escapeHTML;
+    const sections = report.map((group) => `<section class="pathmuncher-report-group">
+        <h4>${escape(group.label)} <span class="pathmuncher-report-count">${group.names.length}</span></h4>
+        <ul>${group.names.map((name) => `<li>${escape(name)}</li>`).join("")}</ul>
+      </section>`).join("");
+    await foundry.applications.api.DialogV2.prompt({
+      window: { title: "pathmuncher.Dialogs.Report.Title", icon: "fas fa-clipboard-list" },
+      classes: ["pathmuncher", "pathmuncher-report"],
+      position: { width: 480 },
+      content: `<p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.Intro")}</p>
+        <div class="pathmuncher-report-groups">${sections}</div>`,
+      ok: { label: "pathmuncher.Labels.Finished", icon: "fas fa-check" },
+      rejectClose: false,
+    });
   }
 }

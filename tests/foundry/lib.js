@@ -204,34 +204,56 @@
     };
   };
 
-  /** Opens the importer dialog for the actor, fills it in like a user and presses Import. */
-  pmt.submitImporter = async (actor, { json = null, id = null } = {}) => {
-    // the dialog has a fixed element id, so let any earlier one finish closing first
-    for (let i = 0; i < 50 && document.getElementById("pathmuncher"); i++) await sleep(100);
+  /** Opens the importer for the actor and waits until its form is on screen. */
+  pmt.openImporter = async (actor) => {
+    const id = `pathmuncher-importer-${actor.id}`;
+    // let an earlier importer for this actor finish closing first
+    for (let i = 0; i < 50 && document.getElementById(id); i++) await sleep(100);
     const app = new (api().PathmuncherImporter)({}, actor);
-    await app.render(true);
-    for (let i = 0; i < 50 && !app.element?.[0]?.querySelector("#pathmuncher-button"); i++) await sleep(100);
-    const el = app.element[0];
+    await app.render({ force: true });
+    for (let i = 0; i < 50 && !app.element?.querySelector("button[type='submit']"); i++) await sleep(100);
+    return app;
+  };
+
+  /**
+   * Opens the importer for the actor, fills it in like a user (export id, pasted JSON or a file),
+   * sets any options given ({ addMoney: false, ... }) and presses Import. The post-import report is
+   * closed when it appears; its text is returned as report.
+   */
+  pmt.submitImporter = async (actor, { json = null, id = null, file = null, options = {} } = {}) => {
+    const app = await pmt.openImporter(actor);
+    const el = app.element;
     if (json !== null) {
-      el.querySelector('.item[data-tab="json"]').click();
-      el.querySelector('[name="textBoxBuildJSON"]').value = typeof json === "string" ? json : JSON.stringify(json);
+      el.querySelector("[data-action='setSource'][data-source='json']").click();
+      el.querySelector("textarea[name='json']").value = typeof json === "string" ? json : JSON.stringify(json);
+    } else if (file !== null) {
+      el.querySelector("[data-action='setSource'][data-source='file']").click();
+      const transfer = new DataTransfer();
+      transfer.items.add(new File([typeof file === "string" ? file : JSON.stringify(file)], "build.json", { type: "application/json" }));
+      el.querySelector("input[name='file']").files = transfer.files;
     } else {
-      el.querySelector('[name="textBoxBuildID"]').value = id;
+      el.querySelector("input[name='pathbuilderId']").value = id;
     }
-    const closeReport = Hooks.on("renderDialog", (dialog) => setTimeout(() => dialog.close(), 20));
-    el.querySelector("#pathmuncher-button").click();
+    for (const [key, value] of Object.entries(options)) {
+      el.querySelector(`input[name='options.${key}']`).checked = value;
+    }
+
+    let report = null;
+    const closeReport = Hooks.on("renderDialogV2", (dialog) => {
+      if (!dialog.options.classes?.includes("pathmuncher-report")) return;
+      report = dialog.element.querySelector(".window-content").innerText;
+      setTimeout(() => dialog.element.querySelector("button[data-action='ok']")?.click(), 20);
+    });
+    el.querySelector("button[type='submit']").click();
     await sleep(300);
     const started = Date.now();
-    while (Date.now() - started < 240000) {
-      const button = document.getElementById("pathmuncher-button");
-      if (!app.rendered || (button && !button.disabled)) break;
-      await sleep(250);
-    }
-    await sleep(300);
-    Hooks.off("renderDialog", closeReport);
+    while (Date.now() - started < 240000 && app.rendered && app.importing) await sleep(250);
+    await sleep(500);
+    Hooks.off("renderDialogV2", closeReport);
     const state = {
       closed: !app.rendered,
-      buttonDisabled: document.getElementById("pathmuncher-button")?.disabled ?? null,
+      buttonDisabled: app.rendered ? app.element.querySelector("button[type='submit']").disabled : null,
+      report,
     };
     if (app.rendered) await app.close();
     return state;

@@ -2,43 +2,39 @@ import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
 import CONSTANTS from "../constants.js";
 import utils from "../utils.js";
 
+/** Whether this user may import into this actor: its owner, allowed to create actors, and trusted if required. */
+function canImport(actor) {
+  if (actor?.type !== "character" || !actor.isOwner) return false;
+  if (!game.user.can("ACTOR_CREATE")) return false;
+  return !utils.setting("RESTRICT_TO_TRUSTED") || game.user.isTrusted;
+}
+
+function label() {
+  return utils.setting("DISPLAY_TITLE") ? CONSTANTS.MODULE_FULL_NAME : "";
+}
+
+/**
+ * Adds the Pathmuncher button to character sheet headers: the Application v1 header buttons the
+ * pf2e and sf2e character sheets use, and the header controls of ApplicationV2 actor sheets.
+ */
 export function registerSheetButton() {
-
-  const trustedUsersOnly = utils.setting("RESTRICT_TO_TRUSTED");
-  if (trustedUsersOnly && !game.user.isTrusted) return;
-
-  /**
-   * Character sheets
-   */
-  const pcSheetNames = Object.values(CONFIG.Actor.sheetClasses.character)
-    .map((sheetClass) => sheetClass.cls)
-    .map((sheet) => sheet.name);
-
-  pcSheetNames.forEach((sheetName) => {
-    Hooks.on("render" + sheetName, (app, html, data) => {
-      // only for GMs or the owner of this character
-      if (!data.owner || !data.actor) return;
-      if (!game.user.can("ACTOR_CREATE")) return;
-
-      const text = utils.setting("DISPLAY_TITLE")
-        ? CONSTANTS.MODULE_FULL_NAME
-        : "";
-
-      const button = $(`<a class="pathmuncher-open" title="${CONSTANTS.MODULE_FULL_NAME}"><i class="fas fa-teeth-open"></i> ${text}</a>`);
-
-      button.click(() => {
-        if (game.user.can("ACTOR_CREATE")) {
-          const muncher = new PathmuncherImporter(PathmuncherImporter.defaultOptions, data.actor);
-          muncher.render(true);
-        } else {
-          ui.notifications.warn(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Notifications.CreateActorPermission`), { permanent: true });
-        }
-      });
-
-      html.closest('.app').find('.pathmuncher-open').remove();
-      let titleElement = html.closest('.app').find('.window-title');
-      if (!app._minimized) button.insertAfter(titleElement);
+  Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
+    if (!canImport(sheet.actor)) return;
+    buttons.unshift({
+      label: label(),
+      class: "pathmuncher-open",
+      icon: "fas fa-teeth-open",
+      onclick: () => PathmuncherImporter.open(sheet.actor),
     });
   });
 
+  Hooks.on("getHeaderControlsActorSheetV2", (sheet, controls) => {
+    if (!canImport(sheet.actor)) return;
+    controls.unshift({
+      label: CONSTANTS.MODULE_FULL_NAME,
+      icon: "fas fa-teeth-open",
+      action: "pathmuncherOpen",
+      onClick: () => PathmuncherImporter.open(sheet.actor),
+    });
+  });
 }

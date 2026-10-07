@@ -4,145 +4,235 @@ import utils from "../utils.js";
 import { Pathmuncher } from "./Pathmuncher.js";
 import { PetShop } from "./PetShop.js";
 
-export class PathmuncherImporter extends FormApplication {
+const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
-  constructor(options, actor) {
-    super(options);
-    this.actor = game.actors.get(actor.id ? actor.id : actor._id);
-    this.mode = "number";
+/** The import options, grouped as the dialog shows them. A nested option is indented under its parent. */
+const OPTION_GROUPS = [
+  { id: "Character", options: ["addName", "addClass", "addAncestry", "addHeritage", "addBackground", "addDeity"] },
+  {
+    id: "Features",
+    options: ["addFeats", "addLores", "addSpells", { key: "adjustBlendedSlots", parent: "addSpells" }, "addFormulas", "addFamiliars"],
+  },
+  { id: "Inventory", options: ["addEquipment", "addWeapons", "addArmor", "addTreasure", "addMoney"] },
+];
+
+const SOURCES = [
+  { id: "id", icon: "fas fa-hashtag" },
+  { id: "json", icon: "fas fa-code" },
+  { id: "file", icon: "fas fa-file-import" },
+];
+
+const i18n = (key) => game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Importer.${key}`);
+
+export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV2) {
+
+  /**
+   * @param {object} [options]  ApplicationV2 options; options.actor is the actor to import into
+   * @param {Actor} [actor]     the actor to import into (the older two-argument form)
+   */
+  constructor(options = {}, actor = null) {
+    const target = actor ?? options.actor;
+    const resolved = game.actors.get(target?.id ?? target?._id) ?? target;
+    super({ ...options, id: `pathmuncher-importer-${resolved.id}` });
+    this.actor = resolved;
+    this.source = "id";
+    this.importing = false;
   }
 
-  static get defaultOptions() {
-    const options = super.defaultOptions;
-    options.title = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.PathmuncherImporter.Title`);
-    options.template = `${CONSTANTS.PATH}/templates/pathmuncher.hbs`;
-    options.classes = ["pathmuncher"];
-    options.id = "pathmuncher";
-    options.width = 400;
-    options.closeOnSubmit = false;
-    options.tabs = [{ navSelector: ".tabs", contentSelector: "form", initial: "number" }];
-    return options;
+  static DEFAULT_OPTIONS = {
+    tag: "form",
+    classes: ["pathmuncher", "pathmuncher-importer"],
+    window: {
+      icon: "fas fa-teeth-open",
+      resizable: true,
+      contentClasses: ["standard-form"],
+    },
+    position: { width: 620, height: "auto" },
+    form: {
+      handler: PathmuncherImporter.#onSubmit,
+      closeOnSubmit: false,
+      submitOnChange: false,
+    },
+    actions: {
+      setSource: PathmuncherImporter.#onSetSource,
+      selectAll: PathmuncherImporter.#onSelectAll,
+    },
+  };
+
+  static PARTS = {
+    form: { template: `${CONSTANTS.PATH}/templates/importer.hbs`, scrollable: [""] },
+    footer: { template: "templates/generic/form-footer.hbs" },
+  };
+
+  get title() {
+    return `${i18n("Title")}: ${this.actor.name}`;
   }
 
-  /** @override */
-  async getData() {
+  /** Opens the importer for an actor, or brings its open importer to the front. */
+  static open(actor) {
+    const existing = foundry.applications.instances.get(`pathmuncher-importer-${actor.id}`);
+    if (existing) return existing.bringToFront();
+    return new PathmuncherImporter({ actor }).render({ force: true });
+  }
+
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
     const flags = utils.getFlags(this.actor);
-
-    return {
-      flags,
-      id: flags?.pathbuilderId ?? "",
-      actor: this.actor,
-    };
+    const optionValue = (key) => flags?.[key] ?? CONSTANTS.ACTOR_FLAGS[key] ?? true;
+    return Object.assign(context, {
+      rootId: this.id,
+      actor: { name: this.actor.name, img: this.actor.img },
+      pathbuilderId: flags?.pathbuilderId ?? "",
+      sources: SOURCES.map((s) => ({ ...s, label: i18n(`Source.${s.id}.Label`), hint: i18n(`Source.${s.id}.Hint`), active: s.id === this.source })),
+      groups: OPTION_GROUPS.map((group) => ({
+        id: group.id,
+        legend: i18n(`Groups.${group.id}`),
+        options: group.options.map((entry) => {
+          const { key, parent } = typeof entry === "string" ? { key: entry, parent: null } : entry;
+          return { key, parent, label: i18n(`Options.${key}`), checked: optionValue(key) !== false };
+        }),
+      })),
+      buttons: [{ type: "submit", icon: "fas fa-file-import", label: i18n("Import"), name: "import" }],
+    });
   }
 
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
-    $("#pathmuncher").css("height", "auto");
-
-    $(html)
-      .find('.item')
-      .on("click", (event) => {
-        if (!event.target?.dataset?.tab) return;
-        this.mode = event.target.dataset.tab;
-      });
+  _onRender(context, options) {
+    super._onRender(context, options);
+    // a nested option (blended slots) only applies while its parent (spells) is ticked
+    for (const child of this.element.querySelectorAll("[data-parent-option]")) {
+      const parent = this.element.querySelector(`input[name="options.${child.dataset.parentOption}"]`);
+      const sync = () => child.toggleAttribute("disabled", !parent.checked);
+      parent?.addEventListener("change", sync);
+      if (parent) sync();
+    }
+    this.#showSource();
   }
 
-  static _updateProgress(total, count, type, prefixLabel = "Cooking") {
-    const localizedType = game.i18n.localize(`pathmuncher.Labels.${type}`);
-    const progressBar = document.getElementById("pathmuncher-status");
-    progressBar.style.width = `${Math.trunc((count / total) * 100)}%`;
-    progressBar.innerHTML = `<span>${game.i18n.localize(`pathmuncher.Labels.${prefixLabel}`)} (${localizedType})...</span>`;
+  /** Shows the inputs for the chosen source (id, pasted JSON or file) without re-rendering. */
+  #showSource() {
+    for (const button of this.element.querySelectorAll("[data-action='setSource']")) {
+      const active = button.dataset.source === this.source;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+    for (const panel of this.element.querySelectorAll(".pathmuncher-source-panel")) {
+      panel.hidden = panel.dataset.source !== this.source;
+    }
   }
 
-  async _updateObject(event, formData) {
-    document.getElementById("pathmuncher-button").disabled = true;
-    const pathbuilderId = formData.textBoxBuildID;
+  static #onSetSource(_event, target) {
+    this.source = target.dataset.source;
+    this.#showSource();
+    this.element.querySelector(`.pathmuncher-source-panel[data-source="${this.source}"] :is(input, textarea)`)?.focus();
+  }
+
+  static #onSelectAll(_event, target) {
+    const checked = target.dataset.value === "true";
+    for (const input of this.element.querySelectorAll(`fieldset[data-group="${target.dataset.group}"] input[type="checkbox"]`)) {
+      input.checked = checked;
+      input.dispatchEvent(new Event("change"));
+    }
+  }
+
+  /** Shows progress through the import; Pathmuncher calls this with each stage. */
+  #updateProgress(step, total, type, prefixLabel = "Cooking") {
+    const progress = this.element?.querySelector(".pathmuncher-progress");
+    if (!progress) return;
+    progress.hidden = false;
+    progress.querySelector("progress").value = total ? Math.min(1, step / total) : 0;
+    progress.querySelector(".pathmuncher-progress-label").textContent
+      = `${game.i18n.localize(`pathmuncher.Labels.${prefixLabel}`)}: ${game.i18n.localize(`pathmuncher.Labels.${type}`)}…`;
+  }
+
+  /** Locks the form while an import runs. */
+  #setImporting(importing) {
+    this.importing = importing;
+    this.element.classList.toggle("importing", importing);
+    for (const element of this.element.querySelectorAll("fieldset, button, input, textarea")) {
+      if (importing) {
+        element.dataset.wasDisabled = String(element.disabled);
+        element.disabled = true;
+      } else {
+        element.disabled = element.dataset.wasDisabled === "true";
+        delete element.dataset.wasDisabled;
+      }
+    }
+    if (!importing) {
+      const progress = this.element.querySelector(".pathmuncher-progress");
+      if (progress) progress.hidden = true;
+    }
+  }
+
+  static async #onSubmit(_event, _form, formData) {
+    if (this.importing) return;
+    const data = foundry.utils.expandObject(formData.object);
     const options = {
-      pathbuilderId,
-      addMoney: formData.checkBoxMoney,
-      addFeats: formData.checkBoxFeats,
-      addSpells: formData.checkBoxSpells,
-      adjustBlendedSlots: formData.checkBoxBlendedSlots,
-      addEquipment: formData.checkBoxEquipment,
-      addTreasure: formData.checkBoxTreasure,
-      addLores: formData.checkBoxLores,
-      addWeapons: formData.checkBoxWeapons,
-      addArmor: formData.checkBoxArmor,
-      addDeity: formData.checkBoxDeity,
-      addName: formData.checkBoxName,
-      addClass: formData.checkBoxClass,
-      addBackground: formData.checkBoxBackground,
-      addHeritage: formData.checkBoxHeritage,
-      addAncestry: formData.checkBoxAncestry,
-      addFamiliars: formData.checkBoxFamiliars,
-      addFormulas: formData.checkBoxFormulas,
-      statusCallback: PathmuncherImporter._updateProgress.bind(this),
+      ...data.options,
+      pathbuilderId: this.source === "id" ? String(data.pathbuilderId ?? "").trim() : undefined,
+      statusCallback: this.#updateProgress.bind(this),
     };
     logger.debug("Pathmuncher options", options);
 
-    const statusBar = document.getElementById("pathmuncher-import-progress");
-    const pathmuncher = new Pathmuncher(this.actor, options);
+    this.#setImporting(true);
+    let completed = null;
     try {
-      // nothing on the actor changes until there is a valid build and it has been fully processed
-      if (!(await this.#loadSource(pathmuncher, formData))) return;
-
-      statusBar.classList.remove("import-hidden");
-
-      logger.debug("Pathmuncher Source", pathmuncher.source);
-      try {
-        await pathmuncher.processCharacter();
-      } catch (error) {
-        logger.error("Pathmuncher processing failed", { error, pathmuncher });
-        ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ProcessingFailed`, {
-          error: error.message ?? error,
-        }));
-        await utils.removeTempActors();
-        return;
-      }
-      logger.debug("Post processed character", pathmuncher);
-
-      // items the import would replace that pathmuncher didn't create: the user decides
-      let keepItemIds;
-      const handAdded = pathmuncher.findHandAddedItems();
-      if (handAdded.length > 0) {
-        keepItemIds = await PathmuncherImporter.#chooseItemsToKeep(handAdded);
-        if (keepItemIds === null) {
-          ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
-          await utils.removeTempActors();
-          return;
-        }
-      }
-
-      const actorBackup = this.actor.toObject();
-      try {
-        await pathmuncher.updateActor({ keepItemIds });
-        // remembered for the next import of this actor; only once the import has succeeded
-        await utils.setFlags(this.actor, options);
-      } catch (error) {
-        logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
-        const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
-        ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.UpdateFailed`, {
-          actor: this.actor.name,
-          error: error.message ?? error,
-          backup: backup?.name ?? "",
-        }), { permanent: true });
-        await utils.removeTempActors();
-        return;
-      }
+      completed = await this.#import(options, data);
     } finally {
-      statusBar?.classList.add("import-hidden");
-      const button = document.getElementById("pathmuncher-button");
-      if (button) button.disabled = false;
+      if (this.rendered) this.#setImporting(false);
+    }
+    if (!completed) return;
+
+    await this.close();
+    await completed.postImportCheck();
+  }
+
+  /** Runs an import. Returns the Pathmuncher on success, or null once the user has been told why not. */
+  async #import(options, data) {
+    const pathmuncher = new Pathmuncher(this.actor, options);
+    // nothing on the actor changes until there is a valid build and it has been fully processed
+    if (!(await this.#loadSource(pathmuncher, data))) return null;
+
+    logger.debug("Pathmuncher Source", pathmuncher.source);
+    try {
+      await pathmuncher.processCharacter();
+    } catch (error) {
+      logger.error("Pathmuncher processing failed", { error, pathmuncher });
+      ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ProcessingFailed`, {
+        error: error.message ?? error,
+      }));
+      await utils.removeTempActors();
+      return null;
+    }
+    logger.debug("Post processed character", pathmuncher);
+
+    // items the import would replace that pathmuncher didn't create: the user decides
+    let keepItemIds;
+    const handAdded = pathmuncher.findHandAddedItems();
+    if (handAdded.length > 0) {
+      keepItemIds = await PathmuncherImporter.#chooseItemsToKeep(handAdded);
+      if (keepItemIds === null) {
+        ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
+        await utils.removeTempActors();
+        return null;
+      }
     }
 
-    logger.debug("Final import details", {
-      actor: this.actor,
-      pathmuncher,
-      options,
-      pathbuilderSource: pathmuncher.source,
-      pathbuilderId,
-    });
+    const actorBackup = this.actor.toObject();
+    try {
+      await pathmuncher.updateActor({ keepItemIds });
+      // remembered for the next import of this actor; only once the import has succeeded
+      await utils.setFlags(this.actor, Object.fromEntries(Object.entries(options).filter(([key]) => key !== "statusCallback")));
+    } catch (error) {
+      logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
+      const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
+      ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.UpdateFailed`, {
+        actor: this.actor.name,
+        error: error.message ?? error,
+        backup: backup?.name ?? "",
+      }), { permanent: true });
+      await utils.removeTempActors();
+      return null;
+    }
 
     if (options.addFamiliars) {
       const petShop = new PetShop({
@@ -153,22 +243,30 @@ export class PathmuncherImporter extends FormApplication {
       await petShop.processPets();
       await petShop.addPetEffects();
     }
-    this.close();
-    await pathmuncher.postImportCheck();
+    logger.debug("Final import details", { actor: this.actor, pathmuncher, options });
+    return pathmuncher;
   }
 
   /**
-   * Loads the build into pathmuncher.source from the Pathbuilder id or the pasted JSON.
+   * Loads the build into pathmuncher.source from the Pathbuilder id, the pasted JSON or a file.
    * Returns false, having told the user why, if there is no usable build.
    */
-  async #loadSource(pathmuncher, formData) {
-    if (this.mode === "number") {
-      return pathmuncher.fetchPathbuilder(formData.textBoxBuildID);
+  async #loadSource(pathmuncher, data) {
+    if (this.source === "id") return pathmuncher.fetchPathbuilder(data.pathbuilderId);
+
+    let text = data.json ?? "";
+    if (this.source === "file") {
+      const file = this.element.querySelector("input[name='file']")?.files?.[0];
+      if (!file) {
+        ui.notifications.error(i18n("Source.file.Missing"));
+        return false;
+      }
+      text = await foundry.utils.readTextFromFile(file);
     }
 
     let jsonData;
     try {
-      jsonData = JSON.parse(formData.textBoxBuildJSON.trim());
+      jsonData = JSON.parse(String(text).trim());
     } catch (error) {
       logger.error("Unable to parse JSON data", error);
       ui.notifications.error(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.InvalidJson`));
@@ -187,34 +285,35 @@ export class PathmuncherImporter extends FormApplication {
    * Asks which hand-added items to keep. Resolves to the ids to keep, or null if the user cancels.
    */
   static async #chooseItemsToKeep(items) {
-    const escape = (text) => String(text).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+    const escape = foundry.utils.escapeHTML;
     const rows = items
       .map((item) => `<label class="pathmuncher-keep-item">
         <input type="checkbox" name="keep" value="${item.id}" checked>
-        <img src="${escape(item.img)}" width="24" height="24"> ${escape(item.name)}
-        <span class="pathmuncher-keep-type">(${escape(game.i18n.localize(`TYPES.Item.${item.type}`))})</span>
+        <img src="${escape(item.img)}" alt="">
+        <span class="pathmuncher-keep-name">${escape(item.name)}</span>
+        <span class="pathmuncher-keep-type">${escape(game.i18n.localize(`TYPES.Item.${item.type}`))}</span>
       </label>`)
       .join("");
-    const content = `<p>${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Content`)}</p>
+    const content = `<p class="hint">${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Content`)}</p>
       <div class="pathmuncher-keep-items">${rows}</div>`;
 
-    const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Title`) },
+    const result = await DialogV2.wait({
+      window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Title`, icon: "fas fa-hand-holding" },
       position: { width: 480 },
-      classes: ["pathmuncher-keep-dialog"],
+      classes: ["pathmuncher", "pathmuncher-keep-dialog"],
       content,
       rejectClose: false,
       buttons: [
         {
           action: "import",
-          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Import`),
+          label: `${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Import`,
           icon: "fas fa-file-import",
           default: true,
           callback: (_event, button) => [...button.form.querySelectorAll('input[name="keep"]:checked')].map((i) => i.value),
         },
         {
           action: "cancel",
-          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Cancel`),
+          label: `${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Cancel`,
           icon: "fas fa-times",
         },
       ],

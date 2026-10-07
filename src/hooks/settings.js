@@ -10,30 +10,19 @@ async function resetSettings() {
   window.location.reload();
 }
 
-class ResetSettingsDialog extends FormApplication {
-  constructor(...args) {
-    super(...args);
-    // eslint-disable-next-line no-constructor-return
-    return new Dialog({
-      title: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Title`),
-      content: `<p class="${CONSTANTS.FLAG_NAME}-dialog-important">${game.i18n.localize(
-        `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Content`,
-      )}</p>`,
-      buttons: {
-        confirm: {
-          icon: '<i class="fas fa-check"></i>',
-          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Confirm`),
-          callback: () => {
-            resetSettings();
-          },
-        },
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Cancel`),
-        },
-      },
-      default: "cancel",
+/** The settings menu entry: asks, then resets every Pathmuncher setting to its default. */
+class ResetSettingsDialog extends foundry.applications.api.ApplicationV2 {
+  async render() {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Title`, icon: "fas fa-refresh" },
+      classes: ["pathmuncher"],
+      content: `<p>${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Content`)}</p>`,
+      yes: { label: `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Confirm`, icon: "fas fa-check" },
+      no: { label: `${CONSTANTS.FLAG_NAME}.Dialogs.ResetSettings.Cancel`, icon: "fas fa-times", default: true },
+      rejectClose: false,
     });
+    if (confirmed) await resetSettings();
+    return this;
   }
 }
 

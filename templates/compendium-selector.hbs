@@ -1,45 +1,60 @@
-<div class="container">
-  <label for="enableCheckbox">
-    <input type="checkbox" id="enableCustomCompendiums" {{checked useCustomCompendiums}}>
-    {{localize "pathmuncher.Dialogs.CompendiumSelector.Enable"}}
-  </label>
-</div>
+<div class="pathmuncher-compendium-body">
+  <p class="hint">{{localize "pathmuncher.Dialogs.CompendiumSelector.Intro"}}</p>
 
-<div class="drop-container">
-  <select id="compSelector">
-    <option selected value="">{{localize "pathmuncher.Dialogs.CompendiumSelector.Select"}}</option>
-    {{#each lookups}}
-    <option value="{{this.key}}">{{this.label}}</option>
-    {{/each}}
-  </select>
-</div>
+  <div class="form-group">
+    <label class="checkbox">
+      <input type="checkbox" name="enabled" {{checked enabled}}>
+      {{localize "pathmuncher.Dialogs.CompendiumSelector.Enable"}}
+    </label>
+  </div>
 
-<div class="container">
-  <div class="list-container">
-    <select id="sourceList" class="list" multiple>
-      {{#each sourceItems}}
-      <option value="{{this}}">{{this}}</option>
-      {{/each}}
-    </select>
-
-    <div class="button-container">
-      <button id="addButton" class="button">{{localize "pathmuncher.Dialogs.CompendiumSelector.Add"}} &gt;&gt;</button>
-      <button id="removeButton" class="button">&lt;&lt; {{localize "pathmuncher.Dialogs.CompendiumSelector.Remove"}}</button>
-    </div>
-
-    <select id="compendiumList" class="list" multiple>
-      {{#each compendiumItems}}
-      <option value="{{this}}">{{this}}</option>
-      {{/each}}
-    </select>
-
-    <div class="button-container">
-      <button id="upButton" class="button">Up</button>
-      <button id="downButton" class="button">Down</button>
+  <div class="form-group">
+    <label for="pathmuncher-compendium-type">{{localize "pathmuncher.Dialogs.CompendiumSelector.Type"}}</label>
+    <div class="form-fields">
+      <select id="pathmuncher-compendium-type" name="type">
+        <option value="">{{localize "pathmuncher.Dialogs.CompendiumSelector.Select"}}</option>
+        {{#each types}}
+        <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
     </div>
   </div>
-</div>
 
-<div class="reset-container">
-  <button id="resetButton" class="reset-button">{{localize "pathmuncher.Dialogs.CompendiumSelector.Reset"}}</button>
+  {{#if currentType}}
+  <div class="pathmuncher-compendium-lists">
+    <div class="pathmuncher-compendium-list">
+      <label for="pathmuncher-compendium-available">{{localize "pathmuncher.Dialogs.CompendiumSelector.Available"}}</label>
+      <select id="pathmuncher-compendium-available" name="available" multiple>
+        {{#each available}}
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="pathmuncher-compendium-buttons">
+      <button type="button" data-action="add" data-tooltip="{{localize "pathmuncher.Dialogs.CompendiumSelector.Add"}}"
+              aria-label="{{localize "pathmuncher.Dialogs.CompendiumSelector.Add"}}"><i class="fas fa-angles-right" inert></i></button>
+      <button type="button" data-action="remove" data-tooltip="{{localize "pathmuncher.Dialogs.CompendiumSelector.Remove"}}"
+              aria-label="{{localize "pathmuncher.Dialogs.CompendiumSelector.Remove"}}"><i class="fas fa-angles-left" inert></i></button>
+    </div>
+
+    <div class="pathmuncher-compendium-list">
+      <label for="pathmuncher-compendium-searched">{{localize "pathmuncher.Dialogs.CompendiumSelector.Searched"}}</label>
+      <select id="pathmuncher-compendium-searched" name="searched" multiple>
+        {{#each searched}}
+        <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if missing}}class="missing"{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="pathmuncher-compendium-buttons">
+      <button type="button" data-action="up" data-tooltip="{{localize "pathmuncher.Dialogs.CompendiumSelector.Up"}}"
+              aria-label="{{localize "pathmuncher.Dialogs.CompendiumSelector.Up"}}"><i class="fas fa-arrow-up" inert></i></button>
+      <button type="button" data-action="down" data-tooltip="{{localize "pathmuncher.Dialogs.CompendiumSelector.Down"}}"
+              aria-label="{{localize "pathmuncher.Dialogs.CompendiumSelector.Down"}}"><i class="fas fa-arrow-down" inert></i></button>
+    </div>
+  </div>
+  {{else}}
+  <p class="pathmuncher-compendium-empty hint">{{localize "pathmuncher.Dialogs.CompendiumSelector.Empty"}}</p>
+  {{/if}}
 </div>

@@ -1,0 +1,68 @@
+<div class="pathmuncher-importer-body">
+  <header class="pathmuncher-target">
+    <img src="{{actor.img}}" alt="">
+    <div>
+      <span class="pathmuncher-target-label">{{localize "pathmuncher.Importer.ImportingInto"}}</span>
+      <span class="pathmuncher-target-name">{{actor.name}}</span>
+    </div>
+  </header>
+
+  <fieldset class="pathmuncher-source">
+    <legend>{{localize "pathmuncher.Importer.Source.Legend"}}</legend>
+    <nav class="pathmuncher-source-tabs" aria-label="{{localize "pathmuncher.Importer.Source.Legend"}}">
+      {{#each sources}}
+      <button type="button" class="{{#if active}}active{{/if}}" data-action="setSource" data-source="{{id}}"
+              aria-pressed="{{#if active}}true{{else}}false{{/if}}">
+        <i class="{{icon}}" inert></i> {{label}}
+      </button>
+      {{/each}}
+    </nav>
+
+    <div class="pathmuncher-source-panel" data-source="id">
+      <div class="form-group">
+        <label for="{{rootId}}-pathbuilderId">{{localize "pathmuncher.Importer.Source.id.Label"}}</label>
+        <div class="form-fields">
+          <input id="{{rootId}}-pathbuilderId" class="pathmuncher-id-input" type="text" name="pathbuilderId"
+                 value="{{pathbuilderId}}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="123456">
+        </div>
+      </div>
+      <p class="hint">{{localize "pathmuncher.Importer.Source.id.Hint"}}</p>
+    </div>
+
+    <div class="pathmuncher-source-panel" data-source="json" hidden>
+      <textarea name="json" rows="5" spellcheck="false"
+                placeholder="{&quot;success&quot;:true,&quot;build&quot;:{ … }}"></textarea>
+      <p class="hint">{{localize "pathmuncher.Importer.Source.json.Hint"}}</p>
+    </div>
+
+    <div class="pathmuncher-source-panel" data-source="file" hidden>
+      <input type="file" name="file" accept=".json,application/json">
+      <p class="hint">{{localize "pathmuncher.Importer.Source.file.Hint"}}</p>
+    </div>
+  </fieldset>
+
+  <div class="pathmuncher-option-groups">
+    {{#each groups}}
+    <fieldset class="pathmuncher-options" data-group="{{id}}">
+      <legend>{{legend}}</legend>
+      <div class="pathmuncher-select-all">
+        <button type="button" data-action="selectAll" data-group="{{id}}" data-value="true">{{localize "pathmuncher.Importer.All"}}</button>
+        <button type="button" data-action="selectAll" data-group="{{id}}" data-value="false">{{localize "pathmuncher.Importer.None"}}</button>
+      </div>
+      {{#each options}}
+      <label class="pathmuncher-option{{#if parent}} nested{{/if}}">
+        <input type="checkbox" name="options.{{key}}" {{checked checked}} {{#if parent}}data-parent-option="{{parent}}"{{/if}}>
+        <span>{{label}}</span>
+      </label>
+      {{/each}}
+    </fieldset>
+    {{/each}}
+  </div>
+
+  <div class="pathmuncher-progress" hidden>
+    <progress max="1" value="0"></progress>
+    <span class="pathmuncher-progress-label"></span>
+  </div>
+
+  <p class="pathmuncher-help hint">{{{localize "pathmuncher.Importer.Problems"}}}</p>
+</div>

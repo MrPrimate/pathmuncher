@@ -70,6 +70,13 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - Dual class exports warn.
   - The importer's checkboxes show their saved options.
   - Parent and child feat choices are parsed as such.
+- `ui.test.js`: the user interface.
+  - The sheet header button opens one importer per actor.
+  - Import from a JSON file, and the error when no file is chosen.
+  - Options are remembered between imports.
+  - All / None, and blended slots following the Spells option.
+  - The compendium selector's add, move and reset.
+  - Cancelling the reset-settings menu changes nothing.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.
