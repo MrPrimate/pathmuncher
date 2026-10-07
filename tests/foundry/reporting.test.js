@@ -21,7 +21,7 @@
 
     t.ok(content, "no report dialog");
     const text = content.replace(/<[^>]+>/g, "\n");
-    for (const miss of ["Manifest Soulforged Armament", "Heroic Heart", "Planar Pain"]) {
+    for (const miss of ["Heroic Heart", "Planar Pain"]) {
       t.ok(text.includes(`Specials: ${miss}`), `report should list ${miss}`);
     }
     for (const label of ["Spellbook", "Spellstrike Specifics", "Intelligence", "Gecko Grip", "Blur", "Shield (Archetype)"]) {

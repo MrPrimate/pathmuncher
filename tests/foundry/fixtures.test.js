@@ -9,7 +9,6 @@
   const EXPECTATIONS = {
     "315329-magus9": {
       unmatchedSpecials: [
-        "Manifest Soulforged Armament",
         "Heroic Heart",
         "Planar Pain",
       ],

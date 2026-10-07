@@ -1864,11 +1864,14 @@ export class Pathmuncher {
 
   // eslint-disable-next-line complexity
   async #generateFeatItems(type,
-    { levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false } = {},
+    {
+      levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false,
+      specialsOnly = false,
+    } = {},
   ) {
     logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${typeFilter}"`);
 
-    for (const featArray of [this.parsed.feats, this.parsed.specials]) {
+    for (const featArray of specialsOnly ? [this.parsed.specials] : [this.parsed.feats, this.parsed.specials]) {
       for (const pBFeat of featArray) {
         logger.verbose(`Checking if ${pBFeat.name} needs processing`, pBFeat);
         if (pBFeat.added) continue;
@@ -2833,6 +2836,8 @@ export class Pathmuncher {
     await this.#generateFeatItems("feats");
     this.#statusUpdate(2, 5, "Feats");
     await this.#generateFeatItems("ancestryFeatures");
+    // specials that are actions a feature gives without granting the item (e.g. Manifest Soulforged Armament)
+    await this.#generateFeatItems("actions", { specialsOnly: true });
     this.#statusUpdate(3, 5, "Feats");
     // await this.#generateSpecialItems("ancestryFeatures");
     // this.#statusUpdate(4, 5, "Feats");

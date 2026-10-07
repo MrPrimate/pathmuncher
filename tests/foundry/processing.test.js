@@ -51,6 +51,20 @@
     t.deepEqual(prompts.map((p) => p.item), ["Fighter"], "prompts");
   });
 
+  test("processing: an unmatched special that is an action is imported as that action", async (t) => {
+    // Soulforger's Manifest Soulforged Armament is in the actions compendium, not granted by a feat
+    const exportJson = fixture("315329-magus9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "special action");
+
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    const actions = actor.itemTypes.action.filter((a) => a.slug === "manifest-soulforged-armament");
+    t.equal(actions.length, 1, "Manifest Soulforged Armament actions");
+    t.ok(!pm.getUnmatchedSpecials().includes("Manifest Soulforged Armament"), "no longer reported");
+  });
+
   test("processing: the deep-dive setting off gives the same character as on", async (t) => {
     const exportJson = fixture("315329-magus9");
     await pmt.useBuildVariants(t, exportJson.build);
