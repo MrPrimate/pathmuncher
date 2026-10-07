@@ -72,7 +72,6 @@ export class Pathmuncher {
       weapons: [],
     };
     this.usedLocations = new Set();
-    this.usedLocationsAlternateRules = new Set();
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};
@@ -239,16 +238,6 @@ export class Pathmuncher {
       if (location && !this.usedLocations.has(location)) {
         document.system.location = location;
         this.usedLocations.add(location);
-      } else if (location && this.usedLocations.has(location)) {
-        logger.debug("Variant feat location", { ancestryParagonVariant: utils.allowAncestryParagon(), location, feature });
-        // eslint-disable-next-line max-depth
-        if (utils.allowAncestryParagon() && feature.type === "Ancestry Feat") {
-          document.system.location = "ancestry-bonus";
-          this.usedLocationsAlternateRules.add(location);
-        } else if (utils.allowDualClasses() && feature.type === "Class Feat") {
-          document.system.location = `dualclass-${feature.level}`;
-          this.usedLocationsAlternateRules.add(location);
-        }
       }
     }
   }
@@ -476,6 +465,7 @@ export class Pathmuncher {
         if (feat.length >= 7) {
           data.featChoiceRef = feat[4];
           data.hasChildren = feat[5] === "parentChoice";
+          data.isParent = data.hasChildren;
           data.isChild = feat[5] === "childChoice";
           data.isStandard = feat[5] === "standardChoice";
           data.parentFeatChoiceRef = feat[6];
@@ -501,6 +491,7 @@ export class Pathmuncher {
           data.type = "Ancestry Feat";
           data.featChoiceRef = original[4];
           data.hasChildren = original[5] === "parentChoice";
+          data.isParent = data.hasChildren;
           data.parentFeatChoiceRef = null;
         }
         this.parsed.feats.push(data);
@@ -596,26 +587,14 @@ export class Pathmuncher {
     foundry.utils.setProperty(this.result.character, "system.traits.senses", senses);
   }
 
-  // eslint-disable-next-line no-unused-vars
-  #addDualClass(_klass) {
-    if (!utils.allowDualClasses()) {
-      if (this.source.dualClass && this.source.dualClass !== "") {
-        logger.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`, {
-          class: this.source.class,
-          dualClass: this.source.dualClass,
-        });
-        ui.notifications.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`);
-      }
-      return;
-    }
-    if (!this.source.dualClass || this.source.dualClass === "") {
-      logger.warn(`Imported character not dual class but system is configured for dual class`, {
-        class: this.source.class,
-      });
-      ui.notifications.warn(`Imported character not dual class but system is configured for dual class`);
-      return;
-    }
-    logger.info("Not processing dual class");
+  // the pf2e system has no dual class variant, so only the primary class is imported
+  #warnDualClass() {
+    if (!this.source.dualClass) return;
+    logger.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`, {
+      class: this.source.class,
+      dualClass: this.source.dualClass,
+    });
+    ui.notifications.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -633,7 +612,7 @@ export class Pathmuncher {
       }
       if (target === "class") {
         itemData.system.keyAbility.selected = this.keyAbility;
-        this.#addDualClass(itemData);
+        this.#warnDualClass();
       }
       itemData._id = foundry.utils.randomID();
       // this.#generateGrantItemData(itemData);
@@ -699,14 +678,7 @@ export class Pathmuncher {
     || slug
       === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
     || slug
-      === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage))
-    || (utils.allowDualClasses()
-      && (slug
-        === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.name, this.source.dualClass))
-        || slug
-          === Seasoning.slug(
-            Seasoning.getDualClassAdjustedSpecialNameLowerCase(f.originalName, this.source.dualClass),
-          )));
+      === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage));
   }
 
   #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
@@ -793,7 +765,9 @@ export class Pathmuncher {
     // return classMatch;
   }
 
-  #createGrantedItem(document, parent, { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false } = {}) {
+  #createGrantedItem(document, parent,
+    { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false, sourceUuid = null } = {},
+  ) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`, {
       document,
       parent,
@@ -802,7 +776,8 @@ export class Pathmuncher {
       applyFeatLocation,
     });
     if (addGrantFlag) {
-      const uuid = foundry.utils.getProperty(document, "flags.core.sourceId");
+      // remembered so temp actors skip GrantItem rules for items already granted
+      const uuid = sourceUuid ?? foundry.utils.getProperty(document, "_stats.compendiumSource");
       if (uuid) this.grantItemLookUp.add(uuid);
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
       foundry.utils.setProperty(parent, `flags.${game.system.id}.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
@@ -1436,7 +1411,9 @@ export class Pathmuncher {
             documentFlagName,
           });
           const flagName = ruleEntry.flag ?? documentFlagName;
-          this.#createGrantedItem(featureDoc, document, { addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false });
+          this.#createGrantedItem(featureDoc, document, {
+            addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false, sourceUuid: uuid ?? ruleFeature.uuid,
+          });
           if (foundry.utils.hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         } else {
           if (!ruleEntry.selection) {
@@ -1767,8 +1744,6 @@ export class Pathmuncher {
           || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class))
           || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry))
           || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage))
-          || (utils.allowDualClasses()
-            && slug === Seasoning.slug(Seasoning.getDualClassAdjustedSpecialNameLowerCase(name, this.source.dualClass)))
         );
       });
       if (indexMatch) return indexMatch;
@@ -1854,7 +1829,7 @@ export class Pathmuncher {
           });
           this.check[pBFeat.originalName] = {
             name: displayName,
-            type: "feat",
+            type: pBFeat.sourceType === "specials" ? "special" : "feat",
             details: {
               displayName,
               name: pBFeat.name,
@@ -1868,9 +1843,9 @@ export class Pathmuncher {
         }
         if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
         pBFeat.added = true;
-        if (this.autoAddedFeatureIds.has(`${indexMatch._id}${indexMatch.type}`)) {
+        if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
-          pBFeat.addedAutoId = `${indexMatch._id}_${indexMatch.type}`;
+          pBFeat.addedAutoId = `${indexMatch.i._id}_${indexMatch.i.type}`;
           continue;
         }
 
@@ -3284,6 +3259,27 @@ export class Pathmuncher {
     await utils.removeTempActors();
   }
 
+  static ATTRIBUTE_NAMES = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
+
+  /**
+   * Pathbuilder specials that matched nothing, by their Pathbuilder name. Leaves out labels that
+   * need no item: the shared ignore lists (skills, "Spellbook", ...), attribute names, lores, and
+   * spells Pathbuilder also lists as specials ("Studious Spell: Blur") when the spell was imported.
+   */
+  getUnmatchedSpecials() {
+    const slug = (name) => Seasoning.slug(String(name ?? "").replace(/\s*\(.*?\)\s*/g, " ").trim());
+    const ignored = new Set([...Seasoning.IGNORED_FEATS(), ...Seasoning.IGNORED_SPECIALS(), ...Pathmuncher.ATTRIBUTE_NAMES]
+      .map(slug));
+    const lores = new Set((this.source?.lores ?? []).flatMap(([name]) => [slug(name), slug(`Lore: ${name}`)]));
+    const spells = new Set(this.result.spells.map((s) => slug(s.name)));
+    return Object.values(this.check)
+      .filter((b) => b.type === "special"
+        && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
+        && !BAD_IGNORE_FEATURES(b.details.name))
+      .map((b) => b.details.originalName)
+      .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
+  }
+
   async postImportCheck() {
     const badClass = this.options.addClass
       ? this.bad.filter((b) => b.type === "class").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Class")}: ${b.pbName}</li>`)
@@ -3311,11 +3307,7 @@ export class Pathmuncher {
       ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Feats")}: ${b.details.name}</li>`)
       : [];
     const badSpecials = this.options.addFeats
-      ? Object.values(this.check).filter((b) =>
-        (b.type === "special")
-        && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
-        && !BAD_IGNORE_FEATURES(b.details.name),
-      ).map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${b.details.originalName}</li>`)
+      ? this.getUnmatchedSpecials().map((name) => `<li>${game.i18n.localize("pathmuncher.Labels.Specials")}: ${name}</li>`)
       : [];
     const badEquipment = this.options.addEquipment
       ? this.bad.filter((b) => b.type === "equipment").map((b) => `<li>${game.i18n.localize("pathmuncher.Labels.Equipment")}: ${b.pbName}</li>`)

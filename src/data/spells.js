@@ -121,7 +121,8 @@ const REMASTER_NAMES = [
 ];
 
 export function spellRename(spellName) {
-  if (foundry.utils.isNewerVersion(game.version, "5.9.0") && game.modules.get("pf2e-legacy-content")?.active) return spellName;
+  // the legacy content module keeps the pre-remaster names, so the old name is right there
+  if (game.modules.get("pf2e-legacy-content")?.active) return spellName;
   const remasterName = REMASTER_NAMES.find((remaster) => remaster.pbName === spellName);
   if (remasterName) {
     return remasterName.foundryName;

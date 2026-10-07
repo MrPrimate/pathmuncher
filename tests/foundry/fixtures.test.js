@@ -1,18 +1,31 @@
 // Every Pathbuilder fixture imports without errors and matches its build, apart from the known gaps
 // listed here. When a fix closes a gap the test fails until the entry is removed, so this list stays
 // an accurate record of what pathmuncher still gets wrong. Prompts are the pf2e choices the user
-// still has to answer during the import, by the item that raised them.
+// still has to answer during the import, by the item that raised them. unmatchedSpecials are the
+// Pathbuilder specials the post-import report lists (labels such as "Spellbook" are left out).
 (() => {
   const { test } = pmt;
 
   const EXPECTATIONS = {
     "315329-magus9": {
+      unmatchedSpecials: [
+        "Manifest Soulforged Armament",
+        "Heroic Heart",
+        "Planar Pain",
+      ],
       prompts: ["The Tangible Dream"],
       knownGaps: [
         "formulas 61 (expected 62)",
       ],
     },
     "142926-wizard20": {
+      unmatchedSpecials: [
+        "Arcane School: Universalist",
+        "Arcane Thesis: Metamagical Experimentation",
+        "Domain: Magic",
+        "Wizard Weapon Expertise",
+        "Resolve",
+      ],
       prompts: [
         "Elemental Heart Dwarf",
         "Arcane School",
@@ -50,14 +63,17 @@
       ],
     },
     "304883-thaumaturge1": {
+      unmatchedSpecials: ["Regalia"],
       prompts: ["Foxfire"],
       knownGaps: [],
     },
     "314710-gunslinger1": {
+      unmatchedSpecials: ["Singular Expertise"],
       prompts: ["Living Weapon"],
       knownGaps: [],
     },
     "345816-guardian3": {
+      unmatchedSpecials: ["Ever Ready", "Dwarf"],
       prompts: [],
       knownGaps: [
         "core heritage: expected Custom Mixed Heritage, got null",
@@ -65,12 +81,11 @@
       ],
     },
     "422753-fighter5": {
+      unmatchedSpecials: [],
       prompts: [
         "Fighter",
         "Barrow's Edge",
         "Barrow's Edge (Grant me a new item.)",
-        "Divine Spark and Ikons",
-        "Bands of Imprisonment",
         "Exemplar Dedication",
         "Fighter Weapon Mastery",
       ],
@@ -90,7 +105,7 @@
       const worldItems = new Set(game.items.map((i) => i.id));
       const actor = await pmt.actor(t, name);
 
-      await pmt.importBuild(actor, exportJson);
+      const pm = await pmt.importBuild(actor, exportJson);
 
       const problems = pmt.compareWithBuild(actor, build);
       const unexpected = problems.filter((p) => !expectation.knownGaps.includes(p));
@@ -99,6 +114,7 @@
       t.deepEqual(unexpected, [], "new differences from the build:");
       t.deepEqual(fixed, [], "known gaps that no longer occur (remove them from EXPECTATIONS):");
       t.deepEqual(prompts.map((p) => p.item), expectation.prompts, "pf2e prompts during the import:");
+      t.deepEqual(pm.getUnmatchedSpecials(), expectation.unmatchedSpecials, "unmatched specials in the report:");
       t.deepEqual(game.items.filter((i) => !worldItems.has(i.id)).map((i) => i.name), [], "world items created");
       t.deepEqual(game.actors.filter((a) => a.getFlag("pathmuncher", "temp")).map((a) => a.name), [], "temp actors left");
     });

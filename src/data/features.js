@@ -305,6 +305,7 @@ const SHARED_IGNORE_LIST = [
   "Imprecise Sense", // this gets picked up and added by granted features
   "Imprecise Scent", // this gets picked up and added by granted features
   "Sanctification", // choose on import
+  "No special vision", // Pathbuilder label for an ancestry without darkvision or low-light vision
 ];
 
 const IGNORED_FEATS_LIST = [

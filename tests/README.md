@@ -59,6 +59,11 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   failures must leave the actor untouched. A failed update must save a pre-import copy.
 - `processing.test.js`: processing details. Unmatched containers are created on the actor only
   (never as world items), and the deep-dive setting gives the same character on or off.
+- `reporting.test.js`: what the user is told and shown.
+  - The post-import report lists unmatched specials but not Pathbuilder's labels.
+  - Dual class exports warn.
+  - The importer's checkboxes show their saved options.
+  - Parent and child feat choices are parsed as such.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.

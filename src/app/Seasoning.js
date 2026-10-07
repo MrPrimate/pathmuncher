@@ -136,10 +136,6 @@ export class Seasoning {
     return `${name} (${className})`.toLowerCase();
   }
 
-  static getDualClassAdjustedSpecialNameLowerCase(name, dualClassName) {
-    return `${name} (${dualClassName})`.toLowerCase();
-  }
-
   static getAncestryAdjustedSpecialNameLowerCase(name, ancestryName) {
     return `${name} (${ancestryName})`.toLowerCase();
   }

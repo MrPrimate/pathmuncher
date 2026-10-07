@@ -350,6 +350,20 @@
       else if (expected && group !== expected) problems.push(`feat in ${group} group: ${name} [${type} ${level}] (expected ${expected})`);
     }
 
+    // the same feat more often than the build takes it (e.g. granted by the class and imported again).
+    // A copy granted by an item with the same slug is the system's own wrapper pattern (the Fighter's
+    // "Shield Block" class feature grants the "Shield Block" feat), as a hand-built character has.
+    const bySlug = new Map();
+    for (const f of actor.itemTypes.feat) {
+      if (actor.items.get(f.flags.pf2e?.grantedBy?.id)?.slug === f.slug) continue;
+      bySlug.set(f.slug, [...(bySlug.get(f.slug) ?? []), f]);
+    }
+    for (const [slug, copies] of bySlug) {
+      if (copies.length < 2) continue;
+      const inBuild = (build.feats ?? []).filter(([name, extra]) => variants(name, extra).has(slug)).length;
+      if (copies.length > Math.max(1, inBuild)) problems.push(`duplicate feat: ${copies[0].name} (${copies.length} on the actor, ${inBuild} in the build)`);
+    }
+
     const physical = actor.inventory.contents;
     const findPhysical = (types, ...names) => {
       const vs = variants(...names);

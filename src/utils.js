@@ -98,17 +98,6 @@ const utils = {
     }
   },
 
-  allowDualClasses: () => {
-    if (game.system.id !== "pf2e") return false;
-    return (foundry.utils.isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "dualClassVariant"));
-    // || (!foundry.utils.isNewerVersion("5.9.0", game.version) && when remaster supports dualclass then add here
-  },
-
-  allowAncestryParagon: () => {
-    if (game.system.id !== "pf2e") return false;
-    return (foundry.utils.isNewerVersion("5.9.0", game.version) && game.settings.get("pf2e", "ancestryParagonVariant"));
-  },
-
   async deleteActor(actor) {
     if (actor.canUserModify(game.user, "delete")) {
       await Actor.deleteDocuments([actor._id]);
