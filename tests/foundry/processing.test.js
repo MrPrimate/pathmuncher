@@ -24,6 +24,33 @@
     t.equal(satchel.contents.size, 8, "contents in the container");
   });
 
+  test("processing: a skill choice the build's proficiencies answer is not prompted", async (t) => {
+    // the Fighter's class skill (Acrobatics or Athletics) is not in the export; Athletics is trained
+    const exportJson = fixture("477013-fighter4-archer");
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "class skill");
+
+    await pmt.importBuild(actor, exportJson);
+
+    t.deepEqual(prompts.map((p) => p.item), [], "prompts");
+    t.equal(actor.skills.athletics.rank, 1, "athletics");
+    t.equal(actor.skills.acrobatics.rank, 0, "acrobatics");
+  });
+
+  test("processing: a skill choice the proficiencies cannot settle is still prompted", async (t) => {
+    // with both skills trained, which one the class granted is ambiguous
+    const exportJson = fixture("477013-fighter4-archer");
+    exportJson.build.proficiencies.acrobatics = 2;
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "class skill ambiguous");
+
+    await pmt.importBuild(actor, exportJson);
+
+    t.deepEqual(prompts.map((p) => p.item), ["Fighter"], "prompts");
+  });
+
   test("processing: the deep-dive setting off gives the same character as on", async (t) => {
     const exportJson = fixture("315329-magus9");
     await pmt.useBuildVariants(t, exportJson.build);

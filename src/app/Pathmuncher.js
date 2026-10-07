@@ -751,7 +751,7 @@ export class Pathmuncher {
       if (extraMatch) return extraMatch;
     }
     // console.warn(`Trying to find ${slug} in ${type}, ignoreAdded? ${ignoreAdded}`, this.parsed[type]);
-    const parsedMatch = this.parsed[type].find((f) =>
+    const candidates = this.parsed[type].filter((f) =>
       (!ignoreAdded || (ignoreAdded && !f.added))
         && (
           featType === null
@@ -760,6 +760,12 @@ export class Pathmuncher {
         && !f.isChoice
         && this.#slugNameMatch(f, slug),
     );
+    // an item granted by another (document) is Pathbuilder's awarded or child entry, not one taken
+    // in a slot, when the build has the feat more than once (e.g. Additional Lore from Kholo Lore
+    // and as a skill feat)
+    const parsedMatch = (document && candidates.length > 1
+      ? candidates.find((f) => f.type === "Awarded Feat" || f.isChild)
+      : undefined) ?? candidates[0];
     if (parsedMatch || !document) return parsedMatch;
 
     const extraMatch = this.parsed[type].find((f) =>
@@ -982,6 +988,20 @@ export class Pathmuncher {
     }
   }
 
+  /**
+   * A choice between skills (e.g. the Fighter's Acrobatics or Athletics) that the build answers:
+   * exactly one of the offered skills is trained in its proficiencies. Pathbuilder does not export
+   * the choice itself, only its effect.
+   */
+  #skillChoiceFromProficiencies(choices) {
+    const skills = Object.keys(CONFIG.PF2E?.skills ?? {});
+    if (choices.length < 2 || !choices.every((c) => skills.includes(c.value))) return undefined;
+    const trained = choices.filter((c) => (this.source.proficiencies?.[c.value] ?? 0) > 0);
+    if (trained.length !== 1) return undefined;
+    trained[0].nouuid = true;
+    return trained[0];
+  }
+
   static getFlag(document, ruleSet) {
     return typeof ruleSet.flag === "string" && ruleSet.flag.length > 0
       ? ruleSet.flag.replace(/[^-a-z0-9]/gi, "")
@@ -1052,6 +1072,11 @@ export class Pathmuncher {
         const featureMatch = await this.#featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet);
         if (featureMatch) {
           return featureMatch;
+        }
+        const skillMatch = this.#skillChoiceFromProficiencies(choices);
+        if (skillMatch) {
+          logger.debug(`Skill choice for ${document.name} from the build's proficiencies`, { skillMatch, choices });
+          return skillMatch;
         }
       }
 

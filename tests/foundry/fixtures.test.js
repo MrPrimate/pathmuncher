@@ -73,6 +73,7 @@
     "422753-fighter5": {
       unmatchedSpecials: [],
       prompts: [
+        // both Acrobatics and Athletics are trained, so the class skill choice stays ambiguous
         "Fighter",
         "Barrow's Edge",
         "Barrow's Edge",
@@ -83,8 +84,7 @@
     },
     "477013-fighter4-archer": {
       unmatchedSpecials: [],
-      // the class skill choice is not in the export, only its effect in proficiencies
-      prompts: ["Fighter"],
+      prompts: [],
       knownGaps: [],
     },
   };

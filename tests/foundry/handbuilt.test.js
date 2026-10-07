@@ -8,9 +8,7 @@
   const KNOWN_DIFFERENCES = {
     "315329-magus9": [],
     "314710-gunslinger1": [],
-    // the build has Additional Lore twice (granted by Kholo Lore, and as the level 2 skill feat);
-    // pathmuncher creates the second one without a slot
-    "422753-fighter5": ["skill-2: additional-lore taken 2"],
+    "422753-fighter5": [],
     "477013-fighter4-archer": [],
   };
 
