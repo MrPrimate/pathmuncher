@@ -86,6 +86,13 @@
       prompts: [],
       knownGaps: [],
     },
+    "jack-necromancer9": {
+      // the others are sections of Basic Undead Benefits and Necromancer Spellcasting
+      unmatchedSpecials: ["Thralls"],
+      // Grim Fascination's choice comes from the "Bone Fascination" special
+      prompts: [],
+      knownGaps: [],
+    },
   };
 
   for (const [name, expectation] of Object.entries(EXPECTATIONS)) {

@@ -34,6 +34,8 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Impulse Junction)$/,
   /(.*) (Gate Junction:).*$/,
   /(.*) (Patron)$/,
+  // Necromancer's Grim Fascination: Pathbuilder's "Bone Fascination" is pf2e's "Bone"
+  /(.*) (Fascination)$/,
   // /(Fork) the Path/,
   // /(Expand) the Portal/,
 ];
@@ -374,6 +376,18 @@ export function SPECIAL_NAME_ADDITIONS(specials) {
     }
   }
   return newSpecials;
+}
+
+// rules terms the remaster renamed, which Pathbuilder still uses in feature names
+const REMASTER_TERMS = [
+  [/\bNegative\b/g, "Void"],
+  [/\bPositive\b/g, "Vitality"],
+];
+
+/** The name and its remastered form, if it has one: ["Negative Healing", "Void Healing"]. */
+export function remasterTermNames(name) {
+  const remastered = REMASTER_TERMS.reduce((result, [term, replacement]) => result.replace(term, replacement), name);
+  return remastered === name ? [name] : [name, remastered];
 }
 
 const NO_AUTO_CHOICE_LIST = [

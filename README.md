@@ -21,7 +21,7 @@ Import characters from Pathbuilder (or Hephaistos 2E) to Foundry Pathfinder 2e/S
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
 
-To use this module the users must have the CREATE ACTOR ability, as it creates temporary actors as part of the import process.
+To use this module the users must have the CREATE ACTOR ability, as it imports familiars as their own actors and saves a copy of the character if an import fails part way.
 
 ## Known Issues
 

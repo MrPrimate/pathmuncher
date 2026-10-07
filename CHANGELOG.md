@@ -1,3 +1,10 @@
+# Next up
+
+- Choices are now worked out without creating temporary actors.
+- The temp-folder settings have been removed.
+- Players without permission to delete actors can now import.
+- Imports are faster and produce much less console output.
+
 # 1.6.2
 
 - The Pathbuilder ID entry box only displayed six digits, hiding the seventh digit of newer Pathbuilder character IDs. The box now shows seven digits.

@@ -8,6 +8,7 @@ import {
   specialOnlyNameLookup,
   BAD_IGNORE_FEATURES,
   IGNORE_MULTISELECT,
+  remasterTermNames,
 } from "../data/features.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
@@ -136,7 +137,6 @@ export class Pathmuncher {
     this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
 
     this.tempActorCounter = 1;
-    this.tempActorFolderName = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Folders.PathmuncherTemp`);
   }
 
   async #loadCompendiumMatchers() {
@@ -1129,8 +1129,6 @@ export class Pathmuncher {
         choiceSet: foundry.utils.duplicate(cleansedChoiceSet),
       });
       throw err;
-    } finally {
-      await utils.deleteActor(tempActor);
     }
 
     logger.debug("Evaluate Choices failed", { choiceSet: cleansedChoiceSet, tempActor, document });
@@ -1190,8 +1188,6 @@ export class Pathmuncher {
         ruleEntry: foundry.utils.duplicate(cleansedRuleEntry),
       });
       throw err;
-    } finally {
-      await utils.deleteActor(tempActor);
     }
 
     logger.debug("Evaluate UUID failed", { choiceSet: cleansedRuleEntry, tempActor, document });
@@ -1247,8 +1243,6 @@ export class Pathmuncher {
         tempActor,
       });
       throw err;
-    } finally {
-      await utils.deleteActor(tempActor);
     }
   }
 
@@ -1281,8 +1275,6 @@ export class Pathmuncher {
         tempActor,
       });
       throw err;
-    } finally {
-      await utils.deleteActor(tempActor);
     }
   }
 
@@ -2580,8 +2572,9 @@ export class Pathmuncher {
             instance,
           });
         if (itemData) {
-          itemData.system.location.heightenedLevel = level;
-          if (itemData && !parsedSpell) {
+          // a spellbook spell prepared in a higher slot keeps its spellbook rank: the slot heightens it
+          if (!parsedSpell) {
+            itemData.system.location.heightenedLevel = level;
             spellNames[spell] = itemData._id;
             this.result.spells.push(itemData);
           }
@@ -2862,15 +2855,15 @@ export class Pathmuncher {
     includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false, continueOnProcessedRules = true,
     removePassedDocuments = false } = {},
   ) {
+    // an unsaved actor: rule elements are prepared on it like on a real one, without touching the world
     const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
+    actorData._id = foundry.utils.randomID();
     this.#setTempActorName(actorData);
-    await this.#setTempActorFolder(actorData);
 
     if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
       delete actorData.system.skills;
     }
 
-    const actor = await Actor.create(actorData, { renderSheet: false });
     const currentState = foundry.utils.duplicate(this.result);
 
     const currentItems = [
@@ -3020,32 +3013,13 @@ export class Pathmuncher {
         return i;
       });
 
-      logger.debug("Creating temp actor items", items);
-      await actor.createEmbeddedDocuments("Item", items, { keepId: true });
-      // for (const item of items) {
-      //   console.warn("Item", item);
-      //   await actor.createEmbeddedDocuments("Item", [item], { keepId: true });
-      // }
-      logger.debug("restoring selection rules to temp items", ruleUpdates);
-      await actor.updateEmbeddedDocuments("Item", ruleUpdates);
-
-      const itemUpdates = [];
-      for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
-        itemUpdates.push({
-          _id: `${key}`,
-          system: {
-            items: foundry.utils.deepClone(value),
-          },
-        });
-      }
-
-      logger.debug("Restoring temp item items");
-      await actor.updateEmbeddedDocuments("Item", itemUpdates);
-
+      this.#applyTempItemUpdates(items, ruleUpdates);
+      logger.debug("Temp actor items", items);
+      const actor = new Actor.implementation({ ...actorData, items });
       logger.debug("Final temp actor", actor);
+      return actor;
     } catch (err) {
       logger.error("Temp actor creation failed", {
-        actor,
         documents,
         thisData: foundry.utils.deepClone(this.result),
         actorData,
@@ -3053,21 +3027,26 @@ export class Pathmuncher {
         currentItems,
         this: this,
       });
+      throw err;
     }
-    return actor;
+  }
+
+  /** Puts the selection rules and granted item lists straight onto the evaluation actor's item data. */
+  #applyTempItemUpdates(items, ruleUpdates) {
+    for (const update of ruleUpdates) {
+      const item = items.find((i) => i._id === update._id);
+      if (item) item.system.rules = update.system.rules;
+    }
+    for (const [id, grantedItems] of Object.entries(this.autoAddedFeatureItems)) {
+      const item = items.find((i) => i._id === id);
+      if (item) item.system.items = foundry.utils.deepClone(grantedItems);
+    }
   }
 
   #setTempActorName(actorData) {
     const formattedNum = this.tempActorCounter.toString().padStart(4, "0");
     actorData.name = `Mr Temp (${this.result.character.name}) ${formattedNum}`;
     this.tempActorCounter += 1;
-  }
-
-  async #setTempActorFolder(actorData) {
-    if (!utils.setting("USE_TEMP_FOLDER")) return;
-
-    let tempActorFolder = await utils.getOrCreateFolder(null, "Actor", this.tempActorFolderName);
-    actorData.folder = tempActorFolder?.id;
   }
 
   /**
@@ -3251,15 +3230,16 @@ export class Pathmuncher {
     if (this.options.addClass) await this.#createAndUpdateItemsWithRuleRestore(this.result.class);
     if (this.options.addLores) await this.#createAndUpdateItemsWithRuleRestore(this.result.lores);
 
-    const featNums = this.result.feats.length;
     if (this.options.addFeats) {
+      // one at a time, in order: the system evaluates a feat's choices against the items already on
+      // the actor (Psi Development's psi cantrip depends on The Tangible Dream), so a single batch
+      // makes it prompt with no options
+      const featCount = this.result.feats.length;
       for (const [i, feat] of this.result.feats.entries()) {
-        // console.warn(`creating ${feat.name}`, feat);
-        this.#statusUpdate(i, featNums, "Feats", "Eating");
+        this.#statusUpdate(i, featCount, "Feats", "Eating");
         await this.#createAndUpdateItemsWithRuleRestore([feat]);
       }
     }
-    // if (this.options.addFeats) await this.#createAndUpdateItemsWithRuleRestore(this.result.feats);
     if (this.options.addSpells) {
       this.#statusUpdate(3, 12, "Spells", "Eating");
       await this.#createAndUpdateItemsWithRuleRestore(this.result.casters);
@@ -3330,7 +3310,6 @@ export class Pathmuncher {
     await this.actor.update(this.result.character);
     await this.#createActorEmbeddedDocuments();
     await this.#restoreEmbeddedRuleLogic();
-    await utils.removeTempActors();
   }
 
   static ATTRIBUTE_NAMES = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
@@ -3340,8 +3319,13 @@ export class Pathmuncher {
    * need no item: the shared ignore lists (skills, "Spellbook", ...), attribute names, lores, and
    * spells Pathbuilder also lists as specials ("Studious Spell: Blur") when the spell was imported.
    */
-  getUnmatchedSpecials() {
-    const slug = (name) => Seasoning.slug(String(name ?? "").replace(/\s*\(.*?\)\s*/g, " ").trim());
+  static #specialSlug(name) {
+    return Seasoning.slug(String(name ?? "").replace(/\s*\(.*?\)\s*/g, " ").trim());
+  }
+
+  /** Specials no item was matched to, leaving out Pathbuilder's labels, lores and spells. */
+  #specialsWithoutItems() {
+    const slug = Pathmuncher.#specialSlug;
     const ignored = new Set([...Seasoning.IGNORED_FEATS(), ...Seasoning.IGNORED_SPECIALS(), ...Pathmuncher.ATTRIBUTE_NAMES]
       .map(slug));
     const lores = new Set((this.source?.lores ?? []).flatMap(([name]) => [slug(name), slug(`Lore: ${name}`)]));
@@ -3352,6 +3336,37 @@ export class Pathmuncher {
         && !BAD_IGNORE_FEATURES(b.details.name))
       .map((b) => b.details.originalName)
       .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
+  }
+
+  /** Item types whose descriptions can describe a special as one of their sections. */
+  static DESCRIBING_ITEM_TYPES = ["ancestry", "heritage", "background", "class", "feat", "action", "deity"];
+
+  /**
+   * Specials without an item of their own that a feature on the actor describes, under a heading or
+   * bold lead-in of the same name: Pathbuilder's "Immunity to Death Effects" is a section of Basic
+   * Undead Benefits, and its "Negative Healing" is that feature's "Void Healing". Grouped by the
+   * describing item: [{ uuid, name, specials: [{ name, text }] }]. Use once the actor is updated.
+   */
+  getDescribedSpecials() {
+    const sections = this.actor.items
+      .filter((item) => Pathmuncher.DESCRIBING_ITEM_TYPES.includes(item.type))
+      .flatMap((item) => Seasoning.describedSections(item.system.description?.value)
+        .map((section) => ({ ...section, item, slug: Pathmuncher.#specialSlug(section.term) })));
+    const origins = new Map();
+    for (const name of new Set(this.#specialsWithoutItems())) {
+      const slugs = remasterTermNames(name).map((n) => Pathmuncher.#specialSlug(n));
+      const section = sections.find((s) => slugs.includes(s.slug));
+      if (!section) continue;
+      if (!origins.has(section.item.uuid)) origins.set(section.item.uuid, { uuid: section.item.uuid, name: section.item.name, specials: [] });
+      origins.get(section.item.uuid).specials.push({ name, text: section.text });
+    }
+    return [...origins.values()];
+  }
+
+  /** Specials the report lists as unmatched: no item of their own, and not described by another. */
+  getUnmatchedSpecials() {
+    const described = new Set(this.getDescribedSpecials().flatMap((origin) => origin.specials.map((s) => s.name)));
+    return this.#specialsWithoutItems().filter((name) => !described.has(name));
   }
 
   /**
@@ -3369,6 +3384,7 @@ export class Pathmuncher {
           && !BAD_IGNORE_FEATURES(b.details.name))
         .map((b) => b.details.name)
       : [];
+    const described = this.options.addFeats ? this.getDescribedSpecials() : [];
     const groups = [
       ["class", bad("class", "addClass")],
       ["ancestry", bad("ancestry", "addAncestry")],
@@ -3377,6 +3393,7 @@ export class Pathmuncher {
       ["deity", bad("deity", "addDeity", (b) => b.pbName && b.pbName !== "Not set")],
       ["feat", [...bad("feat", "addFeats"), ...unmatchedFeats]],
       ["special", this.options.addFeats ? this.getUnmatchedSpecials() : []],
+      ["described", described.flatMap((origin) => origin.specials.map((s) => s.name))],
       ["equipment", bad("equipment", "addEquipment")],
       ["weapon", bad("weapon", "addWeapons")],
       ["armor", bad("armor", "addArmor")],
@@ -3392,7 +3409,12 @@ export class Pathmuncher {
       spellcasting: "Spellcasting", spell: "Spells", ritual: "Rituals", formula: "Formulas", familiar: "Familiars",
     };
     return groups
-      .map(([type, names]) => ({ type, label: game.i18n.localize(`pathmuncher.Labels.${labels[type]}`), names: [...new Set(names)] }))
+      .map(([type, names]) => ({
+        type,
+        label: game.i18n.localize(type === "described" ? "pathmuncher.Dialogs.Report.Described" : `pathmuncher.Labels.${labels[type]}`),
+        names: [...new Set(names)],
+        ...(type === "described" && { origins: described }),
+      }))
       .filter((group) => group.names.length > 0);
   }
 
@@ -3407,10 +3429,20 @@ export class Pathmuncher {
 
     ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
     const escape = foundry.utils.escapeHTML;
-    const sections = report.map((group) => `<section class="pathmuncher-report-group">
+    const { enrichHTML } = foundry.applications.ux.TextEditor.implementation;
+    // specials another feature describes: a link to the feature, and each special's section on hover
+    const originList = async (origins) => (await Promise.all(origins.map(async (origin) => `<li class="pathmuncher-report-origin">
+        ${await enrichHTML(`@UUID[${origin.uuid}]{${origin.name}}`)}
+        <ul>${origin.specials.map((s) => `<li class="pathmuncher-report-described" data-tooltip="${escape(s.text)}">${escape(s.name)}</li>`).join("")}</ul>
+      </li>`))).join("");
+    const groupBody = async (group) => (group.origins
+      ? `<p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.DescribedHint")}</p>
+        <ul>${await originList(group.origins)}</ul>`
+      : `<ul>${group.names.map((name) => `<li>${escape(name)}</li>`).join("")}</ul>`);
+    const sections = (await Promise.all(report.map(async (group) => `<section class="pathmuncher-report-group">
         <h4>${escape(group.label)} <span class="pathmuncher-report-count">${group.names.length}</span></h4>
-        <ul>${group.names.map((name) => `<li>${escape(name)}</li>`).join("")}</ul>
-      </section>`).join("");
+        ${await groupBody(group)}
+      </section>`))).join("");
     await foundry.applications.api.DialogV2.prompt({
       window: { title: "pathmuncher.Dialogs.Report.Title", icon: "fas fa-clipboard-list" },
       classes: ["pathmuncher", "pathmuncher-report"],

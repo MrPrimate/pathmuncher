@@ -200,7 +200,6 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ProcessingFailed`, {
         error: error.message ?? error,
       }));
-      await utils.removeTempActors();
       return null;
     }
     logger.debug("Post processed character", pathmuncher);
@@ -212,7 +211,6 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       keepItemIds = await PathmuncherImporter.#chooseItemsToKeep(handAdded);
       if (keepItemIds === null) {
         ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
-        await utils.removeTempActors();
         return null;
       }
     }
@@ -230,7 +228,6 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
         error: error.message ?? error,
         backup: backup?.name ?? "",
       }), { permanent: true });
-      await utils.removeTempActors();
       return null;
     }
 

@@ -7,6 +7,7 @@ import { Seasoning } from "../app/Seasoning.js";
 import CONSTANTS from "../constants.js";
 import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT } from "../data/equipment.js";
 import { FEAT_RENAME_MAP } from "../data/features.js";
+import { spellRename } from "../data/spells.js";
 import utils from "../utils.js";
 
 export function registerAPI() {
@@ -22,6 +23,7 @@ export function registerAPI() {
       equipment: EQUIPMENT_RENAME_MAP,
       restrictedEquipment: RESTRICTED_EQUIPMENT,
       feats: FEAT_RENAME_MAP(),
+      spellRename,
     },
     utils: utils,
     CONSTANTS,

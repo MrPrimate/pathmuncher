@@ -31,6 +31,43 @@
     }
   });
 
+  test("report: specials that are sections of another feature are grouped under it", async (t) => {
+    const exportJson = fixture("jack-necromancer9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "described");
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    const described = Object.fromEntries(pm.getDescribedSpecials().map((o) => [o.name, o.specials.map((s) => s.name)]));
+    t.deepEqual(described, {
+      // "Negative" specials are the remastered "Void" sections
+      "Basic Undead Benefits": ["Negative Healing", "Negative Survival", "Immunity to Death Effects", "Disease and Poison Protection", "Undead Hunger"],
+      "Necromancer Spellcasting": ["Dirge"],
+    }, "described specials by feature");
+    const healing = pm.getDescribedSpecials()[0].specials[0];
+    t.ok(healing.text.startsWith("You are damaged by"), healing.text);
+    t.deepEqual(pm.getUnmatchedSpecials(), ["Thralls"], "still unmatched");
+
+    let html = null;
+    const hook = Hooks.on("renderDialogV2", (dialog) => {
+      if (!dialog.options.classes?.includes("pathmuncher-report")) return;
+      html = dialog.element.querySelector(".window-content");
+      setTimeout(() => dialog.element.querySelector("button[data-action='ok']")?.click(), 20);
+    });
+    t.cleanup(() => Hooks.off("renderDialogV2", hook));
+    await pm.postImportCheck();
+    await pmt.sleep(300);
+
+    t.ok(html, "no report dialog");
+    const origins = [...html.querySelectorAll(".pathmuncher-report-origin")];
+    const undead = origins.find((li) => li.querySelector("a.content-link")?.textContent.trim() === "Basic Undead Benefits");
+    t.ok(undead, "a link to Basic Undead Benefits");
+    t.equal(undead.querySelector("a.content-link").dataset.uuid, actor.items.find((i) => i.slug === "basic-undead-benefits").uuid, "links the actor's item");
+    const hover = undead.querySelector(".pathmuncher-report-described[data-tooltip]");
+    t.equal(hover.textContent, "Negative Healing", "special listed under it");
+    t.ok(hover.dataset.tooltip.startsWith("You are damaged by"), "its section on hover");
+  });
+
   test("report: a dual class export warns and imports the primary class", async (t) => {
     const exportJson = fixture("314710-gunslinger1");
     exportJson.build.dualClass = "Fighter";
@@ -59,7 +96,6 @@
     const pm = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, {});
     pm.source = exportJson.build;
     await pm.processCharacter();
-    await game.modules.get("pathmuncher").api.utils.removeTempActors();
 
     const warnings = notes.filter((n) => n.type === "warning").map((n) => n.message);
     t.ok(warnings.some((m) => m.includes("Free Archetype")), JSON.stringify(warnings));
@@ -75,7 +111,6 @@
     const pm = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, {});
     pm.source = exportJson.build;
     await pm.processCharacter();
-    await game.modules.get("pathmuncher").api.utils.removeTempActors();
     t.deepEqual(notes.filter((n) => n.type === "warning" && (/archetype|ability boosts/i).test(n.message)), []);
   });
 
@@ -105,6 +140,5 @@
     t.equal(feat("Basic Thoughtform").isParent, true, "Basic Thoughtform is a parent");
     t.equal(feat("Warp Space").isChild, true, "Warp Space is a child");
     t.equal(feat("Nimble Elf").isParent, false, "a standard choice is not a parent");
-    await game.modules.get("pathmuncher").api.utils.removeTempActors();
   });
 })();

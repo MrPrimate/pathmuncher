@@ -98,12 +98,6 @@ const utils = {
     }
   },
 
-  async deleteActor(actor) {
-    if (actor.canUserModify(game.user, "delete")) {
-      await Actor.deleteDocuments([actor._id]);
-    }
-  },
-
   async removeTempActors() {
     const actorIds = game.actors
       .filter((a) =>

@@ -12,6 +12,7 @@ reuses ids, so the ones taken from issues are not necessarily the characters fir
 | `345816-guardian3.json` | Minotaur Guardian 3 | Custom Mixed Heritage; partial boost breakdown; shield; Free Archetype | issue #6 |
 | `422753-fighter5.json` | Kholo Fighter 5 | Free Archetype; Exemplar Dedication with ikon choices | issue #13 |
 | `477013-fighter4-archer.json` | Human Fighter 4 | Built for these tests on Pathbuilder 2e Web v110, core books only, 2026-10-07. No Free Archetype: Archer Dedication and Quick Shot taken in class slots; Natural Ambition (parent) granting Exacting Strike (child); Skilled Human's skill choice; Assurance (Athletics); Battle Medicine in a general slot | built |
+| `jack-necromancer9.json` | Skeleton Necromancer 9 | Grim Fascination's choice only in specials, under Pathbuilder's name ("Bone Fascination" for pf2e's "Bone"); spellbook spells prepared in higher slots (Fear at rank 3); Veil, a remastered name; Free Archetype | Jack, 2026-10-07 (no export id) |
 
 ## What the exports show about Pathbuilder's format
 

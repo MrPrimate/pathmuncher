@@ -273,6 +273,35 @@
   padding-left: 1.25rem;
 }
 
+.pathmuncher-report-group .hint {
+  margin: 0 0 0.25rem;
+}
+
+/* specials another feature describes: the feature's link, then its sections */
+
+.pathmuncher-report-origin {
+  list-style: none;
+  margin-left: -1.25rem;
+}
+
+.pathmuncher-report-origin + .pathmuncher-report-origin {
+  margin-top: 0.25rem;
+}
+
+.pathmuncher-report-origin ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.75rem;
+  padding: 0.15rem 0 0 1.5rem;
+}
+
+.pathmuncher-report-described {
+  list-style: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
 /* ----------------------------------------------------- compendium selector */
 
 .pathmuncher-compendium-body {

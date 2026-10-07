@@ -526,6 +526,7 @@
       if ((coins[c] ?? 0) !== (build.money?.[c] ?? 0)) problems.push(`money ${c} ${coins[c] ?? 0} (expected ${build.money?.[c] ?? 0})`);
     }
 
+    const { spellRename } = game.modules.get("pathmuncher").api.data;
     const entries = actor.spellcasting.regular;
     for (const caster of build.spellCasters ?? []) {
       if (caster.magicTradition === "focus") continue;
@@ -544,7 +545,8 @@
       const have = new Map();
       for (const s of entry.spells) for (const v of variants(s.name)) if (!have.has(v)) have.set(v, s);
       for (const [rank, name] of spells) {
-        const spell = [...variants(name)].map((v) => have.get(v)).find(Boolean);
+        // remastered names, e.g. Veil is Illusory Disguise
+        const spell = [...variants(name, spellRename(name))].map((v) => have.get(v)).find(Boolean);
         if (!spell) problems.push(`spell missing: ${name} (${caster.name} rank ${rank})`);
         else if (rank && (spell.system.location.heightenedLevel ?? spell.rank) !== rank) {
           problems.push(`spell ${name}: rank ${spell.system.location.heightenedLevel ?? spell.rank} (expected ${rank})`);

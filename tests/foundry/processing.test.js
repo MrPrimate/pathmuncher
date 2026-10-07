@@ -1,4 +1,4 @@
-// Processing details: unmatched containers, the deep-dive setting.
+// Processing details: unmatched containers, the deep-dive setting, choices, prepared slots.
 (() => {
   const { test } = pmt;
   const fixture = (name) => foundry.utils.deepClone(pmt.fixtures[name]);
@@ -36,6 +36,40 @@
     t.deepEqual(prompts.map((p) => p.item), [], "prompts");
     t.equal(actor.skills.athletics.rank, 1, "athletics");
     t.equal(actor.skills.acrobatics.rank, 0, "acrobatics");
+  });
+
+  test("processing: a class feature choice named with Pathbuilder's suffix is not prompted", async (t) => {
+    // the Necromancer's Grim Fascination offers "Bone"; Pathbuilder lists it as the special "Bone Fascination"
+    const exportJson = fixture("jack-necromancer9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "grim fascination");
+
+    await pmt.importBuild(actor, exportJson);
+
+    t.deepEqual(prompts.map((p) => p.item), [], "prompts");
+    const grim = actor.items.find((i) => i.slug === "grim-fascination");
+    const bone = actor.items.find((i) => i.slug === "bone");
+    t.ok(bone, "Bone on the actor");
+    t.equal(bone.flags.pf2e.grantedBy?.id, grim.id, "granted by Grim Fascination");
+  });
+
+  test("processing: a spellbook spell prepared in a higher slot keeps its spellbook rank", async (t) => {
+    // Fear is a rank 1 spell in the spellbook, prepared in a rank 3 slot
+    const exportJson = fixture("jack-necromancer9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "heightened slots");
+
+    await pmt.importBuild(actor, exportJson);
+
+    const entry = actor.spellcasting.regular.find((e) => e.name === "Necromancer");
+    const fear = entry.spells.find((s) => s.slug === "fear");
+    t.equal(fear.rank, 1, "spellbook rank");
+    const groups = (await entry.getSheetData()).groups;
+    const cast = (id, slug) => groups.find((g) => g.id === id).active.find((a) => a?.spell.slug === slug)?.castRank;
+    t.equal(cast(3, "fear"), 3, "Fear cast from its rank 3 slot");
+    t.equal(cast(5, "summon-undead"), 5, "Summon Undead cast from its rank 5 slot");
   });
 
   test("processing: a skill choice the proficiencies cannot settle is still prompted", async (t) => {

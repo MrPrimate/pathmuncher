@@ -28,6 +28,38 @@ export class Seasoning {
     return FEAT_RENAME_MAP(name);
   }
 
+  /** Plain text of description HTML, keeping the labels of enrichers such as @UUID[...]{label}. */
+  static descriptionText(html) {
+    return html
+      .replace(/@\w+\[(?:[^[\]]|\[[^\]]*\])*\](?:\{([^}]*)\})?/g, (_, label) => label ?? "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * The sections of an item description that a heading or a bold lead-in names, as { term, text }.
+   * Basic Undead Benefits' "<p><strong>Void Healing:</strong> You are damaged by ...</p>" is
+   * { term: "Void Healing", text: "You are damaged by ..." }. A heading's section runs to the next
+   * heading. Bold text later in a paragraph is emphasis, not a section, so it is left out.
+   */
+  static describedSections(html = "") {
+    const sections = [];
+    for (const match of html.matchAll(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi)) {
+      const rest = html.slice(match.index + match[0].length);
+      const end = rest.search(/<h[1-6][\s>]/i);
+      sections.push({ term: Seasoning.descriptionText(match[2]), text: Seasoning.descriptionText(end === -1 ? rest : rest.slice(0, end)) });
+    }
+    for (const match of html.matchAll(/<(p|li)(?:\s[^>]*)?>\s*<(strong|b)>([\s\S]*?)<\/\2>([\s\S]*?)<\/\1>/gi)) {
+      sections.push({
+        term: Seasoning.descriptionText(match[3]).replace(/[:.]$/, "").trim(),
+        text: Seasoning.descriptionText(match[4]).replace(/^[:.]\s*/, ""),
+      });
+    }
+    return sections.filter((section) => section.term);
+  }
+
   static EQUIPMENT_RENAME_MAP(name) {
     return EQUIPMENT_RENAME_MAP(name);
   }
