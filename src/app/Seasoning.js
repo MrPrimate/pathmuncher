@@ -110,26 +110,54 @@ export class Seasoning {
     return "low";
   }
 
-  static getFoundryFeatLocation(pathbuilderFeatType, pathbuilderFeatLevel) {
-    if (pathbuilderFeatType === "Ancestry Feat") {
-      return `ancestry-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Class Feat") {
-      return `class-${pathbuilderFeatLevel}`;
-    } else if (["Mythic Feat", "Destiny Mythic Feat"].includes(pathbuilderFeatType)) {
-      return `mythic-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Skill Feat") {
-      return `skill-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "General Feat") {
-      return `general-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Background Feat") {
-      return `skill-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Archetype Feat") {
-      return `archetype-${pathbuilderFeatLevel}`;
-    } else if (pathbuilderFeatType === "Kineticist Feat") { // return as null for now
-      return null;
-    } else {
-      return null;
-    }
+  /**
+   * The feat slot (system.location) for a Pathbuilder feat, or null when it has none (bonus feats,
+   * feats granted by another choice). Pathbuilder's slot label (feat[4], parsed as featChoiceRef)
+   * says where the feat was taken: "Fighter Feat 4" (class), "Elf Feat 1" (ancestry, named for the
+   * ancestry or a versatile heritage), "Skill Feat 2", "General Feat 3", "Free Archetype 2", or a UUID
+   * for a Custom Feat Choice. Older exports have no labels, so the feat's type is used instead.
+   * Archetype feats only use archetype slots when the Free Archetype variant is on.
+   */
+  static getFoundryFeatLocation(feature, { className = null, freeArchetype = false } = {}) {
+    const { type, level, isChild } = feature;
+    const label = String(feature.featChoiceRef ?? "");
+    if (!type || !level || isChild) return null;
+    if ((/^[0-9a-f]{8}-[0-9a-f]{4}-/i).test(label)) return null;
+    return Seasoning.#featLocationFromLabel(label, type, { className, freeArchetype })
+      ?? Seasoning.#featLocationFromType(type, level, { freeArchetype });
+  }
+
+  static #featLocationFromLabel(label, type, { className, freeArchetype }) {
+    const match = label.match(/^(.+?) (?:Feat )?(\d+)$/);
+    if (!match) return null;
+    const [, kind, slotLevel] = match;
+    if (kind === "Free Archetype") return `${freeArchetype ? "archetype" : "class"}-${slotLevel}`;
+    if (["Mythic Feat", "Destiny Mythic Feat"].includes(type)) return `mythic-${slotLevel}`;
+    const group = {
+      Skill: "skill",
+      General: "general",
+      Class: "class",
+      Archetype: "class",
+    }[kind] ?? (kind === className ? "class" : "ancestry");
+    return `${group}-${slotLevel}`;
+  }
+
+  static #featLocationFromType(type, level, { freeArchetype }) {
+    const byType = {
+      "Ancestry Feat": "ancestry",
+      "Skill Feat": "skill",
+      "Background Feat": "skill",
+      "General Feat": "general",
+      "Mythic Feat": "mythic",
+      "Destiny Mythic Feat": "mythic",
+      "Archetype Feat": freeArchetype ? "archetype" : "class",
+      "Awarded Feat": null,
+      "Heritage": null,
+      "Kineticist Feat": null,
+    };
+    // anything else named "<X> Feat" is a class feat: "Class Feat", "Wizard Feat", "Cleric Feat"
+    const group = type in byType ? byType[type] : ((/^[\w' -]+ Feat$/).test(type) ? "class" : null);
+    return group ? `${group}-${level}` : null;
   }
 
   static getClassAdjustedSpecialNameLowerCase(name, className) {

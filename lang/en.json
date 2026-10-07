@@ -90,6 +90,16 @@
         "InvalidBuild": "This does not look like a Pathbuilder export, so nothing was changed. Paste the JSON from Pathbuilder's \"Export JSON\" option.",
         "ProcessingFailed": "Pathmuncher could not process this character, so nothing was changed: {error}",
         "ImportCancelled": "Import cancelled; nothing was changed.",
+        "VariantMismatch": {
+          "FreeArchetype": {
+            "BuildOnly": "This character was built with Free Archetype, but the variant is off in this world, so archetype feats are put in class feat slots where there is room. Turn on Free Archetype in the system settings before importing to keep them in archetype slots.",
+            "WorldOnly": "Free Archetype is on in this world, but this character was built without it, so its archetype slots will be empty."
+          },
+          "GradualBoosts": {
+            "BuildOnly": "This character was built with gradual ability boosts, but the variant is off in this world, so boosts taken since the last 5-level step will not apply. Turn on Gradual Ability Boosts in the system settings before importing.",
+            "WorldOnly": "Gradual ability boosts are on in this world, but this character was built without them; check its ability boosts after importing."
+          }
+        },
         "UpdateFailed": "Pathmuncher failed while updating {actor}: {error}. A copy of the character from before the import was saved as \"{backup}\".",
         "MissingItemsOpen": "The following could not be added. They may have a slightly different name or cannot be matched to a foundry item. You may be able to find them with a manual search. If it is marked as \"Special\", Pathmuncher has been unable to determine if it needs to do something with this. It might be a choice value, or may not be needed in the Foundry implementation.",
         "CompletedWithNotes": "Import completed with some notes.",

@@ -232,15 +232,53 @@ export class Pathmuncher {
   }
 
   #generateFoundryFeatLocation(document, feature) {
-    if (feature.type && feature.level) {
-      // const freeArchetypeVariant = game.settings.get("pf2e", "freeArchetypeVariant");
-      const location = Seasoning.getFoundryFeatLocation(feature.type, feature.level);
-      if (location && !this.usedLocations.has(location)) {
-        document.system.location = location;
-        // as the system records when a feat is dropped into a slot
-        foundry.utils.setProperty(document, "system.level.taken", parseInt(feature.level));
-        this.usedLocations.add(location);
-      }
+    const location = Seasoning.getFoundryFeatLocation(feature, {
+      className: this.source.class,
+      freeArchetype: Pathmuncher.#worldVariant("freeArchetypeVariant"),
+    });
+    if (location && !this.usedLocations.has(location)) {
+      document.system.location = location;
+      // as the system records when a feat is dropped into a slot
+      foundry.utils.setProperty(document, "system.level.taken", parseInt(location.split("-").pop()));
+      this.usedLocations.add(location);
+    }
+  }
+
+  static #worldVariant(setting) {
+    return game.system.id === "pf2e" && game.settings.settings.has(`pf2e.${setting}`)
+      ? game.settings.get("pf2e", setting) === true
+      : false;
+  }
+
+  /**
+   * The variant rules a Pathbuilder build was made with. Free Archetype shows in slot labels
+   * ("Free Archetype 2"); exports without labels show it as an archetype feat and a class feat taken
+   * at the same level. Gradual boosts show as levelled boosts outside 1/5/10/15/20.
+   */
+  static detectVariants(source) {
+    const feats = source.feats ?? [];
+    const hasLabels = feats.some((f) => f.length > 4);
+    const classFeatType = (type) => type === "Class Feat" || type === `${source.class} Feat`;
+    const freeArchetype = hasLabels
+      ? feats.some((f) => String(f[4] ?? "").startsWith("Free Archetype"))
+      : feats.some((f) => f[2] === "Archetype Feat" && feats.some((c) => classFeatType(c[2]) && c[3] === f[3]));
+    const boostLevels = Object.keys(source.abilities?.breakdown?.mapLevelledBoosts ?? {});
+    const gradualBoosts = boostLevels.some((l) => !["1", "5", "10", "15", "20"].includes(l));
+    return { freeArchetype, gradualBoosts };
+  }
+
+  /** Warns when the build used variant rules the world does not (or the other way round). */
+  #warnVariantMismatch() {
+    if (game.system.id !== "pf2e") return;
+    const build = Pathmuncher.detectVariants(this.source);
+    const mismatches = [
+      ["freeArchetype", "freeArchetypeVariant", "FreeArchetype"],
+      ["gradualBoosts", "gradualBoostsVariant", "GradualBoosts"],
+    ].filter(([key, setting]) => build[key] !== Pathmuncher.#worldVariant(setting));
+    for (const [key, , label] of mismatches) {
+      ui.notifications.warn(game.i18n.localize(
+        `${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.VariantMismatch.${label}.${build[key] ? "BuildOnly" : "WorldOnly"}`,
+      ), { permanent: true });
     }
   }
 
@@ -3009,6 +3047,7 @@ export class Pathmuncher {
     this.processed = false;
     if (!this.source) return false;
     Pathmuncher.normaliseSource(this.source);
+    this.#warnVariantMismatch();
     await this.#prepare();
     this.#statusUpdate(1, 12, "Character");
     await this.#processCore();

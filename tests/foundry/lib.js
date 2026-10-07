@@ -85,9 +85,7 @@
 
   /** Sets the pf2e variant rules a Pathbuilder build was made with; restored after the test. */
   pmt.useBuildVariants = async (ctx, build) => {
-    const fa = (build.feats ?? []).some((f) => String(f[4] ?? "").includes("Free Archetype"));
-    const levels = Object.keys(build.abilities?.breakdown?.mapLevelledBoosts ?? {});
-    const gradual = levels.some((l) => !["1", "5", "10", "15", "20"].includes(l));
+    const { freeArchetype: fa, gradualBoosts: gradual } = api().Pathmuncher.detectVariants(build);
     const before = {
       freeArchetypeVariant: game.settings.get("pf2e", "freeArchetypeVariant"),
       gradualBoostsVariant: game.settings.get("pf2e", "gradualBoostsVariant"),
@@ -105,18 +103,21 @@
    * option whose label matches a name in the build, else the first. Returns the log of prompts.
    */
   pmt.answerPrompts = (ctx, build) => {
-    const names = new Set([
-      ...(build.feats ?? []).flatMap((f) => [f[0], f[1]]),
-      ...(build.specials ?? []),
-      ...(build.lores ?? []).map((l) => l[0]),
-      build.heritage, build.ancestry, build.background, build.class, build.deity,
-      ...Object.entries(build.proficiencies ?? {}).filter(([, v]) => v > 0).map(([k]) => k),
-    ].filter(Boolean).map(sluggify));
+    // names the build chose, most specific first: a heritage's skill choice is in specials
+    // ("Medicine"), feat extras are other feats' choices (Assurance's "Athletics"), and
+    // proficiencies list every trained skill
+    const tiers = [
+      build.specials ?? [],
+      [...(build.feats ?? []).map((f) => f[0]), build.heritage, build.ancestry, build.background, build.class, build.deity],
+      [...(build.feats ?? []).map((f) => f[1]), ...(build.lores ?? []).map((l) => l[0])],
+      Object.entries(build.proficiencies ?? {}).filter(([, v]) => v > 0).map(([k]) => k),
+    ].map((names) => new Set(names.filter(Boolean).map(sluggify)));
     const prompts = [];
     const hook = Hooks.on("renderApplicationV2", (app) => {
       if (!Array.isArray(app.choices) || typeof app.resolveSelection !== "function" || app.__pmtAnswered) return;
       app.__pmtAnswered = true;
-      const match = app.choices.find((c) => names.has(sluggify(game.i18n.localize(c.label))));
+      const label = (c) => sluggify(game.i18n.localize(c.label));
+      const match = tiers.map((names) => app.choices.find((c) => names.has(label(c)))).find(Boolean);
       const pick = match ?? app.choices[0] ?? null;
       prompts.push({ item: app.item?.name, prompt: game.i18n.localize(app.prompt ?? ""), picked: pick && game.i18n.localize(pick.label), matched: !!match });
       app.selection = pick;
@@ -348,7 +349,7 @@
    */
   pmt.compareWithBuild = (actor, build) => {
     const problems = [];
-    const fa = (build.feats ?? []).some((f) => String(f[4] ?? "").includes("Free Archetype"));
+    const fa = api().Pathmuncher.detectVariants(build).freeArchetype;
 
     const core = { ancestry: build.ancestry, heritage: build.heritage, background: build.background, class: build.class };
     if (build.deity && build.deity !== "Not set") core.deity = build.deity;
@@ -402,7 +403,8 @@
       if (t.endsWith("feat") && t !== "awarded feat") return "class";
       return null;
     };
-    for (const [name, extra, type, level, label] of build.feats ?? []) {
+    for (const featTuple of build.feats ?? []) {
+      const [name, extra, type, level, label] = featTuple;
       if (!name || name === "Not Selected") continue;
       // a UUID slot label is Pathbuilder's "Custom Feat Choice": an extra feat, so a bonus feat
       const isCustomChoice = (/^[0-9a-f]{8}-[0-9a-f]{4}-/).test(String(label ?? ""));
@@ -414,7 +416,7 @@
         continue;
       }
       const group = [...vs].map((v) => groups.get(v)).find(Boolean);
-      const expected = isCustomChoice ? "bonus" : expectedGroup(type);
+      const expected = isCustomChoice ? "bonus" : (pmt.pathbuilderSlot(featTuple)?.groupId ?? expectedGroup(type));
       if (feat.flags.pf2e?.grantedBy || group?.endsWith(":child")) continue;
       if (group === "bonus" && expected !== "bonus") problems.push(`feat in bonus feats: ${name} [${type} ${level}] (expected ${expected})`);
       else if (expected && group !== expected) problems.push(`feat in ${group} group: ${name} [${type} ${level}] (expected ${expected})`);

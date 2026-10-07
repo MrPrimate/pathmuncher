@@ -43,6 +43,40 @@
     t.ok(notes.some((n) => n.type === "warning" && n.message.includes("dual class")), JSON.stringify(notes));
   });
 
+  test("report: a build made with variant rules the world lacks warns about each", async (t) => {
+    // the Magus was built with Free Archetype and gradual boosts
+    const exportJson = fixture("315329-magus9");
+    const before = ["freeArchetypeVariant", "gradualBoostsVariant"].map((k) => [k, game.settings.get("pf2e", k)]);
+    t.cleanup(async () => {
+      for (const [k, v] of before) await game.settings.set("pf2e", k, v);
+    });
+    for (const [k] of before) await game.settings.set("pf2e", k, false);
+    pmt.answerPrompts(t, exportJson.build);
+    const notes = pmt.captureNotifications(t);
+    const actor = await pmt.actor(t, "variants");
+    const pm = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, {});
+    pm.source = exportJson.build;
+    await pm.processCharacter();
+    await game.modules.get("pathmuncher").api.utils.removeTempActors();
+
+    const warnings = notes.filter((n) => n.type === "warning").map((n) => n.message);
+    t.ok(warnings.some((m) => m.includes("Free Archetype")), JSON.stringify(warnings));
+    t.ok(warnings.some((m) => m.includes("gradual ability boosts")), JSON.stringify(warnings));
+  });
+
+  test("report: a build whose variant rules match the world does not warn", async (t) => {
+    const exportJson = fixture("315329-magus9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const notes = pmt.captureNotifications(t);
+    const actor = await pmt.actor(t, "variants match");
+    const pm = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, {});
+    pm.source = exportJson.build;
+    await pm.processCharacter();
+    await game.modules.get("pathmuncher").api.utils.removeTempActors();
+    t.deepEqual(notes.filter((n) => n.type === "warning" && (/archetype|ability boosts/i).test(n.message)), []);
+  });
+
   test("importer: the blended slots option shows its own saved value", async (t) => {
     const { ACTOR_FLAGS } = game.modules.get("pathmuncher").api.CONSTANTS;
     const actor = await pmt.actor(t, "blended", {

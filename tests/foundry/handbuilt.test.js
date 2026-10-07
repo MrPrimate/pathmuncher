@@ -11,6 +11,7 @@
     // the build has Additional Lore twice (granted by Kholo Lore, and as the level 2 skill feat);
     // pathmuncher creates the second one without a slot
     "422753-fighter5": ["skill-2: additional-lore taken 2"],
+    "477013-fighter4-archer": [],
   };
 
   for (const [name, known] of Object.entries(KNOWN_DIFFERENCES)) {

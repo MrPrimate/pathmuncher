@@ -1,0 +1,232 @@
+{
+  "success": true,
+  "build": {
+    "name": "Unknown Adventurer",
+    "class": "Fighter",
+    "dualClass": null,
+    "level": 4,
+    "xp": 0,
+    "ancestry": "Human",
+    "heritage": "Skilled Human",
+    "background": "Barkeep",
+    "alignment": "N",
+    "gender": "Not set",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 2,
+    "sizeName": "Medium",
+    "keyability": "str",
+    "languages": [
+      "None selected"
+    ],
+    "rituals": [],
+    "resistances": [],
+    "inventorMods": [],
+    "abilities": {
+      "str": 16,
+      "dex": 12,
+      "con": 12,
+      "int": 10,
+      "wis": 10,
+      "cha": 10,
+      "breakdown": {
+        "ancestryFree": [
+          "Str",
+          "Dex"
+        ],
+        "ancestryBoosts": [],
+        "ancestryFlaws": [],
+        "backgroundBoosts": [
+          "Con",
+          "Str"
+        ],
+        "classBoosts": [
+          "Str"
+        ],
+        "mapLevelledBoosts": {}
+      }
+    },
+    "attributes": {
+      "ancestryhp": 8,
+      "classhp": 10,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 4,
+      "heavy": 2,
+      "medium": 2,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 2,
+      "martial": 4,
+      "simple": 4,
+      "unarmed": 4,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 0,
+      "castingPrimal": 0,
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 2,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 2,
+      "intimidation": 0,
+      "medicine": 2,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Shield Block",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Hobnobber",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Skilled Human",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Double Slice",
+        null,
+        "Class Feat",
+        1,
+        "Fighter Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Natural Ambition",
+        null,
+        "Ancestry Feat",
+        1,
+        "Human Feat 1",
+        "parentChoice",
+        null
+      ],
+      [
+        "Exacting Strike",
+        null,
+        "Class Feat",
+        1,
+        "Natural Ambition Class FeatHuman Feat 1",
+        "childChoice",
+        "Human Feat 1"
+      ],
+      [
+        "Assurance",
+        "Athletics",
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Archer Dedication",
+        null,
+        "Class Feat",
+        2,
+        "Fighter Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Battle Medicine",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Hefty Hauler",
+        null,
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Quick Shot",
+        null,
+        "Class Feat",
+        4,
+        "Fighter Feat 4",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Reactive Strike",
+      "Medicine",
+      "Bravery",
+      "Skilled Human"
+    ],
+    "lores": [
+      [
+        "Alcohol",
+        2
+      ]
+    ],
+    "equipmentContainers": {},
+    "equipment": [],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [],
+    "money": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 15,
+      "pp": 0
+    },
+    "armor": [],
+    "spellCasters": [],
+    "focusPoints": 0,
+    "focus": {},
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 6,
+      "acAbilityBonus": 1,
+      "acItemBonus": 0,
+      "acTotal": 17,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}
