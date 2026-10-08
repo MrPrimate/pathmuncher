@@ -146,7 +146,9 @@
         "Title": "Pathmuncher | Import notes",
         "Intro": "Pathmuncher could not match these to a Foundry item. They may be named differently in the compendiums, so try a manual search. Specials are Pathbuilder notes that may be a choice already made on another item, or need nothing in Foundry.",
         "Described": "Part of another feature",
-        "DescribedHint": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it."
+        "DescribedHint": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
+        "Rules": "Rules to check",
+        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added."
       }
     },
     "Importer": {

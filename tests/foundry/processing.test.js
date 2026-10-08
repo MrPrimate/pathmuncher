@@ -220,4 +220,79 @@
 
     t.deepEqual(pmt.itemKeys(off), pmt.itemKeys(on), "items");
   });
+
+  test("processing: a rule the system's code fails on is left to the system and reported", async (t) => {
+    // pf2e's ChoiceSet code throws for Grim Fascination while pathmuncher works out its choice
+    const exportJson = fixture("jack-necromancer9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "failed rule");
+    const ChoiceSet = game.pf2e.RuleElements.all.ChoiceSet;
+    const inflateChoices = ChoiceSet.prototype.inflateChoices;
+    ChoiceSet.prototype.inflateChoices = function (...args) {
+      if (this.item?.slug === "grim-fascination") throw new Error("PMTEST rule failure");
+      return inflateChoices.apply(this, args);
+    };
+    t.cleanup(() => {
+      ChoiceSet.prototype.inflateChoices = inflateChoices;
+    });
+
+    const pm = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, {});
+    pm.source = foundry.utils.deepClone(exportJson.build);
+    t.ok(await pm.processCharacter(), "processed");
+    // the system's own prompt, when the item is created, works as normal
+    // eslint-disable-next-line require-atomic-updates
+    ChoiceSet.prototype.inflateChoices = inflateChoices;
+    await pm.updateActor();
+
+    t.deepEqual(pm.getImportReport().find((g) => g.type === "rule")?.names, ["Grim Fascination"], "reported");
+    t.ok(prompts.some((p) => p.item === "Grim Fascination"), "the system asked for the choice");
+    t.ok(actor.items.some((i) => i.slug === "grim-fascination"), "Grim Fascination on the actor");
+  });
+
+  test("processing: an Adventurer's Pack is a backpack holding its contents", async (t) => {
+    const exportJson = fixture("304883-thaumaturge1");
+    exportJson.build.equipment.push(["Adventurer's Pack", 1]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "adventurers pack");
+
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    // the build has its own bedroll, torch and waterskin; chalk is only in the pack
+    const pack = actor.itemTypes.backpack.find((b) => b.contents.some((i) => i.slug === "chalk"));
+    t.ok(pack, "a backpack with chalk in it");
+    t.deepEqual(pack.contents.map((i) => `${i.slug} ${i.quantity}`).sort(), [
+      "bedroll 1", "chalk 10", "flint-and-steel 1", "rations 14", "rope 1", "torch 5", "waterskin 1",
+    ], "contents");
+    t.ok(!pm.getImportReport().some((g) => g.names.includes("Adventurer's Pack")), "not reported");
+  });
+
+  test("processing: an Adventurer's Pack without a backpack to put it in is reported, not fatal", async (t) => {
+    // as on sf2e, whose equipment has no backpack
+    const plain = fixture("304883-thaumaturge1");
+    const exportJson = fixture("304883-thaumaturge1");
+    exportJson.build.equipment.push(["Adventurer's Pack", 1]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const without = await pmt.actor(t, "no pack");
+    await pmt.importBuild(without, plain);
+    const actor = await pmt.actor(t, "no backpack");
+    const pack = game.packs.get("pf2e.equipment-srd");
+    const getIndex = pack.getIndex;
+    pack.getIndex = async function (...args) {
+      return (await getIndex.apply(this, args)).filter((i) => i.system?.slug !== "backpack");
+    };
+    t.cleanup(() => {
+      pack.getIndex = getIndex;
+    });
+
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    t.ok(pm.getImportReport().find((g) => g.type === "equipment")?.names.includes("Adventurer's Pack"), "reported");
+    // the build lists the pack's contents as well, so nothing is added for the pack itself; the
+    // build's own Backpack can't be found either while the index hides it
+    const keys = (a) => pmt.itemKeys(a).filter((key) => !key.startsWith("backpack:"));
+    t.deepEqual(keys(actor), keys(without), "items");
+  });
 })();

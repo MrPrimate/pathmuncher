@@ -37,6 +37,16 @@ globalThis.game = {
   settings: { get: () => undefined },
   system: { id: "pf2e" },
   modules: new Map(),
+  packs: new Map(),
+  // a simpler sluggify than the system's: enough for the names the tests use
+  pf2e: {
+    system: {
+      sluggify: (text, { camel = null } = {}) => {
+        const slug = String(text).toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        return camel === "dromedary" ? slug.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase()) : slug;
+      },
+    },
+  },
 };
 
 const notifications = [];

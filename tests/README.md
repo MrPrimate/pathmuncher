@@ -75,6 +75,9 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - Pathbuilder's awarded feats repeated in specials are created once.
   - A class feature the class lists under another name (the Champion's "Weapon Mastery") is matched.
   - A spellbook spell prepared in a higher slot keeps its spellbook rank.
+  - A rule the system's code throws on is left for the system to apply, and reported.
+  - An Adventurer's Pack is a backpack holding its contents, and is reported when there is no
+    backpack (sf2e).
 - `reporting.test.js`: what the user is told and shown.
   - The post-import report lists unmatched specials but not Pathbuilder's labels.
   - Specials that are a section of another feature's description are grouped under that feature,

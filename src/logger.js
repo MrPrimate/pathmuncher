@@ -1,77 +1,42 @@
 import CONSTANTS from "./constants.js";
 import utils from "./utils.js";
 
+const LOG_LEVELS = ["VERBOSE", "DEBUG", "INFO", "WARN", "ERR", "OFF"];
+
+// the console method for each level: there is no console.verbose, so verbose goes to debug
+const CONSOLE_METHODS = {
+  VERBOSE: "debug",
+  DEBUG: "debug",
+  INFO: "info",
+  WARN: "warn",
+  ERR: "error",
+};
+
 const logger = {
-  _showMessage: (logLevel, data) => {
-    if (!logLevel || !data || typeof logLevel !== "string") {
-      return false;
-    }
-
+  /** Whether messages at this level are shown with the current log level setting. */
+  enabled: (logLevel) => {
+    if (typeof logLevel !== "string") return false;
     const setting = utils.setting("LOG_LEVEL");
-    const logLevels = ["VERBOSE", "DEBUG", "INFO", "WARN", "ERR", "OFF"];
-    const logLevelIndex = logLevels.indexOf(logLevel.toUpperCase());
-    if (setting == "OFF" || logLevelIndex === -1 || logLevelIndex < logLevels.indexOf(setting)) {
-      return false;
-    }
-    return true;
+    const logLevelIndex = LOG_LEVELS.indexOf(logLevel.toUpperCase());
+    return setting !== "OFF" && logLevelIndex !== -1 && logLevelIndex >= LOG_LEVELS.indexOf(setting);
   },
+
+  /**
+   * Logs a message and its payload. A payload given as a function is only called when the message
+   * is shown, so costly payloads (deep clones of documents) cost nothing at quieter log levels.
+   */
   log: (logLevel, ...data) => {
-    if (!logger._showMessage(logLevel, data)) {
-      return;
-    }
+    if (data.length === 0 || !logger.enabled(logLevel)) return;
 
-    logLevel = logLevel.toUpperCase();
-
-    let msg = "No logging message provided.  Please see the payload for more information.";
-    let payload = data.slice();
-    if (data[0] && typeof (data[0] == "string")) {
-      msg = data[0];
-      if (data.length > 1) {
-        payload = data.slice(1);
-      } else {
-        payload = null;
-      }
-    }
-    msg = `${CONSTANTS.MODULE_NAME} | ${logLevel} > ${msg}`;
-    switch (logLevel) {
-      case "VERBOSE":
-        if (payload) {
-          console.verbose(msg, ...payload); // eslint-disable-line no-console
-        } else {
-          console.verbose(msg); // eslint-disable-line no-console
-        }
-        break;
-      case "DEBUG":
-        if (payload) {
-          console.debug(msg, ...payload); // eslint-disable-line no-console
-        } else {
-          console.debug(msg); // eslint-disable-line no-console
-        }
-        break;
-      case "INFO":
-        if (payload) {
-          console.info(msg, ...payload); // eslint-disable-line no-console
-        } else {
-          console.info(msg); // eslint-disable-line no-console
-        }
-        break;
-      case "WARN":
-        if (payload) {
-          console.warn(msg, ...payload); // eslint-disable-line no-console
-        } else {
-          console.warn(msg); // eslint-disable-line no-console
-        }
-        break;
-      case "ERR":
-        if (payload) {
-          console.error(msg, ...payload); // eslint-disable-line no-console
-        } else {
-          console.error(msg); // eslint-disable-line no-console
-        }
-        break;
-      default:
-        break;
-    }
+    const level = logLevel.toUpperCase();
+    const [message, ...rest] = data;
+    const msg = typeof message === "string"
+      ? message
+      : "No logging message provided.  Please see the payload for more information.";
+    const payload = (typeof message === "string" ? rest : data)
+      .map((value) => (typeof value === "function" ? value() : value));
+    // eslint-disable-next-line no-console
+    console[CONSOLE_METHODS[level]](`${CONSTANTS.MODULE_NAME} | ${level} > ${msg}`, ...payload);
   },
 
   verbose: (...data) => {
