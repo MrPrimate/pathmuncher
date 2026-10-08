@@ -15,7 +15,9 @@ npm test
 This uses Node's built-in test runner (Node 22+), so it needs no extra dependencies.
 `tests/unit/setup.mjs` stubs the few Foundry globals touched at import time. Extend it when a test
 needs more. Use these for anything that doesn't need the pf2e system: parsing and normalising
-exports, name and slot mapping, and similar.
+exports, name and slot mapping, and similar. `build-parser.test.mjs` reads every fixture and
+generated build into parsed entries (`BuildParser`), so a change to reading exports is checked
+against all of them in under a second.
 
 ## Foundry tests
 

@@ -1,17 +1,11 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { RUNE_ITEM_MAP } from "../data/equipment.js";
-import {
-  SPECIAL_NAME_ADDITIONS,
-  NO_AUTO_CHOICE,
-  BAD_IGNORE_FEATURES,
-  IGNORE_MULTISELECT,
-  remasterTermNames,
-} from "../data/features.js";
-import { spellRename } from "../data/spells.js";
+import { NO_AUTO_CHOICE, IGNORE_MULTISELECT } from "../data/features.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
+import { ActorWriter } from "./ActorWriter.js";
+import { BuildParser } from "./BuildParser.js";
 import { CompendiumMatcher } from "./CompendiumMatcher.js";
 import {
   FOLLOWABLE_DEITY_CATEGORIES,
@@ -20,10 +14,13 @@ import {
   deitySanctifications,
   replaceSpecials,
 } from "./DeityChoices.js";
+import { EquipmentBuilder } from "./EquipmentBuilder.js";
 import { FeatureNames } from "./FeatureNames.js";
+import { ImportReport } from "./ImportReport.js";
 import { ParsedEntry } from "./ParsedEntry.js";
 import { Pf2eRules } from "./Pf2eRules.js";
 import { Seasoning } from "./Seasoning.js";
+import { SpellBuilder } from "./SpellBuilder.js";
 
 export class Pathmuncher {
   #names = null;
@@ -41,7 +38,7 @@ export class Pathmuncher {
 
   /** Renames that depend on the build: a champion's oath, and feats named for the class or its spellcasting. */
   #buildRenames() {
-    const castingType = (dual) => utils.capitalize(this.getClassSpellCastingType(dual) ?? "");
+    const castingType = (dual) => utils.capitalize(this.spells.getClassSpellCastingType(dual) ?? "");
     return [
       { pbName: "Shining Oath", foundryName: `Shining Oath (${Seasoning.getChampionType(this.source.alignment)})` },
       { pbName: "Counterspell", foundryName: `Counterspell (${castingType(false)})` },
@@ -164,7 +161,84 @@ export class Pathmuncher {
     this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
 
     this.tempActorCounter = 1;
+
+    // the import's stages, each working on this import's state: reading the build, the inventory,
+    // spellcasting, writing the result to the actor, and the report of what could not be matched
+    this.parser = new BuildParser(this);
+    this.equipment = new EquipmentBuilder(this);
+    this.spells = new SpellBuilder(this);
+    this.writer = new ActorWriter(this);
+    this.report = new ImportReport(this);
   }
+
+  // ---------------------------------------------------------------- the stages' public methods
+
+  /** See BuildParser.getBuildFromJson. */
+  static getBuildFromJson(jsonData) {
+    return BuildParser.getBuildFromJson(jsonData);
+  }
+
+  /** See BuildParser.normaliseSource. */
+  static normaliseSource(source) {
+    return BuildParser.normaliseSource(source);
+  }
+
+  /** See BuildParser.detectVariants. */
+  static detectVariants(source) {
+    return BuildParser.detectVariants(source);
+  }
+
+  /** See ActorWriter.importOptionForItem. */
+  static importOptionForItem(item) {
+    return ActorWriter.importOptionForItem(item);
+  }
+
+  /** See SpellBuilder.getClassSpellCastingType. */
+  getClassSpellCastingType(dual = false) {
+    return this.spells.getClassSpellCastingType(dual);
+  }
+
+  /** See SpellBuilder.getClassMagicTradition. */
+  getClassMagicTradition(caster) {
+    return this.spells.getClassMagicTradition(caster);
+  }
+
+  /** See EquipmentBuilder.applyRunes. */
+  async applyRunes(parsedItem, itemData, type) {
+    return this.equipment.applyRunes(parsedItem, itemData, type);
+  }
+
+  /** See ActorWriter.findHandAddedItems. */
+  findHandAddedItems() {
+    return this.writer.findHandAddedItems();
+  }
+
+  /** See ActorWriter.updateActor. */
+  async updateActor(options) {
+    return this.writer.updateActor(options);
+  }
+
+  /** See ImportReport.getDescribedSpecials. */
+  getDescribedSpecials() {
+    return this.report.getDescribedSpecials();
+  }
+
+  /** See ImportReport.getUnmatchedSpecials. */
+  getUnmatchedSpecials() {
+    return this.report.getUnmatchedSpecials();
+  }
+
+  /** See ImportReport.getImportReport. */
+  getImportReport() {
+    return this.report.getImportReport();
+  }
+
+  /** See ImportReport.postImportCheck. */
+  async postImportCheck() {
+    return this.report.postImportCheck();
+  }
+
+  // ---------------------------------------------------------------- the rules engine and the import
 
   async #loadCompendiumMatchers() {
     for (const matcher of Object.values(this.compendiumMatchers)) {
@@ -173,52 +247,8 @@ export class Pathmuncher {
   }
 
   /** Reports progress: step of total for the stage type (a Labels key), e.g. (5, 12, "Heritage"). */
-  #statusUpdate(step, total, type, prefixLabel) {
+  statusUpdate(step, total, type, prefixLabel) {
     if (this.statusCallback) this.statusCallback(step, total, type, prefixLabel);
-  }
-
-  /**
-   * Returns the build from Pathbuilder JSON, either the full export ({ success, build }) or the
-   * build object on its own, or null if it doesn't look like a Pathbuilder build.
-   */
-  static getBuildFromJson(jsonData) {
-    if (!utils.isObject(jsonData)) return null;
-    if (jsonData.success === false) return null;
-    const build = utils.isObject(jsonData.build) ? jsonData.build : jsonData;
-    const isBuild = utils.isString(build.name)
-      && utils.isString(build.class)
-      && Array.isArray(build.feats)
-      && utils.isObject(build.abilities);
-    return isBuild ? build : null;
-  }
-
-  /**
-   * Fills in fields that older Pathbuilder exports leave out (equipmentContainers, focus,
-   * blendedSpells, prepared, ...), so the rest of the import can rely on them. Updates in place.
-   */
-  static normaliseSource(source) {
-    for (const key of ["feats", "specials", "lores", "equipment", "weapons", "armor", "spellCasters", "formula",
-      "pets", "familiars", "rituals", "inventorMods", "resistances", "languages"]) {
-      if (!Array.isArray(source[key])) source[key] = [];
-    }
-    for (const key of ["equipmentContainers", "focus", "money", "mods", "proficiencies", "specificProficiencies"]) {
-      if (!utils.isObject(source[key])) source[key] = {};
-    }
-    for (const coin of ["pp", "gp", "sp", "cp"]) {
-      source.money[coin] ??= 0;
-    }
-    for (const formula of source.formula) {
-      if (!Array.isArray(formula.known)) formula.known = [];
-    }
-    for (const caster of source.spellCasters) {
-      for (const key of ["spells", "prepared", "blendedSpells"]) {
-        if (!Array.isArray(caster[key])) caster[key] = [];
-      }
-      if (!Array.isArray(caster.perDay)) caster.perDay = [];
-      caster.perDay = Array.from({ length: 11 }, (_, i) => caster.perDay[i] ?? 0);
-      caster.innate ??= false;
-    }
-    return source;
   }
 
   /**
@@ -278,23 +308,6 @@ export class Pathmuncher {
       : false;
   }
 
-  /**
-   * The variant rules a Pathbuilder build was made with. Free Archetype shows in slot labels
-   * ("Free Archetype 2"); exports without labels show it as an archetype feat and a class feat taken
-   * at the same level. Gradual boosts show as levelled boosts outside 1/5/10/15/20.
-   */
-  static detectVariants(source) {
-    const feats = source.feats ?? [];
-    const hasLabels = feats.some((f) => f.length > 4);
-    const classFeatType = (type) => type === "Class Feat" || type === `${source.class} Feat`;
-    const freeArchetype = hasLabels
-      ? feats.some((f) => String(f[4] ?? "").startsWith("Free Archetype"))
-      : feats.some((f) => f[2] === "Archetype Feat" && feats.some((c) => classFeatType(c[2]) && c[3] === f[3]));
-    const boostLevels = Object.keys(source.abilities?.breakdown?.mapLevelledBoosts ?? {});
-    const gradualBoosts = boostLevels.some((l) => !["1", "5", "10", "15", "20"].includes(l));
-    return { freeArchetype, gradualBoosts };
-  }
-
   /** Warns when the build used variant rules the world does not (or the other way round). */
   #warnVariantMismatch() {
     if (game.system.id !== "pf2e") return;
@@ -310,306 +323,9 @@ export class Pathmuncher {
     }
   }
 
-  #processSpecialData(name) {
-    if (name.includes("Domain: ")) {
-      const domainName = name.split(" ")[1];
-      this.parsed.feats.push(new ParsedEntry({ name: "Deity's Domain", extra: domainName }));
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  #getContainerData(key) {
-    return {
-      id: key,
-      containerName: this.source.equipmentContainers[key].containerName,
-      bagOfHolding: this.source.equipmentContainers[key].bagOfHolding,
-      backpack: this.source.equipmentContainers[key].backpack,
-    };
-  }
-
-  #nameMapSourceEquipment(e) {
-    const mappingData = Seasoning.getFoundryEquipment(e[0]);
-    const name = mappingData?.foundryName ?? e[0];
-    const containerKey = Object.keys(this.source.equipmentContainers)
-      .find((key) => this.source.equipmentContainers[key].containerName === name);
-
-    const container = containerKey ? this.#getContainerData(containerKey) : null;
-    const foundryId = foundry.utils.randomID();
-
-    if (container) {
-      this.source.equipmentContainers[containerKey].foundryId = foundryId;
-    }
-
-    const item = new ParsedEntry({
-      foundryName: name,
-      pbName: e[0],
-      originalName: e[0],
-      qty: e[1],
-      inContainer: e[2] !== "Invested" ? e[2] : null,
-      container,
-      foundryId,
-      invested: e[2] === "Invested",
-      sourceType: "equipment",
-      extra: mappingData?.details ?? undefined,
-    });
-    this.parsed.equipment.push(item);
-  }
-
-  #nameMapSourceEquipmentAddHandwraps(e) {
-    const name = Seasoning.getFoundryEquipmentName(e[0]);
-    const potencyMatch = e[0].match(/\(\+(\d)[\s)]/i);
-    const potency = potencyMatch ? parseInt(potencyMatch[1]) : 0;
-    const strikingMatch = e[0].match(/\d( \w*)? (Striking)/i);
-    const striking = strikingMatch
-      ? Seasoning.slugD(`${(strikingMatch[1] ?? "").trim()}${(strikingMatch[2] ?? "").trim()}`) // `${(strikingMatch[2] ?? "").toLowerCase().trim()}${(strikingMatch[1] ?? "").trim()}`.trim()
-      : "";
-    const mockE = {
-      name: e[0],
-      qty: 1,
-      prof: "unarmed",
-      pot: Number.isInteger(potency) ? potency : 0,
-      str: striking,
-      mat: null,
-      display: e[0],
-      runes: [],
-      damageType: "B",
-      increasedDice: false,
-    };
-    const weapon = new ParsedEntry({
-      foundryName: name,
-      pbName: mockE.name,
-      originalName: mockE.name,
-      sourceType: "weapons",
-      ...mockE,
-    });
-    this.parsed.weapons.push(weapon);
-  }
-
-  #nameMap() {
-    let iRank = 0;
-    let featRank = 0;
-    logger.debug("Starting Equipment Rename");
-    this.source.equipment
-      .filter((e) => e[0] && e[0] !== "undefined")
-      .forEach((e) => {
-        if (e[0].startsWith("Handwraps of Mighty Blows")) {
-          this.#nameMapSourceEquipmentAddHandwraps(e);
-        } else {
-          this.#nameMapSourceEquipment(e);
-        }
-      });
-    this.source.armor
-      .filter((e) => e && e !== "undefined")
-      .forEach((e) => {
-        const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = new ParsedEntry({
-          foundryName: name,
-          pbName: e.name,
-          originalName: e.name,
-          sourceType: "armor",
-          ...e,
-        });
-        this.parsed.armor.push(item);
-        // work around for now
-        if (e.name.startsWith("Inventor ")) {
-          this.parsed.feats.push(new ParsedEntry({
-            name,
-            extra: "",
-            type: "Awarded Feat",
-            level: 1,
-            originalName: e.name,
-            rank: 0,
-            sourceType: "armor",
-            featChoiceRef: null,
-            hasChildren: null,
-            isChild: null,
-            isStandard: null,
-            parentFeatChoiceRef: null,
-          }));
-          featRank++;
-        }
-      });
-    this.source.weapons
-      .filter((e) => e && e !== "undefined")
-      .forEach((e) => {
-        const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = new ParsedEntry({
-          foundryName: name,
-          pbName: e.name,
-          originalName: e.name,
-          sourceType: "weapons",
-          ...e,
-        });
-        // for now assume first weapon is the weapon innovation
-        if (e.isInventor) {
-          this.parsed.feats.push(new ParsedEntry({
-            name,
-            extra: "",
-            type: "Awarded Feat",
-            level: 1,
-            originalName: e.name,
-            rank: 0,
-            sourceType: "weapons",
-            featChoiceRef: null,
-            hasChildren: null,
-            isChild: null,
-            isStandard: null,
-            parentFeatChoiceRef: null,
-          }));
-          featRank++;
-        } else {
-          this.parsed.weapons.push(item);
-        }
-      });
-    logger.debug("Finished Equipment Rename");
-
-    logger.debug("Starting Special Rename");
-    [].concat(this.source.specials, SPECIAL_NAME_ADDITIONS(this.source.specials))
-      .filter((special) =>
-        special
-        && special !== "undefined"
-        && special !== "Not Selected"
-        && special !== this.source.heritage,
-      )
-      .forEach((special) => {
-        const match = this.getFoundryFeatureName(special); // , true);
-        if (!this.#processSpecialData(match.foundryName) && !Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-          this.parsed.specials.push(new ParsedEntry({
-            name: match.foundryName,
-            foundryName: match.foundryName,
-            foundryValue: match.foundryValue,
-            originalName: special,
-            rank: iRank,
-            sourceType: "specials",
-          }));
-          iRank++;
-        }
-      });
-    logger.debug("Finished Special Rename");
-
-
-    logger.debug("Starting Feat Rename");
-    this.source.feats
-      .filter((feat) =>
-        feat[0]
-        && feat[0] !== "undefined"
-        && feat[0] !== "Not Selected",
-        // && feat[0] !== this.source.heritage
-      )
-      .forEach((feat) => {
-        const name = this.getFoundryFeatureName(feat[0]).foundryName;
-        const data = new ParsedEntry({
-          name,
-          extra: feat[1],
-          // the heritage is imported as the heritage item
-          ...(feat[0] === this.source.heritage && { status: ParsedEntry.STATUS.INCLUDED, reason: "the heritage" }),
-          type: feat[2],
-          level: feat[3],
-          originalName: feat[0],
-          rank: featRank,
-          sourceType: "feats",
-        });
-        if (feat.length >= 7) {
-          data.featChoiceRef = feat[4];
-          data.hasChildren = feat[5] === "parentChoice";
-          data.isParent = data.hasChildren;
-          data.isChild = feat[5] === "childChoice";
-          data.isStandard = feat[5] === "standardChoice";
-          data.parentFeatChoiceRef = feat[6];
-          const parentFeatMatch = this.source.feats.find((f) =>
-            feat[5] === "childChoice"
-            && (data.featChoiceRef.toLowerCase().startsWith(f[0].toLowerCase())
-            || (data.parentFeatChoiceRef
-              && data.featChoiceRef.replace(data.parentFeatChoiceRef, "").trim().toLowerCase().startsWith(f[0].toLowerCase()))
-            ),
-          );
-          data.nameHint = parentFeatMatch?.[0] ? this.getFoundryFeatureName(parentFeatMatch?.[0]).foundryName : undefined;
-        } else {
-          // probably an awarded feat
-          data.featChoiceRef = null;
-          data.hasChildren = null;
-          data.isChild = null;
-          data.isStandard = null;
-          data.parentFeatChoiceRef = null;
-        }
-
-        if (data.type === "Reincarnation Feat") {
-          const original = this.source.feats.find((f) => f[0] === "Reincarnation Feat");
-          data.type = "Ancestry Feat";
-          data.featChoiceRef = original[4];
-          data.hasChildren = original[5] === "parentChoice";
-          data.isParent = data.hasChildren;
-          data.parentFeatChoiceRef = null;
-        }
-        this.parsed.feats.push(data);
-        featRank++;
-      });
-    logger.debug("Finished Feat Rename");
-
-    logger.debug("Checking for Inventions");
-    (this.source.inventorMods ?? []).forEach((mod) => {
-      const match = this.getFoundryFeatureName(mod.selection);
-      if (!Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-        this.parsed.specials.push(new ParsedEntry({
-          name: match.foundryName,
-          foundryName: match.foundryName,
-          foundryValue: match.foundryValue,
-          originalName: mod.selection,
-          isChild: true,
-          rank: iRank,
-          sourceType: "inventorMods",
-          parentFeatChoiceRef: mod.ref,
-          nameHint: this.getFoundryFeatureName(mod.ref).foundryName,
-        }));
-        iRank++;
-      }
-    });
-    logger.debug("Finished Inventions");
-    logger.debug("Name remapping results", {
-      parsed: this.parsed,
-    });
-  }
-
-  #fixUps() {
-    if (this.source.ancestry === "Dwarf" && !this.parsed.feats.some((f) => f.name === "Clan Pistol")) {
-      const clanDagger = new ParsedEntry({
-        name: "Clan Dagger",
-        originalName: "Clan Dagger",
-        isChoice: true,
-        rank: 0,
-        sourceType: "specials",
-      });
-      this.parsed.specials.push(clanDagger);
-    }
-
-    const match = this.source.background.match(/(Magical Experiment) \((.*)\)$/);
-    if (match) {
-      this.parsed.specials.push(new ParsedEntry({
-        name: match[2],
-        originalName: `${this.source.background}`,
-        isChoice: true,
-        rank: 0,
-        sourceType: "specials",
-      }));
-      this.source.background = match[1];
-    }
-
-    this.parsed.specials = this.parsed.specials.map((s) => {
-      const mythicMatch = / Calling$/;
-      if (mythicMatch.test(s.name)) {
-        s.type = "Mythic Feat";
-        s.level = "calling";
-        s.sourceType = "mythicCalling";
-      }
-      return s;
-    });
-  }
-
   async #prepare() {
-    this.#nameMap();
-    this.#fixUps();
+    this.parser.nameMap();
+    this.parser.fixUps();
   }
 
   async #processSenses() {
@@ -756,7 +472,7 @@ export class Pathmuncher {
       }
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
-      await this.#addGrantedItems(itemData, { applyFeatLocation: target !== "class", levelCap });
+      await this.addGrantedItems(itemData, { applyFeatLocation: target !== "class", levelCap });
       return true;
     } else {
       this.bad.push({ pbName: name, type: target, details: { name, levelCap } });
@@ -1753,7 +1469,7 @@ export class Pathmuncher {
         `Processing granted rules for granted item document ${subRuleDocument.name}`,
         () => foundry.utils.duplicate(subRuleDocument),
       );
-      await this.#addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint, levelCap });
+      await this.addGrantedItems(subRuleDocument, { originType, applyFeatLocation, choiceHint, levelCap });
     }
   }
 
@@ -1793,7 +1509,7 @@ export class Pathmuncher {
       if (foundry.utils.hasProperty(featureDoc, "system.rules")) {
         logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, () => foundry.utils.duplicate(featureDoc));
         if (this.immediateDiveAdd) {
-          await this.#addGrantedItems(featureDoc, { originType, applyFeatLocation, levelCap });
+          await this.addGrantedItems(featureDoc, { originType, applyFeatLocation, levelCap });
         } else {
           this.subRuleDocuments[document._id].push(featureDoc);
         }
@@ -1802,7 +1518,7 @@ export class Pathmuncher {
     document.system.items = this.failedFeatureItems[document._id];
   }
 
-  async #addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null, levelCap = 20 } = {}) {
+  async addGrantedItems(document, { originType = null, applyFeatLocation = false, choiceHint = null, levelCap = 20 } = {}) {
     this.subRuleDocuments[document._id] = [];
     if (foundry.utils.hasProperty(document, "system.items")) {
       logger.debug(`addGrantedItems for ${document.name}`, () => foundry.utils.duplicate(document));
@@ -2091,795 +1807,8 @@ export class Pathmuncher {
           choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
           levelCap,
         };
-        await this.#addGrantedItems(docData, options);
+        await this.addGrantedItems(docData, options);
       }
-    }
-  }
-
-  #resizeItem(item) {
-    if (Seasoning.isPhysicalItemType(item.type)) {
-      const resizeItem = item.type !== "treasure" && !["med", "sm"].includes(this.size);
-      if (resizeItem) item.system.size = this.size;
-    }
-  }
-
-  async #generateAdventurersPack() {
-    const adventurersPack = this.parsed.equipment.find((e) => e.pbName === "Adventurer's Pack");
-    if (!adventurersPack) return;
-
-    const defaultCompendium = game.packs.get("pf2e.equipment-srd") ?? game.packs.get("sf2e.equipment");
-    const index = await defaultCompendium?.getIndex({ fields: ["name", "type", "system.slug"] });
-    // the pack is a backpack with its contents in it; sf2e has no backpack
-    const backpackMatch = index?.find((i) => i.type === "backpack" && i.system.slug === "backpack");
-    if (!backpackMatch) {
-      logger.warn("Unable to find a backpack for the Adventurer's Pack", { pack: defaultCompendium?.collection });
-      adventurersPack.unmatched("no backpack to hold it");
-      return;
-    }
-
-    const compendiumBackpack = await defaultCompendium.getDocument(backpackMatch._id);
-    const backpackInstance = compendiumBackpack.toObject();
-    backpackInstance._id = foundry.utils.randomID();
-    adventurersPack.settle(ParsedEntry.STATUS.CREATED, { itemId: backpackInstance._id });
-    this.result.adventurersPack.item = adventurersPack;
-    this.result.equipment.push(backpackInstance);
-    for (const content of this.result.adventurersPack.contents) {
-      const indexMatch = index.find((i) => i.system.slug === content.slug);
-      if (!indexMatch) {
-        logger.error(`Unable to match adventurers kit item ${content.slug}`, content);
-        continue;
-      }
-
-      const doc = await defaultCompendium.getDocument(indexMatch._id);
-      const itemData = doc.toObject();
-      itemData._id = foundry.utils.randomID();
-      itemData.system.quantity = content.qty;
-      itemData.system.containerId = backpackInstance._id;
-      this.#resizeItem(itemData);
-      this.result.equipment.push(itemData);
-    }
-  }
-
-  async #generateContainers() {
-    for (const [key, data] of Object.entries(this.source.equipmentContainers)) {
-      if (data.foundryId) continue;
-      const name = Seasoning.getFoundryEquipmentName(data.containerName);
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.containerName, name);
-      const id = foundry.utils.randomID();
-      // no compendium match: a plain container with the Pathbuilder name, built in memory only
-      const doc = indexMatch
-        ? await indexMatch.pack.getDocument(indexMatch.i._id)
-        : new Item.implementation({ name: data.containerName, type: "backpack" });
-      const itemData = doc.toObject();
-      itemData._id = id;
-      this.#resizeItem(itemData);
-      this.result["equipment"].push(itemData);
-      this.parsed.equipment.push(new ParsedEntry({
-        foundryName: name,
-        pbName: data.containerName,
-        originalName: data.containerName,
-        name,
-        qty: 1,
-        inContainer: undefined,
-        container: this.#getContainerData(key),
-        foundryId: id,
-        status: ParsedEntry.STATUS.CREATED,
-        itemId: id,
-      }));
-    }
-  }
-
-  async #generateEquipmentItem(e) {
-    if (e.pbName === "Adventurer's Pack") return;
-    if (e.added) return;
-    if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
-      e.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
-      return;
-    }
-    logger.debug("Generating item for", e);
-    const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.foundryName);
-    if (!indexMatch) {
-      logger.error(`Unable to match ${e.pbName}`, e);
-      e.unmatched("no equipment compendium entry");
-      return;
-    }
-
-    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-    if (doc.type === "kit") {
-      e.settle(ParsedEntry.STATUS.IGNORED, { reason: "kits are not imported" });
-    } else {
-      const itemData = doc.toObject();
-      itemData._id = e.foundryId || foundry.utils.randomID();
-      itemData.system.quantity = e.qty;
-      const type = doc.type === "treasure" ? "treasure" : "equipment";
-      if (e.inContainer) {
-        const containerMatch = this.parsed.equipment.find((con) => con.container?.id === e.inContainer);
-        if (containerMatch) {
-          itemData.system.containerId = containerMatch.foundryId;
-          itemData.system.equipped.carryType = "stowed";
-        }
-      }
-      if (e.invested) {
-        itemData.system.equipped.carryType = "worn";
-        itemData.system.equipped.invested = true;
-        itemData.system.equipped.inSlot = true;
-        itemData.system.equipped.handsHeld = 0;
-      }
-      this.#resizeItem(itemData);
-      this.result[type].push(itemData);
-
-      const options = {
-        applyFeatLocation: false,
-        choiceHint: e.extra && e.extra !== "" ? e.extra : null,
-      };
-      // settled after its own rules are read, which can match the entry's extra (a choice it makes)
-      await this.#addGrantedItems(itemData, options);
-      // eslint-disable-next-line require-atomic-updates
-      e.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
-    }
-  }
-
-  async #generateEquipmentItems() {
-    for (const e of this.parsed.equipment) {
-      await this.#generateEquipmentItem(e);
-    }
-  }
-
-  async #processEquipmentItems() {
-    // just in case it's in the equipment, pathbuilder should have translated this to items
-    await this.#generateAdventurersPack();
-    await this.#generateContainers();
-    await this.#generateEquipmentItems();
-  }
-
-  static RUNE_SCALE = [
-    "",
-    "Minor",
-    "Lesser",
-    "Moderate",
-    "Greater",
-    "Major",
-    "Supreme",
-  ];
-
-  static REINFORCING_DATA = {
-    "Minor": {
-      value: 1,
-      hp: 44,
-    },
-    "Lesser": {
-      value: 2,
-      hp: 52,
-    },
-    "Moderate": {
-      value: 3,
-      hp: 64,
-    },
-    "Greater": {
-      value: 4,
-      hp: 80,
-    },
-    "Major": {
-      value: 5,
-      hp: 84,
-    },
-    "Supreme": {
-      value: 6,
-      hp: 108,
-    },
-  };
-
-  static POTENCY_SCALE = [
-    "",
-    "striking",
-    "greaterStriking",
-    "majorStriking",
-  ];
-
-  static RESILIENT_SCALE = [
-    "",
-    "resilient",
-    "greaterResilient",
-    "majorResilient",
-  ];
-
-  async #applyPropertyRunes(parsedItem, itemData) {
-    if (foundry.utils.hasProperty(itemData, "system.runes.property")) {
-      for (const property of parsedItem.runes) {
-        const resistantRegex = /Energy Resistant - (.*)/i;
-        const resistantMatch = property.match(resistantRegex);
-        const vitalizingRegex = /Vitalizing(.*)/i;
-        const vitalizingMatch = property.match(vitalizingRegex);
-        const bigRegex = /(.*)\((Greater|Major)\)/i;
-        const bigMatch = property.match(bigRegex);
-
-        let rune = property;
-        if (resistantMatch) rune = `${resistantMatch[1]} Resistant`;
-        else if (vitalizingMatch) rune = `Disrupting${vitalizingMatch[1]}`;
-        else if (bigMatch) rune = `${bigMatch[2]}${bigMatch[1]}`;
-        else if (property === "Quickstrike") rune = "speed";
-        else if (property === "Animated") rune = "dancing";
-
-        const runeItem = RUNE_ITEM_MAP[property];
-        logger.debug("Processing rune property", { property, runeItem });
-        if (runeItem) {
-          // a rune Pathbuilder lists on the weapon that is an item in Foundry (a filigree)
-          const entry = new ParsedEntry({ foundryName: property, pbName: runeItem, originalName: property, sourceType: "runes" });
-          this.parsed.equipment.push(entry);
-          await this.#generateEquipmentItem(entry);
-        } else {
-          itemData.system.runes.property.push(Seasoning.slugD(rune));
-        }
-      }
-    }
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  async #applyMaterial(parsedItem, itemData) {
-    if (parsedItem.mat) {
-      const material = parsedItem.mat.split(" (")[0];
-      itemData.system.material.type = Seasoning.slug(material);
-      itemData.system.material.grade = Seasoning.getMaterialGrade(parsedItem.mat);
-    }
-  }
-
-  // eslint-disable-next-line complexity
-  async applyRunes(parsedItem, itemData, type) {
-    if (itemData.type == "shield") {
-      parsedItem.runes.forEach((rune) => {
-        if (rune.startsWith("Reinforcing")) {
-          const runeScale = rune.split("(").pop().split(")").shift().trim();
-          const runeMatch = Pathmuncher.REINFORCING_DATA[runeScale];
-          if (runeMatch) {
-            itemData.system.runes.reinforcing = runeMatch.value;
-            itemData.system.hp.value += runeMatch.hp;
-          }
-        } else {
-          const runeScale = rune.split("(").pop().split(")").shift().trim();
-          const runeLevel = Pathmuncher.RUNE_SCALE.indexOf(runeScale);
-          const runeType = rune.split("(").shift().toLowerCase().trim();
-          if (runeLevel !== -1) {
-            itemData.system.runes[runeType] = runeLevel;
-          }
-        }
-      });
-    } else if (foundry.utils.hasProperty(itemData, "system.runes.potency")) {
-      itemData.system.runes.potency = parsedItem.pot;
-      if (type === "weapon") {
-        const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str);
-        if (striking !== -1) itemData.system.runes.striking = striking;
-      } else if (type === "armor") {
-        const resilient = Pathmuncher.RESILIENT_SCALE.indexOf(parsedItem.res);
-        if (resilient !== -1) itemData.system.runes.resilient = resilient;
-      }
-    }
-
-    if (type === "armor" && parsedItem.worn
-      && ((Number.isInteger(parsedItem.pot) && parsedItem.pot > 0)
-        || (parsedItem.res && parsedItem.res !== "")
-      )
-    ) {
-      itemData.system.equipped.invested = true;
-    }
-
-    await this.#applyPropertyRunes(parsedItem, itemData);
-    await this.#applyMaterial(parsedItem, itemData);
-  }
-
-  static GRADE_SCALE = [
-    { type: "commercial", pot: 0, res: 0, str: 0 },
-    { type: "tactical", pot: 1, res: 0, str: 0 },
-    { type: "advanced", pot: 1, res: 1, str: 1 },
-    { type: "superior", pot: 2, res: 1, str: 1 },
-    { type: "elite", pot: 2, res: 2, str: 2 },
-    { type: "ultimate", pot: 3, res: 2, str: 2 },
-    { type: "paragon", pot: 3, res: 3, str: 3 },
-  ];
-
-  async #addSubitemsToTechUpgrades(itemData, name) {
-    const foundryName = RUNE_ITEM_MAP[name] ?? name;
-    logger.debug("Processing rune property", { itemData, name, foundryName });
-
-    const indexMatch = this.compendiumMatchers["equipment"].getMatch(name, foundryName);
-    if (!indexMatch) {
-      logger.error(`Unable to match ${name}`, itemData);
-      this.bad.push({ pbName: name, type: "equipment", details: { foundryName, pbName: name } });
-      return;
-    }
-
-    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-
-    const subItemData = doc.toObject();
-    subItemData._id = foundry.utils.randomID();
-    subItemData.system.equipped.carryType = "installed";
-
-    this.#resizeItem(subItemData);
-    itemData.system.subitems.push(subItemData);
-  }
-
-  async #applyTechUpgrades(parsedItem, itemData, type) {
-    if (itemData.type == "shield") {
-      // not yet handled
-    }
-
-    const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str ?? "");
-    const resilient = Pathmuncher.RESILIENT_SCALE.indexOf(parsedItem.res ?? "");
-
-    // Hephaistos exports the grade; Pathbuilder only the potency and striking/resilient runes
-    const exportedGrade = Pathmuncher.GRADE_SCALE.find((g) => g.type === parsedItem.grade?.toLowerCase());
-    const grade = exportedGrade ?? (type === "weapon"
-      ? Pathmuncher.GRADE_SCALE.find((g) =>
-        g.pot === (parsedItem.pot ?? 0)
-        && g.str === striking,
-      )
-      : Pathmuncher.GRADE_SCALE.find((g) =>
-        g.pot === (parsedItem.pot ?? 0)
-        && g.res === resilient,
-      ));
-
-    if (grade) {
-      itemData.system.grade = grade.type;
-    }
-
-    // await this.#applyPropertyRunes(parsedItem, itemData);
-    for (const property of parsedItem.runes) {
-      await this.#addSubitemsToTechUpgrades(itemData, property);
-    }
-    await this.#applyMaterial(parsedItem, itemData);
-  }
-
-  async #createWeaponItem(data) {
-    // { pbName, name, prof, qty, die, display, increasedDice, pot, str, mat, runes, attack, damageBonus, extraDamage, damageType }
-    logger.debug("Generating weapon for", data);
-    const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.pbName, data.foundryName);
-    if (!indexMatch) {
-      logger.error(`Unable to match weapon item ${data.name}`, data);
-      data.unmatched("no equipment compendium entry");
-      return null;
-    }
-
-    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-    const itemData = doc.toObject();
-    itemData._id = foundry.utils.randomID();
-    itemData.system.quantity = data.qty;
-    // because some shields don't have damage dice, but come in as weapons on pathbuilder
-    if (itemData.type === "weapon") {
-      if (data.die) itemData.system.damage.die = data.die;
-      if (game.system.id === "pf2e") {
-        await this.applyRunes(data, itemData, "weapon");
-      } else if (game.system.id === "sf2e") {
-        await this.#applyTechUpgrades(data, itemData, "weapon");
-      }
-    }
-
-    if (data.display.startsWith("Large ") || data.increasedDice) {
-      itemData.system.size = "lg";
-    } else if (data.display && !Seasoning.IGNORED_EQUIPMENT_DISPLAY(data.display)) {
-      itemData.name = data.display;
-    }
-
-    this.#resizeItem(itemData);
-    this.result.weapons.push(itemData);
-    data.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
-    return itemData;
-  }
-
-  async #generateWeaponItems() {
-    for (const w of this.parsed.weapons) {
-      if (Seasoning.IGNORED_EQUIPMENT().includes(w.pbName)) {
-        w.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
-        continue;
-      }
-      await this.#createWeaponItem(w);
-    }
-  }
-
-  async #adjustArmorItem(itemData, parsedArmor) {
-    itemData._id = foundry.utils.randomID();
-    itemData.system.equipped.value = parsedArmor.worn ?? false;
-    if (!Seasoning.RESTRICTED_EQUIPMENT().some((i) => itemData.name.startsWith(i))) {
-      itemData.system.equipped.inSlot = parsedArmor.worn ?? false;
-      itemData.system.quantity = parsedArmor.qty;
-
-      const isShield = parsedArmor.prof === "shield";
-      itemData.system.equipped.handsHeld = isShield && parsedArmor.worn ? 1 : 0;
-      itemData.system.equipped.carryType = isShield && parsedArmor.worn ? "held" : "worn";
-
-      if (game.system.id === "pf2e") {
-        await this.applyRunes(parsedArmor, itemData, "armor");
-      } else if (game.system.id === "sf2e") {
-        await this.#applyTechUpgrades(parsedArmor, itemData, "armor");
-      }
-    }
-    // eslint-disable-next-line require-atomic-updates
-    if (parsedArmor.display) itemData.name = parsedArmor.display;
-
-    this.#resizeItem(itemData);
-    return itemData;
-  }
-
-  async #generateArmorItems() {
-    for (const a of this.parsed.armor) {
-      logger.debug("Generating armor for", a);
-      if (Seasoning.GRANTED_ITEMS_LIST().includes(a.pbName)) {
-        const existingItem = this.result.armor.find((i) => i.name === a.foundryName);
-        if (existingItem) {
-          existingItem.system.equipped.inSlot = true;
-          existingItem.system.equipped.handsHeld = 0;
-          a.settle(ParsedEntry.STATUS.GRANTED, { itemId: existingItem._id, reason: "granted by a feature" });
-          logger.debug(`Ignoring armor item ${a.pbName} as it has been granted by a feature`);
-          continue;
-        }
-      }
-      if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
-        a.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
-        continue;
-      }
-
-      const indexMatch = this.compendiumMatchers["equipment"].getMatch(a.foundryName, `${a.pbName} Armor`);
-      if (!indexMatch) {
-        logger.error(`Unable to match armor kit item ${a.name}`, a);
-        a.unmatched("no equipment compendium entry");
-        continue;
-      }
-
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const itemData = await this.#adjustArmorItem(doc.toObject(), a);
-      this.result.armor.push(itemData);
-      a.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
-    }
-  }
-
-  getClassSpellCastingType(dual = false) {
-    const classCaster = dual
-      ? this.source.spellCasters.find((caster) => caster.name === this.source.dualClass)
-      : this.source.spellCasters.find((caster) => caster.name === this.source.class);
-    const type = classCaster?.spellcastingType;
-    if (type || this.source.spellCasters.length === 0) return type ?? "spontaneous";
-    // if no type and multiple spell casters, then return the first spell casting type
-    return this.source.spellCasters[0].spellcastingType ?? "spontaneous";
-  }
-
-  // aims to determine the class magic tradition for a spellcasting block
-  getClassMagicTradition(caster) {
-    const classCaster = [this.source.class, this.source.dualClass].includes(caster.name);
-    const tradition = classCaster ? caster?.magicTradition : undefined;
-    // if a caster tradition or no spellcasters, return divine
-    if (tradition || this.source.spellCasters.length === 0) return tradition ?? "divine";
-
-    // not a focus traditions
-    if (caster.magicTradition !== "focus" && ["divine", "occult", "primal", "arcane"].includes(caster.magicTradition)) {
-      return caster.magicTradition;
-    }
-
-    // this spell caster type is not a class, determine class tradition based on ability
-    const abilityTradition = this.source.spellCasters.find((c) =>
-      [this.source.class, this.source.dualClass].includes(c.name)
-      && c.ability === caster.ability,
-    );
-    if (abilityTradition) return abilityTradition.magicTradition;
-    // if no type and multiple spell casters, then return the first spell casting type
-    return this.source.spellCasters[0].magicTradition && this.source.spellCasters[0].magicTradition !== "focus"
-      ? this.source.spellCasters[0].magicTradition
-      : "divine";
-  }
-
-  #applySpellBlending(spellcastingEntity, caster) {
-    if (caster.blendedSpells.length === 0) return;
-
-    const remove = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const add = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    // find adjustments
-    caster.blendedSpells.forEach((slot) => {
-      remove[slot.levelFrom]++;
-      add[slot.LevelTo]++;
-    });
-
-    for (let i = 0; i <= 10; i++) {
-      const toAdd = this.options.adjustBlendedSlots ? 0 : Math.floor(add[i] / 2);
-      const toRemove = this.options.adjustBlendedSlots ? remove[i] : 0;
-      const adjustment = 0 - toRemove - toAdd;
-      logger.debug("Adjusting spells for spell blending", { i, adjustment, add, remove, toAdd, max: spellcastingEntity.slots[`slot${i}`].max });
-      spellcastingEntity.slots[`slot${i}`].max += adjustment;
-      spellcastingEntity.slots[`slot${i}`].value += adjustment;
-    }
-  }
-
-  #generateSpellCaster(caster) {
-    const isFocus = caster.magicTradition === "focus";
-    const magicTradition = this.getClassMagicTradition(caster);
-    const spellcastingType = isFocus ? "focus" : caster.spellcastingType;
-    const flexible = false; // placeholder
-
-    const name = isFocus ? `${utils.capitalize(magicTradition)} ${caster.name}` : caster.name;
-
-    const spellcastingEntity = {
-      ability: {
-        value: caster.ability,
-      },
-      proficiency: {
-        value: caster.proficiency / 2,
-      },
-      spelldc: {
-        item: 0,
-      },
-      tradition: {
-        value: magicTradition,
-      },
-      prepared: {
-        value: spellcastingType,
-        flexible,
-      },
-      slots: {},
-      showUnpreparedSpells: { value: true },
-      showSlotlessLevels: { value: true },
-    };
-
-    // apply slot data
-    for (let i = 0; i <= 10; i++) {
-
-      spellcastingEntity.slots[`slot${i}`] = {
-        max: caster.perDay[i],
-        prepared: {},
-        value: caster.perDay[i],
-      };
-    }
-    // adjust slots for spell blended effects
-    this.#applySpellBlending(spellcastingEntity, caster);
-
-    const data = {
-      _id: foundry.utils.randomID(),
-      name,
-      type: "spellcastingEntry",
-      system: spellcastingEntity,
-    };
-    this.result.casters.push(data);
-    return data;
-  }
-
-  #generateFocusSpellCaster(proficiency, ability, tradition) {
-    const data = {
-      _id: foundry.utils.randomID(),
-      name: `${utils.capitalize(tradition)} Focus Tradition`,
-      type: "spellcastingEntry",
-      system: {
-        ability: {
-          value: ability,
-        },
-        proficiency: {
-          value: proficiency / 2,
-        },
-        spelldc: {
-          item: 0,
-        },
-        tradition: {
-          value: tradition,
-        },
-        prepared: {
-          value: "focus",
-          flexible: false,
-        },
-        showUnpreparedSpells: { value: true },
-      },
-    };
-    this.result.casters.push(data);
-    return data;
-  }
-
-  async #loadSpell(spell, casterId, debugData) {
-    const spellName = spellRename(spell.split("(")[0].trim());
-    logger.debug("spell details", { spell, spellName, debugData });
-
-    const indexMatch = this.compendiumMatchers["spells"].getMatch(spell, spellName, true);
-    if (!indexMatch) {
-      if (debugData.psychicAmpSpell) return undefined;
-      logger.error(`Unable to match spell ${spell}`, { spell, spellName, debugData });
-      this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
-      return undefined;
-    }
-
-    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-    const itemData = doc.toObject();
-    itemData._id = foundry.utils.randomID();
-    itemData.system.location.value = casterId;
-
-    return itemData;
-  }
-
-  // eslint-disable-next-line complexity
-  async #processCasterSpells(instance, caster, spellEnhancements, forcePrepare = false) {
-    const spellNames = {};
-    for (const spellSelection of caster.spells) {
-      const level = spellSelection.spellLevel;
-      const preparedAtLevel = caster.prepared?.length > 0
-        ? (caster.prepared.find((p) => p.spellLevel === level)?.list ?? [])
-        : [];
-      let preparedValue = 0;
-
-      // const preparedMap = preparedAtLevel.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-
-      for (const [i, spell] of spellSelection.list.entries()) {
-        logger.debug(`Checking spell at ${i} for level ${level}`, { spell });
-        const itemData = await this.#loadSpell(spell, instance._id, {
-          spellSelection,
-          list: spellSelection.list,
-          level,
-          instance,
-        });
-        if (itemData) {
-          itemData.system.location.heightenedLevel = level;
-          spellNames[spell] = itemData._id;
-          this.result.spells.push(itemData);
-
-          // if the caster is prepared we don't prepare spells as all known spells come through in JSON
-          if (instance.system.prepared.value !== "prepared"
-            || spellEnhancements?.preparePBSpells
-            || forcePrepare
-            || (caster.spellcastingType === "prepared"
-              && preparedAtLevel.length === 0 && spellSelection.list.length <= caster.perDay[level])
-          ) {
-            logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spell });
-            // eslint-disable-next-line require-atomic-updates
-            instance.system.slots[`slot${level}`].prepared[preparedValue] = { id: itemData._id };
-            preparedValue++;
-          }
-        }
-      }
-
-      for (const spell of preparedAtLevel) {
-        // if (spellNames.includes(spellName)) continue;
-        const parsedSpell = foundry.utils.getProperty(spellNames, spell);
-        const itemData = parsedSpell
-          ? this.result.spells.find((s) => s._id === parsedSpell)
-          : await this.#loadSpell(spell, instance._id, {
-            spellSelection,
-            level,
-            instance,
-          });
-        if (itemData) {
-          // a spellbook spell prepared in a higher slot keeps its spellbook rank: the slot heightens it
-          if (!parsedSpell) {
-            itemData.system.location.heightenedLevel = level;
-            spellNames[spell] = itemData._id;
-            this.result.spells.push(itemData);
-          }
-
-          logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spellName: spell });
-          // eslint-disable-next-line require-atomic-updates
-          instance.system.slots[`slot${level}`].prepared[preparedValue] = { id: itemData._id };
-          preparedValue++;
-        } else {
-          logger.warn(`Unable to find spell ${spell}`);
-        }
-      }
-
-      if (spellEnhancements?.knownSpells) {
-        for (const spell of spellEnhancements.knownSpells) {
-          const itemData = await this.#loadSpell(spell, instance._id, {
-            spellEnhancements,
-            instance,
-          });
-          if (itemData && !foundry.utils.hasProperty(spellNames, itemData.name)) {
-            itemData.system.location.heightenedLevel = level;
-            spellNames[spell] = itemData._id;
-            this.result.spells.push(itemData);
-          }
-        }
-      }
-    }
-  }
-
-  async #processFocusSpells(instance, spells) {
-    for (const spell of spells) {
-      const itemData = await this.#loadSpell(spell, instance._id, {
-        instance,
-        spells,
-        spell,
-      });
-      if (itemData) this.result.spells.push(itemData);
-      // only pull amps is the module is active
-      if (spell.endsWith("(Amped)") && game.modules.get("pf2e-psychic-amps")?.active) {
-        const psychicSpell = spell.replace("(Amped)", "(Psychic)");
-        const psychicItemData = await this.#loadSpell(psychicSpell, instance._id, {
-          instance,
-          spells,
-          spell: psychicSpell,
-          psychicAmpSpell: true,
-        });
-        if (psychicItemData) {
-          this.result.spells.push(psychicItemData);
-        }
-      }
-    }
-  }
-
-  async #processRituals() {
-    if (!this.source.rituals?.length) return;
-    const ritualCompendium = new CompendiumMatcher({
-      type: "spells",
-      indexFields: ["name", "type", "system.slug", "system.ritual"],
-    });
-    await ritualCompendium.loadCompendiums();
-
-    for (const ritual of this.source.rituals) {
-      const ritualName = ritual.split("(")[0].trim();
-      logger.debug("ritual spell details", { ritual, spellName: ritualName });
-
-      // a spell can share a ritual's name, so only rituals are looked at
-      const indexMatch = ritualCompendium.getNameMatchWithFilter(ritualName, ritualName, { "system.ritual": (value) => !!value });
-      if (!indexMatch) {
-        logger.error(`Unable to match ritual spell ${ritual}`, { spell: ritual, spellName: ritualName, indexMatch });
-        this.bad.push({ pbName: ritual, type: "ritual", details: { originalName: ritual, name: ritualName } });
-        continue;
-      }
-
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-      const itemData = doc.toObject();
-      itemData._id = foundry.utils.randomID();
-
-      this.result.spells.push(itemData);
-    }
-  }
-
-  async #processSpells() {
-    for (const caster of this.source.spellCasters) {
-      logger.debug("Generating caster for", caster);
-      if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
-      const instance = this.#generateSpellCaster(caster);
-      logger.debug("Generated caster instance", instance);
-      const spellEnhancements = Seasoning.getSpellCastingFeatureAdjustment(caster.name);
-      let forcePrepare = false;
-      if (foundry.utils.hasProperty(spellEnhancements, "showSlotless")) {
-        instance.system.showSlotlessLevels.value = foundry.utils.getProperty(spellEnhancements, "showSlotless");
-      } else if (
-        caster.spellcastingType === "prepared"
-        && ![this.source.class, this.source.dualClass].includes(caster.name)
-      ) {
-        const slotToPreparedMatch = caster.spells.every((spellBlock) => {
-          const spellCount = spellBlock.list.length;
-          const perDay = caster.perDay[spellBlock.spellLevel];
-          return perDay === spellCount;
-        });
-        logger.debug(`Setting ${caster.name} show all slots to ${!slotToPreparedMatch}`);
-        instance.system.showSlotlessLevels.value = !slotToPreparedMatch;
-        forcePrepare = slotToPreparedMatch;
-      }
-      await this.#processCasterSpells(instance, caster, spellEnhancements, forcePrepare);
-    }
-
-    if (this.parsed.feats.some((f) => f.name === "Initiate Warden")) {
-      const spellData = foundry.utils.getProperty(this.source, "focus.Unassigned.General");
-      if (spellData) {
-        const existing = foundry.utils.getProperty(this.source, "focus.primal.wis") ?? {};
-        const merged = foundry.utils.mergeObject(existing, spellData);
-        foundry.utils.setProperty(this.source, "focus.primal.wis", merged);
-      }
-    }
-
-    for (const tradition of ["occult", "primal", "divine", "arcane"]) {
-      const traditionData = foundry.utils.getProperty(this.source, `focus.${tradition}`);
-      logger.debug(`Checking for focus tradition ${tradition}`);
-      if (!traditionData) continue;
-      for (const ability of ["str", "dex", "con", "int", "wis", "cha"]) {
-        const abilityData = foundry.utils.getProperty(traditionData, ability);
-        logger.debug(`Checking for focus tradition ${tradition} with ability ${ability}`);
-        if (!abilityData) continue;
-        logger.debug("Generating focus spellcasting ", { tradition, traditionData, ability });
-        const instance = this.#generateFocusSpellCaster(abilityData.proficiency, ability, tradition);
-        if (abilityData.focusCantrips && abilityData.focusCantrips.length > 0) {
-          await this.#processFocusSpells(instance, abilityData.focusCantrips);
-        }
-        if (abilityData.focusSpells && abilityData.focusSpells.length > 0) {
-          await this.#processFocusSpells(instance, abilityData.focusSpells);
-        }
-      }
-    }
-
-    // older exports have no focus pool; leave it to the system rather than write undefined
-    if (Number.isInteger(this.source.focusPoints)) {
-      foundry.utils.setProperty(this.result.character, "system.resources.focus.max", this.source.focusPoints);
-      foundry.utils.setProperty(this.result.character, "system.resources.focus.value", this.source.focusPoints);
     }
   }
 
@@ -2903,39 +1832,6 @@ export class Pathmuncher {
         },
       };
       this.result.lores.push(data);
-    }
-  }
-
-  async #generateMoney() {
-    const compendium = game.packs.get("pf2e.equipment-srd") ?? game.packs.get("sf2e.equipment");
-    const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
-    const moneyLookup = game.system.id === "pf2e"
-      ? [
-        { slug: "platinum-pieces", type: "pp" },
-        { slug: "gold-pieces", type: "gp" },
-        { slug: "silver-pieces", type: "sp" },
-        { slug: "copper-pieces", type: "cp" },
-      ]
-      : [
-        { slug: "upb", type: "upb" },
-        { slug: "credstick", type: "sp" },
-      ];
-
-    for (const lookup of moneyLookup) {
-      const indexMatch = index.find((i) => i.system.slug === lookup.slug);
-      if (indexMatch) {
-        const doc = await compendium.getDocument(indexMatch._id);
-        const itemData = doc.toObject();
-        itemData._id = foundry.utils.randomID();
-        itemData.system.quantity = this.source.money[lookup.type];
-        this.result.money.push(itemData);
-      } else if (lookup.slug === "credstick") {
-        const itemData = await foundry.utils.fetchJsonWithTimeout(`modules/${CONSTANTS.MODULE_NAME}/data/credits.json`);
-        if (!itemData) continue;
-        itemData._id = foundry.utils.randomID();
-        itemData.system.quantity = this.source.money[lookup.type];
-        this.result.money.push(itemData);
-      }
     }
   }
 
@@ -2993,29 +1889,18 @@ export class Pathmuncher {
 
     this.#setSkills();
     // final pass, include all
-    this.#statusUpdate(1, 5, "Feats");
+    this.statusUpdate(1, 5, "Feats");
     await this.#generateFeatItems("feats");
-    this.#statusUpdate(2, 5, "Feats");
+    this.statusUpdate(2, 5, "Feats");
     await this.#generateFeatItems("ancestryFeatures");
     // specials that are actions a feature gives without granting the item (e.g. Manifest Soulforged Armament)
     await this.#generateFeatItems("actions", { specialsOnly: true });
-    this.#statusUpdate(3, 5, "Feats");
+    this.statusUpdate(3, 5, "Feats");
     // await this.#generateSpecialItems("ancestryFeatures");
-    // this.#statusUpdate(4, 5, "Feats");
+    // this.statusUpdate(4, 5, "Feats");
     // await this.#generateSpecialItems("classFeatures");
-    // this.#statusUpdate(5, 5, "Feats");
+    // this.statusUpdate(5, 5, "Feats");
     // await this.#generateSpecialItems("actions");
-  }
-
-  async #processEquipment() {
-    this.#statusUpdate(1, 4, "Equipment");
-    await this.#processEquipmentItems();
-    this.#statusUpdate(2, 4, "Weapons");
-    await this.#generateWeaponItems();
-    this.#statusUpdate(3, 4, "Armor");
-    await this.#generateArmorItems();
-    this.#statusUpdate(2, 4, "Money");
-    await this.#generateMoney();
   }
 
   async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
@@ -3240,37 +2125,37 @@ export class Pathmuncher {
       if (!replacements) return false;
       Object.assign(this.coreReplacements, replacements);
     }
-    this.#statusUpdate(1, 12, "Character");
+    this.statusUpdate(1, 12, "Character");
     await this.#processCore();
-    this.#statusUpdate(2, 12, "Formula");
+    this.statusUpdate(2, 12, "Formula");
     await this.#processFormulas();
-    this.#statusUpdate(3, 12, "Deity");
+    this.statusUpdate(3, 12, "Deity");
     await this.#processGenericCompendiumLookup("deities", this.source.deity, "deity");
 
-    this.#statusUpdate(4, 12, "Ancestry");
+    this.statusUpdate(4, 12, "Ancestry");
     await this.#processGenericCompendiumLookup("ancestries", this.source.ancestry, "ancestry");
-    this.#statusUpdate(5, 12, "Heritage");
+    this.statusUpdate(5, 12, "Heritage");
     await this.#processGenericCompendiumLookup("heritages", this.source.heritage, "heritage");
-    this.#statusUpdate(6, 12, "Background");
+    this.statusUpdate(6, 12, "Background");
     await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
 
     this.#setSkills(true);
     this.#setLanguages();
 
-    this.#statusUpdate(7, 12, "Class");
+    this.statusUpdate(7, 12, "Class");
     await this.#processGenericCompendiumLookup("classes", this.source.class, "class", 1);
 
     this.#setAbilityBoosts();
 
-    this.#statusUpdate(8, 12, "FeatureRec");
+    this.statusUpdate(8, 12, "FeatureRec");
     await this.#processFeats();
-    this.#statusUpdate(10, 12, "Equipment");
-    await this.#processEquipment();
-    this.#statusUpdate(11, 12, "Spells");
-    await this.#processSpells();
-    this.#statusUpdate(11, 12, "Rituals");
-    await this.#processRituals();
-    this.#statusUpdate(12, 12, "Lores");
+    this.statusUpdate(10, 12, "Equipment");
+    await this.equipment.processEquipment();
+    this.statusUpdate(11, 12, "Spells");
+    await this.spells.processSpells();
+    this.statusUpdate(11, 12, "Rituals");
+    await this.spells.processRituals();
+    this.statusUpdate(12, 12, "Lores");
     await this.#generateLores();
     if (this.unansweredChoices.length > 0) {
       const answers = await this.options.resolveUnansweredChoices(this.unansweredChoiceList);
@@ -3281,381 +2166,4 @@ export class Pathmuncher {
     return true;
   }
 
-  static COIN_SLUGS = ["platinum-pieces", "gold-pieces", "silver-pieces", "copper-pieces", "upb", "credstick"];
-
-  /**
-   * The import option that replaces this kind of item, or null for items an import never touches
-   * (effects, conditions and any other type pathmuncher does not create).
-   */
-  static IMPORT_OPTION_BY_ITEM_TYPE = {
-    treasure: "addTreasure",
-    class: "addClass",
-    deity: "addDeity",
-    background: "addBackground",
-    heritage: "addHeritage",
-    ancestry: "addAncestry",
-    feat: "addFeats",
-    action: "addFeats",
-    equipment: "addEquipment",
-    backpack: "addEquipment",
-    consumable: "addEquipment",
-    book: "addEquipment",
-    weapon: "addWeapons",
-    armor: "addArmor",
-    shield: "addArmor",
-    lore: "addLores",
-    spell: "addSpells",
-    spellcastingEntry: "addSpells",
-  };
-
-  static importOptionForItem(item) {
-    if (item.type === "treasure" && Pathmuncher.COIN_SLUGS.includes(item.system?.slug)) return "addMoney";
-    return Pathmuncher.IMPORT_OPTION_BY_ITEM_TYPE[item.type] ?? null;
-  }
-
-  /** Items this import will replace: those whose import option is ticked. */
-  #replaceableItems() {
-    return this.actor.items.filter((i) => {
-      const option = Pathmuncher.importOptionForItem(i);
-      return option !== null && this.options[option];
-    });
-  }
-
-  /**
-   * Items the import would replace that pathmuncher did not create: added by hand after an import
-   * (homebrew, loot) or present before the first import. Items granted by one of these count with it.
-   * Actors imported before pathmuncher flagged its items have no flagged items; for those, everything
-   * in an imported category is treated as imported, as it always was.
-   */
-  findHandAddedItems() {
-    const isImported = (item) => foundry.utils.getProperty(item, `flags.${CONSTANTS.FLAG_NAME}.imported`) === true;
-    const legacyImport = !this.actor.items.some(isImported)
-      && foundry.utils.hasProperty(this.actor, `flags.${CONSTANTS.FLAG_NAME}.addFeats`);
-    if (legacyImport) return [];
-
-    const ownedByImport = (item, seen = new Set()) => {
-      if (isImported(item)) return true;
-      const grantedBy = this.actor.items.get(item.flags[game.system.id]?.grantedBy?.id);
-      if (!grantedBy || seen.has(grantedBy.id)) return false;
-      seen.add(grantedBy.id);
-      return ownedByImport(grantedBy, seen);
-    };
-    return this.#replaceableItems().filter((i) => !ownedByImport(i));
-  }
-
-  async #removeDocumentsToBeUpdated(keepItemIds) {
-    const keep = new Set(keepItemIds);
-    const deleteIds = this.#replaceableItems()
-      .filter((i) => !keep.has(i.id))
-      .map((i) => i.id);
-    logger.debug("Removing items before import", { deleteIds, keepItemIds });
-    await this.actor.deleteEmbeddedDocuments("Item", deleteIds);
-  }
-
-  async #createAndUpdateItemsWithRuleRestore(items) {
-    const ruleUpdates = [];
-
-    const newItems = foundry.utils.deepClone(items);
-
-    for (const item of newItems) {
-      // marks the item as pathmuncher's, so a re-import can tell it from items added by hand
-      foundry.utils.setProperty(item, `flags.${CONSTANTS.FLAG_NAME}.imported`, true);
-      if (item.system.rules?.length > 0) {
-        ruleUpdates.push({
-          _id: item._id,
-          system: {
-            rules: foundry.utils.deepClone(item.system.rules).map((r) => {
-              delete r.choiceQueryResults;
-              return r;
-            }),
-          },
-        });
-        item.system.rules = item.system.rules
-          .filter((r) => {
-            const excludedKeys = ["ActiveEffectLike", "AdjustModifier", "Resistance", "Strike"].includes(r.key);
-            const grantItemWithFlags = ["GrantItem"].includes(r.key)
-              && (foundry.utils.hasProperty(r, "flag") || foundry.utils.getProperty(r, "pathmuncherImport"));
-            const objectSelection = ["ChoiceSet"].includes(r.key) && utils.isObject(r.selection);
-            return !excludedKeys && !grantItemWithFlags && !objectSelection;
-          })
-          .map((r) => {
-            if (r.key === "ChoiceSet") {
-              if ((utils.isString(r.choices) || utils.isObject(r.choices)) && r.choiceQueryResults) {
-                r.choices = r.choiceQueryResults;
-              }
-              if (Array.isArray(r.choices)) {
-                r.choices = r.choices.map((c) => {
-                  delete c.predicate;
-                  return c;
-                });
-              }
-            }
-            if (r.pathmuncherImport) r.pathmuncherImport = undefined;
-            return r;
-          });
-      }
-    }
-
-    logger.debug(`Creating items ${newItems.map((i) => i.name).join(", ")}`, newItems);
-    await this.actor.createEmbeddedDocuments("Item", newItems, { keepId: true });
-    logger.debug("Rule updates", ruleUpdates);
-    await this.actor.updateEmbeddedDocuments("Item", ruleUpdates);
-  }
-
-  async #updateItems(type) {
-    logger.debug(`Updating ${type}`, this.result[type]);
-    await this.actor.updateEmbeddedDocuments("Item", this.result[type]);
-  }
-
-  async #createActorEmbeddedDocuments() {
-    this.#statusUpdate(1, 12, "Character", "Eating");
-    if (this.options.addDeity) await this.#createAndUpdateItemsWithRuleRestore(this.result.deity);
-    if (this.options.addAncestry) await this.#createAndUpdateItemsWithRuleRestore(this.result.ancestry);
-    if (this.options.addHeritage) await this.#createAndUpdateItemsWithRuleRestore(this.result.heritage);
-    if (this.options.addBackground) await this.#createAndUpdateItemsWithRuleRestore(this.result.background);
-    if (this.options.addClass) await this.#createAndUpdateItemsWithRuleRestore(this.result.class);
-    if (this.options.addLores) await this.#createAndUpdateItemsWithRuleRestore(this.result.lores);
-
-    if (this.options.addFeats) {
-      // one at a time, in order: the system evaluates a feat's choices against the items already on
-      // the actor (Psi Development's psi cantrip depends on The Tangible Dream), so a single batch
-      // makes it prompt with no options
-      const featCount = this.result.feats.length;
-      for (const [i, feat] of this.result.feats.entries()) {
-        this.#statusUpdate(i, featCount, "Feats", "Eating");
-        await this.#createAndUpdateItemsWithRuleRestore([feat]);
-      }
-    }
-    if (this.options.addSpells) {
-      this.#statusUpdate(3, 12, "Spells", "Eating");
-      await this.#createAndUpdateItemsWithRuleRestore(this.result.casters);
-      await this.#createAndUpdateItemsWithRuleRestore(this.result.spells);
-    }
-    this.#statusUpdate(4, 12, "Equipment", "Eating");
-    if (this.options.addEquipment) {
-      await this.#createAndUpdateItemsWithRuleRestore(this.result.equipment);
-      await this.#updateItems("equipment");
-    }
-    if (this.options.addWeapons) await this.#createAndUpdateItemsWithRuleRestore(this.result.weapons);
-    if (this.options.addArmor) {
-      await this.#createAndUpdateItemsWithRuleRestore(this.result.armor);
-      await this.#updateItems("armor");
-    }
-    if (this.options.addTreasure) await this.#createAndUpdateItemsWithRuleRestore(this.result.treasure);
-    if (this.options.addMoney) await this.#createAndUpdateItemsWithRuleRestore(this.result.money);
-  }
-
-  async #restoreEmbeddedRuleLogic() {
-    const importedItems = this.actor.items.map((i) => i._id);
-    // Loop back over items and add rule and item progression data back in.
-    logger.debug("Restoring logic", () => ({ currentActor: foundry.utils.duplicate(this.actor) }));
-    const itemUpdates = [];
-    for (const [key, value] of Object.entries(this.autoAddedFeatureItems)) {
-      if (importedItems.includes(key)) {
-        itemUpdates.push({
-          _id: `${key}`,
-          system: {
-            items: foundry.utils.deepClone(value),
-          },
-        });
-      }
-    }
-    this.#statusUpdate(1, 12, "Feats", "Clearing");
-    logger.debug("Restoring granted item logic", itemUpdates);
-    await this.actor.updateEmbeddedDocuments("Item", itemUpdates);
-
-    const focus = foundry.utils.getProperty(this.result.character, "system.resources.focus");
-    if (focus) await this.actor.update({ "system.resources.focus": focus });
-  }
-
-  /**
-   * Replaces the actor's imported items with the processed result.
-   * keepItemIds: items in replaced categories to keep anyway; defaults to every item added by hand
-   * (findHandAddedItems), so nothing pathmuncher did not create is removed unless asked.
-   */
-  async updateActor({ keepItemIds = this.findHandAddedItems().map((i) => i.id) } = {}) {
-    // removing the actor's items is only safe once a complete result has been built
-    if (!this.processed) {
-      throw new Error("Pathmuncher: updateActor called before processCharacter completed");
-    }
-    await this.#removeDocumentsToBeUpdated(keepItemIds);
-
-    if (!this.options.addName) {
-      delete this.result.character.name;
-      delete this.result.character.prototypeToken.name;
-    }
-    if (!this.options.addFormulas) {
-      delete this.result.character.system.crafting?.formulas;
-    }
-
-    if (!this.boosts.custom) {
-      foundry.utils.setProperty(this.result.character, `system.abilities`, null);
-    }
-
-    logger.debug("Generated result", this.result);
-    await this.actor.update(this.result.character);
-    await this.#createActorEmbeddedDocuments();
-    await this.#restoreEmbeddedRuleLogic();
-  }
-
-  static ATTRIBUTE_NAMES = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
-
-  /**
-   * Pathbuilder specials that matched nothing, by their Pathbuilder name. Leaves out labels that
-   * need no item: the shared ignore lists (skills, "Spellbook", ...), attribute names, lores, and
-   * spells Pathbuilder also lists as specials ("Studious Spell: Blur") when the spell was imported.
-   */
-  static #specialSlug(name) {
-    return Seasoning.slug(String(name ?? "").replace(/\s*\(.*?\)\s*/g, " ").trim());
-  }
-
-  /** The entries of a parsed list (feats, specials, equipment, weapons, armor) that nothing matched. */
-  #unmatchedEntries(list) {
-    return this.parsed[list].filter((entry) => entry.status === ParsedEntry.STATUS.UNMATCHED);
-  }
-
-  /** Specials no item was matched to, leaving out Pathbuilder's labels, lores and spells. */
-  #specialsWithoutItems() {
-    const slug = Pathmuncher.#specialSlug;
-    const ignored = new Set([...Seasoning.IGNORED_FEATS(), ...Seasoning.IGNORED_SPECIALS(), ...Pathmuncher.ATTRIBUTE_NAMES]
-      .map(slug));
-    const lores = new Set((this.source?.lores ?? []).flatMap(([name]) => [slug(name), slug(`Lore: ${name}`)]));
-    const spells = new Set(this.result.spells.map((s) => slug(s.name)));
-    // Pathbuilder repeats some specials (a thaumaturge's implement once per tier): one match covers them
-    const settled = new Set(this.parsed.specials.filter((entry) => entry.added).map((entry) => entry.name));
-    const names = this.#unmatchedEntries("specials")
-      .filter((entry) => entry.sourceType === "specials" && !settled.has(entry.name) && !BAD_IGNORE_FEATURES(entry.name))
-      .map((entry) => entry.originalName);
-    return [...new Set(names)]
-      .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
-  }
-
-  /** Item types whose descriptions can describe a special as one of their sections. */
-  static DESCRIBING_ITEM_TYPES = ["ancestry", "heritage", "background", "class", "feat", "action", "deity"];
-
-  /**
-   * Specials without an item of their own that a feature on the actor describes, under a heading or
-   * bold lead-in of the same name: Pathbuilder's "Immunity to Death Effects" is a section of Basic
-   * Undead Benefits, and its "Negative Healing" is that feature's "Void Healing". Grouped by the
-   * describing item: [{ uuid, name, specials: [{ name, text }] }]. Use once the actor is updated.
-   */
-  getDescribedSpecials() {
-    const sections = this.actor.items
-      .filter((item) => Pathmuncher.DESCRIBING_ITEM_TYPES.includes(item.type))
-      .flatMap((item) => Seasoning.describedSections(item.system.description?.value)
-        .flatMap((section) => [
-          { ...section, item, slug: Pathmuncher.#specialSlug(section.term) },
-          // Pathbuilder can name a section after its feature: "Animal Instinct Raging Resistance"
-          { ...section, item, slug: Pathmuncher.#specialSlug(`${item.name} ${section.term}`) },
-        ]));
-    const origins = new Map();
-    for (const name of new Set(this.#specialsWithoutItems())) {
-      const slugs = remasterTermNames(name).map((n) => Pathmuncher.#specialSlug(n));
-      const section = sections.find((s) => slugs.includes(s.slug));
-      if (!section) continue;
-      if (!origins.has(section.item.uuid)) origins.set(section.item.uuid, { uuid: section.item.uuid, name: section.item.name, specials: [] });
-      origins.get(section.item.uuid).specials.push({ name, text: section.text });
-    }
-    return [...origins.values()];
-  }
-
-  /** Specials the report lists as unmatched: no item of their own, and not described by another. */
-  getUnmatchedSpecials() {
-    const described = new Set(this.getDescribedSpecials().flatMap((origin) => origin.specials.map((s) => s.name)));
-    return this.#specialsWithoutItems().filter((name) => !described.has(name));
-  }
-
-  /**
-   * What the import could not match, by category, for the post-import report: an array of
-   * { type, label, names } for the categories that have any, in the order they are shown.
-   */
-  /** Report groups that are not a kind of item, with their own heading and hint (Dialogs.Report.<key>, <key>Hint). */
-  static REPORT_GROUPS = { described: "Described", rule: "Rules" };
-
-  getImportReport() {
-    const bad = (type, option, filter = () => true) => (option === null || this.options[option]
-      ? this.bad.filter((b) => b.type === type && filter(b)).map((b) => b.pbName)
-      : []);
-    const unmatchedFeats = this.options.addFeats
-      ? this.#unmatchedEntries("feats").filter((entry) => !BAD_IGNORE_FEATURES(entry.name)).map((entry) => entry.name)
-      : [];
-    // unmatched items: the parsed entries, and anything else of the type (an sf2e upgrade)
-    const unmatchedItems = (list, type, option) => (this.options[option]
-      ? [...this.#unmatchedEntries(list).map((entry) => entry.pbName), ...bad(type, option)]
-      : []);
-    const described = this.options.addFeats ? this.getDescribedSpecials() : [];
-    const groups = [
-      ["class", bad("class", "addClass")],
-      ["ancestry", bad("ancestry", "addAncestry")],
-      ["heritage", bad("heritage", "addHeritage")],
-      ["background", bad("background", "addBackground")],
-      ["deity", bad("deity", "addDeity", (b) => b.pbName && b.pbName !== "Not set")],
-      ["feat", [...bad("feat", "addFeats"), ...unmatchedFeats]],
-      ["special", this.options.addFeats ? this.getUnmatchedSpecials() : []],
-      ["described", described.flatMap((origin) => origin.specials.map((s) => s.name))],
-      ["equipment", unmatchedItems("equipment", "equipment", "addEquipment")],
-      ["weapon", unmatchedItems("weapons", "weapon", "addWeapons")],
-      ["armor", unmatchedItems("armor", "armor", "addArmor")],
-      ["spellcasting", bad("spellcasting", "addSpells")],
-      ["spell", bad("spell", "addSpells")],
-      ["ritual", bad("ritual", "addSpells")],
-      ["formula", bad("formula", "addFormulas")],
-      ["familiar", bad("familiar", "addFamiliars")],
-      ["rule", bad("rule", null)],
-    ];
-    const labels = {
-      class: "Class", ancestry: "Ancestry", heritage: "Heritage", background: "Background", deity: "Deity",
-      feat: "Feats", special: "Specials", equipment: "Equipment", weapon: "Weapons", armor: "Armor",
-      spellcasting: "Spellcasting", spell: "Spells", ritual: "Rituals", formula: "Formulas", familiar: "Familiars",
-    };
-    return groups
-      .map(([type, names]) => ({
-        type,
-        label: game.i18n.localize(Pathmuncher.REPORT_GROUPS[type]
-          ? `pathmuncher.Dialogs.Report.${Pathmuncher.REPORT_GROUPS[type]}`
-          : `pathmuncher.Labels.${labels[type]}`),
-        names: [...new Set(names)],
-        ...(type === "described" && { origins: described }),
-      }))
-      .filter((group) => group.names.length > 0);
-  }
-
-  async postImportCheck() {
-    const report = this.getImportReport();
-    logger.debug("Post import report", { report, focusPool: this.result.focusPool });
-
-    if (report.length === 0) {
-      ui.notifications.info(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedSuccess"));
-      return;
-    }
-
-    ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
-    const escape = foundry.utils.escapeHTML;
-    const { enrichHTML } = foundry.applications.ux.TextEditor.implementation;
-    const clip = (text, length = 400) => (text.length <= length ? text : `${text.slice(0, text.lastIndexOf(" ", length))} …`);
-    // specials another feature describes: a link to the feature, and each special's section on hover
-    const originList = async (origins) => (await Promise.all(origins.map(async (origin) => `<li class="pathmuncher-report-origin">
-        ${await enrichHTML(`@UUID[${origin.uuid}]{${origin.name}}`)}
-        <ul>${origin.specials.map((s) => `<li class="pathmuncher-report-described" data-tooltip="${escape(clip(s.text))}">${escape(s.name)}</li>`).join("")}</ul>
-      </li>`))).join("");
-    const hint = (group) => (Pathmuncher.REPORT_GROUPS[group.type]
-      ? `<p class="hint">${game.i18n.localize(`pathmuncher.Dialogs.Report.${Pathmuncher.REPORT_GROUPS[group.type]}Hint`)}</p>`
-      : "");
-    const groupBody = async (group) => (group.origins
-      ? `${hint(group)}<ul>${await originList(group.origins)}</ul>`
-      : `${hint(group)}<ul>${group.names.map((name) => `<li>${escape(name)}</li>`).join("")}</ul>`);
-    const sections = (await Promise.all(report.map(async (group) => `<section class="pathmuncher-report-group">
-        <h4>${escape(group.label)} <span class="pathmuncher-report-count">${group.names.length}</span></h4>
-        ${await groupBody(group)}
-      </section>`))).join("");
-    await foundry.applications.api.DialogV2.prompt({
-      window: { title: "pathmuncher.Dialogs.Report.Title", icon: "fas fa-clipboard-list" },
-      classes: ["pathmuncher", "pathmuncher-report"],
-      position: { width: 480 },
-      content: `<p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.Intro")}</p>
-        <div class="pathmuncher-report-groups">${sections}</div>`,
-      ok: { label: "pathmuncher.Labels.Finished", icon: "fas fa-check" },
-      rejectClose: false,
-    });
-  }
 }
