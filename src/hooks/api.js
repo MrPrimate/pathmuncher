@@ -3,6 +3,7 @@ import { CompendiumSelector } from "../app/CompendiumSelector.js";
 import { Pathmuncher } from "../app/Pathmuncher.js";
 import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
 import { PetShop } from "../app/PetShop.js";
+import { Pf2eRules } from "../app/Pf2eRules.js";
 import { Seasoning } from "../app/Seasoning.js";
 import CONSTANTS from "../constants.js";
 import { EQUIPMENT_RENAME_MAP, RESTRICTED_EQUIPMENT } from "../data/equipment.js";
@@ -15,6 +16,7 @@ export function registerAPI() {
     Pathmuncher,
     PathmuncherImporter,
     PetShop,
+    Pf2eRules,
     CompendiumMatcher,
     Seasoning,
     CompendiumSelector,

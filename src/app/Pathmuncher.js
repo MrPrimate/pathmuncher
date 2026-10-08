@@ -22,6 +22,7 @@ import {
 } from "./DeityChoices.js";
 import { FeatureNames } from "./FeatureNames.js";
 import { ParsedEntry } from "./ParsedEntry.js";
+import { Pf2eRules } from "./Pf2eRules.js";
 import { Seasoning } from "./Seasoning.js";
 
 export class Pathmuncher {
@@ -1223,19 +1224,10 @@ export class Pathmuncher {
 
     const cleansedChoiceSet = foundry.utils.deepClone(choiceSet);
     try {
-      // const itemData = foundry.utils.deepClone(document);
-      // itemData.system.rules = foundry.utils.deepClone(processedRules);
-      // itemData.system.rules.push(cleansedChoiceSet);
-
-      // const item = new Item.implementation(itemData, { temporary: true, parent: tempActor, keepId: true });
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const choiceSetRules = new game.pf2e.RuleElements.all.ChoiceSet(cleansedChoiceSet, { parent: item, suppressWarnings: true });
-      const rollOptions = [
-        tempActor.getRollOptions(),
-        // item.getRollOptions("item"),
-        item.getRollOptions("parent"),
-      ].flat();
-      const choices = await choiceSetRules.inflateChoices(rollOptions, []);
+      const choiceSetRules = Pf2eRules.ruleElement(cleansedChoiceSet, item);
+      const rollOptions = Pf2eRules.rollOptions(tempActor, item);
+      const choices = await Pf2eRules.choices(choiceSetRules, rollOptions);
 
       logger.debug("Starting choice evaluation", {
         document,
@@ -1283,20 +1275,9 @@ export class Pathmuncher {
 
       if (this.#deferChoice(document, choiceSet, choices)) return undefined;
 
-      let tempSet = foundry.utils.deepClone(choiceSet);
+      const tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
-      await choiceSetRules.preCreate({
-        itemSource: item,
-        ruleSource: tempSet,
-        pendingItems: [item],
-        tempItems: [],
-        operation: {
-          keepId: 1,
-          parent: tempActor,
-          // render: false,
-        },
-        reevaluation: true,
-      });
+      await Pf2eRules.makeSelection(choiceSetRules, { item, actor: tempActor, ruleSource: tempSet });
       if (this.devMode) logger.warn("chociesetdata", {
         choiceSetRules,
         selection: choiceSetRules.selection,
@@ -1348,26 +1329,9 @@ export class Pathmuncher {
     const cleansedRuleEntry = foundry.utils.deepClone(ruleEntry);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      // console.warn("creating grant item");
-      const grantItemRule = new game.pf2e.RuleElements.all.GrantItem(cleansedRuleEntry, { parent: item, suppressWarnings: true });
-      // console.warn("Begining uuid resovle");
-      const uuid = grantItemRule.resolveInjectedProperties(grantItemRule.uuid, { warn: false });
-
-      const tempItems = [];
-      let itemUpdates = [];
-      const context = { parent: tempActor, render: false };
-      await grantItemRule.preCreate({
-        itemSource: item,
-        ruleSource: cleansedRuleEntry,
-        pendingItems: [item],
-        tempItems,
-        context,
-        reevaluation: true,
-        operation: {
-          keepId: 0,
-        },
-        itemUpdates,
-      });
+      const grantItemRule = Pf2eRules.ruleElement(cleansedRuleEntry, item);
+      const uuid = Pf2eRules.grantedUuid(grantItemRule);
+      const tempItems = await Pf2eRules.grantedItems(grantItemRule, { item, actor: tempActor, ruleSource: cleansedRuleEntry });
 
       logger.debug("uuid selection", {
         document,
@@ -1376,7 +1340,6 @@ export class Pathmuncher {
         grantItemRule,
         uuid,
         tempItems,
-        itemUpdates,
       });
 
       if (uuid || tempItems.length > 0) {
@@ -1410,23 +1373,18 @@ export class Pathmuncher {
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item, suppressWarnings: true })
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item, suppressWarnings: true });
-      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
+      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item);
+      const rollOptions = Pf2eRules.rollOptions(tempActor, item);
 
-      if (rule.predicate) {
-        const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
-        if (!predicate.test(rollOptions)) return false;
-      }
+      if (rule.predicate && !Pf2eRules.predicatePasses(ruleElement, rollOptions)) return false;
 
       const choices = cleansedRule.key === "ChoiceSet"
-        ? await ruleElement.inflateChoices(rollOptions, [item])
-        : [ruleElement.resolveValue()];
+        ? await Pf2eRules.choices(ruleElement, rollOptions, [item])
+        : [Pf2eRules.resolvedValue(ruleElement)];
 
       const isGood = cleansedRule.key === "ChoiceSet"
         ? (await this.#featureChoiceMatch(document, choices, false)) !== undefined
-        : ruleElement.test(rollOptions);
+        : Pf2eRules.applies(ruleElement, rollOptions);
 
       logger.debug("Checking rule", {
         tempActor,
@@ -1459,17 +1417,8 @@ export class Pathmuncher {
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const ruleElement = cleansedRule.key === "ChoiceSet"
-        ? new game.pf2e.RuleElements.all.ChoiceSet(cleansedRule, { parent: item, suppressWarnings: true })
-        : new game.pf2e.RuleElements.all.GrantItem(cleansedRule, { parent: item, suppressWarnings: true });
-      const rollOptions = [tempActor.getRollOptions(), item.getRollOptions("parent")].flat();
-
-      if (rule.predicate) {
-        const predicate = ruleElement.resolveInjectedProperties(ruleElement.predicate);
-        return predicate.test(rollOptions);
-      } else {
-        return true;
-      }
+      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item);
+      return rule.predicate ? Pf2eRules.predicatePasses(ruleElement, Pf2eRules.rollOptions(tempActor, item)) : true;
     } catch (err) {
       logger.error("Something has gone most wrong during rule predicate checking", {
         document,

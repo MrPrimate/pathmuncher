@@ -210,7 +210,8 @@
     "Chat": {},
     "Notifications": {
       "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user.",
-      "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually."
+      "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually.",
+      "SystemChanged": "Pathmuncher cannot find parts of the system it uses to work out choices from a Pathbuilder build, possibly after an update to {version}. Imports will still run, but the system will ask for more choices. Check for a Pathmuncher update."
     },
     "Labels": {
       "PreImportBackup": "pre-import backup",
