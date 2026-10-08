@@ -4,6 +4,7 @@
 - The temp-folder settings have been removed.
 - Players without permission to delete actors can now import.
 - Imports are faster and produce much less console output.
+- Pathbuilder lets a cleric or champion pick domains, a divine font or a sanctification (or a cause needing one) that their deity does not allow. The importer now spots this and asks: keep the deity and pick choices it allows, or keep the choices and pick (or drop in) a deity that allows them all.
 
 # 1.6.2
 

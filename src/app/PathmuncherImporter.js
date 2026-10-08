@@ -1,6 +1,7 @@
 import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
+import { DeityConflictDialog } from "./DeityConflictDialog.js";
 import { Pathmuncher } from "./Pathmuncher.js";
 import { PetShop } from "./PetShop.js";
 
@@ -171,6 +172,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       pathbuilderId: this.source === "id" ? String(data.pathbuilderId ?? "").trim() : undefined,
       statusCallback: this.#updateProgress.bind(this),
       resolveMissingCore: PathmuncherImporter.#chooseMissingCore,
+      resolveDeityConflict: DeityConflictDialog.choose,
     };
     logger.debug("Pathmuncher options", options);
 

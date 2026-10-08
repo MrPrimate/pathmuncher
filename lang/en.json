@@ -72,6 +72,54 @@
         "Import": "Import",
         "Cancel": "Cancel import"
       },
+      "DeityConflict": {
+        "Title": "Pathmuncher | Deity choices",
+        "BuiltWith": "Built following",
+        "Content": "Pathbuilder allowed choices this deity does not grant its followers, so the system would ask for them again. Keep the deity and pick choices it allows, or keep your choices and pick a deity that allows them all. Hover over an option for details.",
+        "Conflicts": {
+          "domain": "{deity} does not grant the {domain} domain.",
+          "font": "{deity} does not grant a {font}.",
+          "sanctification": "{deity} does not allow the sanctification {sanctification}.",
+          "cause": "The {cause} cause needs {sanctification} sanctification, which {deity} does not allow."
+        },
+        "KeepDeity": "Keep {deity}",
+        "KeepDeityHint": "and replace the choices it does not allow",
+        "KeepChoices": "Keep your choices",
+        "KeepChoicesHint": "and follow a deity that allows them all ({count} found)",
+        "Replace": {
+          "domain": "Instead of {choice}",
+          "font": "Instead of {choice}",
+          "sanctification": "Instead of {choice} sanctification",
+          "cause": "Instead of the {choice} cause"
+        },
+        "Font": {
+          "heal": "Healing Font",
+          "harm": "Harmful Font"
+        },
+        "FontHint": {
+          "heal": "Extra heal spells each day.",
+          "harm": "Extra harm spells each day."
+        },
+        "Sanctification": {
+          "holy": "Holy",
+          "unholy": "Unholy",
+          "none": "None"
+        },
+        "SanctificationHint": {
+          "holy": "You gain the holy trait.",
+          "unholy": "You gain the unholy trait.",
+          "none": "Neither holy nor unholy."
+        },
+        "Search": "Filter deities",
+        "NoOptions": "The deity allows nothing else here.",
+        "NoDeities": "No deity in the searched compendiums allows all of these choices. You can still drop one.",
+        "Drop": "Drop a deity here, or click to open the compendium",
+        "WrongType": "That item is not a deity.",
+        "StillConflicts": "{deity} still does not allow {count} of these choices; the system will ask for them during the import.",
+        "Import": "Import",
+        "AsBuilt": "Import as built",
+        "Cancel": "Cancel import"
+      },
       "KeepItems": {
         "Title": "Pathmuncher | Keep items added by hand?",
         "Content": "These items were not added by a Pathmuncher import, but are in categories this import replaces. Ticked items are kept; unticked items are deleted. Items you keep that are also in the Pathbuilder build will appear twice.",

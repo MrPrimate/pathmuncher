@@ -14,6 +14,13 @@ import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { CompendiumMatcher } from "./CompendiumMatcher.js";
+import {
+  FOLLOWABLE_DEITY_CATEGORIES,
+  buildDeityChoices,
+  deityConflicts,
+  deitySanctifications,
+  replaceSpecials,
+} from "./DeityChoices.js";
 import { Seasoning } from "./Seasoning.js";
 
 export class Pathmuncher {
@@ -135,7 +142,7 @@ export class Pathmuncher {
       ? utils.setting("CUSTOM_COMPENDIUM_MAPPINGS")
       : CONSTANTS.CORE_COMPENDIUM_MAPPINGS;
     for (const type of Object.keys(compendiumMappings)) {
-      this.compendiumMatchers[type] = new CompendiumMatcher({ type });
+      this.compendiumMatchers[type] = new CompendiumMatcher({ type, indexFields: Pathmuncher.INDEX_FIELDS[type] });
     }
 
     this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
@@ -613,7 +620,6 @@ export class Pathmuncher {
   }
 
   async #prepare() {
-    await this.#loadCompendiumMatchers();
     this.#nameMap();
     this.#fixUps();
   }
@@ -665,6 +671,77 @@ export class Pathmuncher {
       .map((lookup) => ({ ...lookup, name: this.source[lookup.target] }))
       .filter(({ type, name }) => name && name !== "Not set" && !this.#findCompendiumMatch(type, name))
       .map((lookup) => ({ ...lookup, packs: Object.keys(this.compendiumMatchers[lookup.type].packs) }));
+  }
+
+  /** Index fields beyond the defaults, for the compendium types that need them. */
+  static INDEX_FIELDS = {
+    deities: [
+      "name", "type", "img", "system.slug", "system.category",
+      "system.domains", "system.font", "system.sanctification", "system.weapons",
+    ],
+  };
+
+  /**
+   * The build's deity and the choices it made that the deity does not allow (Pathbuilder allows any),
+   * with the deities that would allow them all: null if there is nothing to resolve.
+   * { deity, choices, conflicts: [{ kind, special, value }], deities: [index entries with uuid], causes }
+   */
+  async findDeityConflict() {
+    if (this.options.addDeity === false) return null;
+    const name = this.source.deity;
+    if (!name || name === "Not set") return null;
+    const match = this.#findCompendiumMatch("deities", name);
+    if (!match) return null;
+
+    const choices = buildDeityChoices(this.source.specials, this.source.feats);
+    const deity = { ...match.i, uuid: match.pack.getUuid(match.i._id) };
+    const conflicts = deityConflicts(deity, choices);
+    if (conflicts.length === 0) return null;
+
+    const matcher = this.compendiumMatchers.deities;
+    const seen = new Set();
+    const deities = Object.entries(matcher.indexes)
+      .flatMap(([packName, index]) => index.map((i) => ({ ...i, uuid: matcher.packs[packName].getUuid(i._id) })))
+      .filter((i) => FOLLOWABLE_DEITY_CATEGORIES.includes(i.system?.category ?? "deity"))
+      .filter((i) => deityConflicts(i, choices).length === 0)
+      // the first compendium searched wins, as for the deity lookup itself
+      .filter((i) => !seen.has(i.name) && seen.add(i.name))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const causes = conflicts.some((c) => c.kind === "cause") ? await Pathmuncher.#championCauses(deity) : [];
+    logger.debug("Deity conflict", { deity, choices, conflicts, deities, causes });
+    return { deity, choices, conflicts, deities, causes, packs: Object.keys(matcher.packs) };
+  }
+
+  /** The champion causes a follower of the deity can take: [{ name, img, uuid, value }], value being the sanctification needed. */
+  static async #championCauses(deity) {
+    const pack = game.packs.get(`${game.system.id}.classfeatures`);
+    if (!pack) return [];
+    const index = await pack.getIndex({ fields: ["system.traits.otherTags", "system.description.value"] });
+    const allowed = deitySanctifications(deity);
+    return index
+      .filter((i) => i.system?.traits?.otherTags?.includes("champion-cause"))
+      .map((i) => {
+        const tags = i.system.traits.otherTags;
+        const value = tags.includes("holy") ? "holy" : tags.includes("unholy") ? "unholy" : null;
+        return { name: i.name, img: i.img, uuid: pack.getUuid(i._id), value, description: i.system.description?.value ?? "" };
+      })
+      .filter((cause) => !cause.value || allowed.includes(cause.value))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Applies the user's answer to a deity conflict: { deity } follows another deity (an Item, from
+   * a compendium or the world), { specials: { old: new } } replaces the conflicting choices, and {}
+   * imports the build as it is.
+   */
+  #applyDeityResolution({ deity, specials } = {}) {
+    if (deity) {
+      this.coreReplacements.deity = deity;
+      this.source.deity = deity.name;
+    }
+    if (specials) this.source.specials = replaceSpecials(this.source.specials, specials);
+    logger.debug("Deity conflict resolved", { deity, specials, source: this.source });
   }
 
   async #processGenericCompendiumLookup(type, name, target, levelCap = 20) {
@@ -3130,12 +3207,20 @@ export class Pathmuncher {
     if (!this.source) return false;
     Pathmuncher.normaliseSource(this.source);
     this.#warnVariantMismatch();
+    await this.#loadCompendiumMatchers();
+    // before the build is read, so a replacement deity or choice is imported as if Pathbuilder had it
+    const deityConflict = await this.findDeityConflict();
+    if (deityConflict && this.options.resolveDeityConflict) {
+      const resolution = await this.options.resolveDeityConflict(deityConflict);
+      if (!resolution) return false;
+      this.#applyDeityResolution(resolution);
+    }
     await this.#prepare();
     const missingCore = this.#findMissingCore();
     if (missingCore.length > 0 && this.options.resolveMissingCore) {
       const replacements = await this.options.resolveMissingCore(missingCore);
       if (!replacements) return false;
-      this.coreReplacements = replacements;
+      Object.assign(this.coreReplacements, replacements);
     }
     this.#statusUpdate(1, 12, "Character");
     await this.#processCore();
