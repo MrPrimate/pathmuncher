@@ -72,6 +72,9 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
     - a cleric's domain;
     - a sorcerer's bloodline and its kind;
     - an item's several choices of one kind (the Commander's tactics), each taking a different entry.
+    - a choice of items the build carries exactly one of (Surki Weapon Familiarity's weapon);
+    - a champion's sanctification, from the cause.
+  - Choices the export doesn't answer are collected and asked together after processing.
   - Pathbuilder's awarded feats repeated in specials are created once.
   - A class feature the class lists under another name (the Champion's "Weapon Mastery") is matched.
   - A spellbook spell prepared in a higher slot keeps its spellbook rank.
@@ -93,6 +96,15 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - All / None, and blended slots following the Spells option.
   - The compendium selector's add, move and reset.
   - Cancelling the reset-settings menu changes nothing.
+- `snapshot.test.js`: each import compared with its saved snapshot (`fixtures/snapshots`), so a
+  change to what an import produces shows as the lines that changed.
+  - `pmt.characterSnapshot` records the character's details, every item as one line (slot, levels,
+    what granted it, its choices, quantity, container, runes), the spellcasting entries, the
+    post-import report and the prompts. Item ids become item names and lists are sorted.
+  - Covers every fixture and the first generated build of each class. `PMT_SNAPSHOT_ALL=1` covers
+    every generated build.
+  - When a change is meant to alter the result, rerun with `PMT_UPDATE_SNAPSHOTS=1` to rewrite the
+    snapshots, and review their diff before committing.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.
@@ -109,6 +121,7 @@ Add new behaviour tests next to these as plain scripts that call `pmt.test(name,
 - `pmt.useBuildVariants`
 - `pmt.answerPrompts`
 - `pmt.captureNotifications`
+- `pmt.characterSnapshot` and `pmt.snapshotDifferences`
 - `t.cleanup`
 
 ## Survey of generated builds

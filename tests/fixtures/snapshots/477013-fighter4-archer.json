@@ -1,0 +1,81 @@
+{
+  "character": {
+    "name": "Unknown Adventurer",
+    "level": 4,
+    "ancestry": "Human",
+    "heritage": "Skilled Human (Medicine)",
+    "background": "Barkeep",
+    "class": "Fighter",
+    "deity": null,
+    "keyAbility": "str",
+    "attributes": {
+      "str": 3,
+      "dex": 1,
+      "con": 1,
+      "int": 0,
+      "wis": 0,
+      "cha": 0
+    },
+    "hp": 52,
+    "ac": 17,
+    "perception": 2,
+    "senses": [],
+    "saves": {
+      "fortitude": 2,
+      "reflex": 2,
+      "will": 2
+    },
+    "skills": {
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 1,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 1,
+      "intimidation": 0,
+      "medicine": 1,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0
+    },
+    "languages": [
+      "common"
+    ],
+    "size": "med",
+    "focus": 0
+  },
+  "items": [
+    "action: Reactive Strike [granted by Reactive Strike]",
+    "ancestry: Human",
+    "background: Barkeep",
+    "class: Fighter [fighterSkill=athletics]",
+    "feat: Archer Dedication [slot class-2; level 2; taken 2]",
+    "feat: Assurance (Athletics) [slot skill-2; level 1; taken 2; assurance=athletics]",
+    "feat: Battle Medicine [slot general-3; level 1; taken 3]",
+    "feat: Bravery [in Fighter; level 3]",
+    "feat: Double Slice [slot class-1; level 1; taken 1]",
+    "feat: Exacting Strike [level 1; taken 1; granted by Natural Ambition]",
+    "feat: Hefty Hauler [slot skill-4; level 1; taken 4]",
+    "feat: Hobnobber [in Barkeep; level 1]",
+    "feat: Natural Ambition [slot ancestry-1; level 1; taken 1; naturalAmbition=Compendium.pf2e.feats-srd.Item.8tS5NzytLmgbq5hF]",
+    "feat: Quick Shot [slot class-4; level 4; taken 4]",
+    "feat: Reactive Strike [in Fighter; level 1]",
+    "feat: Shield Block [in Fighter; level 1]",
+    "feat: Shield Block [level 1; granted by Shield Block]",
+    "heritage: Skilled Human (Medicine) [skill=medicine]",
+    "lore: Alcohol [rank 1]",
+    "treasure: Copper Pieces [qty 0; worn]",
+    "treasure: Gold Pieces [qty 15; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 0; worn]"
+  ],
+  "spellcasting": [],
+  "report": {},
+  "described": [],
+  "prompts": []
+}

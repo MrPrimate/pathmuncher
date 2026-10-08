@@ -1,0 +1,143 @@
+{
+  "character": {
+    "name": "PMTG Wizard 16",
+    "level": 20,
+    "ancestry": "Merfolk",
+    "heritage": "Reef Merfolk",
+    "background": "Barkeep",
+    "class": "Wizard",
+    "deity": null,
+    "keyAbility": "int",
+    "attributes": {
+      "str": 1,
+      "dex": 1,
+      "con": 0,
+      "int": 1,
+      "wis": 0,
+      "cha": 1
+    },
+    "hp": 128,
+    "ac": 35,
+    "perception": 2,
+    "senses": [
+      "low-light-vision"
+    ],
+    "saves": {
+      "fortitude": 2,
+      "reflex": 2,
+      "will": 3
+    },
+    "skills": {
+      "acrobatics": 0,
+      "arcana": 1,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 1,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 1,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0
+    },
+    "languages": [
+      "common",
+      "thalassic"
+    ],
+    "size": "med",
+    "focus": 0
+  },
+  "items": [
+    "action: Cast a Spell [granted by Wizard Spellcasting]",
+    "action: Drain Bonded Item [granted by Arcane Bond]",
+    "ancestry: Merfolk",
+    "background: Barkeep",
+    "class: Wizard",
+    "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
+    "feat: Additional Lore [level 1; taken 1; granted by Merfolk Lore]",
+    "feat: Adventurous Outfitter [slot skill-14; level 7; taken 14]",
+    "feat: Aquatic Grace [in Merfolk; level 1]",
+    "feat: Arcane Bond [in Wizard; level 1]",
+    "feat: Arcane School [in Wizard; level 1; arcaneSchool=Compendium.pf2e.classfeatures.Item.srcPBNjhq7FBSmi3]",
+    "feat: Arcane Thesis [in Wizard; level 1; arcaneThesis=Compendium.pf2e.classfeatures.Item.QzWXMCSGNfvvpYgF]",
+    "feat: Archwizard's Might [slot class-20; level 20; taken 20]",
+    "feat: Archwizard's Spellcraft [in Wizard; level 19]",
+    "feat: Aura Sight [slot skill-12; level 2; taken 12]",
+    "feat: Bargain Hunter [slot skill-20; level 1; taken 20]",
+    "feat: Bespell Strikes [slot class-6; level 4; taken 6]",
+    "feat: Bond Conservation [slot class-8; level 8; taken 8; spellshape=null]",
+    "feat: Bonded Focus [slot class-14; level 14; taken 14]",
+    "feat: Defensive Robes [in Wizard; level 13]",
+    "feat: Dizzying Spell [slot class-18; level 14; taken 18]",
+    "feat: Environmental Guide [slot skill-8; level 7; taken 8]",
+    "feat: Expeditious Search [slot general-7; level 7; taken 7]",
+    "feat: Expert Spellcaster [in Wizard; level 7]",
+    "feat: Familiar [slot class-2; level 1; taken 2]",
+    "feat: Folk Dowsing [slot skill-4; level 3; taken 4]",
+    "feat: Hobnobber [in Barkeep; level 1]",
+    "feat: Hydration (Merfolk) [in Merfolk; level 1]",
+    "feat: Incredible Scout [slot general-15; level 11; taken 15]",
+    "feat: Legendary Guide [slot skill-16; level 15; taken 16]",
+    "feat: Legendary Spellcaster [in Wizard; level 19]",
+    "feat: Leverage Connections [slot skill-6; level 2; taken 6]",
+    "feat: Magical Fortitude [in Wizard; level 9]",
+    "feat: Master Spellcaster [in Wizard; level 15]",
+    "feat: Merfolk Lore [slot ancestry-1; level 1; taken 1]",
+    "feat: Merfolk Weapon Familiarity [slot ancestry-5; level 1; taken 5]",
+    "feat: Overwhelming Energy [slot class-12; level 10; taken 12]",
+    "feat: Perception Expertise [in Wizard; level 11]",
+    "feat: Pet [level 1; taken 2; granted by Familiar]",
+    "feat: Prodigious Will [in Wizard; level 17]",
+    "feat: Pummeling Whirlpool [slot ancestry-17; level 13; taken 17]",
+    "feat: Red Mantis Magic School [level 1; granted by Arcane School]",
+    "feat: Reflex Expertise [in Wizard; level 5]",
+    "feat: Sea Witch [slot ancestry-13; level 13; taken 13]",
+    "feat: Shield Block [slot general-3; level 1; taken 3]",
+    "feat: Siren Song [slot ancestry-9; level 9; taken 9]",
+    "feat: Skeptic's Defense [slot skill-10; level 7; taken 10]",
+    "feat: Spell Protection Array [slot class-4; level 4; taken 4]",
+    "feat: Spell Substitution [level 1; granted by Arcane Thesis]",
+    "feat: Spell Tinker [slot class-16; level 16; taken 16]",
+    "feat: Steady Spellcasting [slot class-10; level 6; taken 10]",
+    "feat: Tattoo Artist [slot skill-2; level 2; taken 2]",
+    "feat: True Perception [slot general-19; level 19; taken 19]",
+    "feat: Unified Theory [slot skill-18; level 15; taken 18]",
+    "feat: Weapon Expertise [in Wizard; level 11]",
+    "feat: Weapon Specialization [in Wizard; level 13]",
+    "feat: Wizard Spellcasting [in Wizard; level 1]",
+    "heritage: Reef Merfolk",
+    "lore: Alcohol [rank 1]",
+    "lore: Merfolk [rank 4]",
+    "spell: Aqueous Orb [in Sea Witch; rank 5]",
+    "spell: Control Water [in Sea Witch; rank 5]",
+    "spellcastingEntry: Arcane Focus Tradition",
+    "spellcastingEntry: Sea Witch",
+    "spellcastingEntry: Wizard",
+    "treasure: Copper Pieces [qty 0; worn]",
+    "treasure: Gold Pieces [qty 15; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 0; worn]"
+  ],
+  "spellcasting": [
+    "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
+    "Sea Witch [primal; prepared; cha; proficiency 4] rank 5: 2 [Aqueous Orb, Control Water]",
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 2 [-, -]"
+  ],
+  "report": {
+    "special": [
+      "Arcane School: School of the Armada"
+    ],
+    "spell": [
+      "Control Currents"
+    ]
+  },
+  "described": [],
+  "prompts": [
+    "Arcane School: Red Mantis Magic School (guessed)"
+  ]
+}

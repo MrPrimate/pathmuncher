@@ -1,0 +1,91 @@
+{
+  "character": {
+    "name": "Montgomery Fisher",
+    "level": 1,
+    "ancestry": "Fleshwarp",
+    "heritage": "Beastkin",
+    "background": "Back-Alley Doctor",
+    "class": "Gunslinger",
+    "deity": null,
+    "keyAbility": "dex",
+    "attributes": {
+      "str": 2,
+      "dex": 3,
+      "con": 2,
+      "int": 1,
+      "wis": 1,
+      "cha": 0
+    },
+    "hp": 20,
+    "ac": 17,
+    "perception": 2,
+    "senses": [
+      "low-light-vision"
+    ],
+    "saves": {
+      "fortitude": 2,
+      "reflex": 2,
+      "will": 1
+    },
+    "skills": {
+      "acrobatics": 1,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 1,
+      "diplomacy": 0,
+      "intimidation": 1,
+      "medicine": 1,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 1,
+      "thievery": 1
+    },
+    "languages": [
+      "common",
+      "iruxi",
+      "jotun"
+    ],
+    "size": "med",
+    "focus": 0
+  },
+  "items": [
+    "action: Change Shape [granted by Beastkin]",
+    "action: Into the Fray [granted by Way of the Drifter]",
+    "action: Reloading Strike [granted by Way of the Drifter]",
+    "ancestry: Fleshwarp [fleshwarpSize=med]",
+    "armor: Leather [qty 1; worn; size {item|flags.system.rulesSelections.fleshwarpSize}]",
+    "armor: Studded Leather [qty 1; worn; size {item|flags.system.rulesSelections.fleshwarpSize}]",
+    "background: Back-Alley Doctor",
+    "class: Gunslinger",
+    "feat: Dual-Weapon Reload [slot class-1; level 1; taken 1]",
+    "feat: Gunslinger's Way [in Gunslinger; level 1; way=Compendium.pf2e.classfeatures.Item.a3pSIKkDVTvvNSRO]",
+    "feat: Living Weapon (Claw) [slot ancestry-1; level 1; taken 1; livingWeapon=claw]",
+    "feat: Risky Surgery [in Back-Alley Doctor; level 1]",
+    "feat: Slinger's Precision [in Gunslinger; level 1]",
+    "feat: Unusual Anatomy [in Fleshwarp; level 1]",
+    "feat: Way of the Drifter [level 1; granted by Gunslinger's Way]",
+    "heritage: Beastkin [changeShape=hybrid]",
+    "lore: Underworld [rank 1]",
+    "treasure: Copper Pieces [qty 0; worn]",
+    "treasure: Gold Pieces [qty 4; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 0; worn]",
+    "weapon: Axe Musket [qty 1; worn; size {item|flags.system.rulesSelections.fleshwarpSize}]",
+    "weapon: Coat Pistol [qty 1; worn; size {item|flags.system.rulesSelections.fleshwarpSize}]"
+  ],
+  "spellcasting": [],
+  "report": {
+    "special": [
+      "Singular Expertise"
+    ]
+  },
+  "described": [],
+  "prompts": [
+    "Living Weapon: Claw (guessed)"
+  ]
+}

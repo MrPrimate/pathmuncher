@@ -295,4 +295,51 @@
     const keys = (a) => pmt.itemKeys(a).filter((key) => !key.startsWith("backpack:"));
     t.deepEqual(keys(actor), keys(without), "items");
   });
+
+  // a surki champion whose ancestry feats' choices are not in the export, following a deity that
+  // allows the build's unholy cause, so the deity and cause need no answers
+  const surkiChampion = () => {
+    const exportJson = generated("champion-01");
+    exportJson.build.deity = "Asmodeus";
+    return exportJson;
+  };
+  const selection = (actor, name, flag) => actor.items.find((i) => i.name.startsWith(name))?.flags.pf2e.rulesSelections[flag];
+
+  test("processing: a choice of items the build carries one of is not prompted", async (t) => {
+    const exportJson = surkiChampion();
+    exportJson.build.weapons.push({ name: "Battle Axe", qty: 1, prof: "martial", die: "d8", pot: 0, str: "", mat: null,
+      display: "Battle Axe", runes: [], damageType: "S", attack: 0, damageBonus: 0, extraDamage: [], increasedDice: false });
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "carried weapon choice");
+
+    await pmt.importBuild(actor, exportJson);
+
+    t.deepEqual(prompts.map((p) => p.item).filter((item) => item === "Surki Weapon Familiarity"), [], "weapon prompts");
+    t.equal(selection(actor, "Surki Weapon Familiarity", "weapon"), "battle-axe", "weapon");
+    // the champion's sanctification comes from the cause, under the flag the system reads it from
+    t.equal(selection(actor, "Deity (Champion)", "sanctification"), "unholy", "sanctification");
+    t.ok(actor.system.traits.value.includes("unholy"), "unholy trait");
+  });
+
+  test("processing: choices the build doesn't answer are asked together after processing", async (t) => {
+    const exportJson = surkiChampion();
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "unanswered choices");
+    let asked = [];
+    const resolveUnansweredChoices = (unanswered) => {
+      asked = unanswered;
+      const answer = { "Surki Weapon Familiarity": "battle-axe", "Grand Metamorphosis": "digging-wedge" };
+      return Object.fromEntries(unanswered.map((u) => [u.id, answer[u.item.name]]).filter(([, value]) => value));
+    };
+
+    await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices });
+
+    t.deepEqual(asked.map((u) => u.item.name).sort(), ["Grand Metamorphosis", "Surki Weapon Familiarity"], "asked");
+    t.ok(asked.find((u) => u.item.name === "Surki Weapon Familiarity").choices.some((c) => c.value === "battle-axe" && c.uuid), "options name their items");
+    t.deepEqual(prompts.map((p) => p.item).filter((item) => ["Surki Weapon Familiarity", "Grand Metamorphosis"].includes(item)), [], "prompts");
+    t.equal(selection(actor, "Surki Weapon Familiarity", "weapon"), "battle-axe", "weapon");
+    t.equal(selection(actor, "Grand Metamorphosis", "evolution"), "digging-wedge", "evolution");
+  });
 })();

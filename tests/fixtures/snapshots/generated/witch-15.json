@@ -1,0 +1,142 @@
+{
+  "character": {
+    "name": "PMTG Witch 15",
+    "level": 20,
+    "ancestry": null,
+    "heritage": null,
+    "background": "Root Worker",
+    "class": "Witch",
+    "deity": null,
+    "keyAbility": "int",
+    "attributes": {
+      "str": 1,
+      "dex": 0,
+      "con": 0,
+      "int": 2,
+      "wis": 0,
+      "cha": 0
+    },
+    "hp": 120,
+    "ac": 34,
+    "perception": 2,
+    "senses": [
+      "bloodsense"
+    ],
+    "saves": {
+      "fortitude": 2,
+      "reflex": 2,
+      "will": 3
+    },
+    "skills": {
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 1,
+      "occultism": 1,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0
+    },
+    "languages": [],
+    "size": "med",
+    "focus": 3
+  },
+  "items": [
+    "action: Shed Spirit",
+    "background: Root Worker",
+    "class: Witch",
+    "feat: Backup Disguise [slot skill-6; level 2; taken 6]",
+    "feat: Basic Lesson [slot class-2; level 2; taken 2; lesson=Compendium.pf2e.classfeatures.Item.evKUM58ymuuypRn9]",
+    "feat: Bloodsense [slot general-11; level 7; taken 11]",
+    "feat: Break Curse [slot skill-8; level 7; taken 8]",
+    "feat: Canny Acumen (Will) [slot general-3; level 1; taken 3; cannyAcumen=system.saves.will.rank]",
+    "feat: Chromotherapy [slot skill-14; level 2; taken 14]",
+    "feat: Defensive Robes [in Witch; level 13]",
+    "feat: Divine Guidance [slot skill-18; level 15; taken 18]",
+    "feat: Effortless Concentration [slot class-16; level 16; taken 16]",
+    "feat: Expert Spellcaster [in Witch; level 7]",
+    "feat: Familiar (Witch) [in Witch; level 1]",
+    "feat: Greater Lesson [slot class-10; level 6; taken 10; lesson=Compendium.pf2e.classfeatures.Item.HbREpzudMXPscgCj]",
+    "feat: Hex Focus [slot class-14; level 12; taken 14]",
+    "feat: Hex Spells [in Witch; level 1]",
+    "feat: Incredible Scout [slot general-15; level 11; taken 15]",
+    "feat: Keen Follower [slot general-7; level 3; taken 7]",
+    "feat: Legendary Codebreaker [slot skill-16; level 15; taken 16]",
+    "feat: Legendary Spellcaster [in Witch; level 19]",
+    "feat: Lesson of Dreams [level 2; taken 2; granted by Basic Lesson]",
+    "feat: Lesson of Life [level 2; taken 10; granted by Greater Lesson]",
+    "feat: Magical Fortitude [in Witch; level 5]",
+    "feat: Master Spellcaster [in Witch; level 15]",
+    "feat: Patron [in Witch; level 1; patron=Compendium.pf2e.classfeatures.Item.4zE3seVFtLPNw9EQ]",
+    "feat: Patron's Gift [in Witch; level 19]",
+    "feat: Perception Expertise [in Witch; level 11]",
+    "feat: Pet [level 1; granted by Familiar (Witch)]",
+    "feat: Rapid Affixture [slot skill-10; level 7; taken 10]",
+    "feat: Reflex Expertise [in Witch; level 9]",
+    "feat: Rites of Convocation [slot class-8; level 4; taken 8]",
+    "feat: Root Magic [in Root Worker; level 1]",
+    "feat: Scatter Swarm [slot class-4; level 2; taken 4]",
+    "feat: Seasoned Command [slot skill-20; level 7; taken 20]",
+    "feat: Siphon Power [slot class-20; level 16; taken 20]",
+    "feat: Spirit Familiar (Witch) [slot class-12; level 8; taken 12]",
+    "feat: Split Hex [slot class-18; level 18; taken 18; spellshape=null]",
+    "feat: Steady Spellcasting [slot class-6; level 6; taken 6]",
+    "feat: Stifle Flames [slot skill-12; level 1; taken 12]",
+    "feat: True Perception [slot general-19; level 19; taken 19]",
+    "feat: Tumbling Teamwork [slot skill-2; level 2; taken 2]",
+    "feat: Vasodilation [slot skill-4; level 2; taken 4]",
+    "feat: Weapon Expertise [in Witch; level 11]",
+    "feat: Weapon Specialization [in Witch; level 13]",
+    "feat: Whisper of Wings [level 1; granted by Patron]",
+    "feat: Will of the Pupil [in Witch; level 17]",
+    "feat: Witch Spellcasting [in Witch; level 1]",
+    "lore: Herbalism [rank 1]",
+    "spell: Fear [in Bugbear Feat 13; rank 3]",
+    "spell: Invisibility [in Bugbear Feat 9; rank 4]",
+    "spell: Life Boost [in Primal Focus Tradition; rank 1]",
+    "spell: Murmuration [in Primal Focus Tradition; rank 1]",
+    "spell: Patron's Puppet [in Primal Focus Tradition; rank 1]",
+    "spell: Veil of Dreams [in Primal Focus Tradition; rank 1]",
+    "spellcastingEntry: Bugbear Feat 13",
+    "spellcastingEntry: Bugbear Feat 9",
+    "spellcastingEntry: Primal Focus Tradition",
+    "spellcastingEntry: Witch",
+    "treasure: Copper Pieces [qty 0; worn]",
+    "treasure: Gold Pieces [qty 15; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 0; worn]"
+  ],
+  "spellcasting": [
+    "Bugbear Feat 13 [primal; prepared; cha; proficiency 4] rank 3: 1 [Fear]",
+    "Bugbear Feat 9 [occult; prepared; cha; proficiency 4] rank 4: 1 [Invisibility]",
+    "Primal Focus Tradition [primal; focus; int; proficiency 4]",
+    "Witch [primal; prepared; int; proficiency 4] rank 0: 5 [-, -, -, -, -] | rank 1: 3 [-, -, -] | rank 2: 3 [-, -, -] | rank 3: 3 [-, -, -] | rank 4: 3 [-, -, -] | rank 5: 3 [-, -, -] | rank 6: 3 [-, -, -] | rank 7: 3 [-, -, -] | rank 8: 3 [-, -, -] | rank 9: 3 [-, -, -] | rank 10: 1 [-]"
+  ],
+  "report": {
+    "ancestry": [
+      "Bugbear"
+    ],
+    "heritage": [
+      "Murd Bugbear"
+    ],
+    "feat": [
+      "Death of Hope",
+      "Fearsense",
+      "Fiend Worshipper",
+      "Mocking Invisibility",
+      "Terrorize"
+    ]
+  },
+  "described": [
+    "Whisper of Wings: Familiar of Nimble Flight"
+  ],
+  "prompts": []
+}

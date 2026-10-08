@@ -7,7 +7,8 @@
 // password) if the tab is not already in it, reloads so the current module code is used, then
 // evaluates lib.js, every *.test.js file here and the fixtures, and runs the tests one at a time.
 // PMT_KEEP=1 keeps the test actors for inspection. PMT_SURVEY=1 runs survey.test.js over the
-// generated builds. See tests/README.md.
+// generated builds. PMT_UPDATE_SNAPSHOTS=1 rewrites the snapshots in fixtures/snapshots from this
+// run, and PMT_SNAPSHOT_ALL=1 snapshots every generated build. See tests/README.md.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -101,6 +102,16 @@ if (fs.existsSync(generatedDir)) {
     await evaluate(`globalThis.__pmtGenerated[${JSON.stringify(f.replace(/\.json$/, ""))}] = ${fs.readFileSync(path.join(generatedDir, f), "utf8")};`);
   }
 }
+// the saved snapshots, by fixture name ("142926-wizard20", "generated/cleric-01")
+const snapshotDir = path.join(here, "../fixtures/snapshots");
+const snapshotFiles = (dir, prefix = "") => (fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : [])
+  .flatMap((e) => (e.isDirectory()
+    ? snapshotFiles(path.join(dir, e.name), `${prefix}${e.name}/`)
+    : e.name.endsWith(".json") ? [[`${prefix}${e.name.replace(/\.json$/, "")}`, path.join(dir, e.name)]] : []));
+const snapshots = Object.fromEntries(snapshotFiles(snapshotDir).map(([name, file]) => [name, JSON.parse(fs.readFileSync(file, "utf8"))]));
+await evaluate(`globalThis.__pmtSnapshots = ${JSON.stringify(snapshots)};
+  globalThis.__pmtUpdateSnapshots = ${!!process.env.PMT_UPDATE_SNAPSHOTS};
+  globalThis.__pmtSnapshotAll = ${!!process.env.PMT_SNAPSHOT_ALL};`);
 await evaluate(fs.readFileSync(path.join(here, "lib.js"), "utf8"));
 for (const file of fs.readdirSync(here).filter((f) => f.endsWith(".test.js")).sort()) {
   await evaluate(fs.readFileSync(path.join(here, file), "utf8"));
@@ -114,6 +125,15 @@ for (const r of results) {
   console.log(`${r.ok ? "ok" : "not ok"} - ${r.name} (${r.ms} ms)`);
   if (!r.ok) console.log(r.error.split("\n").map((l) => `    ${l}`).join("\n"));
   for (const line of r.log) console.log(`    # ${line}`);
+}
+if (process.env.PMT_UPDATE_SNAPSHOTS) {
+  const taken = await evaluate("globalThis.__pmtSnapshotResults ?? {}", 600000);
+  for (const [name, snapshot] of Object.entries(taken)) {
+    const file = path.join(snapshotDir, `${name}.json`);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, `${JSON.stringify(snapshot, null, 2)}\n`);
+  }
+  console.log(`# wrote ${Object.keys(taken).length} snapshots to ${path.relative(process.cwd(), snapshotDir)}`);
 }
 if (pageErrors.length) console.log(`# uncaught page errors:\n${pageErrors.map((e) => `#   ${e}`).join("\n")}`);
 console.log(`# ${results.length - failed}/${results.length} passed`);

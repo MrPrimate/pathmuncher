@@ -1,0 +1,153 @@
+{
+  "character": {
+    "name": "PMTG Champion 01",
+    "level": 20,
+    "ancestry": "Surki",
+    "heritage": "Breaker Surki",
+    "background": "Hermit",
+    "class": "Champion",
+    "deity": "Sarenrae",
+    "keyAbility": "str",
+    "attributes": {
+      "str": 2,
+      "dex": 0,
+      "con": 2,
+      "int": 0,
+      "wis": 0,
+      "cha": 0
+    },
+    "hp": 248,
+    "ac": 38,
+    "perception": 2,
+    "senses": [
+      "bloodsense",
+      "darkvision"
+    ],
+    "saves": {
+      "fortitude": 3,
+      "reflex": 2,
+      "will": 3
+    },
+    "skills": {
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 0,
+      "nature": 0,
+      "occultism": 1,
+      "performance": 0,
+      "religion": 1,
+      "society": 0,
+      "stealth": 0,
+      "survival": 0,
+      "thievery": 0
+    },
+    "languages": [
+      "common",
+      "surki"
+    ],
+    "size": "med",
+    "focus": 2
+  },
+  "items": [
+    "action: Flash of Grandeur [granted by Grandeur]",
+    "action: Selfish Shield",
+    "ancestry: Surki",
+    "background: Hermit [skill=occultism]",
+    "class: Champion",
+    "deity: Sarenrae",
+    "feat: Armor Expertise [in Champion; level 7]",
+    "feat: Armor Mastery [in Champion; level 13]",
+    "feat: Battle Medicine [slot skill-2; level 1; taken 2]",
+    "feat: Blessed Armament [level 1; granted by Blessing of the Devoted]",
+    "feat: Blessed Shield [level 1; taken 8; granted by Second Blessing]",
+    "feat: Blessing of the Devoted [in Champion; level 3; blessing=Compendium.pf2e.classfeatures.Item.EtltLdiy9kNfHU0c]",
+    "feat: Bloodsense [slot general-11; level 7; taken 11]",
+    "feat: Cause [in Champion; level 1; cause=Compendium.pf2e.classfeatures.Item.h1NGH4TVeBljftni]",
+    "feat: Champion Expertise [in Champion; level 9]",
+    "feat: Champion Mastery [in Champion; level 17]",
+    "feat: Champion's Aura [level 1; granted by Deity (Champion)]",
+    "feat: Consume Magic [slot ancestry-9; level 9; taken 9]",
+    "feat: Courtly Graces [slot skill-4; level 1; taken 4]",
+    "feat: Deific Weapon [level 1; granted by Deity (Champion)]",
+    "feat: Deity (Champion) [in Champion; level 1; deity=null; sanctification=holy]",
+    "feat: Desperate Prayer [slot class-4; level 1; taken 4]",
+    "feat: Devotion Spells [in Champion; level 1]",
+    "feat: Divine Wall [slot class-16; level 12; taken 16]",
+    "feat: Divine Will [in Champion; level 11]",
+    "feat: Dubious Knowledge [in Hermit; level 1]",
+    "feat: Enforce Oath [slot class-14; level 12; taken 14]",
+    "feat: Exalted Greatness [slot class-18; level 14; taken 18]",
+    "feat: Exalted Reaction [in Champion; level 11]",
+    "feat: Faithful Steed [slot class-1; level 1; taken 1]",
+    "feat: Grand Metamorphosis (Digging Wedge) [slot ancestry-13; level 9; taken 13; evolution=digging-wedge]",
+    "feat: Grandeur [level 1; granted by Cause]",
+    "feat: Greater Weapon Specialization [in Champion; level 15]",
+    "feat: Gruesome Strike [slot class-12; level 12; taken 12]",
+    "feat: Hero's Defiance [in Champion; level 19]",
+    "feat: Improvised Repair [slot general-3; level 3; taken 3]",
+    "feat: Incredible Investiture [slot general-15; level 11; taken 15]",
+    "feat: Instrument of Slaughter [slot class-20; level 16; taken 20]",
+    "feat: Legendary Armor [in Champion; level 17]",
+    "feat: Legendary Medic [slot skill-16; level 15; taken 16]",
+    "feat: Legendary Negotiation [slot skill-18; level 15; taken 18]",
+    "feat: Magiphage [in Surki; level 1; magiphage={\"skill\":\"occultism\",\"tradition\":\"occult\"}]",
+    "feat: Martial Weapon Mastery [in Champion; level 13]",
+    "feat: Natural Medicine [slot skill-12; level 1; taken 12]",
+    "feat: Oath of the Slayer [slot class-6; level 2; taken 6; oathOfTheSlayer=aberration]",
+    "feat: Perception Expertise [in Champion; level 11]",
+    "feat: Quick Coercion [slot skill-14; level 1; taken 14]",
+    "feat: Rapid Affixture [slot skill-8; level 7; taken 8]",
+    "feat: Reflex Expertise [in Champion; level 9]",
+    "feat: Relentless Reaction [in Champion; level 9]",
+    "feat: Sacred Body [in Champion; level 9]",
+    "feat: Scare to Death [slot skill-20; level 15; taken 20]",
+    "feat: Second Blessing [slot class-8; level 8; taken 8; blessing=Compendium.pf2e.classfeatures.Item.QQP0mu0cyWIwNUh9]",
+    "feat: Shield Block [in Champion; level 1]",
+    "feat: Shield Block [level 1; granted by Shield Block]",
+    "feat: Skeptic's Defense [slot skill-10; level 7; taken 10]",
+    "feat: Small Speak [slot ancestry-5; level 1; taken 5]",
+    "feat: Splinter Faith [slot class-2; level 1; taken 2]",
+    "feat: Surki Weapon Familiarity [slot ancestry-1; level 1; taken 1; weapon=adze]",
+    "feat: Thorough Search [slot general-7; level 3; taken 7]",
+    "feat: True Perception [slot general-19; level 19; taken 19]",
+    "feat: Unlimited Pluripotency [slot ancestry-17; level 17; taken 17]",
+    "feat: Wary Disarmament [slot skill-6; level 2; taken 6]",
+    "feat: Weapon Expertise [in Champion; level 5]",
+    "feat: Weapon Specialization [in Champion; level 7]",
+    "heritage: Breaker Surki",
+    "lore: One Terrain [rank 1]",
+    "spell: Hero's Defiance [in Divine Focus Tradition; rank 10]",
+    "spell: Touch of the Void [in Divine Focus Tradition; rank 1]",
+    "spellcastingEntry: Divine Focus Tradition",
+    "treasure: Copper Pieces [qty 0; worn]",
+    "treasure: Gold Pieces [qty 15; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 0; worn]"
+  ],
+  "spellcasting": [
+    "Divine Focus Tradition [divine; focus; cha; proficiency 3]"
+  ],
+  "report": {
+    "feat": [
+      "Wild Steed"
+    ],
+    "special": [
+      "Desecration Cause (Unholy)",
+      "Hardshell Surki (Circulatory System)"
+    ]
+  },
+  "described": [
+    "Sarenrae: Anathema"
+  ],
+  "prompts": [
+    "Deity (Champion): Holy (guessed)",
+    "Cause: Grandeur (guessed)",
+    "Surki Weapon Familiarity: Adze (guessed)",
+    "Grand Metamorphosis: Digging Wedge (guessed)"
+  ]
+}

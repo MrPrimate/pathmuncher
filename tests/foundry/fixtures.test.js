@@ -72,7 +72,7 @@
       prompts: [
         // both Acrobatics and Athletics are trained, so the class skill choice stays ambiguous
         "Fighter",
-        "Barrow's Edge",
+        // the ikon's origin; the ikon itself is the one weapon the build carries (Lion Scythe)
         "Barrow's Edge",
         "Exemplar Dedication",
         "Fighter Weapon Mastery",

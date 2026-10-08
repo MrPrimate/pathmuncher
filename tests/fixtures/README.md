@@ -40,6 +40,14 @@ grim fascination, eidolon and element. Classes without one get two builds.
 `survey.test.js` imports them all when `PMT_SURVEY=1`. Other tests use them by name through
 `globalThis.__pmtGenerated`.
 
+## Snapshots (`../snapshots/`)
+
+`snapshots/<fixture>.json` and `snapshots/generated/<build>.json` record what importing each build
+produced: the character's details, every item as one line, the spellcasting entries, the
+post-import report and the prompts. `snapshot.test.js` fails when an import no longer matches its
+snapshot. They are written by the tests (`PMT_UPDATE_SNAPSHOTS=1`), never by hand. They hold
+compendium names and ids, so a pf2e update that renames or changes items changes them too.
+
 ## Pathbuilder's format
 
 From `477013-fighter4-archer` (built to check) and the others:

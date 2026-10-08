@@ -240,6 +240,11 @@
 
     let report = null;
     const closeReport = Hooks.on("renderDialogV2", (dialog) => {
+      // choices the build doesn't answer: picking none leaves them to the system's prompts, as before
+      if (dialog.options.classes?.includes("pathmuncher-unanswered-choices-dialog")) {
+        setTimeout(() => dialog.element.querySelector("button[data-action='import']")?.click(), 20);
+        return;
+      }
       if (!dialog.options.classes?.includes("pathmuncher-report")) return;
       report = dialog.element.querySelector(".window-content").innerText;
       setTimeout(() => dialog.element.querySelector("button[data-action='ok']")?.click(), 20);
@@ -328,6 +333,137 @@
       .filter((f) => (/^(ancestry|class|skill|general|archetype)-\d+$/).test(f.system.location ?? ""))
       .map((f) => `${f.system.location}: ${f.slug} taken ${f.system.level.taken}`).sort(),
   });
+
+  // ---------------------------------------------------------------- snapshots
+
+  const optional = (fn) => {
+    try {
+      return fn() ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  /**
+   * Everything an import produced, for the snapshot tests: the character's details, each item as one
+   * line (slot, levels, what granted it, its choices, quantity, container, runes...), the post-import
+   * report and the prompts the user was asked. Item ids are replaced by item names and lists are
+   * sorted, so importing the same build again gives the same snapshot.
+   */
+  pmt.characterSnapshot = (actor, pm, prompts = []) => {
+    const names = new Map(actor.items.map((i) => [i.id, i.name]));
+    // an id of an item not on the actor (a grant whose granter is missing) is random: say so instead
+    const nameOf = (id) => (names.has(id) ? names.get(id) : "(missing item)");
+    // ids of the actor's own items, wherever they appear in a value, as @Item Name
+    const named = (value) => String(typeof value === "object" ? JSON.stringify(value) : value)
+      .replace(/\b[a-zA-Z0-9]{16}\b/g, (id) => (names.has(id) ? `@${names.get(id)}` : id));
+
+    const itemLine = (item) => {
+      const s = item.system;
+      const parts = [];
+      if (item.type === "spell") {
+        parts.push(`in ${nameOf(s.location?.value)}`, `rank ${s.location?.heightenedLevel ?? s.level?.value}`);
+        if (s.location?.signature) parts.push("signature");
+      } else if (typeof s.location === "string" && s.location) {
+        parts.push(names.has(s.location) ? `in ${names.get(s.location)}` : `slot ${s.location}`);
+      }
+      if (item.type === "feat") parts.push(`level ${s.level?.value}`);
+      if (s.level?.taken) parts.push(`taken ${s.level.taken}`);
+      if (item.type === "lore") parts.push(`rank ${s.proficient?.value}`);
+      const grantedBy = item.flags[game.system.id]?.grantedBy?.id;
+      if (grantedBy) parts.push(`granted by ${nameOf(grantedBy)}`);
+      const selections = item.flags[game.system.id]?.rulesSelections ?? {};
+      for (const [flag, value] of Object.entries(selections).sort(([a], [b]) => a.localeCompare(b))) {
+        parts.push(`${flag}=${named(value)}`);
+      }
+      const unresolved = (s.rules ?? [])
+        .filter((r) => r.key === "ChoiceSet" && r.selection === undefined && !(r.flag && selections[r.flag] !== undefined))
+        .map((r) => r.flag ?? "?");
+      if (unresolved.length) parts.push(`unresolved ${unresolved.join(",")}`);
+      if (item.isOfType("physical")) {
+        parts.push(`qty ${s.quantity}`);
+        if (s.containerId) parts.push(`in ${nameOf(s.containerId)}`);
+        const equipped = s.equipped ?? {};
+        parts.push(`${equipped.carryType ?? "?"}${equipped.handsHeld ? ` ${equipped.handsHeld}h` : ""}`);
+        if (equipped.invested) parts.push("invested");
+        if (s.size && s.size !== "med") parts.push(`size ${s.size}`);
+        const runes = s.runes ?? {};
+        const fundamental = ["potency", "striking", "resilient", "reinforcing"].filter((k) => runes[k]).map((k) => `${k} ${runes[k]}`);
+        if (fundamental.length || runes.property?.length) parts.push(`runes ${[...fundamental, ...(runes.property ?? [])].join(", ")}`);
+        if (s.material?.type) parts.push(`material ${s.material.type} ${s.material.grade}`);
+        if (s.grade) parts.push(`grade ${s.grade}`);
+        if (s.subitems?.length) parts.push(`subitems ${s.subitems.map((i) => i.name).sort().join(", ")}`);
+      }
+      return `${item.type}: ${item.name}${parts.length ? ` [${parts.join("; ")}]` : ""}`;
+    };
+
+    const spellcasting = actor.itemTypes.spellcastingEntry.map((entry) => {
+      const s = entry.system;
+      const slots = Object.entries(s.slots ?? {})
+        .filter(([, slot]) => slot.max || Object.keys(slot.prepared ?? {}).length)
+        .map(([key, slot]) => {
+          const prepared = Object.values(slot.prepared ?? {}).map((p) => (p?.id ? nameOf(p.id) : "-"));
+          return `${key.replace("slot", "rank ")}: ${slot.max}${prepared.length ? ` [${prepared.join(", ")}]` : ""}`;
+        });
+      return `${entry.name} [${[s.tradition?.value, s.prepared?.value, s.ability?.value, `proficiency ${s.proficiency?.value}`]
+        .join("; ")}]${slots.length ? ` ${slots.join(" | ")}` : ""}`;
+    });
+
+    const report = pm?.getImportReport() ?? [];
+    return {
+      character: {
+        name: actor.name,
+        level: actor.level,
+        ancestry: actor.ancestry?.name ?? null,
+        heritage: actor.heritage?.name ?? null,
+        background: actor.background?.name ?? null,
+        class: actor.class?.name ?? null,
+        deity: actor.deity?.name ?? null,
+        keyAbility: actor.system.details.keyability?.value ?? null,
+        attributes: Object.fromEntries(["str", "dex", "con", "int", "wis", "cha"].map((a) => [a, actor.system.abilities?.[a]?.mod ?? null])),
+        hp: optional(() => actor.hitPoints.max),
+        ac: optional(() => actor.armorClass.value),
+        perception: optional(() => actor.perception.rank),
+        senses: optional(() => Array.from(actor.perception.senses ?? [], (sense) => sense.type).sort()),
+        saves: Object.fromEntries(["fortitude", "reflex", "will"].map((k) => [k, optional(() => actor.saves[k].rank)])),
+        skills: Object.fromEntries(Object.entries(actor.skills ?? {}).filter(([, skill]) => !skill.lore)
+          .map(([k, skill]) => [k, skill.rank]).sort(([a], [b]) => a.localeCompare(b))),
+        languages: [...(actor.system.details.languages?.value ?? [])].sort(),
+        size: actor.size,
+        focus: actor.system.resources?.focus?.max ?? null,
+      },
+      items: actor.items.map(itemLine).sort(),
+      spellcasting: spellcasting.sort(),
+      report: Object.fromEntries(report.filter((g) => g.type !== "described").map((g) => [g.type, [...g.names].sort()])),
+      described: (pm?.getDescribedSpecials() ?? []).map((o) => `${o.name}: ${o.specials.map((s) => s.name).sort().join(", ")}`).sort(),
+      prompts: prompts.map((p) => `${p.item}: ${p.picked}${p.matched ? "" : " (guessed)"}`),
+    };
+  };
+
+  /**
+   * The differences between two snapshots, one line each: "items: - <line>" for a line that went,
+   * "items: + <line>" for one that came, and "character.hp: 80 → 92" for a changed value.
+   */
+  pmt.snapshotDifferences = (expected, actual, path = "") => {
+    const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+    const text = (v) => (typeof v === "string" ? v : show(v));
+    if (Array.isArray(expected) && Array.isArray(actual)) {
+      const left = new Map();
+      for (const e of expected) left.set(text(e), (left.get(text(e)) ?? 0) + 1);
+      const added = [];
+      for (const a of actual) {
+        if (left.get(text(a))) left.set(text(a), left.get(text(a)) - 1);
+        else added.push(text(a));
+      }
+      const removed = [...left].flatMap(([line, count]) => Array(count).fill(line));
+      return [...removed.map((line) => `${path}: - ${line}`), ...added.map((line) => `${path}: + ${line}`)];
+    }
+    if (isObject(expected) && isObject(actual)) {
+      return [...new Set([...Object.keys(expected), ...Object.keys(actual)])]
+        .flatMap((key) => pmt.snapshotDifferences(expected[key], actual[key], path ? `${path}.${key}` : key));
+    }
+    return show(expected) === show(actual) ? [] : [`${path}: ${show(expected)} → ${show(actual)}`];
+  };
 
   // ---------------------------------------------------------------- comparing with the build
 

@@ -1,0 +1,111 @@
+{
+  "character": {
+    "name": "Drakthar",
+    "level": 3,
+    "ancestry": "Minotaur",
+    "heritage": null,
+    "background": "Relentless Dedication",
+    "class": "Guardian",
+    "deity": null,
+    "keyAbility": "str",
+    "attributes": {
+      "str": 4,
+      "dex": 1,
+      "con": 4,
+      "int": -1,
+      "wis": 2,
+      "cha": -1
+    },
+    "hp": 61,
+    "ac": 21,
+    "perception": 1,
+    "senses": [
+      "darkvision"
+    ],
+    "saves": {
+      "fortitude": 2,
+      "reflex": 2,
+      "will": 2
+    },
+    "skills": {
+      "acrobatics": 0,
+      "arcana": 0,
+      "athletics": 1,
+      "crafting": 1,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 0,
+      "medicine": 1,
+      "nature": 0,
+      "occultism": 0,
+      "performance": 0,
+      "religion": 0,
+      "society": 0,
+      "stealth": 0,
+      "survival": 1,
+      "thievery": 0
+    },
+    "languages": [
+      "common",
+      "jotun"
+    ],
+    "size": "lg",
+    "focus": 0
+  },
+  "items": [
+    "action: Intercept Attack [granted by Guardian's Techniques]",
+    "action: Taunt [granted by Taunt]",
+    "ancestry: Minotaur",
+    "armor: Splint Mail [qty 1; worn; size lg]",
+    "armor: Studded Leather [qty 1; worn; size lg]",
+    "background: Relentless Dedication",
+    "backpack: Backpack [qty 1; worn; invested; size lg]",
+    "class: Guardian",
+    "consumable: Chalk [qty 10; in Backpack; stowed; size lg]",
+    "consumable: Rations [qty 2; in Backpack; stowed; size lg]",
+    "equipment: Bedroll [qty 1; in Backpack; stowed; size lg]",
+    "equipment: Climbing Kit [qty 1; worn; invested; size lg]",
+    "equipment: Flint and Steel [qty 1; in Backpack; stowed; size lg]",
+    "equipment: Rope [qty 1; in Backpack; stowed; size lg]",
+    "equipment: Soap [qty 1; in Backpack; stowed; size lg]",
+    "equipment: Ten-Foot Pole [qty 1; worn; invested; size lg]",
+    "equipment: Waterskin [qty 2; in Backpack; stowed; size lg]",
+    "feat: Bastion Dedication [slot archetype-2; level 2; taken 2]",
+    "feat: Canny Acumen (Reflex) [in Relentless Dedication; level 1; cannyAcumen=system.saves.reflex.rank]",
+    "feat: Defensive Advance [slot class-1; level 1; taken 1]",
+    "feat: Diehard [level 1; granted by Tough To Kill]",
+    "feat: Guardian's Armor [in Guardian; level 1]",
+    "feat: Guardian's Techniques [in Guardian; level 1]",
+    "feat: Hefty Hauler [slot skill-2; level 1; taken 2]",
+    "feat: Horns (Minotaur) [in Minotaur; level 1]",
+    "feat: Reactive Shield [level 1; taken 2; granted by Bastion Dedication]",
+    "feat: Shield Block [in Guardian; level 1]",
+    "feat: Shield Block [level 1; granted by Shield Block]",
+    "feat: Shielding Taunt [slot class-2; level 2; taken 2]",
+    "feat: Taunt [in Guardian; level 1]",
+    "feat: Tough To Kill [in Guardian; level 3]",
+    "feat: Toughness [slot general-3; level 1; taken 3]",
+    "feat: Unburdened Iron [slot ancestry-1; level 1; taken 1]",
+    "lore: Warfare [rank 1]",
+    "shield: Steel Shield [qty 1; held 1h]",
+    "treasure: Copper Pieces [qty 4; worn]",
+    "treasure: Gold Pieces [qty 11; worn]",
+    "treasure: Platinum Pieces [qty 0; worn]",
+    "treasure: Silver Pieces [qty 9; worn]",
+    "weapon: Longsword [qty 1; worn; size lg]",
+    "weapon: Warhammer [qty 1; worn; size lg]"
+  ],
+  "spellcasting": [],
+  "report": {
+    "heritage": [
+      "Custom Mixed Heritage"
+    ],
+    "special": [
+      "Dwarf"
+    ]
+  },
+  "described": [
+    "Guardian's Techniques: Ever Ready"
+  ],
+  "prompts": []
+}
