@@ -67,7 +67,7 @@
     "feat: Communal Healing [slot class-2; level 2; taken 2]",
     "feat: Courtly Graces [slot skill-4; level 1; taken 4]",
     "feat: Defensive Recovery [slot class-14; level 12; taken 14; spellshape=null]",
-    "feat: Deity (Cleric) [in Cleric; level 1; deity=null; sanctification=holy]",
+    "feat: Deity (Cleric) [in Cleric; level 1; deity=null; sanctification=none]",
     "feat: Divine Defense [in Cleric; level 13]",
     "feat: Divine Font (Healing) [in Cleric; level 1; divineFont=heal]",
     "feat: Doctrine [in Cleric; level 1; doctrine=Compendium.pf2e.classfeatures.Item.ZZzLMOUAtBVgV1DF]",
@@ -183,7 +183,6 @@
     "Sarenrae: Anathema"
   ],
   "prompts": [
-    "Deity (Cleric): Holy (guessed)",
     "Domain Initiate: Fire (guessed)"
   ]
 }

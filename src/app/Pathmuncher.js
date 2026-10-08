@@ -5,7 +5,6 @@ import { RUNE_ITEM_MAP } from "../data/equipment.js";
 import {
   SPECIAL_NAME_ADDITIONS,
   NO_AUTO_CHOICE,
-  specialOnlyNameLookup,
   BAD_IGNORE_FEATURES,
   IGNORE_MULTISELECT,
   remasterTermNames,
@@ -21,29 +20,41 @@ import {
   deitySanctifications,
   replaceSpecials,
 } from "./DeityChoices.js";
+import { FeatureNames } from "./FeatureNames.js";
+import { ParsedEntry } from "./ParsedEntry.js";
 import { Seasoning } from "./Seasoning.js";
 
 export class Pathmuncher {
-  FEAT_RENAME_MAP(name) {
-    const dynamicItems = [
-      { pbName: "Shining Oath", foundryName: `Shining Oath (${Seasoning.getChampionType(this.source.alignment)})` },
-      { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType() ?? "")})` },
-      { pbName: "Counterspell", foundryName: `Counterspell (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")})` },
-      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.class})` },
-      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.dualClass})` },
-      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType() ?? "")} Caster)` },
-      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${utils.capitalize(this.getClassSpellCastingType(true) ?? "")} Caster)` },
-    ];
-    return Seasoning.FEAT_RENAME_MAP(name).concat(dynamicItems);
+  #names = null;
+
+  /** The names the build's features go by (FeatureNames), once the build is loaded. */
+  get names() {
+    this.#names ??= new FeatureNames({
+      className: this.source.class,
+      ancestry: this.source.ancestry,
+      heritage: this.source.heritage,
+      buildRenames: this.#buildRenames(),
+    });
+    return this.#names;
   }
 
-  getFoundryFeatureName(pbName, isSpecial = false) {
-    if (isSpecial) {
-      const specialMatch = specialOnlyNameLookup(pbName);
-      if (specialMatch) return specialMatch;
-    }
-    const match = this.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
-    return match ?? { pbName, foundryName: pbName, details: undefined };
+  /** Renames that depend on the build: a champion's oath, and feats named for the class or its spellcasting. */
+  #buildRenames() {
+    const castingType = (dual) => utils.capitalize(this.getClassSpellCastingType(dual) ?? "");
+    return [
+      { pbName: "Shining Oath", foundryName: `Shining Oath (${Seasoning.getChampionType(this.source.alignment)})` },
+      { pbName: "Counterspell", foundryName: `Counterspell (${castingType(false)})` },
+      { pbName: "Counterspell", foundryName: `Counterspell (${castingType(true)})` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.class})` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.dualClass})` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${castingType(false)} Caster)` },
+      { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${castingType(true)} Caster)` },
+    ];
+  }
+
+  /** The Foundry name a Pathbuilder name is looked up under: { pbName, foundryName, details, foundryValue }. */
+  getFoundryFeatureName(pbName) {
+    return this.names.foundryName(pbName);
   }
 
   static DEFAULTS = {
@@ -72,6 +83,7 @@ export class Pathmuncher {
     this.actor = actor;
     this.options = foundry.utils.mergeObject(CONSTANTS.ACTOR_FLAGS, options, { inplace: false });
     this.source = null;
+    // the build's entries (ParsedEntry), each with its status: what was made of it, or why nothing was
     this.parsed = {
       specials: [],
       feats: [],
@@ -134,7 +146,8 @@ export class Pathmuncher {
       },
       focusPool: 0,
     };
-    this.check = {};
+    // what could not be matched that is not a parsed entry (the core items, spells, rituals, formulas,
+    // rules): { pbName, type, details }. Parsed entries record their own status (ParsedEntry).
     this.bad = [];
     // core items the user supplied for ones no compendium has, keyed by result target (e.g. class)
     this.coreReplacements = {};
@@ -299,7 +312,7 @@ export class Pathmuncher {
   #processSpecialData(name) {
     if (name.includes("Domain: ")) {
       const domainName = name.split(" ")[1];
-      this.parsed.feats.push({ name: "Deity's Domain", extra: domainName });
+      this.parsed.feats.push(new ParsedEntry({ name: "Deity's Domain", extra: domainName }));
       return true;
     } else {
       return false;
@@ -328,21 +341,18 @@ export class Pathmuncher {
       this.source.equipmentContainers[containerKey].foundryId = foundryId;
     }
 
-    const item = {
+    const item = new ParsedEntry({
       foundryName: name,
       pbName: e[0],
       originalName: e[0],
       qty: e[1],
-      added: false,
-      addedId: null,
-      addedAutoId: null,
       inContainer: e[2] !== "Invested" ? e[2] : null,
       container,
       foundryId,
       invested: e[2] === "Invested",
       sourceType: "equipment",
       extra: mappingData?.details ?? undefined,
-    };
+    });
     this.parsed.equipment.push(item);
   }
 
@@ -366,15 +376,13 @@ export class Pathmuncher {
       damageType: "B",
       increasedDice: false,
     };
-    const weapon = foundry.utils.mergeObject({
+    const weapon = new ParsedEntry({
       foundryName: name,
       pbName: mockE.name,
       originalName: mockE.name,
-      added: false,
-      addedId: null,
-      addedAutoId: null,
       sourceType: "weapons",
-    }, mockE);
+      ...mockE,
+    });
     this.parsed.weapons.push(weapon);
   }
 
@@ -395,24 +403,19 @@ export class Pathmuncher {
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = foundry.utils.mergeObject({
+        const item = new ParsedEntry({
           foundryName: name,
           pbName: e.name,
           originalName: e.name,
-          added: false,
-          addedId: null,
-          addedAutoId: null,
           sourceType: "armor",
-        }, e);
+          ...e,
+        });
         this.parsed.armor.push(item);
         // work around for now
         if (e.name.startsWith("Inventor ")) {
-          this.parsed.feats.push({
+          this.parsed.feats.push(new ParsedEntry({
             name,
             extra: "",
-            added: false,
-            addedId: null,
-            addedAutoId: null,
             type: "Awarded Feat",
             level: 1,
             originalName: e.name,
@@ -423,7 +426,7 @@ export class Pathmuncher {
             isChild: null,
             isStandard: null,
             parentFeatChoiceRef: null,
-          });
+          }));
           featRank++;
         }
       });
@@ -431,23 +434,18 @@ export class Pathmuncher {
       .filter((e) => e && e !== "undefined")
       .forEach((e) => {
         const name = Seasoning.getFoundryEquipmentName(e.name);
-        const item = foundry.utils.mergeObject({
+        const item = new ParsedEntry({
           foundryName: name,
           pbName: e.name,
           originalName: e.name,
-          added: false,
-          addedId: null,
-          addedAutoId: null,
           sourceType: "weapons",
-        }, e);
+          ...e,
+        });
         // for now assume first weapon is the weapon innovation
         if (e.isInventor) {
-          this.parsed.feats.push({
+          this.parsed.feats.push(new ParsedEntry({
             name,
             extra: "",
-            added: false,
-            addedId: null,
-            addedAutoId: null,
             type: "Awarded Feat",
             level: 1,
             originalName: e.name,
@@ -458,7 +456,7 @@ export class Pathmuncher {
             isChild: null,
             isStandard: null,
             parentFeatChoiceRef: null,
-          });
+          }));
           featRank++;
         } else {
           this.parsed.weapons.push(item);
@@ -477,17 +475,14 @@ export class Pathmuncher {
       .forEach((special) => {
         const match = this.getFoundryFeatureName(special); // , true);
         if (!this.#processSpecialData(match.foundryName) && !Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-          this.parsed.specials.push({
+          this.parsed.specials.push(new ParsedEntry({
             name: match.foundryName,
             foundryName: match.foundryName,
             foundryValue: match.foundryValue,
             originalName: special,
-            added: false,
-            addedId: null,
-            addedAutoId: null,
             rank: iRank,
             sourceType: "specials",
-          });
+          }));
           iRank++;
         }
       });
@@ -504,18 +499,17 @@ export class Pathmuncher {
       )
       .forEach((feat) => {
         const name = this.getFoundryFeatureName(feat[0]).foundryName;
-        const data = {
+        const data = new ParsedEntry({
           name,
           extra: feat[1],
-          added: feat[0] === this.source.heritage,
-          addedId: null,
-          addedAutoId: null,
+          // the heritage is imported as the heritage item
+          ...(feat[0] === this.source.heritage && { status: ParsedEntry.STATUS.INCLUDED, reason: "the heritage" }),
           type: feat[2],
           level: feat[3],
           originalName: feat[0],
           rank: featRank,
           sourceType: "feats",
-        };
+        });
         if (feat.length >= 7) {
           data.featChoiceRef = feat[4];
           data.hasChildren = feat[5] === "parentChoice";
@@ -557,20 +551,17 @@ export class Pathmuncher {
     (this.source.inventorMods ?? []).forEach((mod) => {
       const match = this.getFoundryFeatureName(mod.selection);
       if (!Seasoning.IGNORED_SPECIALS().includes(match.foundryName)) {
-        this.parsed.specials.push({
+        this.parsed.specials.push(new ParsedEntry({
           name: match.foundryName,
           foundryName: match.foundryName,
           foundryValue: match.foundryValue,
           originalName: mod.selection,
           isChild: true,
-          added: false,
-          addedId: null,
-          addedAutoId: null,
           rank: iRank,
           sourceType: "inventorMods",
           parentFeatChoiceRef: mod.ref,
           nameHint: this.getFoundryFeatureName(mod.ref).foundryName,
-        });
+        }));
         iRank++;
       }
     });
@@ -582,31 +573,25 @@ export class Pathmuncher {
 
   #fixUps() {
     if (this.source.ancestry === "Dwarf" && !this.parsed.feats.some((f) => f.name === "Clan Pistol")) {
-      const clanDagger = {
+      const clanDagger = new ParsedEntry({
         name: "Clan Dagger",
         originalName: "Clan Dagger",
-        added: false,
-        addedId: null,
-        addedAutoId: null,
         isChoice: true,
         rank: 0,
         sourceType: "specials",
-      };
+      });
       this.parsed.specials.push(clanDagger);
     }
 
     const match = this.source.background.match(/(Magical Experiment) \((.*)\)$/);
     if (match) {
-      this.parsed.specials.push({
+      this.parsed.specials.push(new ParsedEntry({
         name: match[2],
         originalName: `${this.source.background}`,
-        added: false,
-        addedId: null,
-        addedAutoId: null,
         isChoice: true,
         rank: 0,
         sourceType: "specials",
-      });
+      }));
       this.source.background = match[1];
     }
 
@@ -756,15 +741,18 @@ export class Pathmuncher {
 
     if (doc) {
       const itemData = doc.toObject();
-      if (name.includes("(")) {
-        const extra = name.split(")")[0].split("(").pop();
-        this.parsed.specials.push({ name: doc.name, originalName: name, added: true, extra, rank: 99 });
-      }
       if (target === "class") {
         itemData.system.keyAbility.selected = this.keyAbility;
         this.#warnDualClass();
       }
       itemData._id = foundry.utils.randomID();
+      // the bracketed part of the name (a choice the item makes) is settled with the item
+      if (name.includes("(")) {
+        const extra = name.split(")")[0].split("(").pop();
+        this.parsed.specials.push(new ParsedEntry({
+          name: doc.name, originalName: name, extra, rank: 99, status: ParsedEntry.STATUS.CREATED, itemId: itemData._id,
+        }));
+      }
       // this.#generateGrantItemData(itemData);
       this.result[target].push(itemData);
       await this.#addGrantedItems(itemData, { applyFeatLocation: target !== "class", levelCap });
@@ -817,20 +805,6 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
-  #slugNameMatch(f, slug) {
-    return slug === Seasoning.slug(f.name)
-    || slug === Seasoning.slug(f.foundryValue)
-    || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.name, this.source.class))
-    || slug === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.name, this.source.ancestry))
-    || slug === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.name, this.source.heritage))
-    || slug === Seasoning.slug(f.originalName)
-    || slug === Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(f.originalName, this.source.class))
-    || slug
-      === Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(f.originalName, this.source.ancestry))
-    || slug
-      === Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(f.originalName, this.source.heritage));
-  }
-
   #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
     if (utils.isObject(slug)) {
       if (slug.size) {
@@ -845,7 +819,7 @@ export class Pathmuncher {
         && f.isChild
         && f.nameHint
         && Seasoning.slug(document.name) === Seasoning.slug(f.nameHint)
-        && this.#slugNameMatch(f, slug),
+        && this.names.entryMatches(f, slug),
       );
       if (hintMatch) {
         hintMatch.rank = -10;
@@ -868,7 +842,7 @@ export class Pathmuncher {
           || f.type === featType
         )
         && !f.isChoice
-        && this.#slugNameMatch(f, slug),
+        && this.names.entryMatches(f, slug),
     );
     // an item granted by another (document) is Pathbuilder's awarded or child entry, not one taken
     // in a slot, when the build has the feat more than once (e.g. Additional Lore from Kholo Lore
@@ -921,22 +895,14 @@ export class Pathmuncher {
     // return classMatch;
   }
 
-  /** The Pathbuilder feat or special a granted item stands for. */
+  /** The Pathbuilder feat or special a granted item stands for, under any name it may be listed under. */
   #grantedFeatureMatch(document, { originType = null, grantedAs = null } = {}) {
     const matchOptions = { ignoreAdded: true, featType: originType };
-    const classPrefix = this.source?.class ? `${this.source.class} ` : null;
-    return this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
-      ?? (document.name.includes("(")
-        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), matchOptions)
-        : undefined)
-      // the name the class lists it under: the Champion's "Weapon Mastery" is Martial Weapon Mastery
-      ?? (grantedAs && grantedAs !== document.name
-        ? this.#findAllFeatureMatch(document, Seasoning.slug(grantedAs), matchOptions)
-        : undefined)
-      // without the class's name: the Psychic's "Psychic Weapon Specialization" is Pathbuilder's "Weapon Specialization"
-      ?? (classPrefix && document.name.startsWith(classPrefix)
-        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.slice(classPrefix.length)), matchOptions)
-        : undefined);
+    for (const slug of this.names.itemSlugs(document, { grantedAs })) {
+      const match = this.#findAllFeatureMatch(document, slug, matchOptions);
+      if (match) return match;
+    }
+    return undefined;
   }
 
   #createGrantedItem(document, parent,
@@ -981,20 +947,11 @@ export class Pathmuncher {
 
     if (featureMatch) {
       logger.debug(`Found feature match for ${document.name}`, { featureMatch });
-      const existingMatch = false;
-      // featureMatch.sourceType
-      //   ? this.parsed[featureMatch.sourceType].some((f) => f.addedId === document._id)
-      //   : false;
-      if (this.devMode && existingMatch) {
-        logger.warn(`create Granted Item Existing match for ${document.name}`, { featureMatch, existingMatch, document });
-      }
-      // console.warn(`Match for ${document.name} createGrantedItem`, { featureMatch, existingMatch, document });
-      if (foundry.utils.hasProperty(featureMatch, "added") && !existingMatch) {
-        featureMatch.added = true;
-        featureMatch.addedId = document._id;
+      // the match can also be the build's deity, which is not a Pathbuilder entry
+      if (featureMatch instanceof ParsedEntry) {
+        featureMatch.settle(ParsedEntry.STATUS.GRANTED, { itemId: document._id, reason: `granted by ${parent.name}` });
         if (applyFeatLocation) this.#generateFoundryFeatLocation(document, featureMatch);
       }
-
       return;
     }
     if (document.type !== "action")
@@ -1072,15 +1029,8 @@ export class Pathmuncher {
       const match = Pathmuncher.#getLowestChoiceRank(open);
       claimed.add(match.featMatch);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
-      const existingMatch = false;
-
-      if (this.devMode && existingMatch) {
-        logger.warn(`Feature Choice Existing match for ${document.name}`, { featMatch, existingMatch, document });
-      }
-
-      if (adjustName && foundry.utils.hasProperty(featMatch, "added") && !existingMatch) {
-        featMatch.added = true;
-        featMatch.addedId = document._id;
+      if (adjustName && featMatch instanceof ParsedEntry) {
+        featMatch.settle(ParsedEntry.STATUS.CHOSEN, { itemId: document._id, reason: `a choice on ${document.name}` });
       }
       logger.debug("Choices evaluated", { choices, document, featMatch, match, matches: open, choiceHint });
       return match.choice;
@@ -1108,16 +1058,10 @@ export class Pathmuncher {
     if (matches.length > 0) {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
       const featMatch = this.#findAllFeatureMatch(document, Pathmuncher.#choiceKey(match.choice), { ignoreAdded: true, isChoiceMatch: true });
-      const existingMatch = false;
-
-      if (this.devMode && existingMatch) {
-        logger.warn(`NoUUID Existing match for ${document.name}`, { featMatch, existingMatch, document });
+      if (featMatch instanceof ParsedEntry) {
+        featMatch.settle(ParsedEntry.STATUS.CHOSEN, { itemId: document._id, reason: `a choice on ${document.name}` });
       }
-      if (featMatch && !existingMatch) {
-        featMatch.added = true;
-        featMatch.addedId = document._id;
-        match.choice.nouuid = true;
-      }
+      if (featMatch) match.choice.nouuid = true;
       logger.debug("No UUID Choices evaluated", { choices, cleansedChoiceSet, document, featMatch, match, matches });
       return match.choice;
     } else {
@@ -2094,25 +2038,9 @@ export class Pathmuncher {
     // foundry.utils.setProperty(this.result.character, "system.attributes.classDC.rank", this.source.proficiencies.classDC / 2);
   }
 
-  /** The slugs a compendium entry for this name can have: its own, or with the class, ancestry or heritage. */
-  #nameSlugs(name) {
-    return [
-      Seasoning.slug(name),
-      Seasoning.slug(Seasoning.getClassAdjustedSpecialNameLowerCase(name, this.source.class)),
-      Seasoning.slug(Seasoning.getAncestryAdjustedSpecialNameLowerCase(name, this.source.ancestry)),
-      Seasoning.slug(Seasoning.getHeritageAdjustedSpecialNameLowerCase(name, this.source.heritage)),
-    ];
-  }
-
-  #findInPackIndexes(type, arrayOfNameMatches) {
-    const matcher = this.compendiumMatchers[type];
-    for (const packName of Object.keys(matcher.indexes)) {
-      for (const name of arrayOfNameMatches) {
-        const indexMatch = matcher.findBySlugs(packName, this.#nameSlugs(name));
-        if (indexMatch) return { i: indexMatch, pack: matcher.packs[packName] };
-      }
-    }
-    return undefined;
+  /** The compendium entry of a type for the first of these names that has one, under any of their slug variants. */
+  #findInPackIndexes(type, names) {
+    return this.compendiumMatchers[type].findCandidates(names.map((name) => this.names.slugVariants(name)));
   }
 
   #sortParsedFeats() {
@@ -2167,8 +2095,7 @@ export class Pathmuncher {
         const addedFeat = pBFeat.sourceType === "specials"
           && this.parsed.feats.find((f) => f.added && f.addedId && f.name === pBFeat.name);
         if (addedFeat) {
-          pBFeat.added = true;
-          pBFeat.addedId = addedFeat.addedId;
+          pBFeat.settle(addedFeat.status, { itemId: addedFeat.itemId, reason: "repeats an awarded feat" });
           continue;
         }
         if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
@@ -2193,34 +2120,19 @@ export class Pathmuncher {
             pBFeat,
             type,
           });
-          this.check[pBFeat.originalName] = {
-            name: displayName,
-            type: pBFeat.sourceType === "specials" ? "special" : "feat",
-            details: {
-              displayName,
-              name: pBFeat.name,
-              originalName: pBFeat.originalName,
-              extra: pBFeat.extra,
-              pBFeat,
-              type,
-            },
-          };
+          pBFeat.unmatched(`no ${type} compendium entry`);
           continue;
         }
-        if (this.check[pBFeat.originalName]) delete this.check[pBFeat.originalName];
-        pBFeat.added = true;
         if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`)) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
-          pBFeat.addedAutoId = `${indexMatch.i._id}_${indexMatch.i.type}`;
+          pBFeat.settle(ParsedEntry.STATUS.INCLUDED, { reason: "already added by a feature" });
           continue;
         }
 
         const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
         const docData = doc.toObject();
         docData._id = foundry.utils.randomID();
-        // eslint-disable-next-line require-atomic-updates
-        pBFeat.addedId = docData._id;
-        // docData.name = displayName;
+        pBFeat.settle(ParsedEntry.STATUS.CREATED, { itemId: docData._id });
 
         this.#generateFoundryFeatLocation(docData, pBFeat);
         this.result.feats.push(docData);
@@ -2252,16 +2164,14 @@ export class Pathmuncher {
     const backpackMatch = index?.find((i) => i.type === "backpack" && i.system.slug === "backpack");
     if (!backpackMatch) {
       logger.warn("Unable to find a backpack for the Adventurer's Pack", { pack: defaultCompendium?.collection });
-      adventurersPack.added = true;
-      this.bad.push({ pbName: adventurersPack.pbName, type: "equipment", details: { e: adventurersPack } });
+      adventurersPack.unmatched("no backpack to hold it");
       return;
     }
 
     const compendiumBackpack = await defaultCompendium.getDocument(backpackMatch._id);
     const backpackInstance = compendiumBackpack.toObject();
-    adventurersPack.added = true;
     backpackInstance._id = foundry.utils.randomID();
-    adventurersPack.addedId = backpackInstance._id;
+    adventurersPack.settle(ParsedEntry.STATUS.CREATED, { itemId: backpackInstance._id });
     this.result.adventurersPack.item = adventurersPack;
     this.result.equipment.push(backpackInstance);
     for (const content of this.result.adventurersPack.contents) {
@@ -2295,17 +2205,18 @@ export class Pathmuncher {
       itemData._id = id;
       this.#resizeItem(itemData);
       this.result["equipment"].push(itemData);
-      this.parsed.equipment.push({
+      this.parsed.equipment.push(new ParsedEntry({
         foundryName: name,
         pbName: data.containerName,
         originalName: data.containerName,
         name,
         qty: 1,
-        added: true,
         inContainer: undefined,
         container: this.#getContainerData(key),
         foundryId: id,
-      });
+        status: ParsedEntry.STATUS.CREATED,
+        itemId: id,
+      }));
     }
   }
 
@@ -2313,20 +2224,21 @@ export class Pathmuncher {
     if (e.pbName === "Adventurer's Pack") return;
     if (e.added) return;
     if (Seasoning.IGNORED_EQUIPMENT().includes(e.pbName)) {
-      e.added = true;
-      e.addedAutoId = "ignored";
+      e.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
       return;
     }
     logger.debug("Generating item for", e);
     const indexMatch = this.compendiumMatchers["equipment"].getMatch(e.pbName, e.foundryName);
     if (!indexMatch) {
       logger.error(`Unable to match ${e.pbName}`, e);
-      this.bad.push({ pbName: e.pbName, type: "equipment", details: { e } });
+      e.unmatched("no equipment compendium entry");
       return;
     }
 
     const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-    if (doc.type != "kit") {
+    if (doc.type === "kit") {
+      e.settle(ParsedEntry.STATUS.IGNORED, { reason: "kits are not imported" });
+    } else {
       const itemData = doc.toObject();
       itemData._id = e.foundryId || foundry.utils.randomID();
       itemData.system.quantity = e.qty;
@@ -2351,12 +2263,11 @@ export class Pathmuncher {
         applyFeatLocation: false,
         choiceHint: e.extra && e.extra !== "" ? e.extra : null,
       };
+      // settled after its own rules are read, which can match the entry's extra (a choice it makes)
       await this.#addGrantedItems(itemData, options);
       // eslint-disable-next-line require-atomic-updates
-      e.addedId = itemData._id;
+      e.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
     }
-    // eslint-disable-next-line require-atomic-updates
-    e.added = true;
   }
 
   async #generateEquipmentItems() {
@@ -2443,10 +2354,10 @@ export class Pathmuncher {
         const runeItem = RUNE_ITEM_MAP[property];
         logger.debug("Processing rune property", { property, runeItem });
         if (runeItem) {
-          await this.#generateEquipmentItem({
-            foundryName: property,
-            pbName: runeItem,
-          });
+          // a rune Pathbuilder lists on the weapon that is an item in Foundry (a filigree)
+          const entry = new ParsedEntry({ foundryName: property, pbName: runeItem, originalName: property, sourceType: "runes" });
+          this.parsed.equipment.push(entry);
+          await this.#generateEquipmentItem(entry);
         } else {
           itemData.system.runes.property.push(Seasoning.slugD(rune));
         }
@@ -2574,7 +2485,7 @@ export class Pathmuncher {
     const indexMatch = this.compendiumMatchers["equipment"].getMatch(data.pbName, data.foundryName);
     if (!indexMatch) {
       logger.error(`Unable to match weapon item ${data.name}`, data);
-      this.bad.push({ pbName: data.pbName, type: "weapon", details: { w: data } });
+      data.unmatched("no equipment compendium entry");
       return null;
     }
 
@@ -2600,16 +2511,14 @@ export class Pathmuncher {
 
     this.#resizeItem(itemData);
     this.result.weapons.push(itemData);
-    data.added = true;
-    data.addedId = itemData._id;
+    data.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
     return itemData;
   }
 
   async #generateWeaponItems() {
     for (const w of this.parsed.weapons) {
       if (Seasoning.IGNORED_EQUIPMENT().includes(w.pbName)) {
-        w.added = true;
-        w.addedAutoId = "ignored";
+        w.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
         continue;
       }
       await this.#createWeaponItem(w);
@@ -2648,32 +2557,27 @@ export class Pathmuncher {
         if (existingItem) {
           existingItem.system.equipped.inSlot = true;
           existingItem.system.equipped.handsHeld = 0;
-          a.added = true;
-          a.addedId = existingItem._id;
+          a.settle(ParsedEntry.STATUS.GRANTED, { itemId: existingItem._id, reason: "granted by a feature" });
           logger.debug(`Ignoring armor item ${a.pbName} as it has been granted by a feature`);
           continue;
         }
       }
       if (Seasoning.IGNORED_EQUIPMENT().includes(a.pbName)) {
-        a.added = true;
-        a.addedAutoId = "ignored";
+        a.settle(ParsedEntry.STATUS.IGNORED, { reason: "Pathbuilder only" });
         continue;
       }
 
       const indexMatch = this.compendiumMatchers["equipment"].getMatch(a.foundryName, `${a.pbName} Armor`);
       if (!indexMatch) {
         logger.error(`Unable to match armor kit item ${a.name}`, a);
-        this.bad.push({ pbName: a.pbName, type: "armor", details: { a } });
+        a.unmatched("no equipment compendium entry");
         continue;
       }
 
       const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
       const itemData = await this.#adjustArmorItem(doc.toObject(), a);
       this.result.armor.push(itemData);
-      // eslint-disable-next-line require-atomic-updates
-      a.addedId = itemData._id;
-      // eslint-disable-next-line require-atomic-updates
-      a.added = true;
+      a.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
     }
   }
 
@@ -3656,6 +3560,11 @@ export class Pathmuncher {
     return Seasoning.slug(String(name ?? "").replace(/\s*\(.*?\)\s*/g, " ").trim());
   }
 
+  /** The entries of a parsed list (feats, specials, equipment, weapons, armor) that nothing matched. */
+  #unmatchedEntries(list) {
+    return this.parsed[list].filter((entry) => entry.status === ParsedEntry.STATUS.UNMATCHED);
+  }
+
   /** Specials no item was matched to, leaving out Pathbuilder's labels, lores and spells. */
   #specialsWithoutItems() {
     const slug = Pathmuncher.#specialSlug;
@@ -3663,13 +3572,12 @@ export class Pathmuncher {
       .map(slug));
     const lores = new Set((this.source?.lores ?? []).flatMap(([name]) => [slug(name), slug(`Lore: ${name}`)]));
     const spells = new Set(this.result.spells.map((s) => slug(s.name)));
-    return Object.values(this.check)
-      .filter((b) => b.type === "special"
-        && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
-        // Pathbuilder repeats some specials (a thaumaturge's implement once per tier): one match covers them
-        && !this.parsed.specials.some((f) => f.name === b.details.name && f.added)
-        && !BAD_IGNORE_FEATURES(b.details.name))
-      .map((b) => b.details.originalName)
+    // Pathbuilder repeats some specials (a thaumaturge's implement once per tier): one match covers them
+    const settled = new Set(this.parsed.specials.filter((entry) => entry.added).map((entry) => entry.name));
+    const names = this.#unmatchedEntries("specials")
+      .filter((entry) => entry.sourceType === "specials" && !settled.has(entry.name) && !BAD_IGNORE_FEATURES(entry.name))
+      .map((entry) => entry.originalName);
+    return [...new Set(names)]
       .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
   }
 
@@ -3720,12 +3628,12 @@ export class Pathmuncher {
       ? this.bad.filter((b) => b.type === type && filter(b)).map((b) => b.pbName)
       : []);
     const unmatchedFeats = this.options.addFeats
-      ? Object.values(this.check)
-        .filter((b) => b.type === "feat"
-          && this.parsed.feats.some((f) => f.name === b.details.name && !f.added)
-          && !BAD_IGNORE_FEATURES(b.details.name))
-        .map((b) => b.details.name)
+      ? this.#unmatchedEntries("feats").filter((entry) => !BAD_IGNORE_FEATURES(entry.name)).map((entry) => entry.name)
       : [];
+    // unmatched items: the parsed entries, and anything else of the type (an sf2e upgrade)
+    const unmatchedItems = (list, type, option) => (this.options[option]
+      ? [...this.#unmatchedEntries(list).map((entry) => entry.pbName), ...bad(type, option)]
+      : []);
     const described = this.options.addFeats ? this.getDescribedSpecials() : [];
     const groups = [
       ["class", bad("class", "addClass")],
@@ -3736,9 +3644,9 @@ export class Pathmuncher {
       ["feat", [...bad("feat", "addFeats"), ...unmatchedFeats]],
       ["special", this.options.addFeats ? this.getUnmatchedSpecials() : []],
       ["described", described.flatMap((origin) => origin.specials.map((s) => s.name))],
-      ["equipment", bad("equipment", "addEquipment")],
-      ["weapon", bad("weapon", "addWeapons")],
-      ["armor", bad("armor", "addArmor")],
+      ["equipment", unmatchedItems("equipment", "equipment", "addEquipment")],
+      ["weapon", unmatchedItems("weapons", "weapon", "addWeapons")],
+      ["armor", unmatchedItems("armor", "armor", "addArmor")],
       ["spellcasting", bad("spellcasting", "addSpells")],
       ["spell", bad("spell", "addSpells")],
       ["ritual", bad("ritual", "addSpells")],

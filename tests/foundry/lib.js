@@ -42,10 +42,14 @@
     },
   };
 
-  /** Run the registered tests whose names match the filter, sequentially. */
-  pmt.run = async (filter = "") => {
+  /**
+   * Run the registered tests whose names match the filter, sequentially. chunk ("2/4") runs one part
+   * of them: every 4th matching test, starting with the 2nd.
+   */
+  pmt.run = async (filter = "", chunk = null) => {
+    const [part, parts] = chunk ? chunk.split("/").map(Number) : [1, 1];
     const results = [];
-    for (const t of pmt.tests.filter((x) => x.name.includes(filter))) {
+    for (const t of pmt.tests.filter((x) => x.name.includes(filter)).filter((_, i) => i % parts === part - 1)) {
       const started = performance.now();
       const cleanups = [];
       const ctx = { ...pmt.assert, cleanup: (fn) => cleanups.push(fn), log: [] };
@@ -352,8 +356,9 @@
    */
   pmt.characterSnapshot = (actor, pm, prompts = []) => {
     const names = new Map(actor.items.map((i) => [i.id, i.name]));
-    // an id of an item not on the actor (a grant whose granter is missing) is random: say so instead
-    const nameOf = (id) => (names.has(id) ? names.get(id) : "(missing item)");
+    // an id of an item not on the actor (a grant whose granter is missing) is random: say so instead;
+    // anything else is a word, such as a ritual's location "rituals"
+    const nameOf = (id) => (names.has(id) ? names.get(id) : (/^[a-zA-Z0-9]{16}$/).test(id ?? "") ? "(missing item)" : id);
     // ids of the actor's own items, wherever they appear in a value, as @Item Name
     const named = (value) => String(typeof value === "object" ? JSON.stringify(value) : value)
       .replace(/\b[a-zA-Z0-9]{16}\b/g, (id) => (names.has(id) ? `@${names.get(id)}` : id));

@@ -68,7 +68,7 @@
     "feat: Additional Lore [slot skill-2; level 1; taken 2]",
     "feat: Armor Proficiency (Heavy) [slot general-3; level 1; taken 3; armorProficiency=heavy]",
     "feat: Assurance [in Farmhand; level 1; taken 1; granted by Farmhand]",
-    "feat: Barrow's Edge [level 1; taken 2; granted by Divine Spark and Ikons; barrowsEdge=granted; divineSpark=null; existingIkon=null; grantedIkon=Compendium.pf2e.equipment-srd.Item.8V4mgecGASsQ7fjl]",
+    "feat: Barrow's Edge [level 1; taken 2; granted by Divine Spark and Ikons; barrowsEdge=granted; divineSpark=null; existingIkon=null; grantedIkon=Compendium.pf2e.equipment-srd.Item.Ak3oHoPDJoMR14yg]",
     "feat: Basic Glory [slot archetype-4; level 4; taken 4; basicGlory=Compendium.pf2e.feats-srd.Item.pJaJUmTrQkXW2s9G]",
     "feat: Bite [in Kholo; level 1]",
     "feat: Bravery [in Fighter; level 3]",
@@ -102,7 +102,6 @@
   "prompts": [
     "Fighter: Athletics",
     "Barrow's Edge: Grant me a new item. (guessed)",
-    "Barrow's Edge: Adze (guessed)",
     "Exemplar Dedication: Strength (guessed)",
     "Fighter Weapon Mastery: Axe (guessed)"
   ]

@@ -90,17 +90,25 @@ export class CompendiumMatcher {
     return undefined;
   }
 
-  getSlugMatch(pbName, foundryName) {
-    const foundrySlug = Seasoning.slug(foundryName);
-    const pbSlug = Seasoning.slug(pbName);
+  /**
+   * The first match for a list of candidates, most likely first, each a list of slugs that count as
+   * the same name: pack by pack in the order searched, the first candidate with an entry in the pack,
+   * and of that candidate's slugs the entry first in the pack's index. { i, pack } or undefined.
+   */
+  findCandidates(candidates, filters = {}) {
     for (const packName of Object.keys(this.indexes)) {
-      const indexMatch = this.findBySlugs(packName, [foundrySlug]) ?? this.findBySlugs(packName, [pbSlug]);
-      if (indexMatch) {
-        logger.debug(`Found slug based compendium document for ${pbName} (${foundryName}) in ${packName} with id ${indexMatch._id}`);
-        return { i: indexMatch, pack: this.packs[packName] };
+      for (const slugs of candidates) {
+        const indexMatch = this.findBySlugs(packName, slugs, filters);
+        if (indexMatch) return { i: indexMatch, pack: this.packs[packName] };
       }
     }
     return undefined;
+  }
+
+  getSlugMatch(pbName, foundryName) {
+    const match = this.findCandidates([[Seasoning.slug(foundryName)], [Seasoning.slug(pbName)]]);
+    if (match) logger.debug(`Found slug based compendium document for ${pbName} (${foundryName}) in ${match.pack.collection} with id ${match.i._id}`);
+    return match;
   }
 
   getMatch(pbName, foundryName, forceName = false) {
@@ -128,18 +136,10 @@ export class CompendiumMatcher {
   }
 
   getNameMatchWithFilter(pbName, foundryName, filters = {}) {
-    const foundrySlug = Seasoning.slug(foundryName);
-    const pbSlug = Seasoning.slug(pbName);
-    logger.debug(`Looking for compendium document for ${pbName} (${foundryName}) with filters`, { pbName, foundryName, filters, foundrySlug, pbSlug });
-    for (const packName of Object.keys(this.indexes)) {
-      const indexMatch = this.findBySlugs(packName, [foundrySlug], filters) ?? this.findBySlugs(packName, [pbSlug], filters);
-      if (indexMatch) {
-        logger.debug(`Found compendium document for ${pbName} (${foundryName}) in ${packName} with id ${indexMatch._id}`);
-        return { i: indexMatch, pack: this.packs[packName] };
-      }
-    }
-
-    return undefined;
+    logger.debug(`Looking for compendium document for ${pbName} (${foundryName}) with filters`, { pbName, foundryName, filters });
+    const match = this.findCandidates([[Seasoning.slug(foundryName)], [Seasoning.slug(pbName)]], filters);
+    if (match) logger.debug(`Found compendium document for ${pbName} (${foundryName}) in ${match.pack.collection} with id ${match.i._id}`);
+    return match;
   }
 
 }

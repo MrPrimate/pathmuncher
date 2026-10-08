@@ -8,7 +8,8 @@
 // evaluates lib.js, every *.test.js file here and the fixtures, and runs the tests one at a time.
 // PMT_KEEP=1 keeps the test actors for inspection. PMT_SURVEY=1 runs survey.test.js over the
 // generated builds. PMT_UPDATE_SNAPSHOTS=1 rewrites the snapshots in fixtures/snapshots from this
-// run, and PMT_SNAPSHOT_ALL=1 snapshots every generated build. See tests/README.md.
+// run, and PMT_SNAPSHOT_ALL=1 snapshots every generated build. PMT_CHUNK=2/4 runs one quarter of the
+// matching tests (every 4th, from the 2nd), to split long runs. See tests/README.md.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -118,7 +119,9 @@ for (const file of fs.readdirSync(here).filter((f) => f.endsWith(".test.js")).so
 }
 
 listening = true;
-const results = await evaluate(`pmt.run(${JSON.stringify(filter)})`, 3600000);
+const chunk = process.env.PMT_CHUNK ?? null;
+if (chunk && !(/^\d+\/\d+$/).test(chunk)) throw new Error(`PMT_CHUNK should look like 2/4, not ${chunk}`);
+const results = await evaluate(`pmt.run(${JSON.stringify(filter)}, ${JSON.stringify(chunk)})`, 3600000);
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;

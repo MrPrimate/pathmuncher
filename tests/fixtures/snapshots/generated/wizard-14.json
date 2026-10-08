@@ -111,7 +111,7 @@
     "feat: Wizard Spellcasting [in Wizard; level 1]",
     "heritage: Climbing Animal [granted by Late Awakener (Climbing Animal)]",
     "lore: Curse [rank 1]",
-    "spell: Awaken Animal [in ?rituals; rank 6; granted by Awaken Others]",
+    "spell: Awaken Animal [in rituals; rank 6; granted by Awaken Others]",
     "spell: Unexpected Windfall [in Arcane Focus Tradition; rank 1]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Wizard",

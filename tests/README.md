@@ -105,6 +105,9 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
     every generated build.
   - When a change is meant to alter the result, rerun with `PMT_UPDATE_SNAPSHOTS=1` to rewrite the
     snapshots, and review their diff before committing.
+  - A run over every build takes about 40 minutes. Split it with `PMT_CHUNK`: `PMT_CHUNK=1/4` up to
+    `PMT_CHUNK=4/4` each run a quarter of the matching tests (every 4th, starting with the 1st, 2nd,
+    ...), so a stopped or failed run only needs that chunk again.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.

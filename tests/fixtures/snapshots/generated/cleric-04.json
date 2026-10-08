@@ -65,7 +65,7 @@
     "feat: Bloodsense [slot general-7; level 7; taken 7]",
     "feat: Cleric Spellcasting [in Cleric; level 1]",
     "feat: Deadly Simplicity [level 1; granted by First Doctrine (Warpriest)]",
-    "feat: Deity (Cleric) [in Cleric; level 1; deity=null; sanctification=holy]",
+    "feat: Deity (Cleric) [in Cleric; level 1; deity=null; sanctification=none]",
     "feat: Divine Defense [in Cleric; level 13]",
     "feat: Divine Font (Healing) [in Cleric; level 1; divineFont=heal]",
     "feat: Doctrine [in Cleric; level 1; doctrine=Compendium.pf2e.classfeatures.Item.0Aocw3igLwna9cjp]",
@@ -176,7 +176,5 @@
   "described": [
     "Desna: Anathema"
   ],
-  "prompts": [
-    "Deity (Cleric): Holy (guessed)"
-  ]
+  "prompts": []
 }
