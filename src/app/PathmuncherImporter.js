@@ -4,6 +4,7 @@ import utils from "../utils.js";
 import { DeityConflictDialog } from "./DeityConflictDialog.js";
 import { Pathmuncher } from "./Pathmuncher.js";
 import { PetShop } from "./PetShop.js";
+import { UnansweredChoicesDialog } from "./UnansweredChoicesDialog.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -173,6 +174,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       statusCallback: this.#updateProgress.bind(this),
       resolveMissingCore: PathmuncherImporter.#chooseMissingCore,
       resolveDeityConflict: DeityConflictDialog.choose,
+      resolveUnansweredChoices: UnansweredChoicesDialog.choose,
     };
     logger.debug("Pathmuncher options", options);
 

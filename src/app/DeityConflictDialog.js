@@ -6,12 +6,12 @@ import {
   deityFonts,
   deitySanctifications,
 } from "./DeityChoices.js";
+import { clip, escape, tile } from "./ChoiceTiles.js";
 
 const { DialogV2 } = foundry.applications.api;
 
 const local = (key) => game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.DeityConflict.${key}`);
 const format = (key, data) => game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.DeityConflict.${key}`, data);
-const escape = (text) => foundry.utils.escapeHTML(String(text ?? ""));
 
 const FONT_IMAGES = {
   heal: "icons/magic/life/cross-worn-green.webp",
@@ -68,13 +68,6 @@ function sanctificationText(deity) {
   const modal = sanctification.modal === "must" ? "Must" : "Can";
   const what = sanctification.what.length > 1 ? "HolyUnholy" : titleCase(sanctification.what[0]);
   return game.i18n.localize(`PF2E.Item.Deity.Sanctification.${modal}.${what}`);
-}
-
-/** Plain text of a description, cut down to a tooltip. */
-function clip(html, length = 400) {
-  const text = String(html ?? "").replace(/@\w+\[[^\]]*\](?:\{([^}]*)\})?/g, (_, label) => label ?? "")
-    .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  return text.length > length ? `${text.slice(0, length - 1)}…` : text;
 }
 
 /** A tooltip listing what a deity allows its followers. */
@@ -145,13 +138,6 @@ function conflictOptions(conflict, { deity, choices, causes }) {
       return [];
   }
 }
-
-const tile = ({ name, value, label, img, icon, tooltip, special, data = "" }) => `
-  <label class="pathmuncher-tile" data-tooltip-html="${escape(tooltip)}" ${data}>
-    <input type="radio" name="${escape(name)}" value="${escape(value)}" ${special ? `data-special="${escape(special)}"` : ""}>
-    ${img ? `<img src="${escape(img)}" alt="" loading="lazy">` : `<i class="${escape(icon)}" inert></i>`}
-    <span>${escape(label)}</span>
-  </label>`;
 
 function deityTile(deity) {
   return tile({

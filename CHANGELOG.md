@@ -8,6 +8,8 @@
 - If Foundry's rule code fails on one item's choice or granted item, the import carries on. Foundry applies that rule itself when the item is created, and the import notes list the item under "Rules to check".
 - An Adventurer's Pack no longer stops a Starfinder 2e import. SF2e has no backpack to hold it, so it is listed in the import notes instead.
 - The Verbose log level no longer breaks imports.
+- Choices the Pathbuilder export doesn't record are guessed where the build settles them: a weapon or other item the character carries exactly one of the options for (Surki Weapon Familiarity, an Exemplar's ikon), and a champion's sanctification from their cause. The rest are asked together, once the build is read and before the character changes. Any left unpicked are still asked by the system.
+- A champion's sanctification is saved where the system reads it, so the holy or unholy trait is applied.
 
 # 1.6.2
 

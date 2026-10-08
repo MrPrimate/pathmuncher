@@ -474,6 +474,56 @@
   margin: 0;
 }
 
+/* ------------------------------------------------ unanswered choices dialog */
+
+.pathmuncher-unanswered-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pathmuncher-unanswered-choices .hint {
+  margin: 0;
+}
+
+.pathmuncher-unanswered {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.pathmuncher-unanswered legend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: bold;
+}
+
+.pathmuncher-unanswered legend img {
+  width: 24px;
+  height: 24px;
+  border: none;
+}
+
+.pathmuncher .pathmuncher-choice-clear {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0 0.25rem;
+  border: none;
+  background: none;
+  line-height: 1;
+}
+
+.pathmuncher-choice-tiles {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
 /* --------------------------------------------------------- import report */
 
 .pathmuncher-report-groups {

@@ -83,6 +83,8 @@ export class Pathmuncher {
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};
+    // choices the build doesn't answer, asked together once processing ends (options.resolveUnansweredChoices)
+    this.unansweredChoices = [];
     this.allFeatureRules = {};
     this.autoAddedFeatureRules = {};
     this.failedFeatureItems = {};
@@ -1141,6 +1143,116 @@ export class Pathmuncher {
     return trained[0];
   }
 
+  /**
+   * A choice between items (Surki Weapon Familiarity's axe or hammer) that the build answers by
+   * carrying exactly one of them. Pathbuilder does not export the choice itself.
+   */
+  #choiceFromCarriedItems(choiceSet, choices) {
+    if (!Pathmuncher.CARRIED_CHOICE_TYPES.includes(choiceSet.choices?.itemType)) return undefined;
+    const carried = new Set([
+      ...this.source.weapons.map((w) => w.name),
+      ...this.source.armor.map((a) => a.name),
+      ...this.source.equipment.map((e) => e[0]),
+    ].filter(utils.isString).map((name) => Seasoning.slug(name)));
+    const matches = choices.filter((c) => utils.isString(c.value) && carried.has(Seasoning.slug(game.i18n.localize(c.label ?? ""))));
+    if (new Set(matches.map((c) => c.value)).size !== 1) return undefined;
+    const choice = matches[0];
+    if (!Pathmuncher.isUuid(choice.value)) choice.nouuid = true;
+    return choice;
+  }
+
+  /**
+   * A cleric's or champion's sanctification, which Pathbuilder exports as the cleric's "Holy",
+   * "Unholy" or "Neither", or as the sanctification a champion's cause needs ("Grandeur Cause (Holy)").
+   */
+  #sanctificationFromBuild(document, choiceSet, choices) {
+    if (Pathmuncher.#ruleFlag(document, choiceSet) !== "sanctification") return undefined;
+    const { sanctification, cause } = buildDeityChoices(this.source.specials);
+    const value = sanctification?.value ?? cause?.value;
+    const choice = choices.find((c) => c.value === value);
+    if (choice) choice.nouuid = true;
+    return choice;
+  }
+
+  /** The flag pf2e stores a rule's selection under: its flag, else its slug, else the item's slug or name. */
+  static #ruleFlag(document, ruleEntry) {
+    return utils.isString(ruleEntry.flag) && ruleEntry.flag.length > 0
+      ? ruleEntry.flag.replace(/[^-a-z0-9]/gi, "")
+      : Seasoning.slugD(ruleEntry.slug ?? document.system.slug ?? document.name);
+  }
+
+  /** Choices that other choices read during processing (the champion's cause needs the sanctification), so are never held back. */
+  static UNDEFERRED_CHOICE_FLAGS = ["deity", "sanctification"];
+
+  static CARRIED_CHOICE_TYPES = ["weapon", "armor", "shield", "equipment", "consumable", "backpack", "treasure"];
+
+  /**
+   * Holds back a choice the build doesn't answer, so it can be asked with the others once processing
+   * ends instead of prompting now. Only when the importer can ask (options.resolveUnansweredChoices),
+   * and only for a choice nothing else in processing reads: one whose selection names the item a
+   * later rule of the item grants, or that another item's choice depends on (a cleric's deity), is
+   * still asked straight away.
+   */
+  #deferChoice(document, ruleEntry, choices) {
+    if (!this.options.resolveUnansweredChoices) return false;
+    if (this.unansweredChoices.some((c) => c.ruleEntry === ruleEntry)) return true;
+    if (choices.length < 2 || !choices.every((c) => utils.isString(c.value))) return false;
+    const flag = Pathmuncher.#ruleFlag(document, ruleEntry);
+    const readLater = Pathmuncher.UNDEFERRED_CHOICE_FLAGS.includes(flag)
+      || document.system.rules.some((r) => r !== ruleEntry && ["GrantItem", "ChoiceSet"].includes(r.key)
+        && JSON.stringify(r).includes(`rulesSelections.${flag}`));
+    if (readLater) return false;
+    this.unansweredChoices.push({
+      id: foundry.utils.randomID(),
+      document,
+      ruleEntry,
+      flag,
+      choices: choices.map((c) => {
+        const label = game.i18n.localize(c.label ?? "");
+        return { value: c.value, label, img: c.img, uuid: this.#choiceUuid(ruleEntry, c.value, label) };
+      }),
+    });
+    logger.debug(`Deferring the choice for ${document.name}`, { ruleEntry, choices });
+    return true;
+  }
+
+  /** The item a choice names, for its description: its value, or for slugs (a weapon's) the equipment of that name. */
+  #choiceUuid(ruleEntry, value, label) {
+    if (Pathmuncher.isUuid(value)) return value;
+    if (!Pathmuncher.CARRIED_CHOICE_TYPES.includes(ruleEntry.choices?.itemType)) return undefined;
+    const match = this.compendiumMatchers.equipment.getMatch(label, label);
+    return match ? match.pack.getUuid(match.i._id) : undefined;
+  }
+
+  /**
+   * The choices held back by #deferChoice, for the user to answer:
+   * [{ id, item: { name, img, type }, prompt, choices: [{ value, label, img, uuid }] }]
+   */
+  get unansweredChoiceList() {
+    return this.unansweredChoices.map(({ id, document, ruleEntry, choices }) => ({
+      id,
+      item: { name: document.name, img: document.img, type: document.type },
+      prompt: utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : "",
+      choices,
+    }));
+  }
+
+  /** Sets the selections the user made ({ id: value }) as pf2e would; anything unanswered is asked by pf2e during the import. */
+  #applyChoiceAnswers(answers) {
+    for (const entry of this.unansweredChoices) {
+      const choice = entry.choices.find((c) => c.value === answers[entry.id]);
+      if (!choice) continue;
+      const { document, ruleEntry, flag } = entry;
+      ruleEntry.flag = flag;
+      ruleEntry.selection = choice.value;
+      foundry.utils.setProperty(document, `flags.${game.system.id}.rulesSelections.${flag}`, choice.value);
+      if (ruleEntry.actorFlag) foundry.utils.setProperty(this.result.character, `flags.${game.system.id}.${flag}`, choice.value);
+      document.name = Pathmuncher.choiceAdjustedName(document.name, ruleEntry, choice, flag);
+      this.promptRules[document._id] = (this.promptRules[document._id] ?? []).filter((r) => r !== ruleEntry);
+    }
+    logger.debug("Choices answered", { answers, unanswered: this.unansweredChoices });
+  }
+
   static getFlag(document, ruleSet) {
     return typeof ruleSet.flag === "string" && ruleSet.flag.length > 0
       ? ruleSet.flag.replace(/[^-a-z0-9]/gi, "")
@@ -1212,6 +1324,20 @@ export class Pathmuncher {
           return skillMatch;
         }
       }
+
+      const sanctificationMatch = this.#sanctificationFromBuild(document, cleansedChoiceSet, choices);
+      if (sanctificationMatch) {
+        logger.debug(`Sanctification for ${document.name} from the build`, { sanctificationMatch, choices });
+        return sanctificationMatch;
+      }
+
+      const carriedMatch = this.#choiceFromCarriedItems(cleansedChoiceSet, choices);
+      if (carriedMatch) {
+        logger.debug(`Item choice for ${document.name} from the build's inventory`, { carriedMatch, choices });
+        return carriedMatch;
+      }
+
+      if (this.#deferChoice(document, choiceSet, choices)) return undefined;
 
       let tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
@@ -1672,7 +1798,8 @@ export class Pathmuncher {
         }
       } else if (foundry.utils.getProperty(choice, "nouuid")) {
         logger.debug("Parsed no id rule", { choice, uuid, ruleEntry });
-        if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
+        // the flag pf2e itself would use, so rules reading the selection (a champion's sanctification trait) find it
+        if (!ruleEntry.flag) ruleEntry.flag = Pathmuncher.#ruleFlag(document, ruleEntry);
         ruleEntry.selection = choice.value;
         addRuleToKeep(ruleEntry);
       } else if (choice && uuid && !foundry.utils.hasProperty(ruleEntry, "selection")) {
@@ -3292,6 +3419,11 @@ export class Pathmuncher {
     await this.#processRituals();
     this.#statusUpdate(12, 12, "Lores");
     await this.#generateLores();
+    if (this.unansweredChoices.length > 0) {
+      const answers = await this.options.resolveUnansweredChoices(this.unansweredChoiceList);
+      if (!answers) return false;
+      this.#applyChoiceAnswers(answers);
+    }
     this.processed = true;
     return true;
   }

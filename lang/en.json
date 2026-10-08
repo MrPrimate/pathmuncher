@@ -120,6 +120,14 @@
         "AsBuilt": "Import as built",
         "Cancel": "Cancel import"
       },
+      "UnansweredChoices": {
+        "Title": "Pathmuncher | Choices to make",
+        "Content": "The Pathbuilder export does not say what was chosen for these. Pick them now, or leave one unpicked and the system will ask for it during the import. Hover over an option for details.",
+        "Search": "Filter options",
+        "Clear": "Clear this choice",
+        "Import": "Import",
+        "Cancel": "Cancel import"
+      },
       "KeepItems": {
         "Title": "Pathmuncher | Keep items added by hand?",
         "Content": "These items were not added by a Pathmuncher import, but are in categories this import replaces. Ticked items are kept; unticked items are deleted. Items you keep that are also in the Pathbuilder build will appear twice.",
