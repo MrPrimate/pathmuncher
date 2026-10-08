@@ -63,10 +63,23 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - `KNOWN_DIFFERENCES` lists what still differs.
 - `importer.test.js`: drives the real importer dialog. Bad input, fetch failures and processing
   failures must leave the actor untouched. A failed update must save a pre-import copy.
-- `processing.test.js`: processing details. Unmatched containers are created on the actor only
-  (never as world items), and the deep-dive setting gives the same character on or off.
+- `processing.test.js`: processing details.
+  - Unmatched containers are created on the actor only, never as world items.
+  - The deep-dive setting gives the same character on or off.
+  - Choices the export answers are not prompted:
+    - a class feature's choice under Pathbuilder's name (Bone Fascination);
+    - a skill choice settled by the proficiencies, including Mastermind's;
+    - a cleric's domain;
+    - a sorcerer's bloodline and its kind;
+    - an item's several choices of one kind (the Commander's tactics), each taking a different entry.
+  - Pathbuilder's awarded feats repeated in specials are created once.
+  - A class feature the class lists under another name (the Champion's "Weapon Mastery") is matched.
+  - A spellbook spell prepared in a higher slot keeps its spellbook rank.
 - `reporting.test.js`: what the user is told and shown.
   - The post-import report lists unmatched specials but not Pathbuilder's labels.
+  - Specials that are a section of another feature's description are grouped under that feature,
+    with its link and the section on hover. This covers remastered terms ("Negative Healing" is
+    "Void Healing") and sections named after their feature ("Animal Instinct Raging Resistance").
   - Dual class exports warn.
   - The importer's checkboxes show their saved options.
   - Parent and child feat choices are parsed as such.
@@ -94,6 +107,27 @@ Add new behaviour tests next to these as plain scripts that call `pmt.test(name,
 - `pmt.answerPrompts`
 - `pmt.captureNotifications`
 - `t.cleanup`
+
+## Survey of generated builds
+
+`fixtures/pathbuilder/generated/` holds level 20 builds made in Pathbuilder for every class and
+each option of its subclass choice (muse, school, bloodline, eidolon, ...), with feats and spells
+picked from Pathbuilder's own tables. They are too many for every run, so they are surveyed rather
+than tested:
+
+```sh
+PMT_SURVEY=1 CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:foundry -- survey > survey.log
+node tests/foundry/survey-report.mjs survey.log > survey.md
+```
+
+- `survey.test.js` imports each build and logs what it finds. A build fails only if the import throws.
+- The report lists, most frequent first:
+  - the pf2e prompts the export already answers, which pathmuncher should have answered;
+  - the prompts it doesn't answer;
+  - everything the post-import report calls unmatched;
+  - the differences `pmt.compareWithBuild` finds;
+  - console errors.
+- Add a survey filter (`-- "survey Wizard"`) to rerun one class.
 
 ## Fixtures
 

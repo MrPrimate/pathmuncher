@@ -238,6 +238,63 @@
   font-size: var(--font-size-12);
 }
 
+/* ------------------------------------------------- missing core items dialog */
+
+.pathmuncher-missing-core {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pathmuncher-missing-core-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pathmuncher-missing-core-type {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-12);
+  margin-right: 0.25rem;
+}
+
+.pathmuncher-missing-core-name {
+  font-weight: bold;
+}
+
+.pathmuncher .pathmuncher-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  height: auto;
+  padding: 0.5rem;
+  border: 2px dashed var(--color-border, #999);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-subtle);
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.pathmuncher .pathmuncher-drop-zone:hover,
+.pathmuncher .pathmuncher-drop-zone.drag-over {
+  border-color: var(--color-border-highlight, #ff6400);
+  background: var(--color-cool-5-25, rgba(0, 0, 0, 0.05));
+}
+
+.pathmuncher .pathmuncher-drop-zone.filled {
+  border-style: solid;
+  color: var(--color-text-primary);
+}
+
+.pathmuncher-drop-zone img {
+  width: 32px;
+  height: 32px;
+  border: none;
+}
+
 /* --------------------------------------------------------- import report */
 
 .pathmuncher-report-groups {

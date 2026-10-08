@@ -170,6 +170,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       ...data.options,
       pathbuilderId: this.source === "id" ? String(data.pathbuilderId ?? "").trim() : undefined,
       statusCallback: this.#updateProgress.bind(this),
+      resolveMissingCore: PathmuncherImporter.#chooseMissingCore,
     };
     logger.debug("Pathmuncher options", options);
 
@@ -194,7 +195,10 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
 
     logger.debug("Pathmuncher Source", pathmuncher.source);
     try {
-      await pathmuncher.processCharacter();
+      if (!(await pathmuncher.processCharacter())) {
+        ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
+        return null;
+      }
     } catch (error) {
       logger.error("Pathmuncher processing failed", { error, pathmuncher });
       ui.notifications.error(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ProcessingFailed`, {
@@ -219,7 +223,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     try {
       await pathmuncher.updateActor({ keepItemIds });
       // remembered for the next import of this actor; only once the import has succeeded
-      await utils.setFlags(this.actor, Object.fromEntries(Object.entries(options).filter(([key]) => key !== "statusCallback")));
+      await utils.setFlags(this.actor, Object.fromEntries(Object.entries(options).filter(([, value]) => typeof value !== "function")));
     } catch (error) {
       logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
       const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
@@ -316,6 +320,91 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       ],
     });
     return Array.isArray(result) ? result : null;
+  }
+
+  /**
+   * Asks for the core items (class, ancestry...) no compendium has, dropped from a compendium or the
+   * Items directory. Resolves to the dropped items keyed by result target, or null if the user cancels.
+   * Anything left empty is skipped and reported as before.
+   */
+  static async #chooseMissingCore(missing) {
+    const escape = foundry.utils.escapeHTML;
+    const local = (key) => game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.${key}`);
+    const chosen = {};
+    const rows = missing
+      .map((m) => `<div class="pathmuncher-missing-core-row">
+        <span class="pathmuncher-missing-core-name">
+          <span class="pathmuncher-missing-core-type">${escape(game.i18n.localize(`TYPES.Item.${m.itemType}`))}</span>
+          ${escape(m.name)}
+        </span>
+        <button type="button" class="pathmuncher-drop-zone" data-target="${m.target}">
+          <i class="fas fa-arrow-down-to-bracket" inert></i>
+          <span>${escape(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Drop`, { type: game.i18n.localize(`TYPES.Item.${m.itemType}`) }))}</span>
+        </button>
+      </div>`)
+      .join("");
+    const content = `<p class="hint">${local("Content")}</p>
+      <div class="pathmuncher-missing-core">${rows}</div>`;
+
+    // fills a drop zone with the item dropped on it, if it is the right type
+    const onDrop = async (event, zone, lookup) => {
+      event.preventDefault();
+      zone.classList.remove("drag-over");
+      const data = foundry.applications.ux.TextEditor.implementation.getDragEventData(event);
+      const item = data?.type === "Item" ? await fromUuid(data.uuid) : null;
+      if (item?.type !== lookup.itemType) {
+        ui.notifications.warn(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.WrongType`, {
+          type: game.i18n.localize(`TYPES.Item.${lookup.itemType}`),
+        }));
+        return;
+      }
+      chosen[lookup.target] = item;
+      zone.classList.add("filled");
+      zone.replaceChildren(Object.assign(document.createElement("img"), { src: item.img, alt: "" }),
+        Object.assign(document.createElement("span"), { textContent: item.name }));
+    };
+
+    // the system's own compendium for this kind of item, else the first one searched
+    const openCompendium = (lookup) => {
+      const packs = lookup.packs.map((id) => game.packs.get(id)).filter(Boolean);
+      const pack = packs.find((p) => p.metadata.packageName === game.system.id) ?? packs[0];
+      pack?.render({ force: true });
+    };
+
+    const result = await DialogV2.wait({
+      window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Title`, icon: "fas fa-puzzle-piece" },
+      position: { width: 480 },
+      classes: ["pathmuncher", "pathmuncher-missing-core-dialog"],
+      content,
+      rejectClose: false,
+      render: (_event, dialog) => {
+        for (const zone of dialog.element.querySelectorAll(".pathmuncher-drop-zone")) {
+          const lookup = missing.find((m) => m.target === zone.dataset.target);
+          zone.addEventListener("click", () => openCompendium(lookup));
+          zone.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            zone.classList.add("drag-over");
+          });
+          zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+          zone.addEventListener("drop", (event) => onDrop(event, zone, lookup));
+        }
+      },
+      buttons: [
+        {
+          action: "import",
+          label: `${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Import`,
+          icon: "fas fa-file-import",
+          default: true,
+          callback: () => chosen,
+        },
+        {
+          action: "cancel",
+          label: `${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Cancel`,
+          icon: "fas fa-times",
+        },
+      ],
+    });
+    return result === "cancel" || !result ? null : result;
   }
 
   /**

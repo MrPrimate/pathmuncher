@@ -8,10 +8,8 @@
 
   const EXPECTATIONS = {
     "315329-magus9": {
-      unmatchedSpecials: [
-        "Heroic Heart",
-        "Planar Pain",
-      ],
+      // Heroic Heart and Planar Pain are sections of Soulforger Dedication
+      unmatchedSpecials: [],
       prompts: ["The Tangible Dream"],
       knownGaps: [
         "formulas 61 (expected 62)",
@@ -22,7 +20,6 @@
         "Arcane School: Universalist",
         "Arcane Thesis: Metamagical Experimentation",
         "Domain: Magic",
-        "Wizard Weapon Expertise",
         "Resolve",
       ],
       prompts: [
@@ -35,7 +32,7 @@
         "Ancestral Paragon",
       ],
       knownGaps: [
-        "feat missing: Dwarven Hold Education [Ancestry Feat 1]",
+        "feat in bonus feats: Dwarven Hold Education [Ancestry Feat 1] (expected ancestry)",
         "feat in bonus feats: Counterspell [Class Feat 1] (expected class)",
         "feat missing: Eschew Materials [Class Feat 2]",
         "feat in bonus feats: Explosive Savant [Ancestry Feat 3] (expected ancestry)",
@@ -43,7 +40,6 @@
         "feat in bonus feats: Blast Resistance [Ancestry Feat 7] (expected ancestry)",
         "feat in bonus feats: Mountain's Stoutness [Ancestry Feat 11] (expected ancestry)",
         "feat in bonus feats: Communal Healing [Cleric Feat 12] (expected class)",
-        "feat missing: Impeccable Crafter [Skill Feat 14]",
         "feat missing: Scroll Savant [Class Feat 14]",
         "feat missing: Improved Communal Healing [Cleric Feat 14]",
         "feat in bonus feats: Fire Savvy [Ancestry Feat 15] (expected ancestry)",
@@ -52,7 +48,8 @@
       ],
     },
     "304883-thaumaturge1": {
-      unmatchedSpecials: ["Regalia"],
+      // the Regalia implement is imported; Pathbuilder repeats its name
+      unmatchedSpecials: [],
       prompts: ["Foxfire"],
       knownGaps: [],
     },
@@ -62,7 +59,8 @@
       knownGaps: [],
     },
     "345816-guardian3": {
-      unmatchedSpecials: ["Ever Ready", "Dwarf"],
+      // Ever Ready is a section of Guardian's Techniques
+      unmatchedSpecials: ["Dwarf"],
       prompts: [],
       knownGaps: [
         "core heritage: expected Custom Mixed Heritage, got null",

@@ -120,7 +120,13 @@ const REMASTER_NAMES = [
   { pbName: "Zone of Truth", foundryName: "Ring of Truth" },
 ];
 
-export function spellRename(spellName) {
+// spelled differently in Pathbuilder, whichever content is installed
+const PATHBUILDER_SPELLINGS = [
+  { pbName: "Weapon of Judgement", foundryName: "Weapon of Judgment" },
+];
+
+export function spellRename(pbName) {
+  const spellName = PATHBUILDER_SPELLINGS.find((spelling) => spelling.pbName === pbName)?.foundryName ?? pbName;
   // the legacy content module keeps the pre-remaster names, so the old name is right there
   if (game.modules.get("pf2e-legacy-content")?.active) return spellName;
   const remasterName = REMASTER_NAMES.find((remaster) => remaster.pbName === spellName);

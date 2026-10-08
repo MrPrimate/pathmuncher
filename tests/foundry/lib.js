@@ -342,6 +342,8 @@
       if (s.includes(":")) out.add(sluggify(s.split(":").slice(1).join(":")));
       const m = s.match(/(.*)\((.*)\)/);
       if (m) out.add(sluggify(`${m[2]} ${m[1]}`));
+      // the names pathmuncher looks a Pathbuilder name up under (Aasimar is Nephilim)
+      for (const e of api().data.generateFeatMap(s)) if (e.pbName === s) out.add(sluggify(e.foundryName));
     }
     out.delete("");
     return out;

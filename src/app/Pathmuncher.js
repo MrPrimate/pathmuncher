@@ -81,6 +81,8 @@ export class Pathmuncher {
     this.failedFeatureItems = {};
     this.subRuleDocuments = {};
     this.grantItemLookUp = new Set();
+    // the Pathbuilder entries each item's choices have taken, so its next choice takes another
+    this.choiceClaims = {};
     this.autoFeats = [];
     this.keyAbility = null;
     this.boosts = {
@@ -125,6 +127,8 @@ export class Pathmuncher {
     };
     this.check = {};
     this.bad = [];
+    // core items the user supplied for ones no compendium has, keyed by result target (e.g. class)
+    this.coreReplacements = {};
     this.statusCallback = this.options.statusCallback;
     this.compendiumMatchers = {};
     const compendiumMappings = utils.setting("USE_CUSTOM_COMPENDIUM_MAPPINGS")
@@ -638,14 +642,40 @@ export class Pathmuncher {
     ui.notifications.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`);
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  /** The core items a build names. If no compendium has one, the user can supply it (options.resolveMissingCore). */
+  static CORE_LOOKUPS = [
+    { type: "ancestries", target: "ancestry", itemType: "ancestry", option: "addAncestry" },
+    { type: "heritages", target: "heritage", itemType: "heritage", option: "addHeritage" },
+    { type: "backgrounds", target: "background", itemType: "background", option: "addBackground" },
+    { type: "classes", target: "class", itemType: "class", option: "addClass" },
+  ];
+
+  #findCompendiumMatch(type, name) {
+    const foundryName = this.getFoundryFeatureName(name).foundryName;
+    return this.compendiumMatchers[type].getMatch(name, foundryName);
+  }
+
+  /**
+   * The core items (ancestry, heritage, background, class) the build names but no compendium has,
+   * for the import options that are on. Each comes with the compendiums searched for it.
+   */
+  #findMissingCore() {
+    return Pathmuncher.CORE_LOOKUPS
+      .filter(({ option }) => this.options[option] !== false)
+      .map((lookup) => ({ ...lookup, name: this.source[lookup.target] }))
+      .filter(({ type, name }) => name && name !== "Not set" && !this.#findCompendiumMatch(type, name))
+      .map((lookup) => ({ ...lookup, packs: Object.keys(this.compendiumMatchers[lookup.type].packs) }));
+  }
+
   async #processGenericCompendiumLookup(type, name, target, levelCap = 20) {
     logger.debug(`Checking for compendium documents for ${name} (${target}) in compendiums for ${type}`);
-    const foundryName = this.getFoundryFeatureName(name).foundryName;
-    const indexMatch = this.compendiumMatchers[type].getMatch(name, foundryName);
+    let doc = this.coreReplacements[target];
+    if (!doc) {
+      const indexMatch = this.#findCompendiumMatch(type, name);
+      if (indexMatch) doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+    }
 
-    if (indexMatch) {
-      const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+    if (doc) {
       const itemData = doc.toObject();
       if (name.includes("(")) {
         const extra = name.split(")")[0].split("(").pop();
@@ -812,8 +842,26 @@ export class Pathmuncher {
     // return classMatch;
   }
 
+  /** The Pathbuilder feat or special a granted item stands for. */
+  #grantedFeatureMatch(document, { originType = null, grantedAs = null } = {}) {
+    const matchOptions = { ignoreAdded: true, featType: originType };
+    const classPrefix = this.source?.class ? `${this.source.class} ` : null;
+    return this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
+      ?? (document.name.includes("(")
+        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), matchOptions)
+        : undefined)
+      // the name the class lists it under: the Champion's "Weapon Mastery" is Martial Weapon Mastery
+      ?? (grantedAs && grantedAs !== document.name
+        ? this.#findAllFeatureMatch(document, Seasoning.slug(grantedAs), matchOptions)
+        : undefined)
+      // without the class's name: the Psychic's "Psychic Weapon Specialization" is Pathbuilder's "Weapon Specialization"
+      ?? (classPrefix && document.name.startsWith(classPrefix)
+        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.slice(classPrefix.length)), matchOptions)
+        : undefined);
+  }
+
   #createGrantedItem(document, parent,
-    { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false, sourceUuid = null } = {},
+    { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false, sourceUuid = null, grantedAs = null } = {},
   ) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`, {
       document,
@@ -850,12 +898,7 @@ export class Pathmuncher {
     }
 
     this.result[resultType].push(document);
-    const matchOptions = { ignoreAdded: true, featType: originType };
-    const featureMatch
-      = this.#findAllFeatureMatch(document, document.system.slug ?? Seasoning.slug(document.name), matchOptions)
-      ?? (document.name.includes("(")
-        ? this.#findAllFeatureMatch(document, Seasoning.slug(document.name.split("(")[0].trim()), matchOptions)
-        : undefined);
+    const featureMatch = this.#grantedFeatureMatch(document, { originType, grantedAs });
 
     if (featureMatch) {
       logger.debug(`Found feature match for ${document.name}`, { featureMatch });
@@ -933,13 +976,22 @@ export class Pathmuncher {
         });
       }
     }
-    if (matches.length > 0) {
+    // an item with several choices of one kind (the Commander's five tactics) takes a different
+    // Pathbuilder entry for each, rather than the same one five times
+    this.choiceClaims[document._id] ??= new Set();
+    const claimed = this.choiceClaims[document._id];
+    const open = matches.filter((m) => !claimed.has(m.featMatch));
+    if (open.length > 0) {
       if (choiceHint) {
-        const hintMatch = matches.find((m) => m.slug === Seasoning.slug(choiceHint));
-        if (hintMatch) return hintMatch.choice ?? hintMatch;
+        const hintMatch = open.find((m) => m.slug === Seasoning.slug(choiceHint));
+        if (hintMatch) {
+          claimed.add(hintMatch.featMatch);
+          return hintMatch.choice ?? hintMatch;
+        }
       }
-      if (this.devMode) logger.warn(`MATCHES`, { matches, choiceHint });
-      const match = Pathmuncher.#getLowestChoiceRank(matches);
+      if (this.devMode) logger.warn(`MATCHES`, { matches: open, choiceHint });
+      const match = Pathmuncher.#getLowestChoiceRank(open);
+      claimed.add(match.featMatch);
       const featMatch = this.#findAllFeatureMatch(document, match.slug, { ignoreAdded });
       const existingMatch = false;
 
@@ -951,17 +1003,22 @@ export class Pathmuncher {
         featMatch.added = true;
         featMatch.addedId = document._id;
       }
-      logger.debug("Choices evaluated", { choices, document, featMatch, match, matches, choiceHint });
+      logger.debug("Choices evaluated", { choices, document, featMatch, match, matches: open, choiceHint });
       return match.choice;
     } else {
       return undefined;
     }
   }
 
+  /** What a choice is called for matching: its value, or its label when the value is data (a dragon's). */
+  static #choiceKey(choice) {
+    return utils.isString(choice.value) ? choice.value : Seasoning.slug(game.i18n.localize(choice.label ?? ""));
+  }
+
   async #featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet) {
     const matches = [];
     for (const choice of choices) {
-      const featMatch = this.#findAllFeatureMatch(document, choice.value, { ignoreAdded: true, isChoiceMatch: true });
+      const featMatch = this.#findAllFeatureMatch(document, Pathmuncher.#choiceKey(choice), { ignoreAdded: true, isChoiceMatch: true });
       if (featMatch) {
         matches.push({
           rank: featMatch.rank,
@@ -971,7 +1028,7 @@ export class Pathmuncher {
     }
     if (matches.length > 0) {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
-      const featMatch = this.#findAllFeatureMatch(document, match.choice.value, { ignoreAdded: true, isChoiceMatch: true });
+      const featMatch = this.#findAllFeatureMatch(document, Pathmuncher.#choiceKey(match.choice), { ignoreAdded: true, isChoiceMatch: true });
       const existingMatch = false;
 
       if (this.devMode && existingMatch) {
@@ -996,8 +1053,12 @@ export class Pathmuncher {
    */
   #skillChoiceFromProficiencies(choices) {
     const skills = Object.keys(CONFIG.PF2E?.skills ?? {});
-    if (choices.length < 2 || !choices.every((c) => skills.includes(c.value))) return undefined;
-    const trained = choices.filter((c) => (this.source.proficiencies?.[c.value] ?? 0) > 0);
+    // a choice's value is the skill ("athletics") or the path it trains ("system.skills.nature.rank", Mastermind)
+    const skillOf = (choice) => (utils.isString(choice.value)
+      ? [choice.value, choice.value.match(/^system\.skills\.([a-z]+)\.rank$/)?.[1]].find((s) => skills.includes(s))
+      : undefined);
+    if (choices.length < 2 || !choices.every((c) => skillOf(c))) return undefined;
+    const trained = choices.filter((c) => (this.source.proficiencies?.[skillOf(c)] ?? 0) > 0);
     if (trained.length !== 1) return undefined;
     trained[0].nouuid = true;
     return trained[0];
@@ -1597,7 +1658,7 @@ export class Pathmuncher {
       foundry.utils.setProperty(featureDoc.system, "location", document._id);
       // a shared feature (e.g. Weapon Expertise) has its own level; the class decides when it is gained
       if (featureDoc.system.level) featureDoc.system.level.value = parseInt(grantedFeature.level);
-      this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation });
+      this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation, grantedAs: grantedFeature.name });
       if (foundry.utils.hasProperty(featureDoc, "system.rules")) {
         logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, foundry.utils.duplicate(featureDoc));
         if (this.immediateDiveAdd) {
@@ -1719,7 +1780,7 @@ export class Pathmuncher {
     this.#generateBackgroundAbilityBoosts();
     this.#generateAncestryAbilityBoosts();
 
-    this.result.class[0].system.boosts = this.boosts.class;
+    if (this.result.class[0]) this.result.class[0].system.boosts = this.boosts.class;
   }
 
   static SKILL_LOOKUP = [
@@ -1868,6 +1929,14 @@ export class Pathmuncher {
       for (const pBFeat of featArray) {
         logger.verbose(`Checking if ${pBFeat.name} needs processing`, pBFeat);
         if (pBFeat.added) continue;
+        // Pathbuilder repeats awarded feats in specials (Beast Trainer's Train Animal): one item for both
+        const addedFeat = pBFeat.sourceType === "specials"
+          && this.parsed.feats.find((f) => f.added && f.addedId && f.name === pBFeat.name);
+        if (addedFeat) {
+          pBFeat.added = true;
+          pBFeat.addedId = addedFeat.addedId;
+          continue;
+        }
         if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
         if (utils.isString(levelCap) && pBFeat.level !== levelCap) continue;
         if (typeFilter && pBFeat.type !== typeFilter) continue;
@@ -1915,6 +1984,7 @@ export class Pathmuncher {
         const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
         const docData = doc.toObject();
         docData._id = foundry.utils.randomID();
+        // eslint-disable-next-line require-atomic-updates
         pBFeat.addedId = docData._id;
         // docData.name = displayName;
 
@@ -2234,7 +2304,9 @@ export class Pathmuncher {
     const striking = Pathmuncher.POTENCY_SCALE.indexOf(parsedItem.str ?? "");
     const resilient = Pathmuncher.RESILIENT_SCALE.indexOf(parsedItem.res ?? "");
 
-    const grade = type === "weapon"
+    // Hephaistos exports the grade; Pathbuilder only the potency and striking/resilient runes
+    const exportedGrade = Pathmuncher.GRADE_SCALE.find((g) => g.type === parsedItem.grade?.toLowerCase());
+    const grade = exportedGrade ?? (type === "weapon"
       ? Pathmuncher.GRADE_SCALE.find((g) =>
         g.pot === (parsedItem.pot ?? 0)
         && g.str === striking,
@@ -2242,7 +2314,7 @@ export class Pathmuncher {
       : Pathmuncher.GRADE_SCALE.find((g) =>
         g.pot === (parsedItem.pot ?? 0)
         && g.res === resilient,
-      );
+      ));
 
     if (grade) {
       itemData.system.grade = grade.type;
@@ -2503,12 +2575,12 @@ export class Pathmuncher {
 
   async #loadSpell(spell, casterId, debugData) {
     const spellName = spellRename(spell.split("(")[0].trim());
-    logger.debug("focus spell details", { spell, spellName, debugData });
+    logger.debug("spell details", { spell, spellName, debugData });
 
     const indexMatch = this.compendiumMatchers["spells"].getMatch(spell, spellName, true);
     if (!indexMatch) {
       if (debugData.psychicAmpSpell) return undefined;
-      logger.error(`Unable to match focus spell ${spell}`, { spell, spellName, debugData });
+      logger.error(`Unable to match spell ${spell}`, { spell, spellName, debugData });
       this.bad.push({ pbName: spell, type: "spell", details: { originalName: spell, name: spellName, debugData } });
       return undefined;
     }
@@ -3051,7 +3123,7 @@ export class Pathmuncher {
 
   /**
    * Builds the import result from this.source without changing the actor.
-   * Returns false if there is no usable source; processing errors are thrown.
+   * Returns false if there is no usable source or the user cancels; processing errors are thrown.
    */
   async processCharacter() {
     this.processed = false;
@@ -3059,6 +3131,12 @@ export class Pathmuncher {
     Pathmuncher.normaliseSource(this.source);
     this.#warnVariantMismatch();
     await this.#prepare();
+    const missingCore = this.#findMissingCore();
+    if (missingCore.length > 0 && this.options.resolveMissingCore) {
+      const replacements = await this.options.resolveMissingCore(missingCore);
+      if (!replacements) return false;
+      this.coreReplacements = replacements;
+    }
     this.#statusUpdate(1, 12, "Character");
     await this.#processCore();
     this.#statusUpdate(2, 12, "Formula");
@@ -3333,6 +3411,8 @@ export class Pathmuncher {
     return Object.values(this.check)
       .filter((b) => b.type === "special"
         && this.parsed.specials.some((f) => f.name === b.details.name && !f.added)
+        // Pathbuilder repeats some specials (a thaumaturge's implement once per tier): one match covers them
+        && !this.parsed.specials.some((f) => f.name === b.details.name && f.added)
         && !BAD_IGNORE_FEATURES(b.details.name))
       .map((b) => b.details.originalName)
       .filter((name) => ![name, name.split(":").pop()].some((n) => ignored.has(slug(n)) || lores.has(slug(n)) || spells.has(slug(n))));
@@ -3351,7 +3431,11 @@ export class Pathmuncher {
     const sections = this.actor.items
       .filter((item) => Pathmuncher.DESCRIBING_ITEM_TYPES.includes(item.type))
       .flatMap((item) => Seasoning.describedSections(item.system.description?.value)
-        .map((section) => ({ ...section, item, slug: Pathmuncher.#specialSlug(section.term) })));
+        .flatMap((section) => [
+          { ...section, item, slug: Pathmuncher.#specialSlug(section.term) },
+          // Pathbuilder can name a section after its feature: "Animal Instinct Raging Resistance"
+          { ...section, item, slug: Pathmuncher.#specialSlug(`${item.name} ${section.term}`) },
+        ]));
     const origins = new Map();
     for (const name of new Set(this.#specialsWithoutItems())) {
       const slugs = remasterTermNames(name).map((n) => Pathmuncher.#specialSlug(n));
@@ -3430,10 +3514,11 @@ export class Pathmuncher {
     ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
     const escape = foundry.utils.escapeHTML;
     const { enrichHTML } = foundry.applications.ux.TextEditor.implementation;
+    const clip = (text, length = 400) => (text.length <= length ? text : `${text.slice(0, text.lastIndexOf(" ", length))} …`);
     // specials another feature describes: a link to the feature, and each special's section on hover
     const originList = async (origins) => (await Promise.all(origins.map(async (origin) => `<li class="pathmuncher-report-origin">
         ${await enrichHTML(`@UUID[${origin.uuid}]{${origin.name}}`)}
-        <ul>${origin.specials.map((s) => `<li class="pathmuncher-report-described" data-tooltip="${escape(s.text)}">${escape(s.name)}</li>`).join("")}</ul>
+        <ul>${origin.specials.map((s) => `<li class="pathmuncher-report-described" data-tooltip="${escape(clip(s.text))}">${escape(s.name)}</li>`).join("")}</ul>
       </li>`))).join("");
     const groupBody = async (group) => (group.origins
       ? `<p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.DescribedHint")}</p>

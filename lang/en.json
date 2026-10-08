@@ -64,6 +64,14 @@
         "CompletedWithNotes": "Import completed with some notes.",
         "CompletedSuccess": "Import completed successfully."
       },
+      "MissingCore": {
+        "Title": "Pathmuncher | Missing from compendiums",
+        "Content": "Pathmuncher could not find these in any compendium it searches. Drag the right one from a compendium or the Items directory onto its box, or click the box to open the compendium. Any left empty are skipped and listed in the import report.",
+        "Drop": "Drop the {type} here, or click to open its compendium",
+        "WrongType": "That item is not of type {type}.",
+        "Import": "Import",
+        "Cancel": "Cancel import"
+      },
       "KeepItems": {
         "Title": "Pathmuncher | Keep items added by hand?",
         "Content": "These items were not added by a Pathmuncher import, but are in categories this import replaces. Ticked items are kept; unticked items are deleted. Items you keep that are also in the Pathbuilder build will appear twice.",

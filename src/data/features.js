@@ -36,6 +36,12 @@ const POSTFIX_PB_REMOVALS = [
   /(.*) (Patron)$/,
   // Necromancer's Grim Fascination: Pathbuilder's "Bone Fascination" is pf2e's "Bone"
   /(.*) (Fascination)$/,
+  // a sorcerer's bloodline with its kind: "Bloodline: Draconic (Divine)" is pf2e's "Bloodline: Draconic"
+  /^(Bloodline: [^(]+?) \((.*)\)$/,
+  // Champion's cause: "Desecration Cause (Unholy)" and "Justice Cause" are pf2e's "Desecration" and "Justice"
+  /(.*) (Cause)(?: \((?:Holy|Unholy)\))?$/,
+  // a witch's lessons: "Major Lesson I" is pf2e's "Major Lesson"
+  /^((?:Basic|Greater|Major) Lesson) (I|II|III)$/,
   // /(Fork) the Path/,
   // /(Expand) the Portal/,
 ];
@@ -240,6 +246,17 @@ const FEAT_RENAME_STATIC_MAP = [
   // semi-official
   { pbName: "Ifrit", foundryName: "Naari" },
 
+  { pbName: "Superstitious Instinct", foundryName: "Superstition Instinct" },
+  { pbName: "Harbinger's Claw", foundryName: "Harbinger's Caw" },
+  { pbName: "Premonition's Reflexes", foundryName: "Premonition Reflexes" },
+  // a class's weapon expertise, which pf2e calls plain "Weapon Expertise" for these classes
+  { pbName: "Thaumaturge Weapon Expertise", foundryName: "Weapon Expertise" },
+  { pbName: "Wizard Weapon Expertise", foundryName: "Weapon Expertise" },
+
+  // Advanced Player's Guide versatile heritages Pathbuilder still offers; the remaster's Nephilim replaced both
+  { pbName: "Aasimar", foundryName: "Nephilim" },
+  { pbName: "Tiefling", foundryName: "Nephilim" },
+
   // dragonblood
   { pbName: "Adamantine", foundryName: "Adamantine Dragon" },
   { pbName: "Conspirator", foundryName: "Conspirator Dragon" },
@@ -308,6 +325,11 @@ const SHARED_IGNORE_LIST = [
   "Imprecise Scent", // this gets picked up and added by granted features
   "Sanctification", // choose on import
   "No special vision", // Pathbuilder label for an ancestry without darkvision or low-light vision
+  "Neither", // a cleric's sanctification when it is neither holy nor unholy
+  "Master Rogue", // the rogue's class DC becoming master at 19, which the class item applies
+  "Deity Skill", // the skill a cleric's or champion's deity trains, which the deity item applies
+  "Holy Aura", // the sanctification of Champion's Aura, which pathmuncher imports as Champion's Aura
+  "Unholy Aura",
 ];
 
 const IGNORED_FEATS_LIST = [
@@ -358,8 +380,27 @@ export function specialOnlyNameLookup(name) {
 }
 
 
+// the remaster's names for the genies Pathbuilder still names the old way
+const GENIE_NAMES = { Djinni: "Jaathoom", Efreeti: "Ifrit", Marid: "Faydhaan", Shaitan: "Jabali", Janni: "Janni" };
+
+/**
+ * The option a sorcerer's bloodline choice takes, as pf2e labels it: "Draconic (Requiem)" is the
+ * "Requiem Dragon", "Bloodline: Draconic (Divine)" the "Divine Dragon" when no particular dragon is
+ * named, "Bloodline: Elemental (Air)" is "Air" and "Bloodline: Genie (Djinni)" the "Jaathoom".
+ */
+function bloodlineChoices(specials) {
+  const dragon = specials.map((s) => s.match(/^Draconic \((.*)\)$/)?.[1]).find(Boolean);
+  return specials.flatMap((special) => {
+    const [, bloodline, kind] = special.match(/^Bloodline: ([^(]+?) \((.*)\)$/) ?? [];
+    if (bloodline === "Draconic") return [`${dragon ?? kind} Dragon`];
+    if (bloodline === "Elemental") return [kind];
+    if (bloodline === "Genie") return [GENIE_NAMES[kind] ?? kind];
+    return [];
+  });
+}
+
 export function SPECIAL_NAME_ADDITIONS(specials) {
-  const newSpecials = [];
+  const newSpecials = bloodlineChoices(specials);
 
   for (const special of specials) {
     for (const reg of POSTFIX_PB_SPLIT_AND_KEEP) {

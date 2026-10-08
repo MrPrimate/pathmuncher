@@ -2,8 +2,9 @@
 (() => {
   const { test } = pmt;
   const fixture = (name) => foundry.utils.deepClone(pmt.fixtures[name]);
+  const generated = (name) => foundry.utils.deepClone(globalThis.__pmtGenerated[name]);
 
-  test("report: the post-import dialog lists unmatched specials and not Pathbuilder's labels", async (t) => {
+  test("report: the post-import dialog lists what is unmatched and not Pathbuilder's labels", async (t) => {
     const exportJson = fixture("315329-magus9");
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);
@@ -20,10 +21,11 @@
     await pm.postImportCheck();
     await pmt.sleep(300);
 
-    const specials = pm.getImportReport().find((g) => g.type === "special");
-    t.deepEqual(specials?.names, ["Heroic Heart", "Planar Pain"], "unmatched specials in the report");
+    const report = pm.getImportReport();
+    t.equal(report.find((g) => g.type === "special"), undefined, "no unmatched specials");
+    t.deepEqual(report.find((g) => g.type === "described")?.names, ["Heroic Heart", "Planar Pain"], "specials Soulforger Dedication describes");
     t.ok(text, "no report dialog");
-    for (const miss of ["Specials", "Heroic Heart", "Planar Pain", "Formulas", "Elemental Ammunition (Lesser)"]) {
+    for (const miss of ["Soulforger Dedication", "Heroic Heart", "Planar Pain", "Formulas", "Elemental Ammunition (Lesser)"]) {
       t.ok(text.includes(miss), `report should show ${miss}`);
     }
     for (const label of ["Spellbook", "Spellstrike Specifics", "Intelligence", "Gecko Grip", "Blur", "Shield (Archetype)"]) {
@@ -38,13 +40,14 @@
     const actor = await pmt.actor(t, "described");
     const pm = await pmt.importBuild(actor, exportJson);
 
-    const described = Object.fromEntries(pm.getDescribedSpecials().map((o) => [o.name, o.specials.map((s) => s.name)]));
+    const described = Object.fromEntries(pm.getDescribedSpecials().map((o) => [o.name, o.specials.map((s) => s.name)])
+      .sort(([a], [b]) => a.localeCompare(b)));
     t.deepEqual(described, {
       // "Negative" specials are the remastered "Void" sections
       "Basic Undead Benefits": ["Negative Healing", "Negative Survival", "Immunity to Death Effects", "Disease and Poison Protection", "Undead Hunger"],
       "Necromancer Spellcasting": ["Dirge"],
     }, "described specials by feature");
-    const healing = pm.getDescribedSpecials()[0].specials[0];
+    const healing = pm.getDescribedSpecials().find((o) => o.name === "Basic Undead Benefits").specials[0];
     t.ok(healing.text.startsWith("You are damaged by"), healing.text);
     t.deepEqual(pm.getUnmatchedSpecials(), ["Thralls"], "still unmatched");
 
@@ -66,6 +69,33 @@
     const hover = undead.querySelector(".pathmuncher-report-described[data-tooltip]");
     t.equal(hover.textContent, "Negative Healing", "special listed under it");
     t.ok(hover.dataset.tooltip.startsWith("You are damaged by"), "its section on hover");
+  });
+
+  test("report: a special named after its feature and section is found in that feature", async (t) => {
+    // Pathbuilder's "Animal Instinct Raging Resistance" is the "Raging Resistance (9th)" section of Animal Instinct
+    const exportJson = generated("barbarian-01");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "instinct sections");
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    const instinct = pm.getDescribedSpecials().find((o) => o.name.startsWith("Animal Instinct"));
+    t.deepEqual(instinct?.specials.map((s) => s.name).sort(), ["Animal Instinct Raging Resistance", "Animal Instinct Specialization Ability"]);
+    t.ok(!pm.getUnmatchedSpecials().some((s) => s.startsWith("Animal Instinct ")), "not reported as unmatched");
+  });
+
+  test("report: a special Pathbuilder repeats, or names after the class, is not listed once matched", async (t) => {
+    // a thaumaturge's implements appear once per tier; "Thaumaturge Weapon Expertise" is Weapon Expertise;
+    // the psychic's "Weapon Specialization" is Psychic Weapon Specialization
+    for (const [name, specials] of [["thaumaturge-02", ["Bell", "Mirror", "Thaumaturge Weapon Expertise"]], ["psychic-01", ["Weapon Specialization"]]]) {
+      const exportJson = generated(name);
+      await pmt.useBuildVariants(t, exportJson.build);
+      pmt.answerPrompts(t, exportJson.build);
+      const actor = await pmt.actor(t, `repeated ${name}`);
+      const pm = await pmt.importBuild(actor, exportJson);
+      const unmatched = pm.getUnmatchedSpecials();
+      t.deepEqual(specials.filter((s) => unmatched.includes(s)), [], `${name} unmatched: ${unmatched.join(", ")}`);
+    }
   });
 
   test("report: a dual class export warns and imports the primary class", async (t) => {

@@ -6,7 +6,8 @@
 // --remote-debugging-port=$CDP_PORT. The runner joins the world as FVTT_USER (a GM without a
 // password) if the tab is not already in it, reloads so the current module code is used, then
 // evaluates lib.js, every *.test.js file here and the fixtures, and runs the tests one at a time.
-// PMT_KEEP=1 keeps the test actors for inspection. See tests/README.md.
+// PMT_KEEP=1 keeps the test actors for inspection. PMT_SURVEY=1 runs survey.test.js over the
+// generated builds. See tests/README.md.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -92,6 +93,14 @@ const fixtureDir = path.join(here, "../fixtures/pathbuilder");
 const fixtures = Object.fromEntries(fs.readdirSync(fixtureDir).filter((f) => f.endsWith(".json"))
   .map((f) => [f.replace(/\.json$/, ""), JSON.parse(fs.readFileSync(path.join(fixtureDir, f), "utf8"))]));
 await evaluate(`globalThis.__pmtFixtures = ${JSON.stringify(fixtures)}; globalThis.__pmtKeep = ${!!process.env.PMT_KEEP};`);
+// the generated builds (pmt.generated), one evaluate each to keep them small; PMT_SURVEY=1 surveys them all
+const generatedDir = path.join(fixtureDir, "generated");
+await evaluate(`globalThis.__pmtGenerated = {}; globalThis.__pmtSurvey = ${!!process.env.PMT_SURVEY};`);
+if (fs.existsSync(generatedDir)) {
+  for (const f of fs.readdirSync(generatedDir).filter((f) => f.endsWith(".json")).sort()) {
+    await evaluate(`globalThis.__pmtGenerated[${JSON.stringify(f.replace(/\.json$/, ""))}] = ${fs.readFileSync(path.join(generatedDir, f), "utf8")};`);
+  }
+}
 await evaluate(fs.readFileSync(path.join(here, "lib.js"), "utf8"));
 for (const file of fs.readdirSync(here).filter((f) => f.endsWith(".test.js")).sort()) {
   await evaluate(fs.readFileSync(path.join(here, file), "utf8"));
