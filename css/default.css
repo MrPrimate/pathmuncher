@@ -238,6 +238,120 @@
   font-size: var(--font-size-12);
 }
 
+/* ------------------------------------------------------- ammunition dialog */
+
+.pathmuncher-ammunition {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pathmuncher-ammo-weapons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.5rem;
+}
+
+.pathmuncher-ammo-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.pathmuncher-ammo-zone.drag-over {
+  border-color: var(--color-border-highlight, #ff6400);
+  background: var(--color-cool-5-25, rgba(0, 0, 0, 0.05));
+}
+
+.pathmuncher-ammo-zone header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 32px;
+}
+
+.pathmuncher-ammo-zone header img {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+}
+
+.pathmuncher-ammo-target {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pathmuncher-ammo-target .hint {
+  margin: 0;
+  font-size: var(--font-size-12);
+}
+
+.pathmuncher-ammo-total {
+  font-weight: bold;
+}
+
+.pathmuncher-ammunition button[data-ammo-action] {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  line-height: 1;
+}
+
+.pathmuncher-ammo-stacks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-height: 34px;
+}
+
+.pathmuncher-ammo-stacks:not(:has(.pathmuncher-ammo-stack))::before {
+  content: attr(data-empty);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 2px dashed var(--color-border, #999);
+  border-radius: 4px;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-12);
+}
+
+.pathmuncher-ammo-stack {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-cool-5-25, rgba(0, 0, 0, 0.05));
+  cursor: grab;
+}
+
+.pathmuncher-ammo-stack.dragging {
+  opacity: 0.4;
+}
+
+.pathmuncher-ammo-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pathmuncher-ammo-stack input {
+  flex: 0 0 4rem;
+  width: 4rem;
+  text-align: center;
+}
+
 /* ------------------------------------------------- missing core items dialog */
 
 .pathmuncher-missing-core {

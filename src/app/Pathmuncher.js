@@ -2083,7 +2083,7 @@ export class Pathmuncher {
     this.statusUpdate(8, 12, "FeatureRec");
     await this.#processFeats();
     this.statusUpdate(10, 12, "Equipment");
-    await this.equipment.processEquipment();
+    if (!(await this.equipment.processEquipment())) return false;
     this.statusUpdate(11, 12, "Spells");
     await this.spells.processSpells();
     this.statusUpdate(11, 12, "Rituals");

@@ -120,6 +120,20 @@
         "AsBuilt": "Import as built",
         "Cancel": "Cancel import"
       },
+      "Ammunition": {
+        "Title": "Pathmuncher | Ammunition",
+        "Content": "Pathbuilder lists this ammunition once, but each of these weapons takes its own. Drag each stack onto the weapon it is for. Split a stack to share it between weapons, or add more. Stacks not given to a weapon are not imported.",
+        "Unassigned": "Not given to a weapon",
+        "Takes": "Takes {ammo}",
+        "Drop": "Drop ammunition here",
+        "Quantity": "Quantity",
+        "Split": "Split this stack in two",
+        "Remove": "Remove this stack",
+        "Add": "Add a stack",
+        "Added": "Added ammunition",
+        "Import": "Import",
+        "Cancel": "Cancel import"
+      },
       "UnansweredChoices": {
         "Title": "Pathmuncher | Choices to make",
         "Content": "The Pathbuilder export does not say what was chosen for these. Pick them now, or leave one unpicked and the system will ask for it during the import. Hover over an option for details.",

@@ -55,6 +55,7 @@ const REMASTER_NAMES = [
   { pbName: "Inspire Courage", foundryName: "Courageous Anthem" },
   { pbName: "Inspire Defense", foundryName: "Rallying Anthem" },
   { pbName: "Inspire Heroics", foundryName: "Fortissimo Composition" },
+  { pbName: "Ki Strike", foundryName: "Inner Upheaval" },
   { pbName: "Know Direction", foundryName: "Know the Way" },
   { pbName: "Legend Lore", foundryName: "Collective Memories" },
   { pbName: "Longstrider", foundryName: "Tailwind" },
@@ -123,6 +124,15 @@ const REMASTER_NAMES = [
 // spelled differently in Pathbuilder, whichever content is installed
 const PATHBUILDER_SPELLINGS = [
   { pbName: "Weapon of Judgement", foundryName: "Weapon of Judgment" },
+  { pbName: "Ember Doppelganger", foundryName: "Ember Doppelgänger" },
+  { pbName: "Censoremoji", foundryName: "Censormoji" },
+  { pbName: "Danceemoji", foundryName: "Dancemoji" },
+  // named without their god or place
+  { pbName: "God Caller's Defense", foundryName: "Domora's Defense" },
+  { pbName: "Keen Axes", foundryName: "Kgalaserke's Axes" },
+  { pbName: "Mantis God's Clutch", foundryName: "Achaekek's Clutch" },
+  { pbName: "Rock Circle", foundryName: "Ranage's Circle" },
+  { pbName: "Summon Oliphaunt of Chaos", foundryName: "Summon Oliphaunt of Jandelay" },
 ];
 
 export function spellRename(pbName) {

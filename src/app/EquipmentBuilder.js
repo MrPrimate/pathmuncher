@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { RUNE_ITEM_MAP } from "../data/equipment.js";
+import { CHARGED_MAGAZINES, PER_WEAPON_AMMUNITION, RUNE_ITEM_MAP } from "../data/equipment.js";
 import logger from "../logger.js";
 import { ParsedEntry } from "./ParsedEntry.js";
 import { Seasoning } from "./Seasoning.js";
@@ -116,6 +116,39 @@ export class EquipmentBuilder {
     }
   }
 
+  /** Puts an item in the container Pathbuilder has its entry in, if it has one. */
+  #placeInContainer(e, itemData) {
+    if (!e.inContainer) return;
+    const containerMatch = this.parsed.equipment.find((con) => con.container?.id === e.inContainer);
+    if (containerMatch) {
+      itemData.system.containerId = containerMatch.foundryId;
+      itemData.system.equipped.carryType = "stowed";
+    }
+  }
+
+  /**
+   * Ammunition as Pathbuilder counts it. A battery or chem tank (CHARGED_MAGAZINES) is one magazine
+   * whose quantity is the charges left in it; more charges than one holds are that many full
+   * magazines and one with the rest. Ammunition named for a precious material ("Projectile Ammo
+   * (Cold Iron, Standard-Grade)") is made of it, and keeps the name that says so.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  #adjustAmmunition(e, itemData) {
+    const max = itemData.system.uses?.max ?? 1;
+    if (max > 1 && CHARGED_MAGAZINES.some((pattern) => pattern.test(e.pbName))) {
+      const charges = Math.max(0, e.qty ?? 0);
+      itemData.system.quantity = Math.max(1, Math.ceil(charges / max));
+      itemData.system.uses.value = charges - ((itemData.system.quantity - 1) * max);
+    }
+
+    const material = Seasoning.slug(String(e.extra ?? "").split(",")[0].trim());
+    if (material && itemData.system.material && CONFIG.PF2E?.preciousMaterials?.[material]) {
+      itemData.system.material.type = material;
+      itemData.system.material.grade = Seasoning.getMaterialGrade(e.extra);
+      itemData.name = e.pbName;
+    }
+  }
+
   async #generateEquipmentItem(e) {
     if (e.pbName === "Adventurer's Pack") return;
     if (e.added) return;
@@ -138,14 +171,9 @@ export class EquipmentBuilder {
       const itemData = doc.toObject();
       itemData._id = e.foundryId || foundry.utils.randomID();
       itemData.system.quantity = e.qty;
+      if (doc.type === "ammo") this.#adjustAmmunition(e, itemData);
       const type = doc.type === "treasure" ? "treasure" : "equipment";
-      if (e.inContainer) {
-        const containerMatch = this.parsed.equipment.find((con) => con.container?.id === e.inContainer);
-        if (containerMatch) {
-          itemData.system.containerId = containerMatch.foundryId;
-          itemData.system.equipped.carryType = "stowed";
-        }
-      }
+      this.#placeInContainer(e, itemData);
       if (e.invested) {
         itemData.system.equipped.carryType = "worn";
         itemData.system.equipped.invested = true;
@@ -327,7 +355,9 @@ export class EquipmentBuilder {
     const foundryName = RUNE_ITEM_MAP[name] ?? name;
     logger.debug("Processing rune property", { itemData, name, foundryName });
 
-    const indexMatch = this.compendiumMatchers["equipment"].getMatch(name, foundryName);
+    // the name as it is first, then as the equipment map renames it ("Photon (Tactical)" is
+    // "Photon Crystal (Tactical)")
+    const indexMatch = this.compendiumMatchers["equipment"].getMatch(Seasoning.getFoundryEquipmentName(name), foundryName);
     if (!indexMatch) {
       logger.error(`Unable to match ${name}`, itemData);
       this.bad.push({ pbName: name, type: "equipment", details: { foundryName, pbName: name } });
@@ -510,15 +540,102 @@ export class EquipmentBuilder {
     }
   }
 
+  /**
+   * The ammunition the build's weapons take of a kind of per-weapon ammunition (PER_WEAPON_AMMUNITION),
+   * one for each that a compendium has: { id (its slug), name, img, match, weapons: [{ name, img }] }.
+   */
+  #ammunitionTargets(kind) {
+    const targets = new Map();
+    for (const weapon of this.result.weapons) {
+      const ammo = weapon.system.ammo;
+      if (!ammo?.baseType?.startsWith(kind.ammoPrefix) || ammo.builtIn) continue;
+      if (!targets.has(ammo.baseType)) {
+        const match = this.compendiumMatchers["equipment"].findCandidates([[ammo.baseType]], { type: "ammo" });
+        if (!match) {
+          logger.warn(`Unable to find ammunition ${ammo.baseType} for ${weapon.name}`);
+          continue;
+        }
+        targets.set(ammo.baseType, { id: ammo.baseType, name: match.i.name, img: match.i.img, match, weapons: [] });
+      }
+      targets.get(ammo.baseType).weapons.push({ name: weapon.name, img: weapon.img });
+    }
+    return [...targets.values()];
+  }
+
+  /**
+   * Creates the ammunition given to each target, a stack per target, from assignments: { source (the
+   * entry, or null for ammunition the user added), target (its id), qty }. An entry none of was given
+   * to a weapon stays unmatched.
+   */
+  async #createAmmunition(entries, targets, assignments) {
+    for (const target of targets) {
+      const given = assignments.filter((a) => a.target === target.id && a.qty > 0);
+      if (given.length === 0) continue;
+      const doc = await target.match.pack.getDocument(target.match.i._id);
+      const itemData = doc.toObject();
+      itemData._id = foundry.utils.randomID();
+      itemData.system.quantity = given.reduce((total, a) => total + a.qty, 0);
+      const source = given.find((a) => a.source)?.source;
+      if (source) this.#placeInContainer(source, itemData);
+      this.#resizeItem(itemData);
+      this.result.equipment.push(itemData);
+      for (const a of given) {
+        if (a.source && !a.source.added) a.source.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
+      }
+    }
+    for (const e of entries) {
+      if (!e.added) e.unmatched("not given to a weapon");
+    }
+  }
+
+  /**
+   * Ammunition Pathbuilder lists once where Foundry has a kind for each weapon ("Bullets (10 rounds)"
+   * for every firearm's own rounds), left unmatched by the equipment pass, becomes the ammunition of
+   * the build's weapons. With one kind of weapon to give it to that is automatic. With several the
+   * user shares it out (options.resolveAmmunition); without a way to ask, it stays unmatched.
+   * Returns false if the user cancels the import.
+   */
+  async #assignAmmunition() {
+    for (const kind of PER_WEAPON_AMMUNITION) {
+      const entries = this.parsed.equipment.filter((e) => e.status === ParsedEntry.STATUS.UNMATCHED
+        && e.sourceType === "equipment" && kind.pattern.test(e.pbName));
+      if (entries.length === 0) continue;
+
+      const targets = this.#ammunitionTargets(kind);
+      let assignments;
+      if (targets.length === 0) {
+        for (const e of entries) e.unmatched("no weapon in the build takes it");
+        continue;
+      } else if (targets.length === 1) {
+        assignments = entries.map((e) => ({ source: e, target: targets[0].id, qty: e.qty }));
+      } else if (this.pm.options.resolveAmmunition) {
+        const answer = await this.pm.options.resolveAmmunition({
+          stacks: entries.map((e, index) => ({ id: String(index), name: e.pbName, qty: e.qty })),
+          targets: targets.map(({ id, name, img, weapons }) => ({ id, name, img, weapons })),
+        });
+        if (!answer) return false;
+        assignments = answer.map((a) => ({ source: entries[a.source] ?? null, target: a.target, qty: a.qty }));
+      } else {
+        for (const e of entries) e.unmatched("several weapons could take it");
+        continue;
+      }
+      await this.#createAmmunition(entries, targets, assignments);
+    }
+    return true;
+  }
+
+  /** Returns false if the user cancels the import. */
   async processEquipment() {
     this.pm.statusUpdate(1, 4, "Equipment");
     await this.#processEquipmentItems();
     this.pm.statusUpdate(2, 4, "Weapons");
     await this.#generateWeaponItems();
+    if (!(await this.#assignAmmunition())) return false;
     this.pm.statusUpdate(3, 4, "Armor");
     await this.#generateArmorItems();
     this.pm.statusUpdate(2, 4, "Money");
     await this.#generateMoney();
+    return true;
   }
 
 

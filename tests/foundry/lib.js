@@ -87,17 +87,18 @@
     return actor;
   };
 
-  /** Sets the pf2e variant rules a Pathbuilder build was made with; restored after the test. */
+  /** Sets the system's variant rules a Pathbuilder build was made with; restored after the test. */
   pmt.useBuildVariants = async (ctx, build) => {
     const { freeArchetype: fa, gradualBoosts: gradual } = api().Pathmuncher.detectVariants(build);
+    const system = game.system.id;
     const before = {
-      freeArchetypeVariant: game.settings.get("pf2e", "freeArchetypeVariant"),
-      gradualBoostsVariant: game.settings.get("pf2e", "gradualBoostsVariant"),
+      freeArchetypeVariant: game.settings.get(system, "freeArchetypeVariant"),
+      gradualBoostsVariant: game.settings.get(system, "gradualBoostsVariant"),
     };
-    await game.settings.set("pf2e", "freeArchetypeVariant", fa);
-    await game.settings.set("pf2e", "gradualBoostsVariant", gradual);
+    await game.settings.set(system, "freeArchetypeVariant", fa);
+    await game.settings.set(system, "gradualBoostsVariant", gradual);
     ctx.cleanup(async () => {
-      for (const [key, value] of Object.entries(before)) await game.settings.set("pf2e", key, value);
+      for (const [key, value] of Object.entries(before)) await game.settings.set(system, key, value);
     });
     return { freeArchetype: fa, gradualBoosts: gradual };
   };

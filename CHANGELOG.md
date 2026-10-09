@@ -15,6 +15,10 @@
 - A feat taken more than once, such as Assurance, never repeats an option another copy already has. When the build doesn't settle which option, the choices dialog says what granted the feat and which options the other copies took, and offers only the rest.
 - A Kineticist's gates are imported as built: the element each Expand the Portal takes and the junction it chooses for that element, which were often guessed or put on the wrong element. A single gate's own Impulse junction is no longer listed as unmatched.
 - A Kineticist's impulses go to the gate, fork or threshold that chose them in Pathbuilder. Before, they could swap between thresholds, be taken from a class feat slot, or be guessed when the build already had them.
+- Pathbuilder lists firearm ammunition once ("Bullets (10 rounds)"), but in Foundry each gun takes its own rounds. If the build has one kind of gun, the bullets become that gun's rounds. With several, a dialog lets you drag the ammunition onto each gun, split a stack between guns, and add more.
+- Ammunition (arrows, bolts, rounds) is now replaced on re-import like other equipment, rather than kept alongside the new copy.
+- Starfinder 2e batteries and chem tanks are imported as one battery or tank holding the charges Pathbuilder lists. Before, a full commercial battery came in as 10 batteries. Projectile ammo made of a precious material (silver, cold iron, ...) keeps its material and name.
+- Around 400 more Pathbuilder names now match their compendium entries. These are mostly names Pathbuilder gives without a god, place or people ("Sword Duelist Dedication" is Aldori Duelist Dedication, "Station Local" is Absalom Local), along with spelling differences and item families named in another pattern ("Wand of Hawthorn (2nd-rank Spell)", "Spacious Pouch II", "Photon (Tactical)"). This covers Starfinder 2e backgrounds, heritages, feats and items too.
 
 # 1.6.2
 

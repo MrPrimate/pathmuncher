@@ -59,6 +59,7 @@ export class ActorWriter {
     equipment: "addEquipment",
     backpack: "addEquipment",
     consumable: "addEquipment",
+    ammo: "addEquipment",
     book: "addEquipment",
     weapon: "addWeapons",
     armor: "addArmor",

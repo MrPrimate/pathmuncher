@@ -385,4 +385,69 @@
     t.ok(!entry.choices.some((c) => c.value === "occultism"), "a taken skill is not offered");
     t.deepEqual(assurances(actor).map((a) => a.skill).sort(), ["occultism", "society"], "skills");
   });
+
+  // Pathbuilder's "Bullets (10 rounds)" where each firearm in Foundry takes its own rounds; the
+  // gunslinger's Axe Musket and Coat Pistol take Rounds (Axe Musket) and Rounds (Coat Pistol)
+  const withBullets = (weapons = null) => {
+    const exportJson = fixture("314710-gunslinger1");
+    exportJson.build.equipment.push(["Bullets (10 rounds)", 10, "Invested"]);
+    if (weapons) exportJson.build.weapons = exportJson.build.weapons.filter((w) => weapons.includes(w.name));
+    return exportJson;
+  };
+  const ammunition = (actor) => Object.fromEntries(actor.itemTypes.ammo.map((i) => [i.name, i.quantity]));
+  const unmatchedEquipment = (pm) => pm.getImportReport().find((g) => g.type === "equipment")?.names ?? [];
+
+  test("processing: ammunition Pathbuilder lists once becomes the rounds of the build's only gun", async (t) => {
+    const exportJson = withBullets(["Coat Pistol"]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "one gun's rounds");
+    let asked = false;
+
+    const pm = await pmt.importBuild(actor, exportJson, { resolveAmmunition: () => (asked = true) && [] });
+
+    t.equal(asked, false, "not asked");
+    t.deepEqual(ammunition(actor), { "Rounds (Coat Pistol)": 10 }, "ammunition");
+    t.deepEqual(unmatchedEquipment(pm), [], "not reported");
+  });
+
+  test("processing: ammunition for several guns is shared out as the user says", async (t) => {
+    const exportJson = withBullets();
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "shared rounds");
+    let asked = null;
+    const resolveAmmunition = (request) => {
+      asked = request;
+      return [
+        { source: "0", target: "rounds-axe-musket", qty: 6 },
+        { source: "0", target: "rounds-coat-pistol", qty: 4 },
+        { source: null, target: "rounds-coat-pistol", qty: 10 },
+      ];
+    };
+
+    const pm = await pmt.importBuild(actor, exportJson, { resolveAmmunition });
+
+    t.deepEqual(asked.stacks, [{ id: "0", name: "Bullets (10 rounds)", qty: 10 }], "stacks offered");
+    const offered = asked.targets.map((target) => `${target.weapons.map((w) => w.name).join()}: ${target.name}`).sort();
+    t.deepEqual(offered, ["Axe Musket: Rounds (Axe Musket)", "Coat Pistol: Rounds (Coat Pistol)"], "weapons offered");
+    t.deepEqual(ammunition(actor), { "Rounds (Axe Musket)": 6, "Rounds (Coat Pistol)": 14 }, "ammunition");
+    t.deepEqual(unmatchedEquipment(pm), [], "not reported");
+  });
+
+  test("processing: ammunition not given to a gun is reported, and cancelling the dialog cancels the import", async (t) => {
+    const exportJson = withBullets();
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "unshared rounds");
+
+    const pm = await pmt.importBuild(actor, exportJson);
+
+    t.deepEqual(ammunition(actor), {}, "no ammunition without a way to ask");
+    t.ok(unmatchedEquipment(pm).includes("Bullets (10 rounds)"), "reported");
+
+    const cancelled = new (game.modules.get("pathmuncher").api.Pathmuncher)(actor, { resolveAmmunition: () => null });
+    cancelled.source = game.modules.get("pathmuncher").api.Pathmuncher.getBuildFromJson(withBullets());
+    t.equal(await cancelled.processCharacter(), false, "cancelled");
+  });
 })();

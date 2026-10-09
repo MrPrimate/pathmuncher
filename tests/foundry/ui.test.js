@@ -134,6 +134,55 @@
     t.deepEqual(searched(), api().CONSTANTS.GET_DEFAULT_SETTINGS()["custom-compendium-mappings"].default.feats, "reset to defaults");
   });
 
+  test("ui: ammunition is split, dragged onto guns and added to in the ammunition dialog", async (t) => {
+    // the gunslinger's Axe Musket and Coat Pistol each take their own rounds
+    const exportJson = fixture("314710-gunslinger1");
+    exportJson.build.equipment.push(["Bullets (10 rounds)", 10, "Invested"]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "ammunition dialog");
+    const seen = {};
+    const hook = Hooks.on("renderDialogV2", (dialog) => {
+      if (!dialog.options.classes?.includes("pathmuncher-ammunition-dialog")) return;
+      const el = dialog.element;
+      const zone = (target) => el.querySelector(`.pathmuncher-ammo-zone[data-target="${target}"]`);
+      const stacks = (target) => [...zone(target).querySelectorAll(".pathmuncher-ammo-stack")];
+      const drag = (stack, target) => {
+        const dataTransfer = new DataTransfer();
+        stack.dispatchEvent(new DragEvent("dragstart", { bubbles: true, dataTransfer }));
+        const into = zone(target).querySelector(".pathmuncher-ammo-stacks");
+        into.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer }));
+        into.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer }));
+        stack.dispatchEvent(new DragEvent("dragend", { bubbles: true, dataTransfer }));
+      };
+      seen.zones = [...el.querySelectorAll(".pathmuncher-ammo-zone")].map((z) => z.dataset.target).sort();
+
+      stacks("")[0].querySelector('[data-ammo-action="split"]').click();
+      seen.split = stacks("").map((s) => s.querySelector("input").value);
+      const [first, second] = stacks("");
+      drag(first, "rounds-axe-musket");
+      drag(second, "rounds-coat-pistol");
+      zone("rounds-coat-pistol").querySelector('[data-ammo-action="add"]').click();
+      const added = stacks("rounds-coat-pistol").at(-1).querySelector("input");
+      added.value = "3";
+      added.dispatchEvent(new Event("input", { bubbles: true }));
+      seen.totals = ["rounds-axe-musket", "rounds-coat-pistol"].map((target) => zone(target).querySelector(".pathmuncher-ammo-total").textContent);
+      seen.left = stacks("").length;
+      setTimeout(() => el.querySelector("button[data-action='import']").click(), 20);
+    });
+    t.cleanup(() => Hooks.off("renderDialogV2", hook));
+
+    const state = await pmt.submitImporter(actor, { json: exportJson });
+
+    t.ok(state.closed, "imported");
+    t.deepEqual(seen.zones, ["", "rounds-axe-musket", "rounds-coat-pistol"], "the unassigned stacks and a zone for each gun");
+    t.deepEqual(seen.split, ["5", "5"], "split in two");
+    t.equal(seen.left, 0, "nothing left unassigned");
+    t.deepEqual(seen.totals, ["5", "8"], "totals");
+    const ammunition = Object.fromEntries(actor.itemTypes.ammo.map((i) => [i.name, i.quantity]));
+    t.deepEqual(ammunition, { "Rounds (Axe Musket)": 5, "Rounds (Coat Pistol)": 8 }, "ammunition");
+  });
+
   test("ui: cancelling the reset settings menu leaves the settings alone", async (t) => {
     const before = game.settings.get("pathmuncher", "log-level");
     const menu = game.settings.menus.get("pathmuncher.resetToDefaults");

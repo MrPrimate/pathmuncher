@@ -83,6 +83,9 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - A rule the system's code throws on is left for the system to apply, and reported.
   - An Adventurer's Pack is a backpack holding its contents, and is reported when there is no
     backpack (sf2e).
+  - Ammunition Pathbuilder lists once (bullets) becomes the rounds of the build's only gun. With
+    several guns it is shared out as the user says, or reported when it can't be asked; cancelling the
+    dialog cancels the import.
 - `reporting.test.js`: what the user is told and shown.
   - The post-import report lists unmatched specials but not Pathbuilder's labels.
   - Specials that are a section of another feature's description are grouped under that feature,
@@ -97,6 +100,7 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - Options are remembered between imports.
   - All / None, and blended slots following the Spells option.
   - The compendium selector's add, move and reset.
+  - The ammunition dialog's split, drag onto a gun and added stack.
   - Cancelling the reset-settings menu changes nothing.
 - `snapshot.test.js`: each import compared with its saved snapshot (`fixtures/snapshots`), so a
   change to what an import produces shows as the lines that changed.
@@ -110,6 +114,11 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - A run over every build takes about 40 minutes. Split it with `PMT_CHUNK`: `PMT_CHUNK=1/4` up to
     `PMT_CHUNK=4/4` each run a quarter of the matching tests (every 4th, starting with the 1st, 2nd,
     ...), so a stopped or failed run only needs that chunk again.
+- `sf2e.test.js`: Starfinder 2e imports, registered only in an sf2e world. Run them there with the
+  filter `sf2e`. The builds are Starbuilder exports of the system's iconics and pregenerated
+  characters.
+  - A battery or chem tank is one magazine holding the charges Pathbuilder lists as its quantity.
+  - Projectile ammo keeps its count, and its precious material and name.
 - `reimport.test.js`: importing over an existing character.
   - Imported items are flagged and replaced.
   - Effects and conditions are always kept.
