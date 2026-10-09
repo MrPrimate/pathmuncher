@@ -13,6 +13,8 @@
 - If a system update changes the parts of the system Pathmuncher uses to work out choices, GMs see a warning when the world loads. Imports still run, with the system asking for those choices.
 - Choices an item makes for the feat it grants are kept: Farmhand's Athletics for its Assurance, an Exemplar epithet's damage type for Energized Spark, Runtsage's adopted ancestry, a Kineticist gate's element for its junction. These were lost, guessed or asked again.
 - A feat taken more than once, such as Assurance, never repeats an option another copy already has. When the build doesn't settle which option, the choices dialog says what granted the feat and which options the other copies took, and offers only the rest.
+- A Kineticist's gates are imported as built: the element each Expand the Portal takes and the junction it chooses for that element, which were often guessed or put on the wrong element. A single gate's own Impulse junction is no longer listed as unmatched.
+- A Kineticist's impulses go to the gate, fork or threshold that chose them in Pathbuilder. Before, they could swap between thresholds, be taken from a class feat slot, or be guessed when the build already had them.
 
 # 1.6.2
 

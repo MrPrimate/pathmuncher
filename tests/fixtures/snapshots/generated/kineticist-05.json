@@ -133,14 +133,8 @@
   "spellcasting": [
     "Jotun's Transposition [occult; prepared; cha; proficiency 1] rank 7: 1 [Interplanar Teleport]"
   ],
-  "report": {
-    "special": [
-      "Impulse"
-    ]
-  },
-  "described": [
-    "Wood Gate: Aura Junction, Skill Junction"
-  ],
+  "report": {},
+  "described": [],
   "prompts": [
     "Water Gate: Deflecting Wave (guessed)",
     "Water Gate: Ocean's Balm (guessed)",

@@ -37,6 +37,33 @@ grim fascination, eidolon and element. Classes without one get two builds.
   or feat be chosen twice. The prompts they cause are not pathmuncher's fault.
 - No Free Archetype: the free web app will not open those builds.
 
+`kineticist-07.json` to `kineticist-14.json` (Pathbuilder characters `PMTK K1` to `PMTK K8`) test
+which gate or threshold each impulse belongs to. Each takes a single or dual gate, and at every
+threshold an Expand the Portal or a Fork the Path:
+
+| Build | Gate | Thresholds (5, 9, 13, 17) |
+| --- | --- | --- |
+| 07 | single fire | expand ×4 |
+| 08 | single water | fork ×4 (air, earth, metal, wood) |
+| 09 | dual air and earth | expand ×4 |
+| 10 | dual metal and wood | fork, expand, fork, expand |
+| 11 | single earth | fork, expand, expand, fork |
+| 12 | dual fire and water, level 9 | expand, fork |
+| 13 | single wood, level 5 | expand |
+| 14 | dual earth and metal | expand ×4 |
+
+Class feat slots also take impulses of the same elements, and universal ones such as Command
+Elemental, so a class impulse can be mistaken for a gate's or threshold's.
+
+Unlike the other generated builds, these are legal builds that Pathbuilder shows with no warnings:
+- ability boosts are assigned at every boost level, and skills are trained and increased;
+- every feat meets its prerequisites, and every feat is common;
+- a gate's or fork's own slots take a 1st-level impulse of that element;
+- an Expand the Portal slot takes an impulse "for one of your kinetic elements", as the rules and
+  pf2e's choice require. Pathbuilder offers any impulse there and does not flag the wrong ones.
+
+Languages and the cantrip choice of First World Magic (`kineticist-09`) are left unselected.
+
 `survey.test.js` imports them all when `PMT_SURVEY=1`. Other tests use them by name through
 `globalThis.__pmtGenerated`.
 

@@ -129,15 +129,8 @@
   "spellcasting": [
     "Born of Elements [primal; prepared; cha; proficiency 1] rank 0: 1 [Electric Arc]"
   ],
-  "report": {
-    "special": [
-      "Critical",
-      "Impulse"
-    ]
-  },
-  "described": [
-    "Fire Gate: Skill Junction"
-  ],
+  "report": {},
+  "described": [],
   "prompts": [
     "Born of Elements: Electric Arc (guessed)",
     "Fire Gate: Burning Jet (guessed)",

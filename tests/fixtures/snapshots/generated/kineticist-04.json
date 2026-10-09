@@ -63,7 +63,7 @@
     "class: Kineticist",
     "condition: Clumsy 1 [granted by Enlarged Chassis]",
     "feat: Aerial Boomerang [level 1; granted by Air Gate]",
-    "feat: Air Cushion [level 1; granted by Gate's Threshold (Expand the Portal: Air)]",
+    "feat: Air Cushion [level 1; granted by Gate's Threshold (Expand the Portal: Water)]",
     "feat: Air Gate [level 1; granted by Gate's Threshold (Fork the Path: Air Gate); impulseOne=Compendium.pf2e.feats-srd.Item.jSSN8WF65RqNcZhF; impulseTwo=null]",
     "feat: Ambush Bladderwort [level 4; granted by Gate's Threshold (Expand the Portal: Water)]",
     "feat: Arcane Locomotion (Swim) [slot ancestry-17; level 13; taken 17; speed=swim]",
@@ -79,9 +79,9 @@
     "feat: Extract Element [in Kineticist; level 3]",
     "feat: Final Gate [in Kineticist; level 19]",
     "feat: Flashforge [level 1; granted by Metal Gate]",
-    "feat: Gate Junction (Aura) [level 5; granted by Gate's Threshold (Expand the Portal: Air); element=air; junction=aura]",
+    "feat: Gate Junction (Aura) [level 5; granted by Gate's Threshold (Expand the Portal: Water); element=water; junction=aura]",
     "feat: Gate Junction (Impulse) [level 5; granted by Gate's Threshold (Expand the Portal: Water); element=water; junction=impulse]",
-    "feat: Gate's Threshold (Expand the Portal: Air) [in Kineticist; level 17; element=air; elementFork=null; fourthGatesThreshold=expand; impulseExpand=Compendium.pf2e.feats-srd.Item.pIHXinKNQ13ugBGm]",
+    "feat: Gate's Threshold (Expand the Portal: Water) [in Kineticist; level 17; element=water; elementFork=null; fourthGatesThreshold=expand; impulseExpand=Compendium.pf2e.feats-srd.Item.pIHXinKNQ13ugBGm]",
     "feat: Gate's Threshold (Expand the Portal: Water) [in Kineticist; level 9; element=water; elementFork=null; impulseExpand=Compendium.pf2e.feats-srd.Item.BXrnQ8qKf09f3spc; threshold=expand]",
     "feat: Gate's Threshold (Fork the Path: Air Gate) [in Kineticist; level 13; element=null; elementFork=Compendium.pf2e.classfeatures.Item.X11Y3T1IzmtNqGMV; impulseExpand=null; thirdGatesThreshold=fork]",
     "feat: Gate's Threshold (Fork the Path: Wood Gate) [in Kineticist; level 5; element=null; elementFork=Compendium.pf2e.classfeatures.Item.8X8db58vKx21L0Dr; gatesThreshold=fork; impulseExpand=null]",
@@ -134,9 +134,7 @@
       "Extra Resistances"
     ]
   },
-  "described": [
-    "Metal Gate: Aura Junction"
-  ],
+  "described": [],
   "prompts": [
     "Metal Gate: Flashforge (guessed)",
     "Water Gate: Deflecting Wave (guessed)",
@@ -145,7 +143,6 @@
     "Lesser Augmentation: Magical Resistance",
     "Lesser Augmentation: Gain additional resistances (guessed)",
     "Air Gate: Aerial Boomerang (guessed)",
-    "Fourth Gate's Threshold: Air (guessed)",
-    "Gate's Threshold (Expand the Portal: Air): Air Cushion (guessed)"
+    "Gate's Threshold (Expand the Portal: Water): Air Cushion (guessed)"
   ]
 }

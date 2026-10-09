@@ -1,4 +1,4 @@
-import { SPECIAL_NAME_ADDITIONS } from "../data/features.js";
+import { SPECIAL_NAME_ADDITIONS, kineticGateOwnJunctions } from "../data/features.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { ParsedEntry } from "./ParsedEntry.js";
@@ -350,6 +350,14 @@ export class BuildParser {
   }
 
   fixUps() {
+    // a single gate's own Impulse junction comes with the gate, which grants it
+    for (const { special, additions } of kineticGateOwnJunctions(this.source.specials)) {
+      for (const name of [special, ...additions]) {
+        this.parsed.specials.find((entry) => entry.originalName === name && !entry.added)
+          ?.settle(ParsedEntry.STATUS.INCLUDED, { reason: "a single gate's own junction" });
+      }
+    }
+
     if (this.source.ancestry === "Dwarf" && !this.parsed.feats.some((f) => f.name === "Clan Pistol")) {
       const clanDagger = new ParsedEntry({
         name: "Clan Dagger",

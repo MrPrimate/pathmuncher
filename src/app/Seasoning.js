@@ -154,6 +154,8 @@ export class Seasoning {
     const { type, level, isChild } = feature;
     const label = String(feature.featChoiceRef ?? "");
     if (!type || !level || isChild) return null;
+    // a Kineticist's impulse a gate or threshold chooses ("Single Gate Element Impulse Feat 0"): no slot of its own
+    if (type === "Kineticist Feat") return null;
     if ((/^[0-9a-f]{8}-[0-9a-f]{4}-/i).test(label)) return null;
     return Seasoning.#featLocationFromLabel(label, type, { className, freeArchetype })
       ?? Seasoning.#featLocationFromType(type, level, { freeArchetype });

@@ -419,6 +419,70 @@ export function SPECIAL_NAME_ADDITIONS(specials) {
   return newSpecials;
 }
 
+// a Kineticist's gate junctions as Pathbuilder names them: "Earth Gate Junction: Critical Blast", "Water Impulse Junction"
+const GATE_JUNCTION = /^(\w+) Gate Junction: (.+)$/;
+const IMPULSE_JUNCTION = /^(\w+) Impulse Junction$/;
+
+/**
+ * A Kineticist's gate thresholds, from Pathbuilder's specials, which list them in level order:
+ * each "Expand the Portal" or "Fork the Path", and for an expansion the junction special that
+ * follows it. [{ threshold, path, element, junction, special, additions }]: threshold counts from 1,
+ * path is "expand" or "fork", element is lower case ("earth"), junction is the option's name as pf2e
+ * labels it ("Critical Blast", "Skill"), special is Pathbuilder's name for it, and additions the
+ * other entries that special adds (SPECIAL_NAME_ADDITIONS). An expansion without a junction special
+ * has no element or junction.
+ */
+export function kineticGatePlan(specials = []) {
+  const plan = [];
+  for (const special of specials) {
+    const expansion = plan.at(-1);
+    const junction = special.match(GATE_JUNCTION) ?? special.match(IMPULSE_JUNCTION);
+    if (special === "Expand the Portal" || special === "Fork the Path") {
+      plan.push({ threshold: plan.length + 1, path: special === "Expand the Portal" ? "expand" : "fork" });
+    } else if (junction && expansion?.path === "expand" && !expansion.special) {
+      // the junction special that follows an expansion; a single gate's own first Impulse junction comes before any
+      Object.assign(expansion, {
+        element: junction[1].toLowerCase(),
+        junction: (junction[2] ?? "Impulse").replace(/ Junction$/, ""),
+        special,
+        additions: SPECIAL_NAME_ADDITIONS([special]),
+      });
+    }
+  }
+  return plan;
+}
+
+/**
+ * Which kinetic gate choice a Pathbuilder impulse slot is, from the slot label it exports an impulse
+ * feat under: { gate: "single", index } for a single gate's two ("Single Gate Element Impulse Feat 1"),
+ * { gate: "dual", element } for a dual gate's first or second element ("Dual Gate Element 2 Impulse Feat
+ * 0"), { threshold: level, path: "fork" } for the new element of a Fork the Path ("Gate's Threshold
+ * (Level 5) Element Choice Impulse Feat 0"), and { threshold: level, path: "expand" } for an Expand the
+ * Portal ("Gate's Threshold (Level 9) Impulse Feat"). Null for any other label.
+ */
+export function kineticImpulseSlot(label) {
+  const text = String(label ?? "");
+  const single = text.match(/^Single Gate Element Impulse Feat (\d+)$/);
+  if (single) return { gate: "single", index: Number(single[1]) };
+  const dual = text.match(/^Dual Gate Element (\d+) Impulse Feat \d+$/);
+  if (dual) return { gate: "dual", element: Number(dual[1]) };
+  const threshold = text.match(/^Gate's Threshold \(Level (\d+)\) (Element Choice )?Impulse Feat/);
+  if (threshold) return { threshold: Number(threshold[1]), path: threshold[2] ? "fork" : "expand" };
+  return null;
+}
+
+/**
+ * The Impulse junction a single gate comes with, which Pathbuilder lists as a special ("Air Impulse
+ * Junction") before any threshold: [{ special, additions }], additions being the other entries that
+ * special adds (SPECIAL_NAME_ADDITIONS).
+ */
+export function kineticGateOwnJunctions(specials = []) {
+  const firstThreshold = specials.findIndex((s) => s === "Expand the Portal" || s === "Fork the Path");
+  return specials.slice(0, firstThreshold === -1 ? specials.length : firstThreshold)
+    .filter((special) => IMPULSE_JUNCTION.test(special))
+    .map((special) => ({ special, additions: SPECIAL_NAME_ADDITIONS([special]) }));
+}
+
 // rules terms the remaster renamed, which Pathbuilder still uses in feature names
 const REMASTER_TERMS = [
   [/\bNegative\b/g, "Void"],

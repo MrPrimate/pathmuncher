@@ -31,11 +31,11 @@
     "skills": {
       "acrobatics": 0,
       "arcana": 1,
-      "athletics": 0,
+      "athletics": 1,
       "crafting": 0,
       "deception": 0,
       "diplomacy": 0,
-      "intimidation": 1,
+      "intimidation": 0,
       "medicine": 0,
       "nature": 1,
       "occultism": 0,
@@ -63,7 +63,7 @@
     "background: Scholar (Arcana) [skill=arcana]",
     "class: Kineticist",
     "feat: Adamantine Mantra [slot ancestry-13; level 13; taken 13]",
-    "feat: Alloy Flesh and Steel [level 14; granted by Gate's Threshold (Expand the Portal: Earth)]",
+    "feat: Alloy Flesh and Steel [level 14; granted by Gate's Threshold (Expand the Portal: Fire)]",
     "feat: Ancestral Paragon [slot general-3; level 3; taken 3; ancestralParagon=Compendium.pf2e.feats-srd.Item.G0Iw8ltK3Dfav8B8]",
     "feat: Armor in Earth [level 1; granted by Earth Gate]",
     "feat: Ash-Piercing Gaze [slot ancestry-5; level 1; taken 5]",
@@ -85,18 +85,17 @@
     "feat: Fire Gate [level 1; granted by Kinetic Gate; impulseOne=Compendium.pf2e.feats-srd.Item.vS3GSv6ndGmh8FXz; impulseTwo=null]",
     "feat: Flashforge [level 1; granted by Metal Gate]",
     "feat: Foil Senses [slot skill-10; level 7; taken 10]",
-    "feat: Gate Junction (Aura) [level 5; granted by Gate's Threshold (Expand the Portal: Earth); element=earth; junction=aura]",
-    "feat: Gate Junction (Skill) [level 5; granted by Gate's Threshold (Expand the Portal: Earth); element=fire; junction=skill]",
-    "feat: Gate's Threshold (Expand the Portal: Earth) [in Kineticist; level 17; element=earth; elementFork=null; fourthGatesThreshold=expand; impulseExpand=Compendium.pf2e.feats-srd.Item.AkUvfczLFJcsv3Sp]",
+    "feat: Gate Junction (Aura) [level 5; granted by Gate's Threshold (Expand the Portal: Fire); element=fire; junction=aura]",
+    "feat: Gate Junction (Skill) [level 5; granted by Gate's Threshold (Expand the Portal: Earth); element=earth; junction=skill]",
     "feat: Gate's Threshold (Expand the Portal: Earth) [in Kineticist; level 9; element=earth; elementFork=null; impulseExpand=Compendium.pf2e.feats-srd.Item.C5zKhps2Rv95A8yX; threshold=expand]",
+    "feat: Gate's Threshold (Expand the Portal: Fire) [in Kineticist; level 17; element=fire; elementFork=null; fourthGatesThreshold=expand; impulseExpand=Compendium.pf2e.feats-srd.Item.AkUvfczLFJcsv3Sp]",
     "feat: Gate's Threshold (Fork the Path: Metal Gate) [in Kineticist; level 5; element=null; elementFork=Compendium.pf2e.classfeatures.Item.21JjdNW0RQ2LfaH3; gatesThreshold=fork; impulseExpand=null]",
     "feat: Gate's Threshold (Fork the Path: Water Gate) [in Kineticist; level 13; element=null; elementFork=Compendium.pf2e.classfeatures.Item.MvunDFH8Karxee0t; impulseExpand=null; thirdGatesThreshold=fork]",
     "feat: Greater Kinetic Durability [in Kineticist; level 15]",
     "feat: Group Coercion [slot skill-4; level 1; taken 4]",
-    "feat: Hefty Hauler [level 1]",
+    "feat: Hefty Hauler [level 1; granted by Earth Gate]",
     "feat: Horn and Bone Incantation [slot ancestry-9; level 9; taken 9]",
     "feat: Impulses [in Kineticist; level 1]",
-    "feat: Intimidating Glare [level 1; granted by Fire Gate]",
     "feat: Kinetic Aura [in Kineticist; level 1]",
     "feat: Kinetic Durability [in Kineticist; level 7]",
     "feat: Kinetic Expertise [in Kineticist; level 7]",
@@ -141,17 +140,14 @@
       "Deny Calamity"
     ]
   },
-  "described": [
-    "Fire Gate: Aura Junction, Skill Junction"
-  ],
+  "described": [],
   "prompts": [
     "Earth Gate: Armor in Earth (guessed)",
     "Fire Gate: Burning Jet (guessed)",
     "Metal Gate: Flashforge (guessed)",
     "Gate's Threshold (Expand the Portal: Earth): Blazing Wave (guessed)",
     "Water Gate: Call the Hurricane (guessed)",
-    "Fourth Gate's Threshold: Earth (guessed)",
-    "Gate's Threshold (Expand the Portal: Earth): Alloy Flesh and Steel (guessed)",
+    "Gate's Threshold (Expand the Portal: Fire): Alloy Flesh and Steel (guessed)",
     "Ancestral Paragon: Avowed Insight (guessed)"
   ]
 }

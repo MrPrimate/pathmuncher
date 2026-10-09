@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { NO_AUTO_CHOICE, IGNORE_MULTISELECT } from "../data/features.js";
+import { NO_AUTO_CHOICE, IGNORE_MULTISELECT, kineticGatePlan, kineticImpulseSlot } from "../data/features.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { ActorWriter } from "./ActorWriter.js";
@@ -102,6 +102,8 @@ export class Pathmuncher {
     this.subRuleDocuments = {};
     // the Pathbuilder entries each item's choices have taken, so its next choice takes another
     this.choiceClaims = {};
+    // a Kineticist's gate thresholds, from the build (kineticGatePlan), once looked at
+    this.gatePlan = null;
     this.autoFeats = [];
     this.keyAbility = null;
     this.boosts = {
@@ -820,6 +822,96 @@ export class Pathmuncher {
     return choice;
   }
 
+  // each kinetic gate threshold's number, by its slug
+  static GATE_THRESHOLDS = { "gates-threshold": 1, "second-gates-threshold": 2, "third-gates-threshold": 3, "fourth-gates-threshold": 4 };
+
+  // the level of each gate threshold, by its number
+  static THRESHOLD_LEVELS = [5, 9, 13, 17];
+
+  /**
+   * Which Pathbuilder impulse slot (kineticImpulseSlot's form) a kinetic gate's or threshold's impulse
+   * choice is, or null for any other choice: a threshold's Expand the Portal impulse, an element gate's
+   * impulse from a Fork the Path (the threshold that granted the gate), or one of the first gate's.
+   */
+  #kineticImpulseSlotFor(document, flag) {
+    const slug = document.system.slug ?? Seasoning.slug(document.name);
+    const threshold = Pathmuncher.GATE_THRESHOLDS[slug];
+    if (threshold) return flag === "impulseExpand" ? { threshold: Pathmuncher.THRESHOLD_LEVELS[threshold - 1], path: "expand" } : null;
+    const element = slug.match(/^(air|earth|fire|metal|water|wood)-gate$/)?.[1];
+    if (!element || !["impulseOne", "impulseTwo"].includes(flag)) return null;
+    const granter = this.#resultItem(document.flags?.[game.system.id]?.grantedBy?.id);
+    const forkedAt = Pathmuncher.GATE_THRESHOLDS[granter?.system.slug ?? Seasoning.slug(granter?.name)];
+    if (forkedAt) return { threshold: Pathmuncher.THRESHOLD_LEVELS[forkedAt - 1], path: "fork" };
+    const specials = this.source.specials;
+    if (!specials.includes("Dual Gate")) return { gate: "single", index: flag === "impulseOne" ? 0 : 1 };
+    // a dual gate's elements are the first two Pathbuilder lists after it, in its order
+    const order = specials.slice(specials.indexOf("Dual Gate")).filter((s) => (/ Element$/).test(s)).slice(0, 2)
+      .map((s) => s.split(" ")[0].toLowerCase());
+    return { gate: "dual", element: order.indexOf(element) + 1 };
+  }
+
+  /** An item in the import's result, by id. */
+  #resultItem(id) {
+    if (!id) return null;
+    return Object.values(this.result).filter(Array.isArray).flat().find((item) => item?._id === id) ?? null;
+  }
+
+  /**
+   * A kinetic gate or threshold impulse choice, from the slot Pathbuilder records each impulse under:
+   * { choice } with the build's impulse for this slot if the choice offers it, and the choices left to
+   * match otherwise, without any feat the build took in another slot (so the gate cannot take the
+   * impulse an Expand the Portal or a class feat slot took). Just { choices } for any other choice.
+   */
+  #kineticImpulseChoice(document, choiceSet, choices) {
+    const slot = this.#kineticImpulseSlotFor(document, Pathmuncher.#ruleFlag(document, choiceSet));
+    if (!slot) return { choices };
+    const same = (a, b) => Object.keys({ ...a, ...b }).every((k) => a[k] === b[k]);
+    const impulses = this.parsed.feats.filter((entry) => entry.type === "Kineticist Feat")
+      .map((entry) => ({ entry, slot: kineticImpulseSlot(entry.featChoiceRef) }))
+      .filter((impulse) => impulse.slot);
+    const own = impulses.find((impulse) => same(impulse.slot, slot));
+    const others = new Set(this.parsed.feats.filter((entry) => entry !== own?.entry).map((entry) => Seasoning.slug(entry.name)));
+    const nameOf = (c) => Seasoning.slug(game.i18n.localize(c.label ?? ""));
+    return {
+      choice: own ? choices.find((c) => nameOf(c) === Seasoning.slug(own.entry.name)) : undefined,
+      choices: choices.filter((c) => !others.has(nameOf(c))),
+    };
+  }
+
+  /**
+   * A Kineticist's gate choices, from the thresholds the build lists in order (kineticGatePlan): the
+   * element a threshold that expands the portal takes, and the junction the Gate Junction it grants
+   * takes for that element. Pathbuilder names the junction with its element ("Earth Gate Junction:
+   * Critical Blast"), which name matching alone cannot tie to the right Gate Junction.
+   */
+  #kineticGateChoice(document, choiceSet, choices) {
+    const slug = document.system.slug ?? Seasoning.slug(document.name);
+    const flag = Pathmuncher.#ruleFlag(document, choiceSet);
+    const threshold = Pathmuncher.GATE_THRESHOLDS[slug];
+    if (!(threshold && flag === "element") && !(slug === "gate-junction" && flag === "junction")) return undefined;
+    this.gatePlan ??= kineticGatePlan(this.source.specials);
+
+    if (threshold) {
+      const expansion = this.gatePlan.find((e) => e.threshold === threshold && e.element);
+      return choices.find((c) => c.value === expansion?.element);
+    }
+
+    // the junction's element is its first choice, preselected from the threshold that granted it
+    const element = document.system.rules.find((r) => r.key === "ChoiceSet" && r.flag === "element")?.selection
+      ?? document.flags?.[game.system.id]?.rulesSelections?.element;
+    const expansion = this.gatePlan.find((e) => e.element === element && e.junction && !e.claimed);
+    const choice = expansion && choices.find((c) => Seasoning.slug(game.i18n.localize(c.label ?? "")) === Seasoning.slug(expansion.junction));
+    if (!choice) return undefined;
+    expansion.claimed = true;
+    // the junction's special, and the entries Pathbuilder's name for it added, are answered by this choice
+    for (const name of [expansion.special, ...expansion.additions]) {
+      this.parsed.specials.find((entry) => entry.originalName === name && !entry.added)
+        ?.settle(ParsedEntry.STATUS.CHOSEN, { itemId: document._id, reason: `a choice on ${document.name}` });
+    }
+    choice.nouuid = true;
+    return choice;
+  }
+
   /**
    * A cleric's or champion's sanctification, which Pathbuilder exports as the cleric's "Holy",
    * "Unholy" or "Neither", or as the sanctification a champion's cause needs ("Grandeur Cause (Holy)").
@@ -854,8 +946,7 @@ export class Pathmuncher {
    */
   /** The name of an item in the import's result, by id. */
   #resultItemName(id) {
-    if (!id) return null;
-    return Object.values(this.result).filter(Array.isArray).flat().find((item) => item?._id === id)?.name ?? null;
+    return this.#resultItem(id)?.name ?? null;
   }
 
   /**
@@ -980,7 +1071,14 @@ export class Pathmuncher {
       const open = (taken) => offered.filter((c) => !taken.some((t) => t.value === c.value));
       const allTaken = this.#takenElsewhere(document, choiceSet, offered);
       const taken = open(allTaken).length > 0 ? allTaken : [];
-      const choices = open(taken);
+      // a kinetic impulse choice takes the impulse the build took for its slot, and never another slot's
+      const impulse = this.#kineticImpulseChoice(document, choiceSet, open(taken));
+      if (impulse.choice) {
+        logger.debug(`Kinetic impulse for ${document.name} from the build's slot`, { impulse });
+        impulse.choice.choiceQueryResults = foundry.utils.deepClone(offered);
+        return impulse.choice;
+      }
+      const choices = impulse.choices;
       if (taken.some((t) => t.value === choiceSet.selection)) {
         delete choiceSet.selection;
         delete cleansedChoiceSet.selection;
@@ -999,6 +1097,11 @@ export class Pathmuncher {
       });
 
       logger.debug("Evaluating choiceset", cleansedChoiceSet);
+      const gateMatch = this.#kineticGateChoice(document, cleansedChoiceSet, choices);
+      if (gateMatch) {
+        logger.debug(`Kinetic gate choice for ${document.name} from the build`, { gateMatch, choices });
+        return gateMatch;
+      }
       const choiceMatch = await this.#featureChoiceMatch(document, choices, true, !!cleansedChoiceSet.adjustName, choiceHint);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
@@ -1006,16 +1109,15 @@ export class Pathmuncher {
         return choiceMatch;
       }
 
-      if (typeof cleansedChoiceSet.choices === "string" || Array.isArray(choices)) {
-        const featureMatch = await this.#featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet);
-        if (featureMatch) {
-          return featureMatch;
-        }
-        const skillMatch = this.#skillChoiceFromProficiencies(choices);
-        if (skillMatch) {
-          logger.debug(`Skill choice for ${document.name} from the build's proficiencies`, { skillMatch, choices });
-          return skillMatch;
-        }
+      // the options are always a list (Pf2eRules.choices), whatever the rule's choices are
+      const featureMatch = await this.#featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet);
+      if (featureMatch) {
+        return featureMatch;
+      }
+      const skillMatch = this.#skillChoiceFromProficiencies(choices);
+      if (skillMatch) {
+        logger.debug(`Skill choice for ${document.name} from the build's proficiencies`, { skillMatch, choices });
+        return skillMatch;
       }
 
       const sanctificationMatch = this.#sanctificationFromBuild(document, cleansedChoiceSet, choices);
