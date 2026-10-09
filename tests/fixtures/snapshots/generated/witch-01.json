@@ -59,7 +59,7 @@
     "ancestry: Hobgoblin",
     "background: Scholar (Nature) [skill=nature]",
     "class: Witch",
-    "feat: Adopted Ancestry [level 1; taken 9; granted by Runtsage]",
+    "feat: Adopted Ancestry (Goblin) [level 1; taken 9; granted by Runtsage; ancestry=goblin]",
     "feat: Assurance (Nature) [in Scholar (Nature); level 1; taken 1; granted by Scholar (Nature); assurance=nature]",
     "feat: Baba Yaga [level 1; granted by Patron]",
     "feat: Bloodsense [slot general-11; level 7; taken 11]",

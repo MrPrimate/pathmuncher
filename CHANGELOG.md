@@ -11,6 +11,8 @@
 - Choices the Pathbuilder export doesn't record are guessed where the build settles them: a weapon or other item the character carries exactly one of the options for (Surki Weapon Familiarity, an Exemplar's ikon), and a champion's sanctification from their cause. The rest are asked together, once the build is read and before the character changes. Any left unpicked are still asked by the system.
 - A champion's sanctification is saved where the system reads it, so the holy or unholy trait is applied.
 - If a system update changes the parts of the system Pathmuncher uses to work out choices, GMs see a warning when the world loads. Imports still run, with the system asking for those choices.
+- Choices an item makes for the feat it grants are kept: Farmhand's Athletics for its Assurance, an Exemplar epithet's damage type for Energized Spark, Runtsage's adopted ancestry, a Kineticist gate's element for its junction. These were lost, guessed or asked again.
+- A feat taken more than once, such as Assurance, never repeats an option another copy already has. When the build doesn't settle which option, the choices dialog says what granted the feat and which options the other copies took, and offers only the rest.
 
 # 1.6.2
 

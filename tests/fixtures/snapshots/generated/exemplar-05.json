@@ -79,7 +79,7 @@
     "feat: Divine Spark and Ikons [in Exemplar; level 1; firstIkon=Compendium.pf2e.classfeatures.Item.hfn5w8ZuI22vfimn; secondIkon=Compendium.pf2e.classfeatures.Item.o8Q7wWx2oKvKMi1s; thirdIkon=Compendium.pf2e.classfeatures.Item.gjZXHLjezR0mkMnc]",
     "feat: Divine Weapon Mastery [in Exemplar; level 13]",
     "feat: Dominion Epithet [in Exemplar; level 7; dominionEpithet=Compendium.pf2e.classfeatures.Item.pgqhlWAJ18FXaHeO]",
-    "feat: Energized Spark (Metal) [level 1; granted by Whose Cry is Thunder; energizedSpark=metal; energizedSparkDamage=null]",
+    "feat: Energized Spark (Electricity) [level 1; granted by Whose Cry is Thunder; energizedSpark=electricity; energizedSparkDamage=null]",
     "feat: Expeditious Search [slot general-7; level 7; taken 7]",
     "feat: Gaze Sharp as Steel [level 1; granted by Divine Spark and Ikons]",
     "feat: Gleaming Blade [level 1; granted by Divine Spark and Ikons; divineSpark=null; existingIkon=null; gleamingBlade=null; grantedIkon=null; unarmedIkon=null; unresolved ?]",

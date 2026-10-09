@@ -65,7 +65,7 @@
     "class: Summoner",
     "condition: Quickened [granted by Eternal Boost]",
     "feat: Advanced Weaponry [level 1; granted by Evolution Feat]",
-    "feat: Assurance [in Nomad; level 1; taken 1; granted by Nomad]",
+    "feat: Assurance (Survival) [in Nomad; level 1; taken 1; granted by Nomad; assurance=survival]",
     "feat: Aura Sight [slot skill-6; level 2; taken 6]",
     "feat: Backup Disguise [slot skill-2; level 2; taken 2]",
     "feat: Bloodsense [slot general-11; level 7; taken 11]",

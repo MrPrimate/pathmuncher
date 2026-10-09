@@ -105,7 +105,7 @@
     "feat: Signature Spells [in Psychic; level 3]",
     "feat: Skeptic's Defense [slot skill-10; level 7; taken 10]",
     "feat: Spark Fist [slot ancestry-9; level 5; taken 9]",
-    "feat: Specialty Crafting [level 1; taken 1; granted by Stonemason's Eye]",
+    "feat: Specialty Crafting (Stonemasonry) [level 1; taken 1; granted by Stonemason's Eye; specialtyCrafting=stonemasonry]",
     "feat: Spell Repertoire [in Psychic; level 1]",
     "feat: Stonemason's Eye [slot ancestry-1; level 1; taken 1]",
     "feat: Subconscious Mind [in Psychic; level 1; subconsciousMind=Compendium.pf2e.classfeatures.Item.PNihL10QAB1sYSRn]",

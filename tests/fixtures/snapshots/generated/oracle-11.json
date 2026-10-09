@@ -60,7 +60,7 @@
     "class: Oracle",
     "feat: Additional Lore [level 1; taken 1; granted by Gnome Obsession]",
     "feat: Assurance (Occultism) [in Scholar (Occultism); level 1; taken 1; granted by Scholar (Occultism); assurance=occultism]",
-    "feat: Assurance [level 1; taken 1; granted by Gnome Obsession]",
+    "feat: Assurance (Religion) [level 1; taken 1; granted by Gnome Obsession; assurance=religion]",
     "feat: Aura Sight [slot skill-6; level 2; taken 6]",
     "feat: Backup Disguise [slot skill-2; level 2; taken 2]",
     "feat: Blaze of Revelation [slot class-18; level 18; taken 18]",

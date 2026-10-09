@@ -61,7 +61,7 @@
     "background: Nomad",
     "class: Swashbuckler",
     "feat: Aquatic Elf Warrior [slot ancestry-5; level 1; taken 5]",
-    "feat: Assurance [in Nomad; level 1; taken 1; granted by Nomad]",
+    "feat: Assurance (Survival) [in Nomad; level 1; taken 1; granted by Nomad; assurance=survival]",
     "feat: Assured Evasion [in Swashbuckler; level 13]",
     "feat: Battledancer [level 1; granted by Swashbuckler's Style]",
     "feat: Bloodsense [slot general-11; level 7; taken 11]",

@@ -63,7 +63,7 @@
     "class: Psychic",
     "feat: Additional Lore [level 1; taken 1; granted by Gnome Obsession]",
     "feat: All in Your Head [slot class-20; level 18; taken 20]",
-    "feat: Assurance [level 1; taken 1; granted by Gnome Obsession]",
+    "feat: Assurance (Crafting) [level 1; taken 1; granted by Gnome Obsession; assurance=crafting]",
     "feat: Bloodsense [slot general-11; level 7; taken 11]",
     "feat: Cantrip Expansion [slot class-2; level 2; taken 2]",
     "feat: Clarity of Focus [in Psychic; level 5]",

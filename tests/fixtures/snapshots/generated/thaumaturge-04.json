@@ -68,7 +68,7 @@
     "feat: Adept Benefit (Shield) [level 7; taken 18; granted by Intense Implement]",
     "feat: Apprentice Sea Witch [slot ancestry-9; level 5; taken 9]",
     "feat: Aquatic Grace [in Merfolk; level 1]",
-    "feat: Assurance [in Farmhand; level 1; taken 1; granted by Farmhand]",
+    "feat: Assurance (Athletics) [in Farmhand; level 1; taken 1; granted by Farmhand; assurance=athletics]",
     "feat: Biographical Eye [slot skill-10; level 7; taken 10]",
     "feat: Bloodsense [slot general-7; level 7; taken 7]",
     "feat: Call Implement [slot class-4; level 2; taken 4]",

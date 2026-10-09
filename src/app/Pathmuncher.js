@@ -15,6 +15,7 @@ import {
   replaceSpecials,
 } from "./DeityChoices.js";
 import { EquipmentBuilder } from "./EquipmentBuilder.js";
+import { EvaluationActor } from "./EvaluationActor.js";
 import { FeatureNames } from "./FeatureNames.js";
 import { ImportReport } from "./ImportReport.js";
 import { ParsedEntry } from "./ParsedEntry.js";
@@ -99,7 +100,6 @@ export class Pathmuncher {
     this.autoAddedFeatureRules = {};
     this.failedFeatureItems = {};
     this.subRuleDocuments = {};
-    this.grantItemLookUp = new Set();
     // the Pathbuilder entries each item's choices have taken, so its next choice takes another
     this.choiceClaims = {};
     this.autoFeats = [];
@@ -160,7 +160,6 @@ export class Pathmuncher {
 
     this.immediateDiveAdd = utils.setting("USE_IMMEDIATE_DEEP_DIVE");
 
-    this.tempActorCounter = 1;
 
     // the import's stages, each working on this import's state: reading the build, the inventory,
     // spellcasting, writing the result to the actor, and the report of what could not be matched
@@ -169,6 +168,8 @@ export class Pathmuncher {
     this.spells = new SpellBuilder(this);
     this.writer = new ActorWriter(this);
     this.report = new ImportReport(this);
+    // the unsaved actors rules are worked out on
+    this.evaluation = new EvaluationActor(this);
   }
 
   // ---------------------------------------------------------------- the stages' public methods
@@ -623,7 +624,7 @@ export class Pathmuncher {
   }
 
   #createGrantedItem(document, parent,
-    { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false, sourceUuid = null, grantedAs = null } = {},
+    { addGrantFlag = false, itemGrantName = null, originType = null, applyFeatLocation = false, grantedAs = null } = {},
   ) {
     logger.debug(`Adding granted item flags to ${document.name} (parent ${parent.name}) with originType "${originType}", and will applyFeatLocation? ${applyFeatLocation}`, {
       document,
@@ -633,9 +634,6 @@ export class Pathmuncher {
       applyFeatLocation,
     });
     if (addGrantFlag) {
-      // remembered so temp actors skip GrantItem rules for items already granted
-      const uuid = sourceUuid ?? foundry.utils.getProperty(document, "_stats.compendiumSource");
-      if (uuid) this.grantItemLookUp.add(uuid);
       const camelCase = Seasoning.slugD(itemGrantName ?? document.system.slug ?? document.name);
       foundry.utils.setProperty(parent, `flags.${game.system.id}.itemGrants.${camelCase}`, { id: document._id, onDelete: "detach" });
       foundry.utils.setProperty(document, `flags.${game.system.id}.grantedBy`, { id: parent._id, onDelete: "cascade" });
@@ -854,7 +852,40 @@ export class Pathmuncher {
    * later rule of the item grants, or that another item's choice depends on (a cleric's deity), is
    * still asked straight away.
    */
-  #deferChoice(document, ruleEntry, choices) {
+  /** The name of an item in the import's result, by id. */
+  #resultItemName(id) {
+    if (!id) return null;
+    return Object.values(this.result).filter(Array.isArray).flat().find((item) => item?._id === id)?.name ?? null;
+  }
+
+  /**
+   * What other copies of the same feat already chose for this choice: a feat that can be taken more
+   * than once (pf2e's maxTakable is null or above 1: Assurance, Additional Lore) takes a different
+   * option each time. Class features granted more than once (a Kineticist's Gate Junction) can repeat
+   * an option, so are left alone. [{ value, label, source }], label from the choices offered and
+   * source the item that granted that copy, if one did.
+   */
+  #takenElsewhere(document, ruleEntry, choices) {
+    const maxTakable = document.system.maxTakable;
+    if (document.type !== "feat" || !(maxTakable === null || maxTakable > 1)) return [];
+    const slug = document.system.slug ?? Seasoning.slug(document.name);
+    const flag = Pathmuncher.#ruleFlag(document, ruleEntry);
+    return this.result.feats
+      .filter((other) => other._id !== document._id && (other.system.slug ?? Seasoning.slug(other.name)) === slug)
+      .map((other) => {
+        const rule = (other.system.rules ?? []).find((r) => r.key === "ChoiceSet" && Pathmuncher.#ruleFlag(other, r) === flag);
+        const value = other.flags?.[game.system.id]?.rulesSelections?.[flag] ?? rule?.selection;
+        const choice = choices.find((c) => c.value === value);
+        return {
+          value,
+          label: choice ? game.i18n.localize(choice.label ?? "") : String(value),
+          source: this.#resultItemName(other.flags?.[game.system.id]?.grantedBy?.id),
+        };
+      })
+      .filter((taken) => utils.isString(taken.value));
+  }
+
+  #deferChoice(document, ruleEntry, choices, taken = []) {
     if (!this.options.resolveUnansweredChoices) return false;
     if (this.unansweredChoices.some((c) => c.ruleEntry === ruleEntry)) return true;
     if (choices.length < 2 || !choices.every((c) => utils.isString(c.value))) return false;
@@ -868,6 +899,7 @@ export class Pathmuncher {
       document,
       ruleEntry,
       flag,
+      taken,
       choices: choices.map((c) => {
         const label = game.i18n.localize(c.label ?? "");
         return { value: c.value, label, img: c.img, uuid: this.#choiceUuid(ruleEntry, c.value, label) };
@@ -890,19 +922,27 @@ export class Pathmuncher {
    * [{ id, item: { name, img, type }, prompt, choices: [{ value, label, img, uuid }] }]
    */
   get unansweredChoiceList() {
-    return this.unansweredChoices.map(({ id, document, ruleEntry, choices }) => ({
+    return this.unansweredChoices.map(({ id, document, ruleEntry, choices, taken }) => ({
       id,
       item: { name: document.name, img: document.img, type: document.type },
       prompt: utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : "",
+      // where the item comes from, and what other copies of it already chose
+      origin: this.#resultItemName(document.flags?.[game.system.id]?.grantedBy?.id),
+      taken: taken.map(({ label, source }) => ({ label, source })),
       choices,
     }));
   }
 
   /** Sets the selections the user made ({ id: value }) as pf2e would; anything unanswered is asked by pf2e during the import. */
   #applyChoiceAnswers(answers) {
+    // the same option picked for two copies of a feat (two Assurances): the second is left to the system
+    const picked = new Set();
     for (const entry of this.unansweredChoices) {
       const choice = entry.choices.find((c) => c.value === answers[entry.id]);
       if (!choice) continue;
+      const key = `${entry.document.system.slug ?? entry.document.name}|${entry.flag}|${choice.value}`;
+      if (picked.has(key)) continue;
+      picked.add(key);
       const { document, ruleEntry, flag } = entry;
       ruleEntry.flag = flag;
       ruleEntry.selection = choice.value;
@@ -927,23 +967,24 @@ export class Pathmuncher {
       choiceHint: foundry.utils.deepClone(choiceHint),
       processedRules: foundry.utils.deepClone(processedRules),
     }));
-    const tempActor = await this.#generateTempActor({
-      documents: [document],
-      includePassedDocumentsRules: false,
-      includeGrants: false,
-      includeFlagsOnly: true,
-      processedRules,
-      excludeAddedGrants: true,
-      continueOnProcessedRules: false,
-      // removePassedDocuments: true,
-    });
+    const tempActor = this.evaluation.build(document, { rules: processedRules });
 
     const cleansedChoiceSet = foundry.utils.deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
       const choiceSetRules = Pf2eRules.ruleElement(cleansedChoiceSet, item);
       const rollOptions = Pf2eRules.rollOptions(tempActor, item);
-      const choices = await Pf2eRules.choices(choiceSetRules, rollOptions);
+      const offered = await Pf2eRules.choices(choiceSetRules, rollOptions);
+      // a feat taken more than once takes a different option each time: not one another copy has
+      // (unless that leaves nothing, when the system's choices stand)
+      const open = (taken) => offered.filter((c) => !taken.some((t) => t.value === c.value));
+      const allTaken = this.#takenElsewhere(document, choiceSet, offered);
+      const taken = open(allTaken).length > 0 ? allTaken : [];
+      const choices = open(taken);
+      if (taken.some((t) => t.value === choiceSet.selection)) {
+        delete choiceSet.selection;
+        delete cleansedChoiceSet.selection;
+      }
 
       logger.debug("Starting choice evaluation", {
         document,
@@ -961,7 +1002,7 @@ export class Pathmuncher {
       const choiceMatch = await this.#featureChoiceMatch(document, choices, true, !!cleansedChoiceSet.adjustName, choiceHint);
       logger.debug("choiceMatch result", choiceMatch);
       if (choiceMatch) {
-        choiceMatch.choiceQueryResults = foundry.utils.deepClone(choices);
+        choiceMatch.choiceQueryResults = foundry.utils.deepClone(offered);
         return choiceMatch;
       }
 
@@ -989,11 +1030,13 @@ export class Pathmuncher {
         return carriedMatch;
       }
 
-      if (this.#deferChoice(document, choiceSet, choices)) return undefined;
+      if (this.#deferChoice(document, choiceSet, choices, taken)) return undefined;
 
       const tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
-      await Pf2eRules.makeSelection(choiceSetRules, { item, actor: tempActor, ruleSource: tempSet });
+      // the system asks with only the options still open
+      const selectionRules = taken.length > 0 ? Pf2eRules.ruleElement({ ...cleansedChoiceSet, choices }, item) : choiceSetRules;
+      await Pf2eRules.makeSelection(selectionRules, { item, actor: tempActor, ruleSource: tempSet });
       if (this.devMode) logger.warn("chociesetdata", {
         choiceSetRules,
         selection: choiceSetRules.selection,
@@ -1003,7 +1046,7 @@ export class Pathmuncher {
       if (tempSet.selection) {
         const lookedUpChoice = choices.find((c) => c.value === tempSet.selection);
         logger.debug("lookedUpChoice", lookedUpChoice);
-        if (lookedUpChoice) lookedUpChoice.choiceQueryResults = foundry.utils.deepClone(choices);
+        if (lookedUpChoice) lookedUpChoice.choiceQueryResults = foundry.utils.deepClone(offered);
         // set some common lookups here, e.g. deities are often not set!
         if (lookedUpChoice && cleansedChoiceSet.flag === "deity") {
           if (lookedUpChoice.label && lookedUpChoice.label !== "") {
@@ -1035,13 +1078,7 @@ export class Pathmuncher {
   }
 
   async #resolveInjectedUuid(document, ruleEntry, processedRules = []) {
-    const tempActor = await this.#generateTempActor({
-      documents: [document],
-      // includePassedDocumentsRules: true,
-      // includeGrants: true,
-      // includeFlagsOnly: true,
-      processedRules,
-    });
+    const tempActor = this.evaluation.build(document, { rules: processedRules });
     const cleansedRuleEntry = foundry.utils.deepClone(ruleEntry);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -1077,15 +1114,8 @@ export class Pathmuncher {
 
   async #checkRule(document, rule, otherDocuments = []) {
     logger.debug("Checking rule", { document, rule, otherDocuments });
-    const tempActor = await this.#generateTempActor({
-      documents: [document],
-      includePassedDocumentsRules: true,
-      includeGrants: false,
-      // includeFlagsOnly: true,
-      otherDocs: otherDocuments,
-      // include otherDOcs and grants?
-      excludeAddedGrants: true,
-    });
+    // the granted item, on an actor that has the granting item with the rules it has kept so far
+    const tempActor = this.evaluation.build(document, { alongside: otherDocuments });
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -1123,13 +1153,7 @@ export class Pathmuncher {
   }
 
   async #checkRulePredicate(document, rule, processedRules) {
-    const tempActor = await this.#generateTempActor({
-      documents: [document],
-      includePassedDocumentsRules: true,
-      // includeGrants: false,
-      // includeFlagsOnly: true,
-      processedRules,
-    });
+    const tempActor = this.evaluation.build(document, { rules: processedRules });
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
@@ -1252,7 +1276,7 @@ export class Pathmuncher {
         const predicateCheck = await this.#tryRuleStep(
           document,
           ruleEntry,
-          () => this.#checkRulePredicate(foundry.utils.duplicate(document), ruleEntry, [rulesToKeep]),
+          () => this.#checkRulePredicate(foundry.utils.duplicate(document), ruleEntry, rulesToKeep),
         );
         if (predicateCheck.failed) {
           addRuleToKeep(ruleEntry);
@@ -1388,7 +1412,7 @@ export class Pathmuncher {
           });
           const flagName = ruleEntry.flag ?? documentFlagName;
           this.#createGrantedItem(featureDoc, document, {
-            addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false, sourceUuid: uuid ?? ruleFeature.uuid,
+            addGrantFlag: true, itemGrantName: flagName, applyFeatLocation: false,
           });
           if (foundry.utils.hasProperty(featureDoc, "system.rules")) await this.#addGrantedRules(featureDoc);
         } else {
@@ -1411,10 +1435,15 @@ export class Pathmuncher {
         if (!ruleEntry.flag) ruleEntry.flag = Pathmuncher.#ruleFlag(document, ruleEntry);
         ruleEntry.selection = choice.value;
         addRuleToKeep(ruleEntry);
-      } else if (choice && uuid && !foundry.utils.hasProperty(ruleEntry, "selection")) {
+      } else if (choice && uuid) {
+        // a choice that is not an item. It may already have its selection, preselected by the item
+        // granting this one (Farmhand's Athletics for the Assurance it grants); a preselection the
+        // choice does not offer (Gnome Obsession's "lore" for Assurance) gives way to the choice made
         logger.debug("Parsed odd choice rule", { choice, uuid, ruleEntry });
-        // if (!ruleEntry.flag) ruleEntry.flag = Seasoning.slugD(document.name);
-        ruleEntry.selection = choice.value;
+        const offered = choice.choiceQueryResults?.map((c) => c.value);
+        if (ruleEntry.selection === undefined || (offered && !offered.includes(ruleEntry.selection))) {
+          ruleEntry.selection = choice.value;
+        }
         addRuleToKeep(ruleEntry);
       } else {
         logger.debug(`Final rule fallback for ${document.name}`, ruleEntry);
@@ -1901,204 +1930,6 @@ export class Pathmuncher {
     // await this.#generateSpecialItems("classFeatures");
     // this.statusUpdate(5, 5, "Feats");
     // await this.#generateSpecialItems("actions");
-  }
-
-  async #generateTempActor({ documents = [], includePassedDocumentsRules = false, includeGrants = false,
-    includeFlagsOnly = false, processedRules = [], otherDocs = [], excludeAddedGrants = false, continueOnProcessedRules = true,
-    removePassedDocuments = false } = {},
-  ) {
-    // an unsaved actor: rule elements are prepared on it like on a real one, without touching the world
-    const actorData = foundry.utils.mergeObject({ type: "character", flags: { pathmuncher: { temp: true } } }, this.result.character);
-    actorData._id = foundry.utils.randomID();
-    this.#setTempActorName(actorData);
-
-    if (documents.map((d) => d.name.split("(")[0].trim().toLowerCase()).includes("skill training")) {
-      delete actorData.system.skills;
-    }
-
-    const currentState = foundry.utils.duplicate(this.result);
-
-    const currentItems = [
-      ...currentState.deity,
-      ...currentState.ancestry,
-      ...currentState.heritage,
-      ...currentState.background,
-      ...currentState.class,
-      ...currentState.lores,
-      ...currentState.feats,
-      ...currentState.casters,
-      // ...currentState.spells,
-      // ...currentState.equipment,
-      // ...currentState.weapons,
-      // ...currentState.armor,
-      // ...currentState.treasure,
-      // ...currentState.money,
-    ]
-      .filter((i) => !otherDocs.some((o) => i._id === o._id))
-      .filter((i) => !removePassedDocuments || !documents.some((d) => i._id === d._id));
-    currentItems.push(...otherDocs);
-    if (!removePassedDocuments) {
-      for (const doc of documents) {
-        if (!currentItems.some((d) => d._id === doc._id)) {
-          currentItems.push(foundry.utils.deepClone(doc));
-        }
-      }
-    }
-
-    // console.warn("Initial temp actor data", {
-    //   initialTempActor: foundry.utils.deepClone(actor),
-    //   documents,
-    //   includePassedDocumentsRules,
-    //   removePassedDocuments,
-    //   includeGrants,
-    //   includeFlagsOnly,
-    //   processedRules: foundry.utils.deepClone(processedRules),
-    //   otherDocs,
-    //   currentItems: foundry.utils.deepClone(currentItems),
-    //   excludeAddedGrants,
-    //   this: this,
-    // });
-
-    try {
-      // if the rule selected is an object, id doesn't take on import
-      const ruleUpdates = [];
-      for (const i of foundry.utils.deepClone(currentItems)) {
-        if (!i.system.rules || i.system.rules.length === 0) continue;
-        const isPassedDocument = documents.some((d) => d._id === i._id);
-        if (isPassedDocument && processedRules.length > 0) {
-          i.system.rules = foundry.utils.deepClone(processedRules);
-          if (this.devMode) logger.verbose(`${i.name} is passed document`, () => foundry.utils.deepClone(i));
-          if (continueOnProcessedRules) continue;
-        } else if (isPassedDocument && !includePassedDocumentsRules && !includeFlagsOnly) {
-          continue;
-        }
-
-        const objectSelectionRules = i.system.rules
-          .filter((r) => {
-            const isRollOption = r.key === "RollOption";
-            const evaluateRules = ["ChoiceSet"].includes(r.key) && (r.selection || r.domain === "all");
-            const includePreselectionGrants = ["GrantItem"].includes(r.key) && r.preselectChoices;
-            return !includeFlagsOnly || isRollOption || evaluateRules || includePreselectionGrants || ["ActiveEffectLike"].includes(r.key);
-          })
-          .map((r) => {
-            r.ignored = false;
-            return r;
-          });
-
-        if (this.devMode) logger.verbose(`${i.name}`, () => ({
-          objectSelectionRules: foundry.utils.duplicate(objectSelectionRules),
-          isPassedDocument,
-          iRules: foundry.utils.duplicate(i.system.rules),
-        }));
-
-        if (objectSelectionRules.length > 0) {
-          ruleUpdates.push({
-            _id: i._id,
-            system: {
-              rules: objectSelectionRules,
-            },
-          });
-        }
-      }
-
-      if (this.devMode) logger.verbose("Rule updates", () => foundry.utils.duplicate(ruleUpdates));
-
-      const items = foundry.utils.duplicate(currentItems).map((i) => {
-        if (i.system.items) i.system.items = [];
-        if (i.system.rules) {
-          i.system.rules = i.system.rules
-            // eslint-disable-next-line complexity
-            .filter((r) => {
-              const allowedMiscKeys = ["RollOption", "ActiveEffectLike"].includes(r.key);
-              if (allowedMiscKeys) return true;
-              const isOtherDocument = otherDocs.some((d) => d._id === i._id);
-              const excludeAddedGrant = excludeAddedGrants && ["GrantItem"].includes(r.key) && this.grantItemLookUp.has(r.uuid);
-              const otherDocumentGrantRules = isOtherDocument && excludeAddedGrant;
-              if (otherDocumentGrantRules) return false;
-              if (isOtherDocument) return true;
-
-              const isPassedDocument = documents.some((d) => d._id === i._id);
-              const isChoiceSetSelection = ["ChoiceSet"].includes(r.key) && r.selection;
-              const grantRuleWithoutFlag = includeGrants && ["GrantItem"].includes(r.key) && !r.flag;
-              // if (excludeAddedGrant && grantRuleWithoutFlag) return false;
-              const genericDiscardRule = ["ChoiceSet", "GrantItem"].includes(r.key);
-              const grantRuleFromItemFlag = includeGrants && ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
-
-
-              const notPassedDocumentRules
-                = !isPassedDocument
-                // && !excludeAddedGrant
-                && (grantRuleWithoutFlag
-                  // || choiceSetSelectionNotObject
-                  || !genericDiscardRule
-                  || grantRuleFromItemFlag);
-
-              const passedDocumentRules
-                = isPassedDocument
-                && includePassedDocumentsRules
-                // && !excludeAddedGrant
-                && (isChoiceSetSelection || grantRuleWithoutFlag || grantRuleFromItemFlag);
-
-              return notPassedDocumentRules || passedDocumentRules;
-            })
-            .map((r) => {
-              // if choices is a string or an object then we replace with the query string results
-              if ((utils.isString(r.choices) || utils.isObject(r.choices)) && r.choiceQueryResults) {
-                r.choices = r.choiceQueryResults;
-              }
-              r.ignored = false;
-              return r;
-            });
-          if (documents.some((d) => d._id === i._id) && processedRules.length > 0 && includeFlagsOnly) {
-            i.system.rules = foundry.utils.deepClone(processedRules).filter((r) => {
-              const excludeAddedGrant = excludeAddedGrants && ["GrantItem"].includes(r.key) && this.grantItemLookUp.has(r.uuid);
-              if (excludeAddedGrant) return false;
-              const noGrants = !includeGrants && !["GrantItem"].includes(r.key);
-              if (noGrants) return false;
-              const grantRuleFromItemFlag = ["GrantItem"].includes(r.key) && r.uuid.includes("{item|flags");
-              if (!grantRuleFromItemFlag) return true;
-              if (grantRuleFromItemFlag && r.alterations) return true;
-              return false;
-            });
-          }
-        }
-        return i;
-      });
-
-      this.#applyTempItemUpdates(items, ruleUpdates);
-      logger.debug("Temp actor items", items);
-      const actor = new Actor.implementation({ ...actorData, items });
-      logger.debug("Final temp actor", actor);
-      return actor;
-    } catch (err) {
-      logger.error("Temp actor creation failed", {
-        documents,
-        thisData: foundry.utils.deepClone(this.result),
-        actorData,
-        err,
-        currentItems,
-        this: this,
-      });
-      throw err;
-    }
-  }
-
-  /** Puts the selection rules and granted item lists straight onto the evaluation actor's item data. */
-  #applyTempItemUpdates(items, ruleUpdates) {
-    for (const update of ruleUpdates) {
-      const item = items.find((i) => i._id === update._id);
-      if (item) item.system.rules = update.system.rules;
-    }
-    for (const [id, grantedItems] of Object.entries(this.autoAddedFeatureItems)) {
-      const item = items.find((i) => i._id === id);
-      if (item) item.system.items = foundry.utils.deepClone(grantedItems);
-    }
-  }
-
-  #setTempActorName(actorData) {
-    const formattedNum = this.tempActorCounter.toString().padStart(4, "0");
-    actorData.name = `Mr Temp (${this.result.character.name}) ${formattedNum}`;
-    this.tempActorCounter += 1;
   }
 
   /**

@@ -342,4 +342,47 @@
     t.equal(selection(actor, "Surki Weapon Familiarity", "weapon"), "battle-axe", "weapon");
     t.equal(selection(actor, "Grand Metamorphosis", "evolution"), "digging-wedge", "evolution");
   });
+  /** Each Assurance on the actor with the skill it took. */
+  const assurances = (actor) => actor.items.filter((i) => i.slug === "assurance")
+    .map((i) => ({ grantedBy: actor.items.get(i.flags.pf2e?.grantedBy?.id)?.name ?? null, skill: i.flags.pf2e?.rulesSelections?.assurance ?? null }));
+
+  test("processing: a second Assurance never takes a skill another Assurance has", async (t) => {
+    // the Scholar (Occultism) background grants Assurance (Occultism); Gnome Obsession grants another,
+    // which takes Religion: the only other skill the build is trained in
+    const exportJson = generated("oracle-11");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "assurance twice");
+
+    await pmt.importBuild(actor, exportJson);
+
+    const skills = assurances(actor).map((a) => a.skill);
+    t.equal(skills.length, 2, "Assurances");
+    t.ok(skills.every(Boolean), `every Assurance has a skill: ${JSON.stringify(assurances(actor))}`);
+    t.deepEqual([...skills].sort(), ["occultism", "religion"], "skills");
+  });
+
+  test("processing: an Assurance the build doesn't settle is asked with where it comes from and what is taken", async (t) => {
+    // trained in Religion and Society besides Occultism, so the build leaves the skill open
+    const exportJson = generated("oracle-11");
+    exportJson.build.proficiencies.society = 2;
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "assurance asked");
+    let asked = [];
+    const resolveUnansweredChoices = (unanswered) => {
+      asked = unanswered;
+      const assurance = unanswered.find((u) => u.item.name === "Assurance");
+      return assurance ? { [assurance.id]: "society" } : {};
+    };
+
+    await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices });
+
+    const entry = asked.find((u) => u.item.name === "Assurance");
+    t.ok(entry, `Assurance asked: ${JSON.stringify(asked.map((u) => u.item.name))}`);
+    t.equal(entry.origin, "Gnome Obsession", "where it comes from");
+    t.deepEqual(entry.taken, [{ label: "Occultism", source: "Scholar" }], "skills already taken");
+    t.ok(!entry.choices.some((c) => c.value === "occultism"), "a taken skill is not offered");
+    t.deepEqual(assurances(actor).map((a) => a.skill).sort(), ["occultism", "society"], "skills");
+  });
 })();

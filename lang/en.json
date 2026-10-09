@@ -123,6 +123,9 @@
       "UnansweredChoices": {
         "Title": "Pathmuncher | Choices to make",
         "Content": "The Pathbuilder export does not say what was chosen for these. Pick them now, or leave one unpicked and the system will ask for it during the import. Hover over an option for details.",
+        "GrantedBy": "Granted by {item}.",
+        "Taken": "Already chosen on another {item}: {list}. Those are not offered here.",
+        "TakenFrom": "{choice} (from {source})",
         "Search": "Filter options",
         "Clear": "Clear this choice",
         "Import": "Import",

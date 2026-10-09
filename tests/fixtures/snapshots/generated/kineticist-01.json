@@ -82,7 +82,7 @@
     "feat: Extract Element [in Kineticist; level 3]",
     "feat: Final Gate [in Kineticist; level 19]",
     "feat: Fire Gate [level 1; granted by Gate's Threshold (Fork the Path: Fire Gate); impulseOne=Compendium.pf2e.feats-srd.Item.cg6iASOmkTadIYCd; impulseTwo=null]",
-    "feat: Gate Junction (Critical Blast) [level 5; granted by Gate's Threshold (Expand the Portal: Earth); element=air; junction=critical]",
+    "feat: Gate Junction (Impulse) [level 5; granted by Gate's Threshold (Expand the Portal: Earth); element=earth; junction=impulse]",
     "feat: Gate Junction (Skill) [level 5; granted by Gate's Threshold (Expand the Portal: Air); element=air; junction=skill]",
     "feat: Gate's Threshold (Expand the Portal: Air) [in Kineticist; level 5; element=air; elementFork=null; gatesThreshold=expand; impulseExpand=Compendium.pf2e.feats-srd.Item.QV4NCyZQBCABykS1]",
     "feat: Gate's Threshold (Expand the Portal: Earth) [in Kineticist; level 13; element=earth; elementFork=null; impulseExpand=Compendium.pf2e.feats-srd.Item.kh0uz44otsdQlpIk; thirdGatesThreshold=expand]",
@@ -129,19 +129,17 @@
   "spellcasting": [],
   "report": {
     "special": [
-      "Critical",
-      "Impulse"
+      "Critical"
     ]
   },
   "described": [
-    "Fire Gate: Skill Junction"
+    "Fire Gate: Critical Blast, Skill Junction"
   ],
   "prompts": [
     "Air Gate: Aerial Boomerang (guessed)",
     "Air Gate: Air Cushion (guessed)",
     "Gate's Threshold (Expand the Portal: Air): Air Shroud (guessed)",
     "Earth Gate: Armor in Earth (guessed)",
-    "Gate Junction: Air (guessed)",
     "Gate's Threshold (Expand the Portal: Earth): Calcifying Sand (guessed)",
     "Fire Gate: Architect of Flame (guessed)"
   ]

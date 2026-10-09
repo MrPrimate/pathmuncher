@@ -486,6 +486,11 @@
   margin: 0;
 }
 
+/* where the choice's item comes from, and what other copies of it already took */
+.pathmuncher-unanswered-choices .pathmuncher-choice-note {
+  font-style: italic;
+}
+
 .pathmuncher-unanswered {
   display: flex;
   flex-direction: column;

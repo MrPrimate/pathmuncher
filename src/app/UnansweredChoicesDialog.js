@@ -8,6 +8,22 @@ const local = (key) => game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Unansw
 /** Above this many options, a choice gets a filter box. */
 const FILTER_FROM = 12;
 
+/**
+ * Where a choice's item comes from, and what other copies of it already chose (a second Assurance
+ * cannot take a skill the first has): "Granted by Gnome Obsession. Already chosen on another
+ * Assurance: Occultism (from Scholar)."
+ */
+function notes(entry) {
+  const format = (key, data) => game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.UnansweredChoices.${key}`, data);
+  const lines = [];
+  if (entry.origin) lines.push(format("GrantedBy", { item: entry.origin }));
+  if (entry.taken?.length) {
+    const list = entry.taken.map((t) => (t.source ? format("TakenFrom", { choice: t.label, source: t.source }) : t.label)).join(", ");
+    lines.push(format("Taken", { item: entry.item.name.split("(")[0].trim(), list }));
+  }
+  return lines.map((line) => `<p class="hint pathmuncher-choice-note">${escape(line)}</p>`).join("");
+}
+
 function renderContent(unanswered) {
   const rows = unanswered.map((entry) => {
     const tiles = entry.choices.map((choice) => tile({
@@ -30,6 +46,7 @@ function renderContent(unanswered) {
         </button>
       </legend>
       ${entry.prompt ? `<p class="hint">${escape(entry.prompt)}</p>` : ""}
+      ${notes(entry)}
       ${filter}
       <div class="pathmuncher-tiles pathmuncher-choice-tiles">${tiles}</div>
     </fieldset>`;
