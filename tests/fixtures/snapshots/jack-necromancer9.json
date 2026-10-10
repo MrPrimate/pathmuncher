@@ -181,11 +181,7 @@
     "Necromancer [occult; prepared; int; proficiency 2] rank 0: 5 [Guidance, Figment, Needle Darts, Telekinetic Hand, Shield] | rank 1: 2 [Lose the Path, Bless] | rank 2: 2 [Loose Time's Arrow, Loose Time's Arrow] | rank 3: 2 [Fear, Bonewall Bulwark] | rank 4: 2 [Suggestion, Invisibility] | rank 5: 2 [Synesthesia, Summon Undead]",
     "Occult Focus Tradition [occult; focus; int; proficiency 2]"
   ],
-  "report": {
-    "special": [
-      "Thralls"
-    ]
-  },
+  "report": {},
   "described": [
     "Basic Undead Benefits: Disease and Poison Protection, Immunity to Death Effects, Negative Healing, Negative Survival, Undead Hunger",
     "Necromancer Spellcasting: Dirge"

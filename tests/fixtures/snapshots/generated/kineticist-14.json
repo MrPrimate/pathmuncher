@@ -12,8 +12,8 @@
       "str": 4,
       "dex": 5,
       "con": 5,
-      "int": 2,
-      "wis": 3,
+      "int": 1,
+      "wis": 4,
       "cha": 2
     },
     "hp": 268,
@@ -39,7 +39,7 @@
       "nature": 4,
       "occultism": 0,
       "performance": 0,
-      "religion": 1,
+      "religion": 0,
       "society": 0,
       "stealth": 1,
       "survival": 1,
@@ -47,6 +47,7 @@
     },
     "languages": [
       "common",
+      "draconic",
       "fey",
       "petran",
       "talican"
