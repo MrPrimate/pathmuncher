@@ -196,6 +196,14 @@ export class ImportReport {
     }
 
     ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
+    await ImportReport.show(report);
+  }
+
+  /**
+   * Shows import notes (getImportReport), from this import or kept from an earlier one (ImportMemory).
+   * importedAt, when given, says when the import was made.
+   */
+  static async show(report, { importedAt = null } = {}) {
     const escape = foundry.utils.escapeHTML;
     const { enrichHTML } = foundry.applications.ux.TextEditor.implementation;
     const clip = (text, length = 400) => (text.length <= length ? text : `${text.slice(0, text.lastIndexOf(" ", length))} …`);
@@ -218,7 +226,8 @@ export class ImportReport {
       window: { title: "pathmuncher.Dialogs.Report.Title", icon: "fas fa-clipboard-list" },
       classes: ["pathmuncher", "pathmuncher-report"],
       position: { width: 480 },
-      content: `<p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.Intro")}</p>
+      content: `${importedAt ? `<p class="hint">${escape(game.i18n.format("pathmuncher.Dialogs.Report.ImportedAt", { date: new Date(importedAt).toLocaleString() }))}</p>` : ""}
+        <p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.Intro")}</p>
         <div class="pathmuncher-report-groups">${sections}</div>`,
       ok: { label: "pathmuncher.Labels.Finished", icon: "fas fa-check" },
       rejectClose: false,

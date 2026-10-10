@@ -185,7 +185,22 @@
   font-size: var(--font-size-12);
 }
 
+/* the last import: re-use its answers, show its notes */
+
+.pathmuncher-last-import {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.pathmuncher-last-import .hint {
+  margin: 0;
+}
+
 .pathmuncher-importer.importing .pathmuncher-option-groups,
+.pathmuncher-importer.importing .pathmuncher-last-import,
 .pathmuncher-importer.importing .pathmuncher-source {
   opacity: 0.6;
 }

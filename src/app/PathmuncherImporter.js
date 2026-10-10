@@ -3,6 +3,8 @@ import logger from "../logger.js";
 import utils from "../utils.js";
 import { AmmunitionDialog } from "./AmmunitionDialog.js";
 import { DeityConflictDialog } from "./DeityConflictDialog.js";
+import { ImportMemory } from "./ImportMemory.js";
+import { ImportReport } from "./ImportReport.js";
 import { Pathmuncher } from "./Pathmuncher.js";
 import { PetShop } from "./PetShop.js";
 import { UnansweredChoicesDialog } from "./UnansweredChoicesDialog.js";
@@ -59,6 +61,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     actions: {
       setSource: PathmuncherImporter.#onSetSource,
       selectAll: PathmuncherImporter.#onSelectAll,
+      showLastReport: PathmuncherImporter.#onShowLastReport,
     },
   };
 
@@ -82,7 +85,12 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     const context = await super._prepareContext(options);
     const flags = utils.getFlags(this.actor);
     const optionValue = (key) => flags?.[key] ?? CONSTANTS.ACTOR_FLAGS[key] ?? true;
+    const memory = new ImportMemory(this.actor);
     return Object.assign(context, {
+      // the last import's answers can be given again, and its notes shown again
+      reuseAnswers: memory.hasAnswers,
+      lastReport: !!memory.lastReport,
+      lastImport: memory.hasAnswers || !!memory.lastReport,
       rootId: this.id,
       actor: { name: this.actor.name, img: this.actor.img },
       pathbuilderId: flags?.pathbuilderId ?? "",
@@ -121,6 +129,11 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     for (const panel of this.element.querySelectorAll(".pathmuncher-source-panel")) {
       panel.hidden = panel.dataset.source !== this.source;
     }
+  }
+
+  static async #onShowLastReport() {
+    const memory = new ImportMemory(this.actor);
+    if (memory.lastReport) await ImportReport.show(memory.lastReport, { importedAt: memory.lastImportedAt });
   }
 
   static #onSetSource(_event, target) {
@@ -169,7 +182,9 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
   static async #onSubmit(_event, _form, formData) {
     if (this.importing) return;
     const data = foundry.utils.expandObject(formData.object);
-    const options = {
+    const memory = new ImportMemory(this.actor);
+    const reuse = memory.hasAnswers && data.reuseAnswers !== false;
+    const options = memory.options({
       ...data.options,
       pathbuilderId: this.source === "id" ? String(data.pathbuilderId ?? "").trim() : undefined,
       statusCallback: this.#updateProgress.bind(this),
@@ -177,13 +192,13 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       resolveDeityConflict: DeityConflictDialog.choose,
       resolveUnansweredChoices: UnansweredChoicesDialog.choose,
       resolveAmmunition: AmmunitionDialog.choose,
-    };
+    }, { reuse });
     logger.debug("Pathmuncher options", options);
 
     this.#setImporting(true);
     let completed = null;
     try {
-      completed = await this.#import(options, data);
+      completed = await this.#import(options, data, { memory, reuse });
     } finally {
       if (this.rendered) this.#setImporting(false);
     }
@@ -194,10 +209,12 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
   }
 
   /** Runs an import. Returns the Pathmuncher on success, or null once the user has been told why not. */
-  async #import(options, data) {
+  async #import(options, data, { memory, reuse = false }) {
     const pathmuncher = new Pathmuncher(this.actor, options);
     // nothing on the actor changes until there is a valid build and it has been fully processed
     if (!(await this.#loadSource(pathmuncher, data))) return null;
+    // the build as Pathbuilder gave it, kept on the actor with the answers once the import succeeds
+    const source = foundry.utils.deepClone(pathmuncher.source);
 
     logger.debug("Pathmuncher Source", pathmuncher.source);
     try {
@@ -218,7 +235,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     let keepItemIds;
     const handAdded = pathmuncher.findHandAddedItems();
     if (handAdded.length > 0) {
-      keepItemIds = await PathmuncherImporter.#chooseItemsToKeep(handAdded);
+      keepItemIds = memory.keptBefore(handAdded, { reuse }) ?? await PathmuncherImporter.#chooseItemsToKeep(handAdded);
       if (keepItemIds === null) {
         ui.notifications.info(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.Pathmuncher.ImportCancelled`));
         return null;
@@ -228,8 +245,9 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     const actorBackup = this.actor.toObject();
     try {
       await pathmuncher.updateActor({ keepItemIds });
+      memory.noteKept(keepItemIds);
       // remembered for the next import of this actor; only once the import has succeeded
-      await utils.setFlags(this.actor, Object.fromEntries(Object.entries(options).filter(([, value]) => typeof value !== "function")));
+      await utils.setFlags(this.actor, Object.fromEntries(Object.keys(CONSTANTS.ACTOR_FLAGS).map((key) => [key, options[key]])));
     } catch (error) {
       logger.error("Pathmuncher actor update failed", { error, pathmuncher, actorBackup });
       const backup = await PathmuncherImporter.#saveBackupActor(actorBackup);
@@ -252,6 +270,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       // abilities no compendium item matched, in the import notes' Familiars
       pathmuncher.bad.push(...petShop.unmatched);
     }
+    await memory.save(pathmuncher, { source, report: pathmuncher.getImportReport() });
     logger.debug("Final import details", { actor: this.actor, pathmuncher, options });
     return pathmuncher;
   }

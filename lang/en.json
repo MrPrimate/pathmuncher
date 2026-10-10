@@ -175,7 +175,8 @@
         "Rules": "Rules to check",
         "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
         "Pets": "Pets not imported",
-        "PetsHint": "Pathmuncher imports familiars only, and Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand."
+        "PetsHint": "Pathmuncher imports familiars only, and Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand.",
+        "ImportedAt": "Imported {date}."
       }
     },
     "Importer": {
@@ -224,7 +225,13 @@
       "All": "All",
       "None": "None",
       "Import": "Import",
-      "Problems": "Something not right? Report it on <a href=\"https://discord.gg/EzKAwngjKn\">Discord</a>."
+      "Problems": "Something not right? Report it on <a href=\"https://discord.gg/EzKAwngjKn\">Discord</a>.",
+      "LastImport": {
+        "Legend": "Last import",
+        "ReuseAnswers": "Re-use import answers from the last import?",
+        "ReuseAnswersHint": "Gives your answers from last time again where the same question comes up: choices, the deity, items dropped in for missing ones, and the items added by hand you kept. Anything new is still asked.",
+        "ShowNotes": "Last import notes"
+      }
     },
     "Chat": {},
     "Notifications": {

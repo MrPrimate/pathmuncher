@@ -1,5 +1,6 @@
 # Next up
 
+- An import now keeps the Pathbuilder build, its import notes and the answers you gave on the actor. The next import offers "Re-use import answers from the last import?" (ticked by default): the choices you answered (in the choices dialog or when the system asked), the deity, items dropped in for missing ones, and which hand-added items to keep are given again where the same question comes up, and only new questions are asked. "Last import notes" in the importer shows the last import's notes again.
 - Choices are now worked out without creating temporary actors.
 - The temp-folder settings have been removed.
 - Players without permission to delete actors can now import.

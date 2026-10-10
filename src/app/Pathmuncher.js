@@ -81,6 +81,8 @@ export class Pathmuncher {
     this.promptRules = {};
     // choices the build doesn't answer, asked together once processing ends (options.resolveUnansweredChoices)
     this.unansweredChoices = [];
+    // the choices the build doesn't settle, however they are answered: { key, base, documentId, flag }
+    this.openChoices = [];
     this.allFeatureRules = {};
     this.autoAddedFeatureRules = {};
     this.failedFeatureItems = {};
@@ -964,6 +966,62 @@ export class Pathmuncher {
   }
 
   /**
+   * An answer for a choice the build's feats and specials don't name: the skill the build is trained
+   * in, the sanctification its cause needs, the item it carries, or failing those the answer given
+   * for the same choice in the last import (options.choiceAnswers). undefined when there is none.
+   */
+  #answerFromBuildState(document, choiceSet, choices) {
+    const answers = [
+      ["the build's proficiencies", () => this.#skillChoiceFromProficiencies(choices)],
+      ["the build's cause", () => this.#sanctificationFromBuild(document, choiceSet, choices)],
+      ["the build's inventory", () => this.#choiceFromCarriedItems(choiceSet, choices)],
+      ["the last import", () => this.#lastImportAnswer(document, choiceSet, choices)],
+    ];
+    for (const [source, find] of answers) {
+      const match = find();
+      if (match) {
+        logger.debug(`Choice for ${document.name} from ${source}`, { match, choices });
+        return match;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * A key for a choice the build doesn't settle that is the same on the next import of the build: the
+   * item that granted the item making it (or the slot it fills), the item, and the choice's flag, with
+   * a count for a second copy of all three ("background:raised-by-belief>assurance#assurance").
+   */
+  #openChoiceKey(document, ruleEntry) {
+    const granter = this.#resultItem(document.flags?.[game.system.id]?.grantedBy?.id);
+    const location = utils.isString(document.system?.location) && !this.#resultItem(document.system.location)
+      ? document.system.location
+      : this.#resultItem(document.system?.location);
+    const origin = granter ?? location;
+    const originKey = utils.isString(origin) ? origin : origin ? `${origin.type}:${origin.system?.slug ?? Seasoning.slug(origin.name)}` : "";
+    const base = `${originKey}>${document.system?.slug ?? Seasoning.slug(document.name)}#${Pathmuncher.#ruleFlag(document, ruleEntry)}`;
+    const earlier = this.openChoices.filter((c) => c.base === base && c.documentId !== document._id).length;
+    return { base, key: earlier > 0 ? `${base}@${earlier}` : base };
+  }
+
+  /**
+   * The answer given in the last import (options.choiceAnswers) for a choice the build doesn't settle,
+   * if it is still one of the options. Every such choice is noted (openChoices) so its answer, however
+   * it is given, can be read back from the actor once the import is done.
+   */
+  #lastImportAnswer(document, ruleEntry, choices) {
+    const flag = Pathmuncher.#ruleFlag(document, ruleEntry);
+    let open = this.openChoices.find((c) => c.documentId === document._id && c.flag === flag);
+    if (!open) {
+      open = { ...this.#openChoiceKey(document, ruleEntry), documentId: document._id, flag };
+      this.openChoices.push(open);
+    }
+    if (!Object.hasOwn(this.options.choiceAnswers ?? {}, open.key)) return undefined;
+    const stored = JSON.stringify(this.options.choiceAnswers[open.key]);
+    return choices.find((c) => JSON.stringify(c.value) === stored);
+  }
+
+  /**
    * What the build chose for an item, when none of the choices offered is it: the option Pathbuilder
    * records with the feat ("Lore: Piloting" for a Driver's Assurance). null when the build doesn't
    * record one, or one of the choices is it.
@@ -1136,23 +1194,8 @@ export class Pathmuncher {
       if (featureMatch) {
         return featureMatch;
       }
-      const skillMatch = this.#skillChoiceFromProficiencies(choices);
-      if (skillMatch) {
-        logger.debug(`Skill choice for ${document.name} from the build's proficiencies`, { skillMatch, choices });
-        return skillMatch;
-      }
-
-      const sanctificationMatch = this.#sanctificationFromBuild(document, cleansedChoiceSet, choices);
-      if (sanctificationMatch) {
-        logger.debug(`Sanctification for ${document.name} from the build`, { sanctificationMatch, choices });
-        return sanctificationMatch;
-      }
-
-      const carriedMatch = this.#choiceFromCarriedItems(cleansedChoiceSet, choices);
-      if (carriedMatch) {
-        logger.debug(`Item choice for ${document.name} from the build's inventory`, { carriedMatch, choices });
-        return carriedMatch;
-      }
+      const answer = this.#answerFromBuildState(document, cleansedChoiceSet, choices);
+      if (answer) return answer;
 
       if (this.#deferChoice(document, choiceSet, choices, taken)) return undefined;
 

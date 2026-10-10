@@ -59,6 +59,24 @@
     {{/each}}
   </div>
 
+  {{#if lastImport}}
+  <fieldset class="pathmuncher-last-import">
+    <legend>{{localize "pathmuncher.Importer.LastImport.Legend"}}</legend>
+    {{#if reuseAnswers}}
+    <label class="pathmuncher-option">
+      <input type="checkbox" name="reuseAnswers" checked>
+      <span>{{localize "pathmuncher.Importer.LastImport.ReuseAnswers"}}</span>
+    </label>
+    <p class="hint">{{localize "pathmuncher.Importer.LastImport.ReuseAnswersHint"}}</p>
+    {{/if}}
+    {{#if lastReport}}
+    <button type="button" data-action="showLastReport">
+      <i class="fas fa-clipboard-list" inert></i> {{localize "pathmuncher.Importer.LastImport.ShowNotes"}}
+    </button>
+    {{/if}}
+  </fieldset>
+  {{/if}}
+
   <div class="pathmuncher-progress" hidden>
     <progress max="1" value="0"></progress>
     <span class="pathmuncher-progress-label"></span>
