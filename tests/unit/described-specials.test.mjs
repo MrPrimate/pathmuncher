@@ -23,6 +23,15 @@ describe("Seasoning.describedSections", () => {
     ]);
   });
 
+  it("knows a step's section by its name too", () => {
+    // an eidolon's abilities: "Initial (1st)—Hallowed Strikes", "Transcendence (17th)—Angelic Mercy"
+    const html = "<p><strong>Transcendence (17th)—Angelic Mercy</strong> Your eidolon can cast heal.</p>";
+    assert.deepEqual(Seasoning.describedSections(html), [
+      { term: "Transcendence (17th)—Angelic Mercy", text: "Your eidolon can cast heal." },
+      { term: "Angelic Mercy", text: "Your eidolon can cast heal." },
+    ]);
+  });
+
   it("leaves out bold text in the middle of a paragraph", () => {
     assert.deepEqual(Seasoning.describedSections("<p>You gain a <strong>+1 circumstance bonus</strong>.</p>"), []);
   });

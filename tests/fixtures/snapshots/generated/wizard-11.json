@@ -114,9 +114,41 @@
     "feat: Wizard Spellcasting [in Wizard; level 1]",
     "heritage: Peachchild Leshy",
     "lore: Academia [rank 1]",
+    "spell: Blister [in Wizard; rank 5]",
+    "spell: Boots on the Ground [in Wizard; rank 6]",
+    "spell: Burning Blossoms [in Wizard; rank 8]",
+    "spell: Cataclysm [in Wizard; rank 10]",
     "spell: Circle of Weakness [in Arcane Focus Tradition; rank 1]",
+    "spell: Clairvoyance [in Wizard; rank 4]",
+    "spell: Containment [in Wizard; rank 4]",
+    "spell: Countless Eyes [in Wizard; rank 4]",
+    "spell: Disguise Magic [in Wizard; rank 1]",
+    "spell: Déjà Vu [in Wizard; rank 1]",
+    "spell: Eclipse Burst [in Wizard; rank 7]",
+    "spell: Enthrall [in Wizard; rank 3]",
+    "spell: Falling Sky [in Wizard; rank 8]",
+    "spell: Inertia Lock [in Wizard; rank 3]",
+    "spell: Infinitesimal Collapse Field [in Wizard; rank 7]",
+    "spell: Light [in Wizard; rank 0]",
+    "spell: Massacre [in Wizard; rank 9]",
+    "spell: Message [in Wizard; rank 0]",
+    "spell: Musical Accompaniment [in Wizard; rank 0]",
+    "spell: Noise Blast [in Wizard; rank 2]",
+    "spell: Persistent Servant [in Wizard; rank 2]",
+    "spell: Phantasmagoria [in Wizard; rank 9]",
+    "spell: Pierce the Sky [in Wizard; rank 9]",
+    "spell: Prestidigitation [in Wizard; rank 0]",
+    "spell: Quandary [in Wizard; rank 8]",
     "spell: Quantic Dampening [in Arcane Focus Tradition; rank 4]",
     "spell: Regenerate [in Regrowth; rank 7]",
+    "spell: Repulsion [in Wizard; rank 6]",
+    "spell: Slither [in Wizard; rank 5]",
+    "spell: Time Pocket [in Wizard; rank 3]",
+    "spell: Time Sense [in Wizard; rank 0]",
+    "spell: True Target [in Wizard; rank 7]",
+    "spell: Vampiric Exsanguination [in Wizard; rank 6]",
+    "spell: Ventriloquism [in Wizard; rank 1]",
+    "spell: Web [in Wizard; rank 2]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Regrowth",
     "spellcastingEntry: Wizard",
@@ -128,9 +160,13 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Regrowth [primal; prepared; cha; proficiency 4] rank 7: 1 [Regenerate]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light, -] | rank 1: 4 [Ventriloquism, Déjà Vu, Disguise Magic, -] | rank 2: 4 [Web, Persistent Servant, Noise Blast, -] | rank 3: 4 [Time Pocket, Inertia Lock, Enthrall, -] | rank 4: 4 [Countless Eyes, Containment, Clairvoyance, -] | rank 5: 4 [Blister, Slither, -, -] | rank 6: 4 [Vampiric Exsanguination, Boots on the Ground, Repulsion, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Burning Blossoms, Falling Sky, Quandary, -] | rank 9: 4 [Massacre, Phantasmagoria, Pierce the Sky, -] | rank 10: 1 [Cataclysm]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Searing Rain"
+    ]
+  },
   "described": [],
   "prompts": []
 }

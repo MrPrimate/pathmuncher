@@ -69,7 +69,7 @@
     "feat: Adept Benefit (Mirror) [level 7; granted by Second Adept]",
     "feat: Amulet [level 1; granted by Third Implement]",
     "feat: Ancestral Paragon [slot general-3; level 3; taken 3; ancestralParagon=Compendium.pf2e.feats-srd.Item.LaThPZtOGJ1VTNxl]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Awaken Others [slot ancestry-13; level 13; taken 13]",
     "feat: Awakened Animal Lore [slot ancestry-5; level 1; taken 5]",
     "feat: Awakened Form [in Awakened Animal; level 1]",
@@ -152,19 +152,19 @@
       "Censer Adept Benefit",
       "Censer Initiate Benefit",
       "Censer Intensify Vulnerability",
-      "Perception Expertise",
       "Swing the Censer"
+    ],
+    "rule": [
+      "Assurance (Lore: Driving)"
     ]
   },
   "described": [
-    "Bell: Bell Adept Benefit, Bell Intensify Vulnerability, Bell Paragon Benefit",
+    "Bell: Bell Intensify Vulnerability",
     "Mirror: Mirror Intensify Vulnerability"
   ],
   "prompts": [
-    "Assurance: Acrobatics",
-    "Implement Adept: Bell",
     "Third Implement: Amulet (guessed)",
-    "Implement Paragon: Bell",
-    "Ancestral Paragon: Awakened Magic (guessed)"
+    "Ancestral Paragon: Awakened Magic (guessed)",
+    "Assurance: Acrobatics"
   ]
 }

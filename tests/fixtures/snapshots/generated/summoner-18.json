@@ -172,13 +172,13 @@
     "Water to Water [occult; prepared; cha; proficiency 3] rank 4: 2 [Translocate, Translocate]"
   ],
   "report": {
-    "special": [
-      "Hidden Watcher",
-      "Shepherd's Touch",
-      "Spirit Taker"
+    "pet": [
+      "Eidolon"
     ]
   },
-  "described": [],
+  "described": [
+    "Psychopomp Eidolon: Hidden Watcher, Shepherd's Touch, Spirit Taker"
+  ],
   "prompts": [
     "Specialty Crafting: Alchemy (guessed)",
     "Terrain Stalker: Rubble (guessed)"

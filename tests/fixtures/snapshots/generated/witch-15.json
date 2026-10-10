@@ -100,9 +100,39 @@
     "feat: Witch Spellcasting [in Witch; level 1]",
     "feat: Witch's Broom [slot class-12; level 12; taken 12]",
     "lore: Herbalism [rank 1]",
+    "spell: Animal Vision [in Witch; rank 3]",
+    "spell: Blood Chestnuts [in Witch; rank 4]",
+    "spell: Coral Eruption [in Witch; rank 4]",
+    "spell: Cryostasis [in Witch; rank 6]",
+    "spell: Disorienting Flash [in Witch; rank 2]",
+    "spell: Eclipse Burst [in Witch; rank 7]",
+    "spell: Execute [in Witch; rank 7]",
     "spell: Fear [in Bugbear Feat 9; rank 3]",
+    "spell: Gentle Landing [in Witch; rank 1]",
+    "spell: Healing Well [in Witch; rank 5]",
+    "spell: Implosion [in Witch; rank 9]",
+    "spell: Incarnate Draconic Legion [in Witch; rank 9]",
+    "spell: Indestructibility [in Witch; rank 10]",
+    "spell: Know the Way [in Witch; rank 0]",
+    "spell: Lifewood Cage [in Witch; rank 7]",
+    "spell: Live Wire [in Witch; rank 0]",
+    "spell: Magnetize [in Witch; rank 4]",
+    "spell: Mariner's Curse [in Witch; rank 5]",
+    "spell: Metallic Meteorite Glyph [in Witch; rank 8]",
+    "spell: Migration [in Witch; rank 8]",
+    "spell: Monstrosity Form [in Witch; rank 8]",
     "spell: Murmuration [in Primal Focus Tradition; rank 1]",
+    "spell: Noxious Vapors [in Witch; rank 1]",
+    "spell: One with the Land [in Witch; rank 9]",
     "spell: Patron's Puppet [in Primal Focus Tradition; rank 1]",
+    "spell: Petrify [in Witch; rank 6]",
+    "spell: Prestidigitation [in Witch; rank 0]",
+    "spell: Primal Chorus [in Witch; rank 3]",
+    "spell: Read Aura [in Witch; rank 0]",
+    "spell: Scatter Scree [in Witch; rank 0]",
+    "spell: Status [in Witch; rank 2]",
+    "spell: Threefold Aspect [in Witch; rank 3]",
+    "spell: Tree of Life and Death [in Witch; rank 5]",
     "spellcastingEntry: Bugbear Feat 9",
     "spellcastingEntry: Primal Focus Tradition",
     "spellcastingEntry: Witch",
@@ -114,7 +144,7 @@
   "spellcasting": [
     "Bugbear Feat 9 [primal; prepared; cha; proficiency 4] rank 3: 1 [Fear]",
     "Primal Focus Tradition [primal; focus; int; proficiency 4]",
-    "Witch [primal; prepared; int; proficiency 4] rank 0: 5 [-, -, -, -, -] | rank 1: 3 [-, -, -] | rank 2: 3 [-, -, -] | rank 3: 3 [-, -, -] | rank 4: 3 [-, -, -] | rank 5: 3 [-, -, -] | rank 6: 3 [-, -, -] | rank 7: 3 [-, -, -] | rank 8: 3 [-, -, -] | rank 9: 3 [-, -, -] | rank 10: 1 [-]"
+    "Witch [primal; prepared; int; proficiency 4] rank 0: 5 [Prestidigitation, Know the Way, Scatter Scree, Read Aura, Live Wire] | rank 1: 3 [Noxious Vapors, Gentle Landing, -] | rank 2: 3 [Disorienting Flash, Status, -] | rank 3: 3 [Primal Chorus, Animal Vision, Threefold Aspect] | rank 4: 3 [Magnetize, Coral Eruption, Blood Chestnuts] | rank 5: 3 [Mariner's Curse, Healing Well, Tree of Life and Death] | rank 6: 3 [Cryostasis, Petrify, -] | rank 7: 3 [Execute, Lifewood Cage, Eclipse Burst] | rank 8: 3 [Monstrosity Form, Metallic Meteorite Glyph, Migration] | rank 9: 3 [One with the Land, Implosion, Incarnate Draconic Legion] | rank 10: 1 [Indestructibility]"
   ],
   "report": {
     "ancestry": [
@@ -129,6 +159,11 @@
       "Fearsense",
       "Know I Approach",
       "Terrorize"
+    ],
+    "spell": [
+      "Piercing Jet",
+      "Rude Awakening",
+      "Silver Spear"
     ]
   },
   "described": [

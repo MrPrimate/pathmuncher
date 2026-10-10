@@ -173,9 +173,9 @@
         "Described": "Part of another feature",
         "DescribedHint": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
         "Rules": "Rules to check",
-        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added.",
+        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
         "Pets": "Pets not imported",
-        "PetsHint": "Pathmuncher imports familiars only. Create these from the build by hand."
+        "PetsHint": "Pathmuncher imports familiars only, and Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand."
       }
     },
     "Importer": {

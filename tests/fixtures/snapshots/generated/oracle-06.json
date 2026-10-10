@@ -61,7 +61,7 @@
     "class: Oracle",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
     "feat: Additional Lore [level 1]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
     "feat: Concealing Legerdemain [slot skill-2; level 1; taken 2]",
     "feat: Cosmos [level 1; granted by Mystery]",
@@ -183,6 +183,9 @@
     ],
     "special": [
       "Nothingness"
+    ],
+    "rule": [
+      "Assurance (Lore: Driving)"
     ]
   },
   "described": [],

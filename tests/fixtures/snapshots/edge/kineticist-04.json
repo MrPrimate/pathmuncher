@@ -129,11 +129,7 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Extra Resistances"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Metal Gate: Flashforge (guessed)",
@@ -141,7 +137,6 @@
     "Wood Gate: Born to the Trees (guessed)",
     "Gate's Threshold (Expand the Portal: Water): Ambush Bladderwort (guessed)",
     "Lesser Augmentation: Magical Resistance",
-    "Lesser Augmentation: Gain additional resistances (guessed)",
     "Air Gate: Aerial Boomerang (guessed)",
     "Gate's Threshold (Expand the Portal: Water): Air Cushion (guessed)"
   ]

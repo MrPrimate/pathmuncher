@@ -92,7 +92,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Hefty Hauler [slot skill-14; level 1; taken 14]",
     "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.l3X6D8uMlt2y6vGS]",
-    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.BdIlZ73jdXg7kQ5G]",
+    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.mrSBs3kfw6POoZtG]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Implement's Flight [slot class-16; level 16; taken 16]",
     "feat: Incredible Investiture [level 11; taken 10; granted by Thaumaturge's Investiture]",
@@ -108,7 +108,7 @@
     "feat: Medium Armor Expertise [in Thaumaturge; level 11]",
     "feat: Medium Armor Mastery [in Thaumaturge; level 19]",
     "feat: One More Activation [slot class-8; level 6; taken 8]",
-    "feat: Paragon Benefit (Amulet) [level 17; granted by Implement Paragon]",
+    "feat: Paragon Benefit (Weapon) [level 17; granted by Implement Paragon]",
     "feat: Perception Mastery [in Thaumaturge; level 9]",
     "feat: Perfected Mind [in Thaumaturge; level 13]",
     "feat: Prescient Consumable [level 7; taken 9; granted by Uncanny Cheeks]",
@@ -148,19 +148,13 @@
     "weapon: Air Repeater [granted by Weapon; qty 1; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Perception Expertise"
-    ]
-  },
+  "report": {},
   "described": [
-    "Amulet: Amulet Adept Benefit, Amulet Intensify Vulnerability",
-    "Chalice: Chalice Adept Benefit, Chalice Intensify Vulnerability",
-    "Weapon: Weapon Adept Benefit, Weapon Intensify Vulnerability, Weapon Paragon Benefit"
+    "Amulet: Amulet Intensify Vulnerability",
+    "Chalice: Chalice Intensify Vulnerability",
+    "Weapon: Weapon Intensify Vulnerability"
   ],
   "prompts": [
-    "Weapon: Air Repeater (guessed)",
-    "Implement Adept: Amulet",
-    "Implement Paragon: Amulet"
+    "Weapon: Air Repeater (guessed)"
   ]
 }

@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import CONSTANTS from "../constants.js";
-import { NO_AUTO_CHOICE, IGNORE_MULTISELECT, kineticGatePlan, kineticImpulseSlot } from "../data/features.js";
+import { NO_AUTO_CHOICE, IGNORE_MULTISELECT, bareDragonName, choiceAliases, classFeatureRenames, kineticGatePlan, kineticImpulseSlot } from "../data/features.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { ActorWriter } from "./ActorWriter.js";
@@ -48,6 +48,8 @@ export class Pathmuncher {
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${this.source.dualClass})` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${castingType(false)} Caster)` },
       { pbName: "Cantrip Expansion", foundryName: `Cantrip Expansion (${castingType(true)} Caster)` },
+      ...classFeatureRenames(this.source.class),
+      ...classFeatureRenames(this.source.dualClass),
     ];
   }
 
@@ -93,6 +95,8 @@ export class Pathmuncher {
     this.usedLocations = new Set();
     // the compendium items ChoiceSet filters are tested against, made once for the import
     this.compendiumQueries = new CompendiumQueries();
+    // what the build says about the summoner's eidolon, which is not imported (#settleEidolonSpecials)
+    this.eidolonNotes = [];
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};
@@ -627,6 +631,21 @@ export class Pathmuncher {
     return pBFeat.isStandard === true && (/\s\d+$/).test(pBFeat.featChoiceRef ?? "");
   }
 
+  /**
+   * Specials that describe the summoner's eidolon, which is not imported: the damage type Energy Heart
+   * takes ("electricity"), which Pathbuilder lists on its own. They are noted with the eidolon in the
+   * import notes (eidolonNotes) rather than listed as unmatched.
+   */
+  #settleEidolonSpecials() {
+    if (!this.parsed.feats.some((f) => f.name === "Energy Heart")) return;
+    for (const special of this.parsed.specials.filter((s) => !s.added && Pathmuncher.ENERGY_HEART_TYPES.includes(s.originalName ?? s.name))) {
+      special.settle(ParsedEntry.STATUS.IGNORED, { reason: "Energy Heart's damage type, for the eidolon" });
+      this.eidolonNotes.push(`Energy Heart: ${special.originalName ?? special.name}`);
+    }
+  }
+
+  static ENERGY_HEART_TYPES = ["acid", "cold", "electricity", "fire"];
+
   /** Whether an item is a feat that can be taken more than once (pf2e's maxTakable is null or above 1: Assurance). */
   static #repeatable(document) {
     const maxTakable = document.system?.maxTakable;
@@ -726,8 +745,9 @@ export class Pathmuncher {
           ? await fromUuid(choice.value)
           : null;
       if (!doc) continue;
+      // Dragonblood's dragon only by its bare name ("Executor"): "<X> Dragon" is a sorcerer's bloodline
       const slug = adjustName
-        ? Seasoning.slug(doc)
+        ? Seasoning.slug(bareDragonName(document.name, doc) ?? doc)
         : doc.system.slug === null
           ? Seasoning.slug(doc.name)
           : doc.system.slug;
@@ -787,17 +807,24 @@ export class Pathmuncher {
   async #featureChoiceMatchNoUUID(document, choices, cleansedChoiceSet) {
     const matches = [];
     for (const choice of choices) {
-      const featMatch = this.#findAllFeatureMatch(document, Pathmuncher.#choiceKey(choice), { ignoreAdded: true, isChoiceMatch: true });
-      if (featMatch) {
+      // the option by its own name or another Pathbuilder records it under; Dragonblood's dragon only by its bare name
+      const bare = bareDragonName(document.name, game.i18n.localize(choice.label ?? ""));
+      const keys = bare
+        ? [Seasoning.slug(bare)]
+        : [Pathmuncher.#choiceKey(choice), ...choiceAliases(document.name, choice).map((a) => Seasoning.slug(a))];
+      const found = keys.map((key) => ({ key, featMatch: this.#findAllFeatureMatch(document, key, { ignoreAdded: true, isChoiceMatch: true }) }))
+        .find((m) => m.featMatch);
+      if (found) {
         matches.push({
-          rank: featMatch.rank,
+          rank: found.featMatch.rank,
           choice,
+          key: found.key,
         });
       }
     }
     if (matches.length > 0) {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
-      const featMatch = this.#findAllFeatureMatch(document, Pathmuncher.#choiceKey(match.choice), { ignoreAdded: true, isChoiceMatch: true });
+      const featMatch = this.#findAllFeatureMatch(document, match.key, { ignoreAdded: true, isChoiceMatch: true });
       if (featMatch instanceof ParsedEntry) {
         featMatch.settle(ParsedEntry.STATUS.CHOSEN, { itemId: document._id, reason: `a choice on ${document.name}` });
       }
@@ -1006,7 +1033,35 @@ export class Pathmuncher {
     return [...fromResult, ...pending];
   }
 
+  /**
+   * What the build chose for an item, when none of the choices offered is it: the option Pathbuilder
+   * records with the feat ("Lore: Piloting" for a Driver's Assurance). null when the build doesn't
+   * record one, or one of the choices is it.
+   */
+  #unofferedBuildChoice(document, choices) {
+    const entry = [...this.parsed.feats, ...this.parsed.specials].find((e) => e.itemId === document._id);
+    const extra = utils.isString(entry?.extra) && entry.extra !== entry.name ? entry.extra : null;
+    if (!extra) return null;
+    const slug = Seasoning.slug(extra);
+    const offered = choices.some((c) => (utils.isString(c.value) && Seasoning.slug(c.value) === slug)
+      || Seasoning.slug(game.i18n.localize(c.label ?? "")) === slug);
+    return offered ? null : extra;
+  }
+
+  /**
+   * Holds a choice the build doesn't settle back to ask the user with the others (resolveUnansweredChoices),
+   * or leaves it to the system when the build made it with an option the system doesn't offer. Whether
+   * the choice is left unanswered here.
+   */
   #deferChoice(document, ruleEntry, choices, taken = []) {
+    // no option offered would be right (Driver's Assurance in Piloting Lore: pf2e's Assurance takes
+    // skills only), so it isn't asked: it is listed among the rules to check, and the system picks or
+    // asks when the item is created
+    const unoffered = this.#unofferedBuildChoice(document, choices);
+    if (unoffered) {
+      this.bad.push({ pbName: `${document.name} (${unoffered})`, type: "rule", details: { choice: unoffered, offered: choices.map((c) => c.value) } });
+      return true;
+    }
     if (!this.options.resolveUnansweredChoices) return false;
     if (this.unansweredChoices.some((c) => c.ruleEntry === ruleEntry)) return true;
     if (choices.length < 2 || !choices.every((c) => utils.isString(c.value))) return false;
@@ -2144,6 +2199,7 @@ export class Pathmuncher {
 
     this.statusUpdate(8, 12, "FeatureRec");
     await this.#processFeats();
+    this.#settleEidolonSpecials();
     this.statusUpdate(10, 12, "Equipment");
     if (!(await this.equipment.processEquipment())) return false;
     this.statusUpdate(11, 12, "Spells");

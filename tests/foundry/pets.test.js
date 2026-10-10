@@ -59,4 +59,14 @@
     const pm2 = await pmt.importBuild(await pmt.actor(t, "familiar only"), familiar);
     t.equal(pm2.getImportReport().find((g) => g.type === "pet"), undefined, "a familiar is not listed");
   });
+
+  test("pets: a summoner's eidolon is listed as not imported, with its Energy Heart", async (t) => {
+    const summoner = generated("summoner-01");
+    await pmt.useBuildVariants(t, summoner.build);
+    pmt.answerPrompts(t, summoner.build);
+    const pm = await pmt.importBuild(await pmt.actor(t, "eidolon"), summoner);
+    const report = pm.getImportReport();
+    t.deepEqual(report.find((g) => g.type === "pet")?.names, ["Eidolon (Energy Heart: electricity)"], "the eidolon");
+    t.ok(!(report.find((g) => g.type === "special")?.names ?? []).includes("electricity"), "the damage type is not unmatched");
+  });
 })();

@@ -114,7 +114,38 @@
     "feat: Wizard Spellcasting [in Wizard; level 1]",
     "heritage: Skilled Human (Athletics) [skill=athletics]",
     "lore: One Terrain [rank 1]",
+    "spell: Bilocation [in Wizard; rank 9]",
+    "spell: Burning Blossoms [in Wizard; rank 8]",
+    "spell: Caustic Blast [in Wizard; rank 0]",
+    "spell: Containment [in Wizard; rank 4]",
+    "spell: Countless Eyes [in Wizard; rank 4]",
+    "spell: Croak Voice [in Wizard; rank 3]",
+    "spell: Demon Form [in Wizard; rank 6]",
+    "spell: Echoing Weapon [in Wizard; rank 1]",
+    "spell: Eclipse Burst [in Wizard; rank 7]",
+    "spell: Elemental Confluence [in Wizard; rank 6]",
+    "spell: Empty Pack [in Wizard; rank 2]",
+    "spell: Fishing Spot [in Wizard; rank 1]",
+    "spell: Freeze Time [in Wizard; rank 10]",
     "spell: Friendly Push [in Arcane Focus Tradition; rank 1]",
+    "spell: Frostbite [in Wizard; rank 0]",
+    "spell: Frozen Lungs [in Wizard; rank 2]",
+    "spell: Grisly Growths [in Wizard; rank 5]",
+    "spell: Howling Blizzard [in Wizard; rank 5]",
+    "spell: Implosion [in Wizard; rank 9]",
+    "spell: Incarnate Draconic Legion [in Wizard; rank 9]",
+    "spell: Infinitesimal Collapse Field [in Wizard; rank 7]",
+    "spell: Levitate [in Wizard; rank 3]",
+    "spell: Living Thunderbolt [in Wizard; rank 6]",
+    "spell: Mist [in Wizard; rank 2]",
+    "spell: Restraining Chains [in Wizard; rank 3]",
+    "spell: Runic Body [in Wizard; rank 1]",
+    "spell: Shield [in Wizard; rank 0]",
+    "spell: Sigil [in Wizard; rank 0]",
+    "spell: Telekinetic Projectile [in Wizard; rank 0]",
+    "spell: True Target [in Wizard; rank 7]",
+    "spell: Uncontrollable Dance [in Wizard; rank 8]",
+    "spell: Unrelenting Observation [in Wizard; rank 8]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Wizard",
     "treasure: Copper Pieces [qty 0; worn]",
@@ -124,9 +155,14 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Telekinetic Projectile, Caustic Blast, Sigil, Frostbite, Shield, -] | rank 1: 4 [Echoing Weapon, Runic Body, Fishing Spot, -] | rank 2: 4 [Empty Pack, Mist, Frozen Lungs, -] | rank 3: 4 [Croak Voice, Restraining Chains, Levitate, -] | rank 4: 4 [Countless Eyes, Containment, -, -] | rank 5: 4 [Grisly Growths, Howling Blizzard, -, -] | rank 6: 4 [Elemental Confluence, Living Thunderbolt, Demon Form, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Uncontrollable Dance, Unrelenting Observation, Burning Blossoms, -] | rank 9: 4 [Implosion, Bilocation, Incarnate Draconic Legion, -] | rank 10: 1 [Freeze Time]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Gift of Dusk",
+      "Searing Rain"
+    ]
+  },
   "described": [],
   "prompts": []
 }

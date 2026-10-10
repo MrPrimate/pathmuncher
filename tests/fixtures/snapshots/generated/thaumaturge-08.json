@@ -66,8 +66,8 @@
     "equipment: Amulet Implement [granted by Amulet; qty 1; worn]",
     "equipment: Tome Implement [granted by Tome; qty 1; worn]",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
-    "feat: Adept Benefit (Shield) [level 7; granted by Implement Adept]",
-    "feat: Adept Benefit (Tome) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Shield) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Tome) [level 7; granted by Implement Adept]",
     "feat: Amulet [level 1; granted by Third Implement]",
     "feat: Assurance (Acrobatics) [in Raised by Belief; level 1; assurance=acrobatics]",
     "feat: Assurance (Occultism) [slot skill-12; level 1; taken 12; assurance=occultism]",
@@ -87,7 +87,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Group Coercion [level 1; granted by Runtboss Hobgoblin]",
     "feat: Hefty Hauler [slot skill-2; level 1; taken 2]",
-    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.mzKV3lHPni85EMFM]",
+    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.gR8ODlO6au0laXo4]",
     "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.Swy3rjQsdO0wu2kU]",
     "feat: Implement's Assault [slot class-18; level 18; taken 18]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
@@ -114,7 +114,7 @@
     "feat: Ride [slot general-15; level 1; taken 15]",
     "feat: Root to Life [slot class-1; level 1; taken 1]",
     "feat: Sanctify Water [slot skill-20; level 2; taken 20]",
-    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.gR8ODlO6au0laXo4]",
+    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.mzKV3lHPni85EMFM]",
     "feat: Second Implement [in Thaumaturge; level 5; implement=Compendium.pf2e.classfeatures.Item.MyN1cQgE0HsLF20e]",
     "feat: Sever Magic [slot class-20; level 16; taken 20]",
     "feat: Shield Block [level 1; granted by Initiate Benefit (Shield)]",
@@ -145,20 +145,14 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Perception Expertise"
-    ]
-  },
+  "report": {},
   "described": [
     "Amulet: Amulet Intensify Vulnerability",
-    "Shield: Shield Adept Benefit, Shield Intensify Vulnerability, Shield Paragon Benefit",
-    "Tome: Tome Adept Benefit, Tome Intensify Vulnerability"
+    "Shield: Shield Intensify Vulnerability",
+    "Tome: Tome Intensify Vulnerability"
   ],
   "prompts": [
     "Assurance: Acrobatics",
-    "Shield: Buckler (guessed)",
-    "Implement Adept: Shield",
-    "Implement Paragon: Shield"
+    "Shield: Buckler (guessed)"
   ]
 }

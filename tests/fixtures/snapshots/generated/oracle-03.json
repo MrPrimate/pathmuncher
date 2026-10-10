@@ -63,7 +63,7 @@
     "feat: A Home in Every Port [slot general-15; level 11; taken 15]",
     "feat: Advanced Revelation [slot class-6; level 6; taken 6]",
     "feat: Arcane Sense [slot skill-10; level 1; taken 10]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Performance) [in Driver; level 1; unresolved assurance]",
     "feat: Automatic Knowledge [slot skill-6; level 2; taken 6]",
     "feat: Battle [level 1; granted by Mystery]",
     "feat: Big Sharp Teeth [in Dragonet; level 1]",
@@ -178,9 +178,13 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Glamorize, Protect Companion, Sigil, Guidance, Void Warp] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link, Runic Body] | rank 2: 4 [Fear the Sun, Revealing Light, Deafness, Summoner's Precaution] | rank 3: 4 [Anointed Ground, Blindness, Web of Eyes, Reblooded] | rank 4: 4 [Vampiric Maiden, Holy Cascade, Filter Air, Planar Tether] | rank 5: 4 [Unravel Existence, Rip the Spirit, Shadow Blast, Summon Dragon] | rank 6: 4 [Spirit Blast, Doom Mark, Awaken Entropy, Vampiric Exsanguination] | rank 7: 4 [Regenerate, Deity's Strike, Incarnate Ancient Specter, Energy Aegis] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Weapon of Judgment, Foresight, Voracious Gestalt, Sacred Covenant] | rank 10: 2 [Avatar, Revival]"
   ],
-  "report": {},
+  "report": {
+    "rule": [
+      "Assurance (Lore: Piloting)"
+    ]
+  },
   "described": [],
   "prompts": [
-    "Assurance: Acrobatics"
+    "Assurance: Performance"
   ]
 }

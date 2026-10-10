@@ -146,11 +146,7 @@
   "spellcasting": [
     "Otherworldly Acumen [occult; prepared; cha; proficiency 1] rank 2: 1 [Shatter]"
   ],
-  "report": {
-    "special": [
-      "Occult"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

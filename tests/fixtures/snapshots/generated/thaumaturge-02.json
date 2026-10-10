@@ -71,7 +71,7 @@
     "feat: Adept Benefit (Mirror) [level 7; granted by Second Adept]",
     "feat: Amulet [level 1; granted by Third Implement]",
     "feat: Armored Stealth [slot skill-14; level 2; taken 14]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Awakened Animal Lore [slot ancestry-5; level 1; taken 5]",
     "feat: Awakened Form [in Awakened Animal; level 1]",
     "feat: Awakened Mind [in Awakened Animal; level 1]",
@@ -154,19 +154,19 @@
       "Censer Adept Benefit",
       "Censer Initiate Benefit",
       "Censer Intensify Vulnerability",
-      "Perception Expertise",
       "Swing the Censer"
+    ],
+    "rule": [
+      "Assurance (Lore: Driving)"
     ]
   },
   "described": [
-    "Bell: Bell Adept Benefit, Bell Intensify Vulnerability, Bell Paragon Benefit",
-    "Mirror: Mirror Adept Benefit, Mirror Intensify Vulnerability"
+    "Bell: Bell Intensify Vulnerability",
+    "Mirror: Mirror Intensify Vulnerability"
   ],
   "prompts": [
-    "Assurance: Acrobatics",
-    "Implement Adept: Bell",
     "Third Implement: Amulet (guessed)",
-    "Implement Paragon: Bell",
-    "Terrain Stalker: Rubble (guessed)"
+    "Terrain Stalker: Rubble (guessed)",
+    "Assurance: Acrobatics"
   ]
 }

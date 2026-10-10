@@ -66,7 +66,7 @@
     "feat: Aggressive Block [slot class-2; level 2; taken 2]",
     "feat: Armor Expertise [in Fighter; level 11]",
     "feat: Armor Mastery [in Fighter; level 17]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Battle Hardened [in Fighter; level 9]",
     "feat: Battlefield Surveyor [in Fighter; level 7]",
     "feat: Bravery [in Fighter; level 3]",
@@ -127,10 +127,14 @@
   "spellcasting": [
     "Ratfolk Growth [primal; prepared; cha; proficiency 1] rank 6: 1 [Enlarge]"
   ],
-  "report": {},
+  "report": {
+    "rule": [
+      "Assurance (Lore: Piloting)"
+    ]
+  },
   "described": [],
   "prompts": [
-    "Assurance: Acrobatics",
-    "Fighter: Acrobatics"
+    "Fighter: Acrobatics",
+    "Assurance: Acrobatics"
   ]
 }

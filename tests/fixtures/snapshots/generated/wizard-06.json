@@ -113,8 +113,40 @@
     "feat: Wizard Spellcasting [in Wizard; level 1]",
     "heritage: Jinxed Halfling",
     "lore: Underworld [rank 1]",
+    "spell: Boots on the Ground [in Wizard; rank 6]",
+    "spell: Charm [in Wizard; rank 1]",
+    "spell: Cozy Cabin [in Wizard; rank 3]",
+    "spell: Cursed Metamorphosis [in Wizard; rank 6]",
+    "spell: Detect Magic [in Wizard; rank 0]",
+    "spell: Disappearance [in Wizard; rank 8]",
+    "spell: Disintegrating Puddle [in Wizard; rank 2]",
+    "spell: Dream Council [in Wizard; rank 8]",
+    "spell: Earthbind [in Wizard; rank 3]",
+    "spell: Electric Arc [in Wizard; rank 0]",
     "spell: Fact Check [in Arcane Focus Tradition; rank 1]",
+    "spell: Falling Stars [in Wizard; rank 9]",
+    "spell: Flicker [in Wizard; rank 4]",
+    "spell: Gravity Wave [in Wizard; rank 3]",
+    "spell: Hippocampus Retreat [in Wizard; rank 1]",
+    "spell: Horizon's Veil [in Wizard; rank 5]",
+    "spell: Incarnate Tempest of Shades [in Wizard; rank 7]",
+    "spell: Indestructibility [in Wizard; rank 10]",
+    "spell: Kinetic Ram [in Wizard; rank 1]",
+    "spell: Laughing Fit [in Wizard; rank 2]",
+    "spell: Magnetize [in Wizard; rank 4]",
+    "spell: Phase Bolt [in Wizard; rank 0]",
+    "spell: Quicken Time [in Wizard; rank 5]",
+    "spell: Repulsion [in Wizard; rank 6]",
+    "spell: Resplendent Mansion [in Wizard; rank 9]",
+    "spell: Spout [in Wizard; rank 0]",
+    "spell: Telekinetic Bombardment [in Wizard; rank 7]",
+    "spell: Telekinetic Haul [in Wizard; rank 5]",
+    "spell: Telepathy [in Wizard; rank 4]",
     "spell: Unfettered Movement [in Unhampered Passage; rank 4]",
+    "spell: Vampiric Revelry [in Wizard; rank 9]",
+    "spell: Vanish Weapon [in Wizard; rank 2]",
+    "spell: Warp Mind [in Wizard; rank 7]",
+    "spell: Warp Step [in Wizard; rank 0]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Unhampered Passage",
     "spellcastingEntry: Wizard",
@@ -126,9 +158,13 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Unhampered Passage [primal; prepared; cha; proficiency 4] rank 4: 1 [Unfettered Movement]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Warp Step, Electric Arc, Phase Bolt, Detect Magic, Spout, -] | rank 1: 4 [Kinetic Ram, Hippocampus Retreat, Charm, -] | rank 2: 4 [Laughing Fit, Disintegrating Puddle, Vanish Weapon, -] | rank 3: 4 [Gravity Wave, Earthbind, Cozy Cabin, -] | rank 4: 4 [Telepathy, Flicker, Magnetize, -] | rank 5: 4 [Telekinetic Haul, Quicken Time, Horizon's Veil, -] | rank 6: 4 [Boots on the Ground, Repulsion, Cursed Metamorphosis, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Disappearance, Dream Council, -, -] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars, -] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Roar of Freedom"
+    ]
+  },
   "described": [],
   "prompts": []
 }

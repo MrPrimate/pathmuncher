@@ -172,13 +172,12 @@
     "Summoner [divine; spontaneous; cha; proficiency 3] rank 0: 5 [Stabilize, Light, Glamorize, Protect Companion, Sigil] | rank 1: 2 [Sanctuary, Infuse Vitality] | rank 2: 2 [Final Sacrifice, Noise Blast] | rank 3: 2 [Roaring Applause, Fractious Echo] | rank 4: 2 [Unfettered Movement, Soothing Spring] | rank 5: 2 [Summon Monitor, Spiritual Guardian] | rank 6: 2 [Sacred Form, Demon Form] | rank 7: 2 [Angel Form, Execute] | rank 8: 2 [Incarnate Deific Herald, Canticle of Everlasting Grief] | rank 9: 2 [Incarnate Draconic Legion, Massacre]"
   ],
   "report": {
-    "special": [
-      "Angelic Mercy",
-      "Hallowed Strikes",
-      "Occult",
-      "Traveler's Aura"
+    "pet": [
+      "Eidolon"
     ]
   },
-  "described": [],
+  "described": [
+    "Angel Eidolon: Angelic Mercy, Hallowed Strikes, Traveler's Aura"
+  ],
   "prompts": []
 }

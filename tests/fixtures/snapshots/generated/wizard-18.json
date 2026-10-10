@@ -116,8 +116,40 @@
     "heritage: Elytron Surki",
     "lore: Herbalism [rank 1]",
     "lore: Surki [rank 4]",
+    "spell: Approximate [in Wizard; rank 0]",
+    "spell: Bilocation [in Wizard; rank 9]",
+    "spell: Bullhorn [in Wizard; rank 0]",
+    "spell: Daemon Form [in Wizard; rank 6]",
+    "spell: Devil Form [in Wizard; rank 6]",
+    "spell: Ember Doppelgänger [in Wizard; rank 5]",
+    "spell: Etheric Shards [in Wizard; rank 5]",
+    "spell: Gale Blast [in Wizard; rank 0]",
     "spell: Grasping Vine [in Arcane Focus Tradition; rank 1]",
+    "spell: Illusory Object [in Wizard; rank 1]",
+    "spell: Implosion [in Wizard; rank 9]",
+    "spell: Incarnate Draconic Legion [in Wizard; rank 9]",
+    "spell: Incarnate Tempest of Shades [in Wizard; rank 7]",
+    "spell: Incarnate Wild Rose [in Wizard; rank 6]",
+    "spell: Lightning Bolt [in Wizard; rank 3]",
+    "spell: Lucky Number [in Wizard; rank 2]",
+    "spell: Magnetize [in Wizard; rank 4]",
+    "spell: Manifestation [in Wizard; rank 10]",
+    "spell: Message Rune [in Wizard; rank 1]",
+    "spell: Monstrosity Form [in Wizard; rank 8]",
+    "spell: Mud Pit [in Wizard; rank 1]",
+    "spell: Shared Invisibility [in Wizard; rank 3]",
+    "spell: Skyglass Prison [in Wizard; rank 3]",
+    "spell: Summon Dragon [in Wizard; rank 5]",
+    "spell: Telekinetic Bombardment [in Wizard; rank 7]",
+    "spell: Telekinetic Hand [in Wizard; rank 0]",
+    "spell: Uncontrollable Dance [in Wizard; rank 8]",
+    "spell: Unrelenting Observation [in Wizard; rank 8]",
     "spell: Unsettling Knowledge [in Arcane Focus Tradition; rank 4]",
+    "spell: Vision of Death [in Wizard; rank 4]",
+    "spell: Void Warp [in Wizard; rank 0]",
+    "spell: Warp Mind [in Wizard; rank 7]",
+    "spell: Water Walk [in Wizard; rank 2]",
+    "spell: Weapon Storm [in Wizard; rank 4]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Wizard",
     "treasure: Copper Pieces [qty 0; worn]",
@@ -127,9 +159,13 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Gale Blast, Telekinetic Hand, Bullhorn, Void Warp, Approximate, -] | rank 1: 4 [Illusory Object, Message Rune, Mud Pit, -] | rank 2: 4 [Water Walk, Lucky Number, -, -] | rank 3: 4 [Shared Invisibility, Skyglass Prison, Lightning Bolt, -] | rank 4: 4 [Magnetize, Weapon Storm, Vision of Death, -] | rank 5: 4 [Ember Doppelgänger, Summon Dragon, Etheric Shards, -] | rank 6: 4 [Devil Form, Incarnate Wild Rose, Daemon Form, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Monstrosity Form, Uncontrollable Dance, Unrelenting Observation, -] | rank 9: 4 [Implosion, Bilocation, Incarnate Draconic Legion, -] | rank 10: 1 [Manifestation]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Spray of Salt"
+    ]
+  },
   "described": [],
   "prompts": [
     "Terrain Stalker: Rubble (guessed)"

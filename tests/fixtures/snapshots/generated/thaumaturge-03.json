@@ -160,18 +160,15 @@
       "Censer Adept Benefit",
       "Censer Initiate Benefit",
       "Censer Intensify Vulnerability",
-      "Perception Expertise",
       "Swing the Censer"
     ]
   },
   "described": [
-    "Chalice: Chalice Adept Benefit, Chalice Intensify Vulnerability, Chalice Paragon Benefit",
-    "Regalia: Regalia Adept Benefit, Regalia Intensify Vulnerability"
+    "Chalice: Chalice Intensify Vulnerability",
+    "Regalia: Regalia Intensify Vulnerability"
   ],
   "prompts": [
-    "Implement Adept: Chalice",
     "Virtuosic Performer: Acting (guessed)",
-    "Third Implement: Amulet (guessed)",
-    "Implement Paragon: Chalice"
+    "Third Implement: Amulet (guessed)"
   ]
 }

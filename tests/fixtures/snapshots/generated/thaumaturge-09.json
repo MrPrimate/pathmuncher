@@ -28,8 +28,8 @@
       "will": 4
     },
     "skills": {
-      "acrobatics": 4,
-      "arcana": 4,
+      "acrobatics": 3,
+      "arcana": 3,
       "athletics": 1,
       "crafting": 0,
       "deception": 1,
@@ -89,7 +89,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Group Coercion [slot skill-14; level 1; taken 14]",
     "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.gR8ODlO6au0laXo4]",
-    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.IGv5wS17AAi0U87W]",
+    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.jVW6185zu3VlWHot]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Implement's Flight [slot class-20; level 16; taken 20]",
     "feat: Incredible Investiture [level 11; taken 12; granted by Thaumaturge's Investiture]",
@@ -106,7 +106,7 @@
     "feat: Medium Armor Mastery [in Thaumaturge; level 19]",
     "feat: Oddity Identification [in Astrologer; level 1]",
     "feat: One More Activation [slot class-8; level 6; taken 8]",
-    "feat: Paragon Benefit (Tome) [level 17; granted by Implement Paragon]",
+    "feat: Paragon Benefit (Wand) [level 17; granted by Implement Paragon]",
     "feat: Perception Mastery [in Thaumaturge; level 9]",
     "feat: Perfected Mind [in Thaumaturge; level 13]",
     "feat: Quick Unlock [slot skill-10; level 7; taken 10]",
@@ -144,19 +144,16 @@
   "spellcasting": [],
   "report": {
     "special": [
-      "Perception Expertise",
       "Standard"
     ]
   },
   "described": [
     "Bell: Bell Intensify Vulnerability",
-    "Tome: Tome Adept Benefit, Tome Intensify Vulnerability",
-    "Wand: Wand Adept Benefit, Wand Intensify Vulnerability, Wand Paragon Benefit"
+    "Tome: Tome Intensify Vulnerability",
+    "Wand: Wand Intensify Vulnerability"
   ],
   "prompts": [
     "Initiate Benefit (Wand): Cold (guessed)",
-    "Implement Adept: Tome",
-    "Adept Benefit (Wand): Electricity (guessed)",
-    "Implement Paragon: Tome"
+    "Adept Benefit (Wand): Electricity (guessed)"
   ]
 }

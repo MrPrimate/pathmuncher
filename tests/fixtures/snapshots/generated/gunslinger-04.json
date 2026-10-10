@@ -124,14 +124,9 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Extra Resistances"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
-    "Lesser Augmentation: Magical Resistance",
-    "Lesser Augmentation: Gain additional resistances (guessed)"
+    "Lesser Augmentation: Magical Resistance"
   ]
 }

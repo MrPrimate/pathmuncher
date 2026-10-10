@@ -169,11 +169,13 @@
     "Trickster Tengu [primal; prepared; cha; proficiency 3] rank 7: 1 [Aerial Form]"
   ],
   "report": {
-    "special": [
-      "Growing Vines",
-      "Wave Fan"
+    "pet": [
+      "Eidolon"
     ]
   },
-  "described": [],
+  "described": [
+    "Plant Eidolon: Growing Vines",
+    "Tengu Feather Fan: Wave Fan"
+  ],
   "prompts": []
 }

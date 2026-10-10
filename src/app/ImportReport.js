@@ -45,6 +45,9 @@ export class ImportReport {
 
   static ATTRIBUTE_NAMES = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
 
+  // the tradition a feat's innate spells take (Cautious Curiosity's "Occult"), which pf2e's feats don't record
+  static TRADITION_NAMES = ["Arcane", "Divine", "Occult", "Primal"];
+
   /**
    * Pathbuilder specials that matched nothing, by their Pathbuilder name. Leaves out labels that
    * need no item: the shared ignore lists (skills, "Spellbook", ...), attribute names, lores, and
@@ -62,7 +65,8 @@ export class ImportReport {
   /** Specials no item was matched to, leaving out Pathbuilder's labels, lores and spells. */
   #specialsWithoutItems() {
     const slug = ImportReport.#specialSlug;
-    const ignored = new Set([...Seasoning.IGNORED_FEATS(), ...Seasoning.IGNORED_SPECIALS(), ...ImportReport.ATTRIBUTE_NAMES]
+    const ignored = new Set([...Seasoning.IGNORED_FEATS(), ...Seasoning.IGNORED_SPECIALS(), ...ImportReport.ATTRIBUTE_NAMES,
+      ...ImportReport.TRADITION_NAMES]
       .map(slug));
     const lores = new Set((this.source?.lores ?? []).flatMap(([name]) => [slug(name), slug(`Lore: ${name}`)]));
     const spells = new Set(this.result.spells.map((s) => slug(s.name)));
@@ -166,11 +170,20 @@ export class ImportReport {
       .filter((group) => group.names.length > 0);
   }
 
-  /** The build's pets other than familiars (animal companions, mounts), which are not imported: "<name> (<type>)". */
+  /**
+   * The build's pets other than familiars (animal companions, mounts), which are not imported:
+   * "<name> (<type>)"; and a summoner's eidolon, which Pathbuilder's export leaves out, with what
+   * the build says of it ("Eidolon (Energy Heart: electricity)").
+   */
   unimportedPets() {
-    return (this.source.pets ?? [])
+    const pets = (this.source.pets ?? [])
       .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar")
       .map((pet) => (pet.name ? `${pet.name} (${pet.type})` : pet.type));
+    if ([this.source.class, this.source.dualClass].includes("Summoner")) {
+      const notes = this.pm.eidolonNotes ?? [];
+      pets.push(notes.length > 0 ? `Eidolon (${notes.join(", ")})` : "Eidolon");
+    }
+    return pets;
   }
 
   async postImportCheck() {

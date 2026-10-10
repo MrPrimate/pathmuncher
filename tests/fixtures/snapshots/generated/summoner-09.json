@@ -180,8 +180,8 @@
     "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Scatter Scree, Read Aura, Live Wire, Spout, Sigil] | rank 1: 2 [Pet Cache, Cleanse Cuisine] | rank 2: 2 [Create Food, Expeditious Excavation] | rank 3: 2 [Dividing Trench, Gleaming Pet] | rank 4: 2 [Countless Eyes, Snake Fangs] | rank 5: 2 [Lightning Storm, Glacial Skewer] | rank 6: 2 [Field of Life, Patron's Protector] | rank 7: 2 [Sunburst, Volcanic Eruption] | rank 8: 2 [Migration, Punishing Winds] | rank 9: 2 [Incarnate Draconic Legion, Falling Stars]"
   ],
   "report": {
-    "special": [
-      "electricity"
+    "pet": [
+      "Eidolon (Energy Heart: electricity)"
     ]
   },
   "described": [

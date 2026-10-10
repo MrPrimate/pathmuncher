@@ -112,7 +112,39 @@
     "heritage: Liminal Fetchling",
     "lore: Genealogy [rank 1]",
     "spell: Appeal to Authority [in Arcane Focus Tradition; rank 1]",
+    "spell: Bilocation [in Wizard; rank 9]",
+    "spell: Blazing Dive [in Wizard; rank 3]",
+    "spell: Cataclysm [in Wizard; rank 10]",
     "spell: Detect Magic [in Caster Arcane Sense; rank 0]",
+    "spell: Disappearance [in Wizard; rank 8]",
+    "spell: Eclipse Burst [in Wizard; rank 7]",
+    "spell: Embed Message [in Wizard; rank 2]",
+    "spell: Explosive Barrage [in Wizard; rank 6]",
+    "spell: Fear the Sun [in Wizard; rank 2]",
+    "spell: Final Sacrifice [in Wizard; rank 2]",
+    "spell: Foresight [in Wizard; rank 9]",
+    "spell: Horizon's Veil [in Wizard; rank 5]",
+    "spell: Incarnate Draconic Legion [in Wizard; rank 9]",
+    "spell: Inertia Lock [in Wizard; rank 3]",
+    "spell: Infinitesimal Collapse Field [in Wizard; rank 7]",
+    "spell: Invisible Item [in Wizard; rank 1]",
+    "spell: Light [in Wizard; rank 0]",
+    "spell: Living Terrain [in Wizard; rank 4]",
+    "spell: Message [in Wizard; rank 0]",
+    "spell: Mountain Resilience [in Wizard; rank 4]",
+    "spell: Musical Accompaniment [in Wizard; rank 0]",
+    "spell: Quicken Time [in Wizard; rank 5]",
+    "spell: Skeleton Army [in Wizard; rank 6]",
+    "spell: Stars of Another Sky [in Wizard; rank 8]",
+    "spell: Summon Construct [in Wizard; rank 1]",
+    "spell: Tailwind [in Wizard; rank 1]",
+    "spell: Time Pocket [in Wizard; rank 3]",
+    "spell: Time Sense [in Wizard; rank 0]",
+    "spell: True Target [in Wizard; rank 7]",
+    "spell: Vibrant Pattern [in Wizard; rank 6]",
+    "spell: Wall of Fire [in Wizard; rank 4]",
+    "spell: Wall of Ice [in Wizard; rank 5]",
+    "spell: Warp Step [in Wizard; rank 0]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Caster Arcane Sense",
     "spellcastingEntry: Wizard",
@@ -124,7 +156,7 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Musical Accompaniment, Message, Time Sense, Light, Warp Step, -] | rank 1: 4 [Summon Construct, Invisible Item, Tailwind, -] | rank 2: 4 [Final Sacrifice, Fear the Sun, Embed Message, -] | rank 3: 4 [Blazing Dive, Time Pocket, Inertia Lock, -] | rank 4: 4 [Mountain Resilience, Living Terrain, Wall of Fire, -] | rank 5: 4 [Quicken Time, Horizon's Veil, Wall of Ice, -] | rank 6: 4 [Skeleton Army, Vibrant Pattern, Explosive Barrage, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Stars of Another Sky, Disappearance, -, -] | rank 9: 4 [Bilocation, Incarnate Draconic Legion, Foresight, -] | rank 10: 1 [Cataclysm]"
   ],
   "report": {
     "feat": [
@@ -133,6 +165,9 @@
     ],
     "special": [
       "Arcane School: School of Breathtaking Influence"
+    ],
+    "spell": [
+      "Roar of Freedom"
     ]
   },
   "described": [],

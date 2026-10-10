@@ -122,8 +122,38 @@
     "feat: Wings (Dragonet) [in Dragonet; level 1]",
     "heritage: Tidepool Dragonet",
     "lore: Engineering [rank 1]",
+    "spell: Approximate [in Magus; rank 0]",
     "spell: Booming Blast [in Arcane Focus Tradition; rank 1]",
+    "spell: Bullhorn [in Magus; rank 0]",
+    "spell: Caustic Blast [in Magus; rank 0]",
+    "spell: Confusing Colors [in Magus; rank 8]",
+    "spell: Earthbind [in Magus; rank 3]",
+    "spell: Elemental Confluence [in Magus; rank 6]",
+    "spell: Endure [in Magus; rank 1]",
+    "spell: Enlarge [in Magus; rank 2]",
+    "spell: Entangling Flora [in Magus; rank 2]",
+    "spell: Figment [in Magus; rank 0]",
+    "spell: Fly [in Magus; rank 4]",
     "spell: Force Fang [in Arcane Focus Tradition; rank 1]",
+    "spell: Gecko Grip [in Magus; rank 2]",
+    "spell: Hallucination [in Magus; rank 5]",
+    "spell: Haste [in Magus; rank 3]",
+    "spell: Illusory Disguise [in Magus; rank 1]",
+    "spell: Incarnate Archmage [in Magus; rank 8]",
+    "spell: Incarnate Tempest of Shades [in Magus; rank 7]",
+    "spell: Invoke Spirits [in Magus; rank 5]",
+    "spell: Metamorphosis [in Magus; rank 9]",
+    "spell: Phantasmal Treasure [in Magus; rank 2]",
+    "spell: Proximal Shift [in Magus; rank 6]",
+    "spell: Roaring Applause [in Magus; rank 3]",
+    "spell: Sanguine Mist [in Magus; rank 4]",
+    "spell: Seal Fate [in Magus; rank 4]",
+    "spell: Shared Invisibility [in Magus; rank 3]",
+    "spell: Telekinetic Bombardment [in Magus; rank 7]",
+    "spell: Telekinetic Hand [in Magus; rank 0]",
+    "spell: Telekinetic Projectile [in Magus; rank 0]",
+    "spell: Telepathic Demand [in Magus; rank 9]",
+    "spell: Void Warp [in Magus; rank 0]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Magus",
     "treasure: Copper Pieces [qty 0; worn]",
@@ -133,17 +163,9 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 7 [-, -, -, -, -, -, -] | rank 1: 2 [-, -] | rank 2: 2 [-, -] | rank 3: 2 [-, -] | rank 4: 2 [-, -] | rank 5: 2 [-, -] | rank 6: 2 [-, -] | rank 7: 2 [-, -] | rank 8: 2 [-, -] | rank 9: 2 [-, -]"
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 7 [Telekinetic Hand, Bullhorn, Void Warp, Approximate, Figment, Telekinetic Projectile, Caustic Blast] | rank 1: 2 [Illusory Disguise, Endure] | rank 2: 2 [Enlarge, Phantasmal Treasure] | rank 3: 2 [Roaring Applause, Shared Invisibility] | rank 4: 2 [Fly, Sanguine Mist] | rank 5: 2 [Hallucination, Invoke Spirits] | rank 6: 2 [Proximal Shift, Elemental Confluence] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Confusing Colors, Incarnate Archmage] | rank 9: 2 [Telepathic Demand, Metamorphosis]"
   ],
-  "report": {
-    "special": [
-      "Studious Spell: Earthbind",
-      "Studious Spell: Entangling Flora",
-      "Studious Spell: Gecko Grip",
-      "Studious Spell: Haste",
-      "Studious Spell: Seal Fate"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

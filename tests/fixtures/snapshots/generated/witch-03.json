@@ -115,9 +115,41 @@
     "feat: Witch's Armaments (Eldritch Nails) [slot class-2; level 1; taken 2; witchsArmaments=nails]",
     "heritage: Aiuvarin",
     "lore: Heraldry [rank 1]",
+    "spell: Arctic Rift [in Witch; rank 8]",
+    "spell: Blanket of Stars [in Witch; rank 6]",
+    "spell: Blindness [in Witch; rank 3]",
+    "spell: Blister Bomb [in Witch; rank 3]",
+    "spell: Burning Blossoms [in Witch; rank 8]",
+    "spell: Comet Charge [in Witch; rank 7]",
+    "spell: Confusing Cry [in Witch; rank 5]",
+    "spell: Cryostasis [in Witch; rank 6]",
+    "spell: Dancing Shield [in Witch; rank 2]",
     "spell: Detect Magic [in Caster Arcane Sense; rank 0]",
+    "spell: Earthquake [in Witch; rank 8]",
+    "spell: Energy Aegis [in Witch; rank 7]",
+    "spell: Envenom Companion [in Witch; rank 3]",
+    "spell: Fire Shield [in Witch; rank 4]",
+    "spell: Glamorize [in Witch; rank 0]",
+    "spell: Live Wire [in Witch; rank 0]",
+    "spell: Mantle of the Magma Heart [in Witch; rank 5]",
+    "spell: Mask of Terror [in Witch; rank 7]",
+    "spell: Massacre [in Witch; rank 9]",
+    "spell: Metal Merged [in Witch; rank 1]",
+    "spell: Oaken Resilience [in Witch; rank 2]",
     "spell: Patron's Puppet [in Primal Focus Tradition; rank 1]",
+    "spell: Petal Storm [in Witch; rank 4]",
+    "spell: Pierce the Sky [in Witch; rank 9]",
+    "spell: Plant Form [in Witch; rank 5]",
+    "spell: Primal Herd [in Witch; rank 10]",
+    "spell: Reaper's Lantern [in Witch; rank 2]",
     "spell: Scrounger's Glee [in Primal Focus Tradition; rank 1]",
+    "spell: Shockwave [in Witch; rank 1]",
+    "spell: Sigil [in Witch; rank 0]",
+    "spell: Spout [in Witch; rank 0]",
+    "spell: Tame [in Witch; rank 0]",
+    "spell: Vanishing Tracks [in Witch; rank 1]",
+    "spell: Vapor Form [in Witch; rank 4]",
+    "spell: Wrathful Storm [in Witch; rank 9]",
     "spellcastingEntry: Caster Arcane Sense",
     "spellcastingEntry: Primal Focus Tradition",
     "spellcastingEntry: Witch",
@@ -129,9 +161,13 @@
   "spellcasting": [
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
     "Primal Focus Tradition [primal; focus; int; proficiency 4]",
-    "Witch [primal; prepared; int; proficiency 4] rank 0: 5 [-, -, -, -, -] | rank 1: 3 [-, -, -] | rank 2: 3 [-, -, -] | rank 3: 3 [-, -, -] | rank 4: 3 [-, -, -] | rank 5: 3 [-, -, -] | rank 6: 3 [-, -, -] | rank 7: 3 [-, -, -] | rank 8: 3 [-, -, -] | rank 9: 3 [-, -, -] | rank 10: 1 [-]"
+    "Witch [primal; prepared; int; proficiency 4] rank 0: 5 [Live Wire, Spout, Sigil, Glamorize, Tame] | rank 1: 3 [Shockwave, Vanishing Tracks, Metal Merged] | rank 2: 3 [Reaper's Lantern, Dancing Shield, Oaken Resilience] | rank 3: 3 [Envenom Companion, Blister Bomb, Blindness] | rank 4: 3 [Vapor Form, Fire Shield, Petal Storm] | rank 5: 3 [Confusing Cry, Plant Form, Mantle of the Magma Heart] | rank 6: 3 [Blanket of Stars, Cryostasis, -] | rank 7: 3 [Comet Charge, Energy Aegis, Mask of Terror] | rank 8: 3 [Earthquake, Arctic Rift, Burning Blossoms] | rank 9: 3 [Massacre, Pierce the Sky, Wrathful Storm] | rank 10: 1 [Primal Herd]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Silver Spear"
+    ]
+  },
   "described": [
     "Devourer of Decay: Familiar of Parasitic Might"
   ],

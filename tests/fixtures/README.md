@@ -39,9 +39,19 @@ get two builds.
   option for each and checks none of them.
 - Skill choices of feats (Assurance, Automatic Knowledge) take a skill the build is trained in.
 - Spells fill every slot, repertoire and innate choice, from common spells of the right tradition and
-  rank. An animist's apparitions are chosen and give it its apparition spells. Spellbook casters
-  (wizard, witch, magus, necromancer) export their spells as `prepared` with an empty spellbook
-  (`spells`).
+  rank. An animist's apparitions are chosen and give it its apparition spells. Most spellbook
+  casters (wizard, witch, magus, necromancer) export their spells as `prepared` with an empty
+  spellbook (`spells`), which Pathbuilder allows. Seven have a spellbook and other kinds of
+  preparation:
+
+  | Build | Spellbook and preparations |
+  | --- | --- |
+  | wizard-01 | the prepared spells and two more per rank; a curriculum spell in each school slot |
+  | wizard-04 | the same, with a spell prepared twice at rank 3 and that spell heightened into a rank 5 slot |
+  | wizard-08 | a spellbook and nothing prepared |
+  | witch-02, witch-05 | the familiar's spells: the prepared ones and two more per rank (witch-05 prepares one twice) |
+  | magus-02 | the prepared spells and two more per rank |
+  | necromancer-02 | the same, with a rank 3 spell heightened into a rank 5 slot |
 - Pets were set up in the paid app for nine builds:
 
   | Build | Pet |

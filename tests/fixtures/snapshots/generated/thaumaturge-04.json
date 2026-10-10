@@ -66,8 +66,8 @@
     "equipment: Lantern Implement [granted by Lantern; qty 1; worn]",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
     "feat: Additional Lore [level 1; taken 5; granted by Merfolk Lore]",
-    "feat: Adept Benefit (Chalice) [level 7; granted by Implement Adept]",
-    "feat: Adept Benefit (Lantern) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Chalice) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Lantern) [level 7; granted by Implement Adept]",
     "feat: Adept Benefit (Shield) [level 7; taken 18; granted by Intense Implement]",
     "feat: Advanced First Aid [slot skill-8; level 7; taken 8]",
     "feat: Ammunition Thaumaturgy [slot class-1; level 1; taken 1]",
@@ -93,7 +93,7 @@
     "feat: Hobnobber [slot skill-2; level 1; taken 2]",
     "feat: Hydration (Merfolk) [in Merfolk; level 1]",
     "feat: Ill Tide [slot ancestry-13; level 9; taken 13]",
-    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.T6p6lZnGupq3CX6A]",
+    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.QK5ojonup9AQBg4O]",
     "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.rW3xdQPTNptQIcL5]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Implement's Flight [slot class-20; level 16; taken 20]",
@@ -119,7 +119,7 @@
     "feat: Reflex Expertise [in Thaumaturge; level 3]",
     "feat: Robust Health [slot general-7; level 3; taken 7]",
     "feat: Robust Recovery [slot skill-4; level 2; taken 4]",
-    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.QK5ojonup9AQBg4O]",
+    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.T6p6lZnGupq3CX6A]",
     "feat: Second Implement [in Thaumaturge; level 5; implement=Compendium.pf2e.classfeatures.Item.AltwHU7hCqTwpn48]",
     "feat: Share Weakness [slot class-10; level 10; taken 10]",
     "feat: Shield Block [level 1; granted by Initiate Benefit (Shield)]",
@@ -155,19 +155,13 @@
     "Appraiser's Eye [primal; prepared; cha; proficiency 1] rank 0: 1 [Read Aura]",
     "Apprentice Sea Witch [primal; prepared; cha; proficiency 1] rank 1: 1 [Protector Tree]"
   ],
-  "report": {
-    "special": [
-      "Perception Expertise"
-    ]
-  },
+  "report": {},
   "described": [
-    "Chalice: Chalice Adept Benefit, Chalice Intensify Vulnerability, Chalice Paragon Benefit",
-    "Lantern: Lantern Adept Benefit, Lantern Intensify Vulnerability",
-    "Shield: Shield Adept Benefit, Shield Intensify Vulnerability"
+    "Chalice: Chalice Intensify Vulnerability",
+    "Lantern: Lantern Intensify Vulnerability",
+    "Shield: Shield Intensify Vulnerability"
   ],
   "prompts": [
-    "Implement Adept: Chalice",
-    "Shield: Buckler (guessed)",
-    "Implement Paragon: Chalice"
+    "Shield: Buckler (guessed)"
   ]
 }

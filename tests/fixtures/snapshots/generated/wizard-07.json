@@ -116,6 +116,38 @@
     "feat: Wizard Spellcasting [in Wizard; level 1]",
     "lore: Games [rank 1]",
     "spell: Augmented Body [in Arcane Focus Tradition; rank 1]",
+    "spell: Bilocation [in Wizard; rank 9]",
+    "spell: Chain Lightning [in Wizard; rank 6]",
+    "spell: Confusing Colors [in Wizard; rank 8]",
+    "spell: Desiccate [in Wizard; rank 8]",
+    "spell: Draw the Lightning [in Wizard; rank 4]",
+    "spell: Eclipse Burst [in Wizard; rank 7]",
+    "spell: Freezing Touch [in Wizard; rank 4]",
+    "spell: Gale Blast [in Wizard; rank 0]",
+    "spell: Gouging Claw [in Wizard; rank 0]",
+    "spell: Hidebound [in Wizard; rank 2]",
+    "spell: Humanoid Form [in Wizard; rank 2]",
+    "spell: Illusory Object [in Wizard; rank 1]",
+    "spell: Illusory Scene [in Wizard; rank 5]",
+    "spell: Implosion [in Wizard; rank 9]",
+    "spell: Incarnate Archmage [in Wizard; rank 8]",
+    "spell: Infinitesimal Collapse Field [in Wizard; rank 7]",
+    "spell: Instant Minefield [in Wizard; rank 5]",
+    "spell: Invoke Spirits [in Wizard; rank 5]",
+    "spell: Live Wire [in Wizard; rank 0]",
+    "spell: Mystic Armor [in Wizard; rank 1]",
+    "spell: Nightmare [in Wizard; rank 4]",
+    "spell: Pierce the Sky [in Wizard; rank 9]",
+    "spell: Rouse Skeletons [in Wizard; rank 3]",
+    "spell: Shadow Army [in Wizard; rank 10]",
+    "spell: Shift Perspective [in Wizard; rank 2]",
+    "spell: Summon Instrument [in Wizard; rank 0]",
+    "spell: Telekinetic Hand [in Wizard; rank 0]",
+    "spell: Tentacular Innervation [in Wizard; rank 6]",
+    "spell: True Target [in Wizard; rank 7]",
+    "spell: Unexpected Transposition [in Wizard; rank 6]",
+    "spell: Wall of Wind [in Wizard; rank 3]",
+    "spell: Weapon Tide [in Wizard; rank 3]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Wizard",
     "treasure: Copper Pieces [qty 0; worn]",
@@ -125,7 +157,7 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Live Wire, Gouging Claw, Summon Instrument, Gale Blast, Telekinetic Hand, -] | rank 1: 4 [Mystic Armor, Illusory Object, -, -] | rank 2: 4 [Hidebound, Shift Perspective, Humanoid Form, -] | rank 3: 4 [Weapon Tide, Wall of Wind, Rouse Skeletons, -] | rank 4: 4 [Draw the Lightning, Freezing Touch, Nightmare, -] | rank 5: 4 [Invoke Spirits, Instant Minefield, Illusory Scene, -] | rank 6: 4 [Chain Lightning, Unexpected Transposition, Tentacular Innervation, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Desiccate, Confusing Colors, Incarnate Archmage, -] | rank 9: 4 [Pierce the Sky, Implosion, Bilocation, -] | rank 10: 1 [Shadow Army]"
   ],
   "report": {
     "heritage": [
@@ -133,6 +165,9 @@
     ],
     "special": [
       "Tripkee"
+    ],
+    "spell": [
+      "Curse of Slippery Steps"
     ]
   },
   "described": [],

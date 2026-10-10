@@ -109,9 +109,41 @@
     "feat: Witch's Broom [slot class-14; level 12; taken 14]",
     "heritage: Born of Animal",
     "lore: One Terrain [rank 1]",
+    "spell: Blister [in Witch; rank 5]",
+    "spell: Boots on the Ground [in Witch; rank 6]",
+    "spell: Burning Blossoms [in Witch; rank 8]",
+    "spell: Cataclysm [in Witch; rank 10]",
+    "spell: Clairvoyance [in Witch; rank 4]",
+    "spell: Containment [in Witch; rank 4]",
+    "spell: Countless Eyes [in Witch; rank 4]",
     "spell: Discern Secrets [in Arcane Focus Tradition; rank 1]",
+    "spell: Disguise Magic [in Witch; rank 1]",
+    "spell: Déjà Vu [in Witch; rank 1]",
+    "spell: Eclipse Burst [in Witch; rank 7]",
+    "spell: Enthrall [in Witch; rank 3]",
+    "spell: Falling Sky [in Witch; rank 8]",
+    "spell: Inertia Lock [in Witch; rank 3]",
+    "spell: Infinitesimal Collapse Field [in Witch; rank 7]",
+    "spell: Light [in Witch; rank 0]",
+    "spell: Massacre [in Witch; rank 9]",
+    "spell: Message [in Witch; rank 0]",
+    "spell: Musical Accompaniment [in Witch; rank 0]",
+    "spell: Noise Blast [in Witch; rank 2]",
     "spell: Patron's Puppet [in Arcane Focus Tradition; rank 1]",
+    "spell: Persistent Servant [in Witch; rank 2]",
+    "spell: Phantasmagoria [in Witch; rank 9]",
+    "spell: Pierce the Sky [in Witch; rank 9]",
+    "spell: Prestidigitation [in Witch; rank 0]",
+    "spell: Quandary [in Witch; rank 8]",
+    "spell: Repulsion [in Witch; rank 6]",
     "spell: Return the Favor [in Arcane Focus Tradition; rank 3]",
+    "spell: Slither [in Witch; rank 5]",
+    "spell: Time Pocket [in Witch; rank 3]",
+    "spell: Time Sense [in Witch; rank 0]",
+    "spell: True Target [in Witch; rank 7]",
+    "spell: Vampiric Exsanguination [in Witch; rank 6]",
+    "spell: Ventriloquism [in Witch; rank 1]",
+    "spell: Web [in Witch; rank 2]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Witch",
     "treasure: Copper Pieces [qty 0; worn]",
@@ -121,9 +153,13 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Witch [arcane; prepared; int; proficiency 4] rank 0: 5 [-, -, -, -, -] | rank 1: 3 [-, -, -] | rank 2: 3 [-, -, -] | rank 3: 3 [-, -, -] | rank 4: 3 [-, -, -] | rank 5: 3 [-, -, -] | rank 6: 3 [-, -, -] | rank 7: 3 [-, -, -] | rank 8: 3 [-, -, -] | rank 9: 3 [-, -, -] | rank 10: 1 [-]"
+    "Witch [arcane; prepared; int; proficiency 4] rank 0: 5 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light] | rank 1: 3 [Ventriloquism, Déjà Vu, Disguise Magic] | rank 2: 3 [Web, Persistent Servant, Noise Blast] | rank 3: 3 [Time Pocket, Inertia Lock, Enthrall] | rank 4: 3 [Countless Eyes, Containment, Clairvoyance] | rank 5: 3 [Blister, Slither, -] | rank 6: 3 [Vampiric Exsanguination, Boots on the Ground, Repulsion] | rank 7: 3 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 3 [Burning Blossoms, Falling Sky, Quandary] | rank 9: 3 [Massacre, Phantasmagoria, Pierce the Sky] | rank 10: 1 [Cataclysm]"
   ],
-  "report": {},
+  "report": {
+    "spell": [
+      "Searing Rain"
+    ]
+  },
   "described": [
     "The Inscribed One: Familiar of Flowing Script"
   ],

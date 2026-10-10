@@ -75,6 +75,9 @@ const SPLITS = [
   /^(.*): (.*)/,
 ];
 
+// a thaumaturge's implement benefits: Pathbuilder's "Amulet Adept Benefit" is pf2e's "Adept Benefit (Amulet)"
+const IMPLEMENT_BENEFITS = /^(\w+) ((?:Adept|Paragon) Benefit)$/;
+
 const SWAPS = [
   /^(Greater) (.*)/,
   /^(Lesser) (.*)/,
@@ -464,7 +467,53 @@ function generateDynamicNames(pbName) {
       result.push({ pbName, foundryName: `${match[2]} (${match[1]})`, details: match[2] });
     }
   }
+  const benefit = pbName.match(IMPLEMENT_BENEFITS);
+  if (benefit) result.push({ pbName, foundryName: `${benefit[2]} (${benefit[1]})`, details: benefit[1] });
   return result;
+}
+
+/**
+ * Class features Pathbuilder names differently for one class, by class: the thaumaturge starts expert
+ * in Perception, so the step Pathbuilder calls its "Perception Expertise" (level 9) is pf2e's
+ * Perception Mastery.
+ */
+const CLASS_FEATURE_RENAMES = {
+  Thaumaturge: [
+    { pbName: "Perception Expertise", foundryName: "Perception Mastery" },
+  ],
+};
+
+/**
+ * Options of a choice Pathbuilder records under another name, by the item making the choice: the
+ * special Pathbuilder lists and the value of the option it stands for.
+ */
+const CHOICE_ALIASES = {
+  // an automaton's Lesser Augmentation: pf2e's "Gain additional resistances"
+  "Lesser Augmentation": { "Extra Resistances": "all" },
+};
+
+/** Other names Pathbuilder may record a choice's option under (CHOICE_ALIASES). */
+export function choiceAliases(itemName, choice) {
+  return Object.entries(CHOICE_ALIASES[itemName] ?? {})
+    .filter(([, value]) => value === choice.value)
+    .map(([pbName]) => pbName);
+}
+
+// items whose dragon Pathbuilder names on its own ("Executor"), where pf2e's option is "Executor Dragon"
+const BARE_DRAGON_ITEMS = ["Dragonblood"];
+
+/**
+ * The name Pathbuilder gives an item's dragon option, for items that name it on its own: "Executor"
+ * for Dragonblood's "Executor Dragon". Only that name counts for them, since "<X> Dragon" is what a
+ * sorcerer's draconic bloodline ("Draconic (Adamantine)") is read as. null for other items.
+ */
+export function bareDragonName(itemName, label) {
+  return BARE_DRAGON_ITEMS.includes(itemName) ? label.match(/^(.+) Dragon$/)?.[1] ?? null : null;
+}
+
+/** The renames for a class's features (CLASS_FEATURE_RENAMES): [{ pbName, foundryName }]. */
+export function classFeatureRenames(className) {
+  return CLASS_FEATURE_RENAMES[className] ?? [];
 }
 
 export function FEAT_RENAME_MAP(pbName = null) {
@@ -647,6 +696,8 @@ export function kineticGateOwnJunctions(specials = []) {
 const REMASTER_TERMS = [
   [/\bNegative\b/g, "Void"],
   [/\bPositive\b/g, "Vitality"],
+  // the psychopomp eidolon's first ability
+  [/^Shepherd's Touch$/, "Spirit Touch"],
 ];
 
 /** The name and its remastered form, if it has one: ["Negative Healing", "Void Healing"]. */

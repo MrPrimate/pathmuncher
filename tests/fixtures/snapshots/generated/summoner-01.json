@@ -162,12 +162,12 @@
     "Summoner [occult; spontaneous; cha; proficiency 3] rank 0: 5 [Daze, Read the Air, Light, Warp Step, Shield] | rank 1: 2 [Bane, Spirit Link] | rank 2: 2 [Darkness, Vomit Swarm] | rank 3: 2 [Dream Message, Bottomless Stomach] | rank 4: 2 [Outcast's Curse, Implement of Destruction] | rank 5: 2 [Mariner's Curse, Rip the Spirit] | rank 6: 2 [Vampiric Exsanguination, Cryostasis] | rank 7: 2 [Warp Mind, Visions of Danger] | rank 8: 2 [Quandary, Confusing Colors] | rank 9: 2 [Incarnate Draconic Legion, Resplendent Mansion]"
   ],
   "report": {
-    "special": [
-      "Maddening Whispers",
-      "Unfathomable Mind",
-      "electricity"
+    "pet": [
+      "Eidolon (Energy Heart: electricity)"
     ]
   },
-  "described": [],
+  "described": [
+    "Aberrant Eidolon: Maddening Whispers, Unfathomable Mind"
+  ],
   "prompts": []
 }

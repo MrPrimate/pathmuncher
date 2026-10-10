@@ -138,11 +138,7 @@
     "Cautious Curiosity [occult; prepared; cha; proficiency 1] rank 2: 2 [Disguise Magic, Silence]",
     "Fey Touched Gnome [primal; prepared; cha; proficiency 1] rank 0: 1 [Protect Companion]"
   ],
-  "report": {
-    "special": [
-      "Occult"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

@@ -155,16 +155,14 @@
       "Censer Initiate Benefit",
       "Censer Intensify Vulnerability",
       "Censer Paragon Benefit",
-      "Perception Expertise",
       "Swing the Censer"
     ]
   },
   "described": [
-    "Amulet: Amulet Adept Benefit, Amulet Intensify Vulnerability",
-    "Regalia: Regalia Adept Benefit, Regalia Intensify Vulnerability"
+    "Amulet: Amulet Intensify Vulnerability",
+    "Regalia: Regalia Intensify Vulnerability"
   ],
   "prompts": [
-    "Implement Adept: Amulet",
     "Third Implement: Bell (guessed)",
     "Implement Paragon: Amulet"
   ]

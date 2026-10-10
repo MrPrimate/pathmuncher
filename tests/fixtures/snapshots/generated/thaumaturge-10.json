@@ -64,8 +64,8 @@
     "equipment: Wand Implement [granted by Wand; qty 1; worn]",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
     "feat: Adept Benefit (Amulet) [level 7; taken 20; granted by Intense Implement]",
-    "feat: Adept Benefit (Wand) [level 7; granted by Implement Adept; adeptBenefitWand=electricity]",
-    "feat: Adept Benefit (Weapon) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Wand) [level 7; granted by Second Adept; adeptBenefitWand=electricity]",
+    "feat: Adept Benefit (Weapon) [level 7; granted by Implement Adept]",
     "feat: Ammunition Thaumaturgy [slot class-1; level 1; taken 1]",
     "feat: Amulet [level 1; granted by Third Implement]",
     "feat: Aquatic Adaptation [in Lizardfolk; level 1]",
@@ -90,7 +90,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Group Impression [slot skill-20; level 1; taken 20]",
     "feat: Hobnobber [slot skill-2; level 1; taken 2]",
-    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.pax1pnWW5XFYO0Eg]",
+    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.XcuyDpn8L4HltRjW]",
     "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.jVW6185zu3VlWHot]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Implement's Flight [slot class-18; level 16; taken 18]",
@@ -117,7 +117,7 @@
     "feat: Pilgrim's Token [in Pilgrim; level 1]",
     "feat: Prescient Planner [slot general-7; level 3; taken 7]",
     "feat: Reflex Expertise [in Thaumaturge; level 3]",
-    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.XcuyDpn8L4HltRjW]",
+    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.pax1pnWW5XFYO0Eg]",
     "feat: Second Implement [in Thaumaturge; level 5; implement=Compendium.pf2e.classfeatures.Item.YiDkrwaxiF7Gao7y]",
     "feat: Sever Magic [slot class-16; level 16; taken 16]",
     "feat: Share Weakness [slot class-10; level 10; taken 10]",
@@ -155,21 +155,18 @@
       "Censer Initiate Benefit",
       "Censer Intensify Vulnerability",
       "Occult Bone Magic",
-      "Perception Expertise",
       "Swing the Censer"
     ]
   },
   "described": [
-    "Wand: Wand Adept Benefit, Wand Intensify Vulnerability, Wand Paragon Benefit",
-    "Weapon: Weapon Adept Benefit, Weapon Intensify Vulnerability"
+    "Wand: Wand Intensify Vulnerability",
+    "Weapon: Weapon Intensify Vulnerability"
   ],
   "prompts": [
     "Initiate Benefit (Wand): Cold (guessed)",
     "Weapon: Air Repeater (guessed)",
-    "Implement Adept: Wand",
     "Adept Benefit (Wand): Electricity (guessed)",
     "Specialty Crafting: Alchemy (guessed)",
-    "Third Implement: Amulet (guessed)",
-    "Implement Paragon: Wand"
+    "Third Implement: Amulet (guessed)"
   ]
 }

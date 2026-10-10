@@ -4,6 +4,7 @@ import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { CompendiumMatcher } from "./CompendiumMatcher.js";
+import { ParsedEntry } from "./ParsedEntry.js";
 import { Seasoning } from "./Seasoning.js";
 
 /**
@@ -235,8 +236,11 @@ export class SpellBuilder {
   // eslint-disable-next-line complexity
   async #processCasterSpells(instance, caster, spellEnhancements, forcePrepare = false) {
     const spellNames = {};
-    for (const spellSelection of caster.spells) {
-      const level = spellSelection.spellLevel;
+    // every rank with spells known or prepared: a prepared caster's export can prepare spells its
+    // spellbook doesn't list, which go into the spellbook as they are prepared
+    const levels = [...new Set([...caster.spells, ...(caster.prepared ?? [])].map((s) => s.spellLevel))].sort((a, b) => a - b);
+    for (const level of levels) {
+      const spellSelection = caster.spells.find((s) => s.spellLevel === level) ?? { spellLevel: level, list: [] };
       const preparedAtLevel = caster.prepared?.length > 0
         ? (caster.prepared.find((p) => p.spellLevel === level)?.list ?? [])
         : [];
@@ -367,6 +371,27 @@ export class SpellBuilder {
     }
   }
 
+  /**
+   * A magus's studious spells. Pathbuilder lists them as specials ("Studious Spell: Haste") and mostly
+   * leaves them out of the spellbook; the rules have them in it. Each goes on the class's prepared
+   * spellcasting, where the system's hybrid study marks it as studious, and its special is settled.
+   */
+  async #addStudiousSpells() {
+    const studious = this.parsed.specials.filter((s) => !s.added && (/^Studious Spell: /).test(s.originalName ?? s.name));
+    const instance = this.result.casters.find((c) => c.name === this.source.class && c.system.prepared?.value === "prepared");
+    if (studious.length === 0 || !instance) return;
+    for (const special of studious) {
+      const spell = (special.originalName ?? special.name).replace(/^Studious Spell: /, "");
+      const { indexMatch } = this.#spellMatch(spell);
+      const inBook = indexMatch && this.result.spells.find((s) => s.system.location?.value === instance._id
+        && s._stats?.compendiumSource === indexMatch.pack.getUuid(indexMatch.i._id));
+      const itemData = inBook ?? await this.#loadSpell(spell, instance._id, { studious: true });
+      if (!itemData) continue;
+      if (!inBook) this.result.spells.push(itemData);
+      special.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id, reason: "a studious spell" });
+    }
+  }
+
   async processSpells() {
     await this.#prefetchSpells();
     for (const caster of this.source.spellCasters) {
@@ -393,6 +418,8 @@ export class SpellBuilder {
       }
       await this.#processCasterSpells(instance, caster, spellEnhancements, forcePrepare);
     }
+
+    await this.#addStudiousSpells();
 
     if (this.parsed.feats.some((f) => f.name === "Initiate Warden")) {
       const spellData = foundry.utils.getProperty(this.source, "focus.Unassigned.General");

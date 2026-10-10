@@ -116,9 +116,37 @@
     "feat: Weapon Specialization [in Magus; level 7]",
     "heritage: Warrior Jotunborn",
     "lore: City [rank 1]",
+    "spell: Ant Haul [in Magus; rank 1]",
+    "spell: Create Earthen Facsimile [in Magus; rank 0]",
+    "spell: Daze [in Magus; rank 0]",
+    "spell: Disappearance [in Magus; rank 8]",
+    "spell: Dragon Form [in Magus; rank 6]",
+    "spell: Dream Council [in Magus; rank 8]",
+    "spell: Eclipse Burst [in Magus; rank 7]",
+    "spell: Familiar's Face [in Magus; rank 3]",
     "spell: Flicker [in Iivlar's Boundary Break; rank 4]",
+    "spell: Gecko Grip [in Magus; rank 2]",
+    "spell: Glacial Skewer [in Magus; rank 5]",
+    "spell: Haste [in Magus; rank 3]",
     "spell: Home Among Mulberry Leaves [in Arcane Focus Tradition; rank 1]",
+    "spell: Living Terrain [in Magus; rank 4]",
+    "spell: Never Mind [in Magus; rank 6]",
+    "spell: Pest Form [in Magus; rank 1]",
+    "spell: Phantasmagoria [in Magus; rank 9]",
+    "spell: Pierce the Sky [in Magus; rank 9]",
+    "spell: Planar Tether [in Magus; rank 4]",
+    "spell: Puff of Poison [in Magus; rank 0]",
     "spell: Runic Impression [in Arcane Focus Tradition; rank 4]",
+    "spell: Scatter Scree [in Magus; rank 0]",
+    "spell: Shrink [in Magus; rank 2]",
+    "spell: Spout [in Magus; rank 0]",
+    "spell: Telekinetic Haul [in Magus; rank 5]",
+    "spell: True Target [in Magus; rank 7]",
+    "spell: Unrelenting Gravity [in Magus; rank 2]",
+    "spell: Wall of Fire [in Magus; rank 4]",
+    "spell: Wall of Radiance [in Magus; rank 3]",
+    "spell: Web [in Magus; rank 2]",
+    "spell: Whirling Scarves [in Magus; rank 3]",
     "spellcastingEntry: Arcane Focus Tradition",
     "spellcastingEntry: Iivlar's Boundary Break",
     "spellcastingEntry: Magus",
@@ -130,17 +158,9 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
     "Iivlar's Boundary Break [occult; prepared; cha; proficiency 3] rank 4: 1 [Flicker]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [-, -, -, -, -] | rank 1: 2 [-, -] | rank 2: 2 [-, -] | rank 3: 2 [-, -] | rank 4: 2 [-, -] | rank 5: 2 [-, -] | rank 6: 2 [-, -] | rank 7: 2 [-, -] | rank 8: 2 [-, -] | rank 9: 2 [-, -]"
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Spout, Daze, Scatter Scree, Create Earthen Facsimile, Puff of Poison] | rank 1: 2 [Ant Haul, Pest Form] | rank 2: 2 [Unrelenting Gravity, Shrink] | rank 3: 2 [Familiar's Face, Wall of Radiance] | rank 4: 2 [Living Terrain, Wall of Fire] | rank 5: 2 [Glacial Skewer, Telekinetic Haul] | rank 6: 2 [Never Mind, Dragon Form] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Disappearance, Dream Council] | rank 9: 2 [Phantasmagoria, Pierce the Sky]"
   ],
-  "report": {
-    "special": [
-      "Studious Spell: Gecko Grip",
-      "Studious Spell: Haste",
-      "Studious Spell: Planar Tether",
-      "Studious Spell: Web",
-      "Studious Spell: Whirling Scarves"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

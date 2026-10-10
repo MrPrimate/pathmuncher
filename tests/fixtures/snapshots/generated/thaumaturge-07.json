@@ -89,7 +89,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Haunt Ingenuity [slot class-1; level 1; taken 1]",
     "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.EkNT2EhbClDQJUAG]",
-    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.zOMYv2nl2gGICErA]",
+    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.Swy3rjQsdO0wu2kU]",
     "feat: Implement's Assault [slot class-20; level 18; taken 20]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Improvised Repair [slot general-7; level 3; taken 7]",
@@ -108,7 +108,7 @@
     "feat: Medium Armor Mastery [in Thaumaturge; level 19]",
     "feat: One More Activation [slot class-8; level 6; taken 8]",
     "feat: Paired Link [slot class-4; level 4; taken 4]",
-    "feat: Paragon Benefit (Regalia) [level 17; granted by Implement Paragon]",
+    "feat: Paragon Benefit (Shield) [level 17; granted by Implement Paragon]",
     "feat: Perception Mastery [in Thaumaturge; level 9]",
     "feat: Perfected Mind [in Thaumaturge; level 13]",
     "feat: Planar Survival [slot skill-8; level 7; taken 8]",
@@ -149,19 +149,16 @@
       "Custom Mixed Heritage"
     ],
     "special": [
-      "Perception Expertise",
       "Tripkee"
     ]
   },
   "described": [
-    "Regalia: Regalia Adept Benefit, Regalia Intensify Vulnerability",
-    "Shield: Shield Adept Benefit, Shield Intensify Vulnerability, Shield Paragon Benefit",
+    "Regalia: Regalia Intensify Vulnerability",
+    "Shield: Shield Intensify Vulnerability",
     "Weapon: Weapon Intensify Vulnerability"
   ],
   "prompts": [
     "Shield: Buckler (guessed)",
-    "Implement Adept: Regalia",
-    "Weapon: Air Repeater (guessed)",
-    "Implement Paragon: Regalia"
+    "Weapon: Air Repeater (guessed)"
   ]
 }

@@ -87,7 +87,7 @@
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
     "feat: Horns (Minotaur) [in Minotaur; level 1]",
     "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.QK5ojonup9AQBg4O]",
-    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.k9d3rDhYnHwLI8XF]",
+    "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.zOMYv2nl2gGICErA]",
     "feat: Implement's Assault [slot class-20; level 18; taken 20]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
     "feat: Incredible Investiture [level 11; taken 10; granted by Thaumaturge's Investiture]",
@@ -102,7 +102,7 @@
     "feat: Medium Armor Expertise [in Thaumaturge; level 11]",
     "feat: Medium Armor Mastery [in Thaumaturge; level 19]",
     "feat: Paired Link [slot class-6; level 4; taken 6]",
-    "feat: Paragon Benefit (Lantern) [level 17; granted by Implement Paragon]",
+    "feat: Paragon Benefit (Regalia) [level 17; granted by Implement Paragon]",
     "feat: Perception Mastery [in Thaumaturge; level 9]",
     "feat: Perfected Mind [in Thaumaturge; level 13]",
     "feat: Pilgrim's Token [slot skill-20; level 1; taken 20]",
@@ -149,19 +149,13 @@
     "Into the Labyrinth [occult; prepared; cha; proficiency 1] rank 8: 1 [Quandary]",
     "Labyrinthine Echoes [divine; prepared; cha; proficiency 1] rank 3: 1 [Claim Curse]"
   ],
-  "report": {
-    "special": [
-      "Perception Expertise"
-    ]
-  },
+  "report": {},
   "described": [
-    "Lantern: Lantern Adept Benefit, Lantern Intensify Vulnerability",
-    "Regalia: Regalia Adept Benefit, Regalia Intensify Vulnerability, Regalia Paragon Benefit",
+    "Lantern: Lantern Intensify Vulnerability",
+    "Regalia: Regalia Intensify Vulnerability",
     "Weapon: Weapon Intensify Vulnerability"
   ],
   "prompts": [
-    "Implement Adept: Lantern",
-    "Weapon: Air Repeater (guessed)",
-    "Implement Paragon: Lantern"
+    "Weapon: Air Repeater (guessed)"
   ]
 }

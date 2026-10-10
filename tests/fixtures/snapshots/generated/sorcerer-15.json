@@ -160,9 +160,6 @@
     "Trickster Tengu [primal; prepared; cha; proficiency 4] rank 7: 1 [Aerial Form]"
   ],
   "report": {
-    "special": [
-      "Wave Fan"
-    ],
     "spell": [
       "Piercing Jet",
       "Rude Awakening",
@@ -170,7 +167,8 @@
     ]
   },
   "described": [
-    "Bloodline Spells: Blood Magic"
+    "Bloodline Spells: Blood Magic",
+    "Tengu Feather Fan: Wave Fan"
   ],
   "prompts": []
 }

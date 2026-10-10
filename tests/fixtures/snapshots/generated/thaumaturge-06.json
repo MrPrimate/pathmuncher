@@ -67,8 +67,8 @@
     "equipment: Wand Implement [granted by Wand; qty 1; worn]",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
     "feat: Additional Lore [level 1; taken 1; granted by Surki Lore]",
-    "feat: Adept Benefit (Mirror) [level 7; granted by Implement Adept]",
-    "feat: Adept Benefit (Regalia) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Mirror) [level 7; granted by Second Adept]",
+    "feat: Adept Benefit (Regalia) [level 7; granted by Implement Adept]",
     "feat: Adept Benefit (Wand) [level 7; taken 18; granted by Intense Implement; adeptBenefitWand=electricity]",
     "feat: Assurance (Nature) [slot skill-2; level 1; taken 2; assurance=nature]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
@@ -85,7 +85,7 @@
     "feat: First Implement and Esoterica [in Thaumaturge; level 1; implement=Compendium.pf2e.classfeatures.Item.N6KvTbaRsphc0Ymb]",
     "feat: Generation Digger [slot ancestry-17; level 13; taken 17]",
     "feat: Greater Weapon Specialization [in Thaumaturge; level 15]",
-    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.AEibGHmDzLiqGR0F]",
+    "feat: Implement Adept [in Thaumaturge; level 7; implementAdept=Compendium.pf2e.classfeatures.Item.EkNT2EhbClDQJUAG]",
     "feat: Implement Paragon [in Thaumaturge; level 17; implementParagon=Compendium.pf2e.classfeatures.Item.jyfTDSYuzXaNuJ2r]",
     "feat: Implement's Assault [slot class-20; level 18; taken 20]",
     "feat: Implement's Empowerment [in Thaumaturge; level 1]",
@@ -114,7 +114,7 @@
     "feat: Reflex Expertise [in Thaumaturge; level 3]",
     "feat: Regalia [level 1; granted by Second Implement]",
     "feat: Root to Life [slot class-4; level 1; taken 4]",
-    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.EkNT2EhbClDQJUAG]",
+    "feat: Second Adept [in Thaumaturge; level 11; secondAdept=Compendium.pf2e.classfeatures.Item.AEibGHmDzLiqGR0F]",
     "feat: Second Implement [in Thaumaturge; level 5; implement=Compendium.pf2e.classfeatures.Item.DhdLzrcMvB93Rjmt]",
     "feat: Sever Magic [slot class-16; level 16; taken 16]",
     "feat: Subtle Theft [slot skill-12; level 1; taken 12]",
@@ -145,20 +145,14 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Perception Expertise"
-    ]
-  },
+  "report": {},
   "described": [
-    "Mirror: Mirror Adept Benefit, Mirror Intensify Vulnerability, Mirror Paragon Benefit",
-    "Regalia: Regalia Adept Benefit, Regalia Intensify Vulnerability",
-    "Wand: Wand Adept Benefit, Wand Intensify Vulnerability"
+    "Mirror: Mirror Intensify Vulnerability",
+    "Regalia: Regalia Intensify Vulnerability",
+    "Wand: Wand Intensify Vulnerability"
   ],
   "prompts": [
-    "Implement Adept: Mirror",
     "Initiate Benefit (Wand): Cold (guessed)",
-    "Implement Paragon: Mirror",
     "Adept Benefit (Wand): Electricity (guessed)"
   ]
 }

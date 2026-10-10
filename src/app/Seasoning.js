@@ -52,10 +52,12 @@ export class Seasoning {
       sections.push({ term: Seasoning.descriptionText(match[2]), text: Seasoning.descriptionText(end === -1 ? rest : rest.slice(0, end)) });
     }
     for (const match of html.matchAll(/<(p|li)(?:\s[^>]*)?>\s*<(strong|b)>([\s\S]*?)<\/\2>([\s\S]*?)<\/\1>/gi)) {
-      sections.push({
-        term: Seasoning.descriptionText(match[3]).replace(/[:.]$/, "").trim(),
-        text: Seasoning.descriptionText(match[4]).replace(/^[:.]\s*/, ""),
-      });
+      const term = Seasoning.descriptionText(match[3]).replace(/[:.]$/, "").trim();
+      const text = Seasoning.descriptionText(match[4]).replace(/^[:.]\s*/, "");
+      sections.push({ term, text });
+      // a step and its name ("Transcendence (17th)—Angelic Mercy", an eidolon's abilities) is also known by the name
+      const named = term.split("—").at(-1).trim();
+      if (named && named !== term) sections.push({ term: named, text });
     }
     return sections.filter((section) => section.term);
   }

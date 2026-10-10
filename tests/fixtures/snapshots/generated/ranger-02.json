@@ -60,7 +60,7 @@
     "equipment: Head Gem [granted by Head Gem; qty 1; worn]",
     "feat: Animal Companion (Ranger) [slot class-1; level 1; taken 1]",
     "feat: Armored Stealth [slot skill-6; level 2; taken 6]",
-    "feat: Assurance (Acrobatics) [in Driver; level 1; assurance=acrobatics]",
+    "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
     "feat: Charming Liar [slot skill-12; level 1; taken 12]",
     "feat: Convocation of Earth and Moon [slot ancestry-17; level 17; taken 17]",
@@ -125,6 +125,9 @@
   "report": {
     "pet": [
       "Kestrel - Nimble Bird (Animal Companion)"
+    ],
+    "rule": [
+      "Assurance (Lore: Driving)"
     ]
   },
   "described": [],

@@ -168,18 +168,19 @@
   ],
   "report": {
     "special": [
-      "Claw Armament",
-      "Fey Chicanery",
-      "Fey Gift Spells",
-      "Fey Mischief",
-      "acid"
+      "Claw Armament"
     ],
     "spell": [
       "Piercing Jet",
       "Silver Spear"
+    ],
+    "pet": [
+      "Eidolon (Energy Heart: acid)"
     ]
   },
-  "described": [],
+  "described": [
+    "Fey Eidolon: Fey Chicanery, Fey Gift Spells, Fey Mischief"
+  ],
   "prompts": [
     "Iruxi Armaments: Claw (guessed)"
   ]

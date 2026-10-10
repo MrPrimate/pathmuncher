@@ -171,11 +171,12 @@
     "Summoner [arcane; spontaneous; cha; proficiency 3] rank 0: 5 [Frostbite, Shield, Tangle Vine, Read Aura, Ignition] | rank 1: 2 [Fishing Spot, Grease] | rank 2: 2 [Blood Runs Cold, Uncover Device] | rank 3: 2 [Bottomless Stomach, Hypnotize] | rank 4: 2 [Sanguine Mist, Friends to Foes] | rank 5: 2 [Geyser, Desperate Repair] | rank 6: 2 [Frozen Fog, Vampiric Exsanguination] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Metallic Meteorite Glyph, Stars of Another Sky] | rank 9: 2 [Bilocation, Incarnate Draconic Legion]"
   ],
   "report": {
-    "special": [
-      "Ooze Physiology",
-      "Stretching Pseudopods"
+    "pet": [
+      "Eidolon"
     ]
   },
-  "described": [],
+  "described": [
+    "Ooze Eidolon: Ooze Physiology, Stretching Pseudopods"
+  ],
   "prompts": []
 }

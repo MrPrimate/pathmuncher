@@ -120,13 +120,36 @@
     "lore: Alcohol [rank 1]",
     "lore: Undead [rank 4]",
     "spell: Aerial Form [in Ancestor's Transformation; rank 5]",
+    "spell: Agitate [in Necromancer; rank 1]",
+    "spell: Begone [in Necromancer; rank 3]",
+    "spell: Bullhorn [in Necromancer; rank 0]",
+    "spell: Charitable Urge [in Necromancer; rank 2]",
     "spell: Create Thrall [in Occult Focus Tradition; rank 1]",
+    "spell: Daze [in Necromancer; rank 0]",
     "spell: Dead Weight [in Occult Focus Tradition; rank 1]",
+    "spell: Fabricated Truth [in Necromancer; rank 10]",
+    "spell: Foresight [in Necromancer; rank 9]",
     "spell: Living Graveyard [in Occult Focus Tradition; rank 10]",
+    "spell: Lose the Path [in Necromancer; rank 1]",
+    "spell: Momentary Recovery [in Necromancer; rank 7]",
     "spell: Muscle Barrier [in Occult Focus Tradition; rank 1]",
     "spell: Necrotic Bomb [in Occult Focus Tradition; rank 1]",
+    "spell: Phantasmagoria [in Necromancer; rank 9]",
+    "spell: Poltergeist's Fury [in Necromancer; rank 6]",
+    "spell: Proximal Shift [in Necromancer; rank 6]",
+    "spell: Radiant Field [in Necromancer; rank 2]",
+    "spell: Roaring Applause [in Necromancer; rank 3]",
+    "spell: Sigil [in Necromancer; rank 0]",
+    "spell: Stop Heart [in Necromancer; rank 8]",
+    "spell: Telekinetic Bombardment [in Necromancer; rank 7]",
     "spell: Thrall Charge [in Occult Focus Tradition; rank 1]",
+    "spell: Time Sense [in Necromancer; rank 0]",
+    "spell: Tree of Life and Death [in Necromancer; rank 5]",
+    "spell: Vapor Form [in Necromancer; rank 4]",
     "spell: Ventriloquism [in Thrown Voice; rank 1]",
+    "spell: Vital Seed [in Necromancer; rank 4]",
+    "spell: Void Warp [in Necromancer; rank 0]",
+    "spell: Wave of Despair [in Necromancer; rank 5]",
     "spellcastingEntry: Ancestor's Transformation",
     "spellcastingEntry: Necromancer",
     "spellcastingEntry: Occult Focus Tradition",
@@ -138,7 +161,7 @@
   ],
   "spellcasting": [
     "Ancestor's Transformation [primal; prepared; cha; proficiency 4] rank 5: 1 [Aerial Form]",
-    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [-, -, -, -, -] | rank 1: 2 [-, -] | rank 2: 2 [-, -] | rank 3: 2 [-, -] | rank 4: 2 [-, -] | rank 5: 2 [-, -] | rank 6: 2 [-, -] | rank 7: 2 [-, -] | rank 8: 2 [-, -] | rank 9: 2 [-, -] | rank 10: 1 [-]",
+    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [Time Sense, Sigil, Void Warp, Bullhorn, Daze] | rank 1: 2 [Agitate, Lose the Path] | rank 2: 2 [Charitable Urge, Radiant Field] | rank 3: 2 [Roaring Applause, Begone] | rank 4: 2 [Vapor Form, Vital Seed] | rank 5: 2 [Wave of Despair, Tree of Life and Death] | rank 6: 2 [Proximal Shift, Poltergeist's Fury] | rank 7: 2 [Telekinetic Bombardment, Momentary Recovery] | rank 8: 2 [Stop Heart, -] | rank 9: 2 [Phantasmagoria, Foresight] | rank 10: 1 [Fabricated Truth]",
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Thrown Voice [primal; prepared; cha; proficiency 4] rank 1: 1 [Ventriloquism]"
   ],
@@ -146,6 +169,9 @@
     "feat": [
       "Flock As One",
       "Void Siphon[Reaction]"
+    ],
+    "spell": [
+      "Roar of Freedom"
     ]
   },
   "described": [
