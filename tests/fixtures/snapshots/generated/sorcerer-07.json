@@ -128,6 +128,7 @@
     "spell: Dream Message [in Sorcerer; rank 3]",
     "spell: Fishing Spot [in Sorcerer; rank 1]",
     "spell: Flurry of Claws [in Divine Focus Tradition; rank 1]",
+    "spell: Gift of Dusk [in Sorcerer; rank 4]",
     "spell: Imprinting Hand [in Sorcerer; rank 2]",
     "spell: Incarnate Deific Herald [in Sorcerer; rank 8]",
     "spell: Incarnate Draconic Legion [in Sorcerer; rank 9]",
@@ -160,13 +161,9 @@
   "spellcasting": [
     "Apprentice Sea Witch [primal; prepared; cha; proficiency 4] rank 1: 1 [Charm]",
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
-    "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Know the Way, Bullhorn, Read Aura, Divine Lance] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link] | rank 2: 4 [Charitable Urge, Peaceful Rest, Imprinting Hand] | rank 3: 4 [Defensive Prescience, Dream Message, Behold the Weave] | rank 4: 4 [Bloodspray Curse, Vital Beacon] | rank 5: 4 [Mirror Malefactors, Breath of Life, Scouting Eye] | rank 6: 4 [Patron's Protector, Truesight, Scintillating Safeguard] | rank 7: 4 [Moonburst, Incarnate Tempest of Shades, Regenerate] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Telepathic Demand, Incarnate Draconic Legion, Massacre] | rank 10: 1 [Nullify]"
+    "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Know the Way, Bullhorn, Read Aura, Divine Lance] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link] | rank 2: 4 [Charitable Urge, Peaceful Rest, Imprinting Hand] | rank 3: 4 [Defensive Prescience, Dream Message, Behold the Weave] | rank 4: 4 [Bloodspray Curse, Vital Beacon, Gift of Dusk] | rank 5: 4 [Mirror Malefactors, Breath of Life, Scouting Eye] | rank 6: 4 [Patron's Protector, Truesight, Scintillating Safeguard] | rank 7: 4 [Moonburst, Incarnate Tempest of Shades, Regenerate] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Telepathic Demand, Incarnate Draconic Legion, Massacre] | rank 10: 1 [Nullify]"
   ],
-  "report": {
-    "spell": [
-      "Gift of Dusk"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Draconic (Empyreal)"

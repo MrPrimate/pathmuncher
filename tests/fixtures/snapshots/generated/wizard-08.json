@@ -149,6 +149,7 @@
     "spell: Prestidigitation [in Wizard; rank 0]",
     "spell: Read Aura [in Wizard; rank 0]",
     "spell: Resplendent Mansion [in Wizard; rank 9]",
+    "spell: Searing Rain [in Wizard; rank 5]",
     "spell: Shield [in Otherworldly Magic; rank 0]",
     "spell: Shield [in Wizard; rank 0]",
     "spell: Shock and Awe [in Wizard; rank 5]",
@@ -189,11 +190,7 @@
     "Touch of the Sea [primal; prepared; cha; proficiency 4] rank 0: 1 [Gale Blast]",
     "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [-, -, -, -, -, -] | rank 1: 4 [-, -, -, -] | rank 2: 4 [-, -, -, -] | rank 3: 4 [-, -, -, -] | rank 4: 4 [-, -, -, -] | rank 5: 4 [-, -, -, -] | rank 6: 4 [-, -, -, -] | rank 7: 4 [-, -, -, -] | rank 8: 4 [-, -, -, -] | rank 9: 4 [-, -, -, -] | rank 10: 1 [-]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

@@ -155,6 +155,7 @@
     "spell: Scintillating Safeguard [in Oracle; rank 6]",
     "spell: Speak With Magic [in Oracle; rank 3]",
     "spell: Speak With Water [in Oracle; rank 6]",
+    "spell: Spray of Salt [in Oracle; rank 2]",
     "spell: Stabilize [in Oracle; rank 0]",
     "spell: Stars of Another Sky [in Oracle; rank 8]",
     "spell: Summon Celestial [in Oracle; rank 5]",
@@ -174,13 +175,9 @@
   "spellcasting": [
     "Astral Blink [arcane; prepared; cha; proficiency 4] rank 4: 1 [Translocate]",
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
-    "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Stabilize, Light, Glamorize] | rank 1: 4 [Alarm, Concordant Choir, Benediction, Heal] | rank 2: 4 [Darkness, Inner Radiance Torrent, Environmental Endurance] | rank 3: 4 [Crisis of Faith, Focusing Hum, Speak With Magic, Mind of Menace] | rank 4: 4 [Dull Ambition, Divine Wrath, Whispers of the Void, Implement of Destruction] | rank 5: 4 [Summon Celestial, Whispers of a Dead Goddess, Healing Well, Unravel Existence] | rank 6: 4 [Scintillating Safeguard, Speak With Water, Blessed Boundary, Blinding Fury] | rank 7: 4 [Deity's Strike, Incarnate Ancient Specter, Energy Aegis, Cosmic Form] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Pierce the Sky, Overwhelming Presence, Weapon of Judgment, Foresight] | rank 10: 1 [Indestructibility]"
+    "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Stabilize, Light, Glamorize] | rank 1: 4 [Alarm, Concordant Choir, Benediction, Heal] | rank 2: 4 [Darkness, Inner Radiance Torrent, Environmental Endurance, Spray of Salt] | rank 3: 4 [Crisis of Faith, Focusing Hum, Speak With Magic, Mind of Menace] | rank 4: 4 [Dull Ambition, Divine Wrath, Whispers of the Void, Implement of Destruction] | rank 5: 4 [Summon Celestial, Whispers of a Dead Goddess, Healing Well, Unravel Existence] | rank 6: 4 [Scintillating Safeguard, Speak With Water, Blessed Boundary, Blinding Fury] | rank 7: 4 [Deity's Strike, Incarnate Ancient Specter, Energy Aegis, Cosmic Form] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Pierce the Sky, Overwhelming Presence, Weapon of Judgment, Foresight] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {
-    "spell": [
-      "Spray of Salt"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Specialty Crafting: Alchemy (guessed)"

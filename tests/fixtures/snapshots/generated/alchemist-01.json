@@ -66,7 +66,7 @@
     "condition: Quickened [granted by Abundant Vials]",
     "equipment: Formula Book (Blank) [granted by Formula Book; qty 1; worn]",
     "feat: Abundant Vials [in Alchemist; level 17]",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 1; granted by Strix Lore]",
     "feat: Advanced Alchemy [level 1; granted by Alchemy]",
     "feat: Advanced First Aid [slot skill-10; level 7; taken 10]",
     "feat: Advanced Vials (Bomber) [level 11; granted by Advanced Vials; bomberAdvancedVials=null]",
@@ -125,6 +125,7 @@
     "feat: Versatile Vials [level 1; granted by Alchemy]",
     "feat: Weapon Specialization [in Alchemist; level 13]",
     "feat: Will Expertise [in Alchemist; level 7]",
+    "feat: Winged Mantle [slot ancestry-13; level 13; taken 13]",
     "feat: Wings [in Strix; level 1]",
     "heritage: Nightglider Strix",
     "lore: Labor [rank 1]",
@@ -140,11 +141,7 @@
   "spellcasting": [
     "Ancestor's Transformation [primal; prepared; cha; proficiency 1] rank 5: 1 [Aerial Form]"
   ],
-  "report": {
-    "feat": [
-      "Winged Mantle"
-    ]
-  },
+  "report": {},
   "described": [
     "Bomber: Field Benefit (Bomber), Field Vials (Bomber), Formulas (Bomber)"
   ],

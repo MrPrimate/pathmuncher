@@ -111,6 +111,7 @@ const REMASTER_NAMES = [
   { pbName: "Tree Shape", foundryName: "One with Plants" },
   { pbName: "Tree Stride", foundryName: "Nature's Pathway" },
   { pbName: "Trueseeing", foundryName: "Truesight" },
+  { pbName: "True Seeing", foundryName: "Truesight" },
   { pbName: "True Strike", foundryName: "Sure Strike" },
   { pbName: "Unseen Servant", foundryName: "Phantasmal Minion" },
   { pbName: "Vampiric Touch", foundryName: "Vampiric Feast" },

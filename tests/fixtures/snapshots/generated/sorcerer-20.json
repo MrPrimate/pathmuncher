@@ -138,6 +138,7 @@
     "spell: Scouting Eye [in Sorcerer; rank 5]",
     "spell: Seashell of Stolen Sound [in Sorcerer; rank 1]",
     "spell: Shadow Projectile [in Sorcerer; rank 3]",
+    "spell: Silver Spear [in Sorcerer; rank 6]",
     "spell: Telekinetic Bombardment [in Sorcerer; rank 7]",
     "spell: Temporary Tool [in Sorcerer; rank 1]",
     "spell: Timely Tutor [in Sorcerer; rank 2]",
@@ -159,13 +160,9 @@
     "Adamantine Mantra [primal; prepared; cha; proficiency 4] rank 5: 1 [Blessing of Defiance]",
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
     "Colugo's Traversal [primal; prepared; cha; proficiency 4] rank 1: 1 [Gentle Landing]",
-    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Create Earthen Facsimile, Puff of Poison, Artistic Recollection, Protect Companion] | rank 1: 4 [Temporary Tool, Seashell of Stolen Sound, Force Barrage] | rank 2: 4 [Vomit Swarm, Timely Tutor, Acid Grip] | rank 3: 4 [Widow’s Bite, Cup of Dust, Shadow Projectile] | rank 4: 4 [Vampiric Maiden, Filter Air, Confusion] | rank 5: 4 [Impaling Spike, Scouting Eye, Weight of the World] | rank 6: 4 [Necrotize, Proximal Shift] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind] | rank 8: 4 [Arctic Rift, Desiccate, Confusing Colors] | rank 9: 4 [Pierce the Sky, Implosion, Bilocation] | rank 10: 1 [Nullify]"
+    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Create Earthen Facsimile, Puff of Poison, Artistic Recollection, Protect Companion] | rank 1: 4 [Temporary Tool, Seashell of Stolen Sound, Force Barrage] | rank 2: 4 [Vomit Swarm, Timely Tutor, Acid Grip] | rank 3: 4 [Widow’s Bite, Cup of Dust, Shadow Projectile] | rank 4: 4 [Vampiric Maiden, Filter Air, Confusion] | rank 5: 4 [Impaling Spike, Scouting Eye, Weight of the World] | rank 6: 4 [Silver Spear, Necrotize, Proximal Shift] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind] | rank 8: 4 [Arctic Rift, Desiccate, Confusing Colors] | rank 9: 4 [Pierce the Sky, Implosion, Bilocation] | rank 10: 1 [Nullify]"
   ],
-  "report": {
-    "spell": [
-      "Silver Spear"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline: Genie (Faydhaan): Blood Magic"
   ],

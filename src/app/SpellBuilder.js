@@ -246,7 +246,6 @@ export class SpellBuilder {
         : [];
       let preparedValue = 0;
 
-      // const preparedMap = preparedAtLevel.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
 
       for (const [i, spell] of spellSelection.list.entries()) {
         logger.debug(`Checking spell at ${i} for level ${level}`, { spell });
@@ -277,7 +276,6 @@ export class SpellBuilder {
       }
 
       for (const spell of preparedAtLevel) {
-        // if (spellNames.includes(spellName)) continue;
         const parsedSpell = foundry.utils.getProperty(spellNames, spell);
         const itemData = parsedSpell
           ? this.result.spells.find((s) => s._id === parsedSpell)

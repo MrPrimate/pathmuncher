@@ -2,7 +2,7 @@
   "character": {
     "name": "PMTG Wizard 02",
     "level": 20,
-    "ancestry": null,
+    "ancestry": "Bugbear",
     "heritage": "Nephilim",
     "background": "Pilgrim",
     "class": "Wizard",
@@ -12,14 +12,15 @@
       "str": 4,
       "dex": 2,
       "con": 4,
-      "int": 5,
+      "int": 4,
       "wis": 4,
-      "cha": 2
+      "cha": 3
     },
-    "hp": 200,
+    "hp": 210,
     "ac": 36,
     "perception": 2,
     "senses": [
+      "darkvision",
       "low-light-vision"
     ],
     "saves": {
@@ -47,8 +48,10 @@
     },
     "languages": [
       "chthonian",
+      "common",
       "draconic",
       "elven",
+      "goblin",
       "jotun"
     ],
     "size": "med",
@@ -57,14 +60,16 @@
   "items": [
     "action: Cast a Spell [granted by Wizard Spellcasting]",
     "action: Drain Familiar [granted by Arcane Bond]",
+    "ancestry: Bugbear",
     "background: Pilgrim",
     "class: Wizard",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 1; granted by Bugbear Lore]",
     "feat: Arcane Bond [in Wizard; level 1]",
     "feat: Arcane School [in Wizard; level 1; arcaneSchool=Compendium.pf2e.classfeatures.Item.E4GZDMn4DYk6qSEV]",
     "feat: Arcane Thesis [in Wizard; level 1; arcaneThesis=Compendium.pf2e.classfeatures.Item.SNZ46g3u7U6x0XJj]",
     "feat: Archwizard's Spellcraft [in Wizard; level 19]",
     "feat: Backup Disguise [slot skill-12; level 2; taken 12]",
+    "feat: Bugbear Lore [slot ancestry-1; level 1; taken 1]",
     "feat: Call Wizardly Tools [slot class-4; level 4; taken 4]",
     "feat: Confabulator [slot skill-6; level 2; taken 6]",
     "feat: Convincing Illusion [slot class-8; level 6; taken 8]",
@@ -77,6 +82,7 @@
     "feat: Improved Familiar Attunement [level 1; granted by Arcane Thesis]",
     "feat: Incredible Initiative [slot general-11; level 1; taken 11]",
     "feat: Incriminating Spell [slot class-6; level 4; taken 6]",
+    "feat: Know I Approach [slot ancestry-17; level 13; taken 17]",
     "feat: Knowledge is Power [slot class-10; level 6; taken 10]",
     "feat: Legendary Professional [slot skill-16; level 15; taken 16]",
     "feat: Legendary Spellcaster [in Wizard; level 19]",
@@ -84,9 +90,11 @@
     "feat: Magic Sense [slot class-16; level 12; taken 16]",
     "feat: Magical Fortitude [in Wizard; level 9]",
     "feat: Master Spellcaster [in Wizard; level 15]",
+    "feat: Mocking Invisibility [slot ancestry-13; level 9; taken 13]",
     "feat: Perception Expertise [in Wizard; level 11]",
     "feat: Pet [level 1; granted by Familiar]",
     "feat: Pilgrim's Token [in Pilgrim; level 1]",
+    "feat: Prey Disguise [slot ancestry-5; level 5; taken 5]",
     "feat: Prodigious Will [in Wizard; level 17]",
     "feat: Quickened Casting [slot class-14; level 10; taken 14]",
     "feat: Reflex Expertise [in Wizard; level 5]",
@@ -99,6 +107,7 @@
     "feat: Student of the Canon [slot skill-14; level 1; taken 14]",
     "feat: Superior Bond [slot class-18; level 14; taken 18]",
     "feat: Swift Sneak [slot skill-8; level 7; taken 8]",
+    "feat: Terrorize [slot ancestry-9; level 9; taken 9]",
     "feat: Unmistakable Lore [slot skill-20; level 2; taken 20]",
     "feat: Untrained Improvisation [slot general-7; level 3; taken 7]",
     "feat: Weapon Expertise [in Wizard; level 11]",
@@ -162,18 +171,7 @@
     "Bugbear Feat 9 [primal; prepared; cha; proficiency 4] rank 3: 1 [Fear]",
     "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Bullhorn, Void Warp, Approximate, Figment, Telekinetic Projectile, -] | rank 1: 4 [Hydraulic Push, Chilling Spray, Gravitational Pull, -] | rank 2: 4 [Summon Elemental, Elemental Zone, Loose Time's Arrow, -] | rank 3: 4 [Slow, Roaring Applause, Shared Invisibility, -] | rank 4: 4 [Dull Ambition, Unfettered Movement, Aerial Form, -] | rank 5: 4 [Grisly Growths, Howling Blizzard, Banishment, -] | rank 6: 4 [Unexpected Transposition, Tentacular Innervation, Flame Vortex, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Monstrosity Form, Uncontrollable Dance, Unrelenting Observation, -] | rank 9: 4 [Falling Stars, Remake Physiology, Massacre, -] | rank 10: 1 [Manifestation]"
   ],
-  "report": {
-    "ancestry": [
-      "Bugbear"
-    ],
-    "feat": [
-      "Bugbear Lore",
-      "Know I Approach",
-      "Mocking Invisibility",
-      "Prey Disguise",
-      "Terrorize"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

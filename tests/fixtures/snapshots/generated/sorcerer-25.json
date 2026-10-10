@@ -2,8 +2,8 @@
   "character": {
     "name": "PMTG Sorcerer 25",
     "level": 20,
-    "ancestry": null,
-    "heritage": null,
+    "ancestry": "Bugbear",
+    "heritage": "Kardan Bugbear",
     "background": "Tax Collector",
     "class": "Sorcerer",
     "deity": null,
@@ -12,14 +12,17 @@
       "str": 4,
       "dex": 3,
       "con": 4,
-      "int": 2,
+      "int": 1,
       "wis": 3,
       "cha": 5
     },
-    "hp": 220,
+    "hp": 230,
     "ac": 37,
     "perception": 2,
-    "senses": [],
+    "senses": [
+      "darkvision",
+      "scent"
+    ],
     "saves": {
       "fortitude": 2,
       "reflex": 2,
@@ -44,12 +47,15 @@
       "thievery": 4
     },
     "languages": [
-      "chthonian"
+      "chthonian",
+      "common",
+      "goblin"
     ],
     "size": "med",
     "focus": 1
   },
   "items": [
+    "ancestry: Bugbear",
     "background: Tax Collector",
     "class: Sorcerer",
     "feat: A Home in Every Port [slot general-15; level 11; taken 15]",
@@ -63,14 +69,17 @@
     "feat: Bloodline [in Sorcerer; level 1; bloodline=Compendium.pf2e.classfeatures.Item.5Wxjghw7lHuCxjZz]",
     "feat: Bloodline: Nymph [level 1; granted by Bloodline; bloodMagic=nymph; secondBloodMagic=null]",
     "feat: Cantrip Expansion [slot class-2; level 2; taken 2]",
+    "feat: Death of Hope [slot ancestry-17; level 17; taken 17]",
     "feat: Defensive Robes [in Sorcerer; level 13]",
     "feat: Dirty Trick [slot skill-4; level 1; taken 4]",
     "feat: Expert Spellcaster [in Sorcerer; level 7]",
+    "feat: Fearsense [slot ancestry-5; level 1; taken 5]",
     "feat: Greater Physical Evolution [slot class-12; level 12; taken 12]",
     "feat: Group Coercion [slot skill-2; level 1; taken 2]",
     "feat: Incredible Investiture [slot general-11; level 11; taken 11]",
     "feat: Influence Nature [slot skill-8; level 7; taken 8]",
     "feat: Intimidating Glare [slot skill-20; level 1; taken 20]",
+    "feat: Know I Approach [slot ancestry-13; level 13; taken 13]",
     "feat: Lasting Coercion [slot skill-12; level 2; taken 12]",
     "feat: Legendary Spellcaster [in Sorcerer; level 19]",
     "feat: Magical Fortitude [in Sorcerer; level 5]",
@@ -85,6 +94,7 @@
     "feat: Quick Unlock [slot skill-10; level 7; taken 10]",
     "feat: Reflex Expertise [in Sorcerer; level 9]",
     "feat: Safeguard Spell [slot class-10; level 6; taken 10; spellshape=null]",
+    "feat: Savor the Hunt [slot ancestry-1; level 1; taken 1]",
     "feat: Scintillating Spell [slot class-18; level 16; taken 18]",
     "feat: Signature Spells [in Sorcerer; level 3]",
     "feat: Sorcerer Spellcasting [in Sorcerer; level 1]",
@@ -92,10 +102,12 @@
     "feat: Spell Repertoire [in Sorcerer; level 1]",
     "feat: Subtle Theft [slot skill-16; level 1; taken 16]",
     "feat: Toughness [slot general-3; level 1; taken 3]",
+    "feat: Unrelenting Terror [slot ancestry-9; level 5; taken 9]",
     "feat: Untrained Improvisation [slot general-19; level 3; taken 19]",
     "feat: Wary Disarmament [slot skill-6; level 2; taken 6]",
     "feat: Weapon Expertise [in Sorcerer; level 11]",
     "feat: Weapon Specialization [in Sorcerer; level 13]",
+    "heritage: Kardan Bugbear",
     "lore: Settlement [rank 1]",
     "spell: Blanket of Stars [in Sorcerer; rank 6]",
     "spell: Blister [in Sorcerer; rank 5]",
@@ -142,21 +154,7 @@
     "Primal Focus Tradition [primal; focus; cha; proficiency 4]",
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Spout, Sigil, Glamorize, Tame, Stabilize] | rank 1: 4 [Gust of Wind, Pummeling Rubble, Runic Body] | rank 2: 4 [Create Food, Expeditious Excavation, Summoner's Visage] | rank 3: 4 [Shadow Spy, Lightning Lasso, Cup of Dust] | rank 4: 4 [Luring Wail, Hydraulic Torrent, Tortoise and the Hare] | rank 5: 4 [Spiked Carapace, Blister, Crucible of Iron] | rank 6: 4 [Incarnate Wild Rose, Truesight, Blanket of Stars] | rank 7: 4 [Energy Aegis, Mask of Terror, Sunburst] | rank 8: 4 [Monstrosity Form, Metallic Meteorite Glyph, Migration] | rank 9: 4 [One with the Land, Implosion, Incarnate Draconic Legion] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {
-    "ancestry": [
-      "Bugbear"
-    ],
-    "heritage": [
-      "Kardan Bugbear"
-    ],
-    "feat": [
-      "Death of Hope",
-      "Fearsense",
-      "Know I Approach",
-      "Savor the Hunt",
-      "Unrelenting Terror"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline: Nymph: Blood Magic"
   ],

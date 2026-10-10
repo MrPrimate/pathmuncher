@@ -137,6 +137,7 @@
     "spell: Quandary [in Witch; rank 8]",
     "spell: Repulsion [in Witch; rank 6]",
     "spell: Return the Favor [in Arcane Focus Tradition; rank 3]",
+    "spell: Searing Rain [in Witch; rank 5]",
     "spell: Slither [in Witch; rank 5]",
     "spell: Time Pocket [in Witch; rank 3]",
     "spell: Time Sense [in Witch; rank 0]",
@@ -153,13 +154,9 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Witch [arcane; prepared; int; proficiency 4] rank 0: 5 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light] | rank 1: 3 [Ventriloquism, Déjà Vu, Disguise Magic] | rank 2: 3 [Web, Persistent Servant, Noise Blast] | rank 3: 3 [Time Pocket, Inertia Lock, Enthrall] | rank 4: 3 [Countless Eyes, Containment, Clairvoyance] | rank 5: 3 [Blister, Slither, -] | rank 6: 3 [Vampiric Exsanguination, Boots on the Ground, Repulsion] | rank 7: 3 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 3 [Burning Blossoms, Falling Sky, Quandary] | rank 9: 3 [Massacre, Phantasmagoria, Pierce the Sky] | rank 10: 1 [Cataclysm]"
+    "Witch [arcane; prepared; int; proficiency 4] rank 0: 5 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light] | rank 1: 3 [Ventriloquism, Déjà Vu, Disguise Magic] | rank 2: 3 [Web, Persistent Servant, Noise Blast] | rank 3: 3 [Time Pocket, Inertia Lock, Enthrall] | rank 4: 3 [Countless Eyes, Containment, Clairvoyance] | rank 5: 3 [Blister, Slither, Searing Rain] | rank 6: 3 [Vampiric Exsanguination, Boots on the Ground, Repulsion] | rank 7: 3 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 3 [Burning Blossoms, Falling Sky, Quandary] | rank 9: 3 [Massacre, Phantasmagoria, Pierce the Sky] | rank 10: 1 [Cataclysm]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [
     "The Inscribed One: Familiar of Flowing Script"
   ],

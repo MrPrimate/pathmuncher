@@ -142,6 +142,7 @@
     "spell: Quantic Dampening [in Arcane Focus Tradition; rank 4]",
     "spell: Regenerate [in Regrowth; rank 7]",
     "spell: Repulsion [in Wizard; rank 6]",
+    "spell: Searing Rain [in Wizard; rank 5]",
     "spell: Slither [in Wizard; rank 5]",
     "spell: Time Pocket [in Wizard; rank 3]",
     "spell: Time Sense [in Wizard; rank 0]",
@@ -160,13 +161,9 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Regrowth [primal; prepared; cha; proficiency 4] rank 7: 1 [Regenerate]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light, -] | rank 1: 4 [Ventriloquism, Déjà Vu, Disguise Magic, -] | rank 2: 4 [Web, Persistent Servant, Noise Blast, -] | rank 3: 4 [Time Pocket, Inertia Lock, Enthrall, -] | rank 4: 4 [Countless Eyes, Containment, Clairvoyance, -] | rank 5: 4 [Blister, Slither, -, -] | rank 6: 4 [Vampiric Exsanguination, Boots on the Ground, Repulsion, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Burning Blossoms, Falling Sky, Quandary, -] | rank 9: 4 [Massacre, Phantasmagoria, Pierce the Sky, -] | rank 10: 1 [Cataclysm]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Prestidigitation, Musical Accompaniment, Message, Time Sense, Light, -] | rank 1: 4 [Ventriloquism, Déjà Vu, Disguise Magic, -] | rank 2: 4 [Web, Persistent Servant, Noise Blast, -] | rank 3: 4 [Time Pocket, Inertia Lock, Enthrall, -] | rank 4: 4 [Countless Eyes, Containment, Clairvoyance, -] | rank 5: 4 [Blister, Slither, Searing Rain, -] | rank 6: 4 [Vampiric Exsanguination, Boots on the Ground, Repulsion, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Burning Blossoms, Falling Sky, Quandary, -] | rank 9: 4 [Massacre, Phantasmagoria, Pierce the Sky, -] | rank 10: 1 [Cataclysm]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

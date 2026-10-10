@@ -119,6 +119,7 @@
     "spell: Bilocation [in Wizard; rank 9]",
     "spell: Chain Lightning [in Wizard; rank 6]",
     "spell: Confusing Colors [in Wizard; rank 8]",
+    "spell: Curse of Slippery Steps [in Wizard; rank 1]",
     "spell: Desiccate [in Wizard; rank 8]",
     "spell: Draw the Lightning [in Wizard; rank 4]",
     "spell: Eclipse Burst [in Wizard; rank 7]",
@@ -157,7 +158,7 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Live Wire, Gouging Claw, Summon Instrument, Gale Blast, Telekinetic Hand, -] | rank 1: 4 [Mystic Armor, Illusory Object, -, -] | rank 2: 4 [Hidebound, Shift Perspective, Humanoid Form, -] | rank 3: 4 [Weapon Tide, Wall of Wind, Rouse Skeletons, -] | rank 4: 4 [Draw the Lightning, Freezing Touch, Nightmare, -] | rank 5: 4 [Invoke Spirits, Instant Minefield, Illusory Scene, -] | rank 6: 4 [Chain Lightning, Unexpected Transposition, Tentacular Innervation, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Desiccate, Confusing Colors, Incarnate Archmage, -] | rank 9: 4 [Pierce the Sky, Implosion, Bilocation, -] | rank 10: 1 [Shadow Army]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Live Wire, Gouging Claw, Summon Instrument, Gale Blast, Telekinetic Hand, -] | rank 1: 4 [Mystic Armor, Curse of Slippery Steps, Illusory Object, -] | rank 2: 4 [Hidebound, Shift Perspective, Humanoid Form, -] | rank 3: 4 [Weapon Tide, Wall of Wind, Rouse Skeletons, -] | rank 4: 4 [Draw the Lightning, Freezing Touch, Nightmare, -] | rank 5: 4 [Invoke Spirits, Instant Minefield, Illusory Scene, -] | rank 6: 4 [Chain Lightning, Unexpected Transposition, Tentacular Innervation, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Desiccate, Confusing Colors, Incarnate Archmage, -] | rank 9: 4 [Pierce the Sky, Implosion, Bilocation, -] | rank 10: 1 [Shadow Army]"
   ],
   "report": {
     "heritage": [
@@ -165,9 +166,6 @@
     ],
     "special": [
       "Tripkee"
-    ],
-    "spell": [
-      "Curse of Slippery Steps"
     ]
   },
   "described": [],

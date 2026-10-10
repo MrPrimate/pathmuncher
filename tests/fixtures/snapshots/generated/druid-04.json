@@ -147,6 +147,7 @@
     "spell: Revival [in Druid; rank 10]",
     "spell: Sacred Beasts [in Druid; rank 1]",
     "spell: Scintillating Safeguard [in Druid; rank 6]",
+    "spell: Searing Rain [in Druid; rank 5]",
     "spell: Shifting Sand [in Druid; rank 3]",
     "spell: Skyglass Prison [in Druid; rank 3]",
     "spell: Speak with Plants [in Druid; rank 3]",
@@ -162,15 +163,11 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc] | rank 1: 3 [Protector Tree, Sacred Beasts, Create Water] | rank 2: 3 [Summoner's Precaution, Gecko Grip, Draw Blood] | rank 3: 3 [Speak with Plants, Skyglass Prison, Shifting Sand] | rank 4: 3 [Living Terrain, Bloodspray Curse, Anchoring Air] | rank 5: 3 [Blazing Fissure, Incarnate Faerie Revelers, -] | rank 6: 3 [Cryostasis, Petrify, Scintillating Safeguard] | rank 7: 3 [Moonburst, Summon Stampede, Comet Charge] | rank 8: 3 [Moment of Renewal, Desiccate, Clone Companion] | rank 9: 3 [Nature's Enmity, Remake Physiology, Metamorphosis] | rank 10: 2 [Revival, Cataclysm]",
+    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc] | rank 1: 3 [Protector Tree, Sacred Beasts, Create Water] | rank 2: 3 [Summoner's Precaution, Gecko Grip, Draw Blood] | rank 3: 3 [Speak with Plants, Skyglass Prison, Shifting Sand] | rank 4: 3 [Living Terrain, Bloodspray Curse, Anchoring Air] | rank 5: 3 [Searing Rain, Blazing Fissure, Incarnate Faerie Revelers] | rank 6: 3 [Cryostasis, Petrify, Scintillating Safeguard] | rank 7: 3 [Moonburst, Summon Stampede, Comet Charge] | rank 8: 3 [Moment of Renewal, Desiccate, Clone Companion] | rank 9: 3 [Nature's Enmity, Remake Physiology, Metamorphosis] | rank 10: 2 [Revival, Cataclysm]",
     "Labyrinthine Echoes [divine; prepared; cha; proficiency 4] rank 3: 1 [Claim Curse]",
     "Primal Focus Tradition [primal; focus; wis; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Specialty Crafting: Alchemy (guessed)"

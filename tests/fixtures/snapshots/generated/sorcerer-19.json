@@ -140,6 +140,7 @@
     "spell: Prestidigitation [in Sorcerer; rank 0]",
     "spell: Pummeling Rubble [in Sorcerer; rank 1]",
     "spell: Resplendent Mansion [in Sorcerer; rank 9]",
+    "spell: Roar of Freedom [in Sorcerer; rank 8]",
     "spell: Stars of Another Sky [in Sorcerer; rank 8]",
     "spell: Tangling Creepers [in Sorcerer; rank 6]",
     "spell: Thunderstrike [in Sorcerer; rank 1]",
@@ -158,7 +159,7 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
-    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Ignition, Prestidigitation, Musical Accompaniment, Message, Time Sense] | rank 1: 4 [Acidic Burst, Pummeling Rubble, Thunderstrike] | rank 2: 4 [Knock, Blood Vendetta, Dancing Shield] | rank 3: 4 [Inertia Lock, Enthrall, Crashing Wave] | rank 4: 4 [Nightmare, Winning Streak, Fulminating Impact] | rank 5: 4 [Elemental Form, Geyser, Desperate Repair] | rank 6: 4 [Tangling Creepers, Phantasmal Calamity, Never Mind] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 4 [Stars of Another Sky, Disappearance] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars] | rank 10: 1 [Cataclysm]"
+    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Ignition, Prestidigitation, Musical Accompaniment, Message, Time Sense] | rank 1: 4 [Acidic Burst, Pummeling Rubble, Thunderstrike] | rank 2: 4 [Knock, Blood Vendetta, Dancing Shield] | rank 3: 4 [Inertia Lock, Enthrall, Crashing Wave] | rank 4: 4 [Nightmare, Winning Streak, Fulminating Impact] | rank 5: 4 [Elemental Form, Geyser, Desperate Repair] | rank 6: 4 [Tangling Creepers, Phantasmal Calamity, Never Mind] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 4 [Stars of Another Sky, Roar of Freedom, Disappearance] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars] | rank 10: 1 [Cataclysm]"
   ],
   "report": {
     "heritage": [
@@ -166,9 +167,6 @@
     ],
     "special": [
       "Merfolk"
-    ],
-    "spell": [
-      "Roar of Freedom"
     ]
   },
   "described": [

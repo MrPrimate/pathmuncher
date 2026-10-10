@@ -152,6 +152,8 @@
     "spell: Stop Heart [in Witch; rank 8]",
     "spell: Telekinetic Bombardment [in Witch; rank 7]",
     "spell: Truesight [in Witch; rank 6]",
+    "spell: Turnip Lantern [in Witch; rank 1]",
+    "spell: Unending Tears [in Witch; rank 4]",
     "spell: Weight of the World [in Witch; rank 5]",
     "spell: Whispers of the Void [in Witch; rank 4]",
     "spellcastingEntry: Iivlar's Boundary Break",
@@ -165,16 +167,12 @@
   "spellcasting": [
     "Iivlar's Boundary Break [occult; prepared; cha; proficiency 4] rank 4: 1 [Flicker]",
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
-    "Witch [occult; prepared; int; proficiency 4] rank 0: 5 [Approximate, Artistic Recollection, Protect Companion, Guidance, Phase Bolt] | rank 1: 3 [Runic Weapon, Sanctuary, -] | rank 2: 3 [See the Unseen, Albatross Curse, Retrieving Hook] | rank 3: 3 [Heroism, Phantom Prison, Shared Invisibility] | rank 4: 3 [Infectious Melody, Whispers of the Void, -] | rank 5: 3 [Weight of the World, Aberrant Form, Instant Minefield] | rank 6: 3 [Poltergeist's Fury, Collective Transposition, Truesight] | rank 7: 3 [Incarnate Ancient Specter, Orb of Twisting Fate, Telekinetic Bombardment] | rank 8: 3 [Shipwreck, Stars of Another Sky, Stop Heart] | rank 9: 3 [Incarnate Draconic Legion, Resplendent Mansion, Phantasmagoria] | rank 10: 1 [Freeze Time]"
+    "Witch [occult; prepared; int; proficiency 4] rank 0: 5 [Approximate, Artistic Recollection, Protect Companion, Guidance, Phase Bolt] | rank 1: 3 [Runic Weapon, Turnip Lantern, Sanctuary] | rank 2: 3 [See the Unseen, Albatross Curse, Retrieving Hook] | rank 3: 3 [Heroism, Phantom Prison, Shared Invisibility] | rank 4: 3 [Unending Tears, Infectious Melody, Whispers of the Void] | rank 5: 3 [Weight of the World, Aberrant Form, Instant Minefield] | rank 6: 3 [Poltergeist's Fury, Collective Transposition, Truesight] | rank 7: 3 [Incarnate Ancient Specter, Orb of Twisting Fate, Telekinetic Bombardment] | rank 8: 3 [Shipwreck, Stars of Another Sky, Stop Heart] | rank 9: 3 [Incarnate Draconic Legion, Resplendent Mansion, Phantasmagoria] | rank 10: 1 [Freeze Time]"
   ],
   "report": {
     "special": [
       "Familiar of Insightful Observation",
       "The Traveler Patron"
-    ],
-    "spell": [
-      "Turnip Lantern",
-      "Unending Tears"
     ]
   },
   "described": [],

@@ -139,6 +139,7 @@
     "spell: Metamorphosis [in Magus; rank 9]",
     "spell: Prestidigitation [in Magus; rank 0]",
     "spell: Read Aura [in Magus; rank 0]",
+    "spell: Searing Rain [in Magus; rank 5]",
     "spell: Shield [in Mage Automaton; rank 0]",
     "spell: Shield [in Magus; rank 0]",
     "spell: Skeleton Army [in Magus; rank 6]",
@@ -161,15 +162,11 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
     "Mage Automaton [arcane; prepared; cha; proficiency 3] rank 0: 1 [Shield]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Shield, Tangle Vine, Read Aura, Ignition, Prestidigitation] | rank 1: 2 [Dome of Tranquility, Goblin Pox] | rank 2: 2 [Floating Harness, Create Food] | rank 3: 2 [Haste, Bottomless Stomach] | rank 4: 2 [Unfettered Movement, Aerial Form] | rank 5: 2 [Slither, -] | rank 6: 2 [Daemon Form, Skeleton Army] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Unrelenting Observation, Burning Blossoms] | rank 9: 2 [Metamorphosis, Vampiric Revelry]",
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Shield, Tangle Vine, Read Aura, Ignition, Prestidigitation] | rank 1: 2 [Dome of Tranquility, Goblin Pox] | rank 2: 2 [Floating Harness, Create Food] | rank 3: 2 [Haste, Bottomless Stomach] | rank 4: 2 [Unfettered Movement, Aerial Form] | rank 5: 2 [Slither, Searing Rain] | rank 6: 2 [Daemon Form, Skeleton Army] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Unrelenting Observation, Burning Blossoms] | rank 9: 2 [Metamorphosis, Vampiric Revelry]",
     "Messenger [arcane; prepared; cha; proficiency 3] rank 0: 1 [Message]",
     "Overburn [arcane; prepared; cha; proficiency 3] rank 3: 1 [Haste]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

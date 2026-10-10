@@ -148,11 +148,14 @@
     "spell: Monstrosity Form [in Summoner; rank 8]",
     "spell: Noxious Vapors [in Summoner; rank 1]",
     "spell: One with the Land [in Summoner; rank 9]",
+    "spell: Piercing Jet [in Summoner; rank 2]",
     "spell: Prestidigitation [in Eidolon; rank 0]",
     "spell: Prestidigitation [in Summoner; rank 0]",
     "spell: Primal Chorus [in Summoner; rank 3]",
     "spell: Read Aura [in Summoner; rank 0]",
     "spell: Scatter Scree [in Summoner; rank 0]",
+    "spell: Silver Spear [in Eidolon; rank 6]",
+    "spell: Silver Spear [in Summoner; rank 6]",
     "spellcastingEntry: Eidolon",
     "spellcastingEntry: Primal Focus Tradition",
     "spellcastingEntry: Summoner",
@@ -162,17 +165,13 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Eidolon [primal; prepared; cha; proficiency 3] rank 0: 2 [Prestidigitation, Know the Way] | rank 6: 1 [-] | rank 7: 1 [Execute]",
+    "Eidolon [primal; prepared; cha; proficiency 3] rank 0: 2 [Prestidigitation, Know the Way] | rank 6: 1 [Silver Spear] | rank 7: 1 [Execute]",
     "Primal Focus Tradition [primal; focus; cha; proficiency 3]",
-    "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Prestidigitation, Know the Way, Scatter Scree, Read Aura, Live Wire] | rank 1: 2 [Noxious Vapors, Gentle Landing] | rank 2: 2 [Disorienting Flash] | rank 3: 2 [Primal Chorus, Animal Vision] | rank 4: 2 [Magnetize, Coral Eruption] | rank 5: 2 [Mariner's Curse, Healing Well] | rank 6: 2 [Cryostasis] | rank 7: 2 [Execute, Lifewood Cage] | rank 8: 2 [Monstrosity Form, Metallic Meteorite Glyph] | rank 9: 2 [One with the Land, Implosion]"
+    "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Prestidigitation, Know the Way, Scatter Scree, Read Aura, Live Wire] | rank 1: 2 [Noxious Vapors, Gentle Landing] | rank 2: 2 [Disorienting Flash, Piercing Jet] | rank 3: 2 [Primal Chorus, Animal Vision] | rank 4: 2 [Magnetize, Coral Eruption] | rank 5: 2 [Mariner's Curse, Healing Well] | rank 6: 2 [Silver Spear, Cryostasis] | rank 7: 2 [Execute, Lifewood Cage] | rank 8: 2 [Monstrosity Form, Metallic Meteorite Glyph] | rank 9: 2 [One with the Land, Implosion]"
   ],
   "report": {
     "special": [
       "Claw Armament"
-    ],
-    "spell": [
-      "Piercing Jet",
-      "Silver Spear"
     ],
     "pet": [
       "Eidolon (Energy Heart: acid)"

@@ -134,6 +134,7 @@
     "spell: Poltergeist's Fury [in Bard; rank 6]",
     "spell: Proximal Shift [in Bard; rank 6]",
     "spell: Radiant Field [in Bard; rank 2]",
+    "spell: Roar of Freedom [in Bard; rank 8]",
     "spell: Roaring Applause [in Bard; rank 3]",
     "spell: Runic Weapon [in Bard; rank 1]",
     "spell: Shadow Raid [in Bard; rank 7]",
@@ -157,14 +158,10 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Time Sense, Sigil, Void Warp, Bullhorn, Daze] | rank 1: 3 [Agitate, Lose the Path, Runic Weapon] | rank 2: 3 [Charitable Urge, Radiant Field, Clear Mind] | rank 3: 3 [Roaring Applause, Begone, Speak With Magic] | rank 4: 3 [Vapor Form, Vital Seed, Fey Form] | rank 5: 3 [Wave of Despair, Tree of Life and Death, Strange Geometry] | rank 6: 3 [Proximal Shift, Poltergeist's Fury, Collective Transposition] | rank 7: 3 [Telekinetic Bombardment, Momentary Recovery, Shadow Raid] | rank 8: 3 [Stop Heart, Disappearance] | rank 9: 3 [Phantasmagoria, Foresight, Voracious Gestalt] | rank 10: 1 [Fabricated Truth]",
+    "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Time Sense, Sigil, Void Warp, Bullhorn, Daze] | rank 1: 3 [Agitate, Lose the Path, Runic Weapon] | rank 2: 3 [Charitable Urge, Radiant Field, Clear Mind] | rank 3: 3 [Roaring Applause, Begone, Speak With Magic] | rank 4: 3 [Vapor Form, Vital Seed, Fey Form] | rank 5: 3 [Wave of Despair, Tree of Life and Death, Strange Geometry] | rank 6: 3 [Proximal Shift, Poltergeist's Fury, Collective Transposition] | rank 7: 3 [Telekinetic Bombardment, Momentary Recovery, Shadow Raid] | rank 8: 3 [Stop Heart, Roar of Freedom, Disappearance] | rank 9: 3 [Phantasmagoria, Foresight, Voracious Gestalt] | rank 10: 1 [Fabricated Truth]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [
     "Composition Spells: Composition Cantrips"
   ],

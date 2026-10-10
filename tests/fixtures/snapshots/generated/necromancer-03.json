@@ -79,6 +79,7 @@
     "feat: Fascinating Performance [slot skill-20; level 1; taken 20]",
     "feat: Fatal Method [in Necromancer; level 1; fatalMethod=Compendium.pf2e.classfeatures.Item.u9U4ySRgjX77gwsq]",
     "feat: Flesh [level 1; granted by Grim Fascination]",
+    "feat: Flock as One [slot ancestry-17; level 17; taken 17]",
     "feat: Forager [level 1; granted by Scavenger Strix]",
     "feat: Grave Spells [in Necromancer; level 1]",
     "feat: Grim Fascination [in Necromancer; level 1; grimFascination=Compendium.pf2e.classfeatures.Item.nJLKij2UY2nxVmb9]",
@@ -138,6 +139,7 @@
     "spell: Poltergeist's Fury [in Necromancer; rank 6]",
     "spell: Proximal Shift [in Necromancer; rank 6]",
     "spell: Radiant Field [in Necromancer; rank 2]",
+    "spell: Roar of Freedom [in Necromancer; rank 8]",
     "spell: Roaring Applause [in Necromancer; rank 3]",
     "spell: Sigil [in Necromancer; rank 0]",
     "spell: Stop Heart [in Necromancer; rank 8]",
@@ -161,17 +163,13 @@
   ],
   "spellcasting": [
     "Ancestor's Transformation [primal; prepared; cha; proficiency 4] rank 5: 1 [Aerial Form]",
-    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [Time Sense, Sigil, Void Warp, Bullhorn, Daze] | rank 1: 2 [Agitate, Lose the Path] | rank 2: 2 [Charitable Urge, Radiant Field] | rank 3: 2 [Roaring Applause, Begone] | rank 4: 2 [Vapor Form, Vital Seed] | rank 5: 2 [Wave of Despair, Tree of Life and Death] | rank 6: 2 [Proximal Shift, Poltergeist's Fury] | rank 7: 2 [Telekinetic Bombardment, Momentary Recovery] | rank 8: 2 [Stop Heart, -] | rank 9: 2 [Phantasmagoria, Foresight] | rank 10: 1 [Fabricated Truth]",
+    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [Time Sense, Sigil, Void Warp, Bullhorn, Daze] | rank 1: 2 [Agitate, Lose the Path] | rank 2: 2 [Charitable Urge, Radiant Field] | rank 3: 2 [Roaring Applause, Begone] | rank 4: 2 [Vapor Form, Vital Seed] | rank 5: 2 [Wave of Despair, Tree of Life and Death] | rank 6: 2 [Proximal Shift, Poltergeist's Fury] | rank 7: 2 [Telekinetic Bombardment, Momentary Recovery] | rank 8: 2 [Stop Heart, Roar of Freedom] | rank 9: 2 [Phantasmagoria, Foresight] | rank 10: 1 [Fabricated Truth]",
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Thrown Voice [primal; prepared; cha; proficiency 4] rank 1: 1 [Ventriloquism]"
   ],
   "report": {
     "feat": [
-      "Flock As One",
       "Void Siphon[Reaction]"
-    ],
-    "spell": [
-      "Roar of Freedom"
     ]
   },
   "described": [

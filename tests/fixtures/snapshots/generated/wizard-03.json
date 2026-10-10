@@ -70,6 +70,7 @@
     "feat: Archwizard's Spellcraft [in Wizard; level 19]",
     "feat: Armor Proficiency (Light) [slot general-3; level 1; taken 3; armorProficiency=light]",
     "feat: Assurance (Arcana) [slot skill-6; level 1; taken 6; assurance=arcana]",
+    "feat: Become as Shadow [slot ancestry-17; level 17; taken 17]",
     "feat: Bonded Animal [slot skill-14; level 2; taken 14]",
     "feat: Bonded Focus [slot class-14; level 14; taken 14]",
     "feat: Canny Acumen (Will) [slot general-19; level 1; taken 19; cannyAcumen=system.saves.will.rank]",
@@ -103,6 +104,7 @@
     "feat: Steady Spellcasting [slot class-6; level 6; taken 6]",
     "feat: Toughness [slot general-15; level 1; taken 15]",
     "feat: Train Animal [slot skill-20; level 1; taken 20]",
+    "feat: Umbra Ally [slot ancestry-13; level 13; taken 13]",
     "feat: Unified Theory [slot skill-18; level 15; taken 18]",
     "feat: Virtuosic Performer (Acting) [slot skill-8; level 1; taken 8; performanceType=acting]",
     "feat: Weapon Expertise [in Wizard; level 11]",
@@ -134,6 +136,7 @@
     "spell: Mountain Resilience [in Wizard; rank 4]",
     "spell: Musical Accompaniment [in Wizard; rank 0]",
     "spell: Quicken Time [in Wizard; rank 5]",
+    "spell: Roar of Freedom [in Wizard; rank 8]",
     "spell: Skeleton Army [in Wizard; rank 6]",
     "spell: Stars of Another Sky [in Wizard; rank 8]",
     "spell: Summon Construct [in Wizard; rank 1]",
@@ -156,18 +159,11 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Musical Accompaniment, Message, Time Sense, Light, Warp Step, -] | rank 1: 4 [Summon Construct, Invisible Item, Tailwind, -] | rank 2: 4 [Final Sacrifice, Fear the Sun, Embed Message, -] | rank 3: 4 [Blazing Dive, Time Pocket, Inertia Lock, -] | rank 4: 4 [Mountain Resilience, Living Terrain, Wall of Fire, -] | rank 5: 4 [Quicken Time, Horizon's Veil, Wall of Ice, -] | rank 6: 4 [Skeleton Army, Vibrant Pattern, Explosive Barrage, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Stars of Another Sky, Disappearance, -, -] | rank 9: 4 [Bilocation, Incarnate Draconic Legion, Foresight, -] | rank 10: 1 [Cataclysm]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Musical Accompaniment, Message, Time Sense, Light, Warp Step, -] | rank 1: 4 [Summon Construct, Invisible Item, Tailwind, -] | rank 2: 4 [Final Sacrifice, Fear the Sun, Embed Message, -] | rank 3: 4 [Blazing Dive, Time Pocket, Inertia Lock, -] | rank 4: 4 [Mountain Resilience, Living Terrain, Wall of Fire, -] | rank 5: 4 [Quicken Time, Horizon's Veil, Wall of Ice, -] | rank 6: 4 [Skeleton Army, Vibrant Pattern, Explosive Barrage, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Stars of Another Sky, Roar of Freedom, Disappearance, -] | rank 9: 4 [Bilocation, Incarnate Draconic Legion, Foresight, -] | rank 10: 1 [Cataclysm]"
   ],
   "report": {
-    "feat": [
-      "Become As Shadow",
-      "Umbra Ally"
-    ],
     "special": [
       "Arcane School: School of Breathtaking Influence"
-    ],
-    "spell": [
-      "Roar of Freedom"
     ]
   },
   "described": [],

@@ -2,8 +2,8 @@
   "character": {
     "name": "PMTG Commander 02",
     "level": 20,
-    "ancestry": null,
-    "heritage": null,
+    "ancestry": "Bugbear",
+    "heritage": "Koblak Bugbear",
     "background": "Amnesiac",
     "class": "Commander",
     "deity": null,
@@ -12,14 +12,16 @@
       "str": 4,
       "dex": 2,
       "con": 5,
-      "int": 5,
+      "int": 4,
       "wis": 4,
-      "cha": 2
+      "cha": 3
     },
-    "hp": 260,
+    "hp": 270,
     "ac": 38,
     "perception": 3,
-    "senses": [],
+    "senses": [
+      "darkvision"
+    ],
     "saves": {
       "fortitude": 2,
       "reflex": 3,
@@ -45,8 +47,10 @@
     },
     "languages": [
       "chthonian",
+      "common",
       "draconic",
       "elven",
+      "goblin",
       "jotun"
     ],
     "size": "med",
@@ -68,15 +72,17 @@
     "action: Pop, Drop, and Lock [granted by Legendary Tactician]",
     "action: Ready, Aim, Fire!",
     "action: Wait For It... [granted by Expert Tactician]",
+    "ancestry: Bugbear",
     "background: Amnesiac",
     "class: Commander",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 1; granted by Bugbear Lore]",
     "feat: Armor Assist [slot skill-18; level 1; taken 18]",
     "feat: Armor Expertise [in Commander; level 11]",
     "feat: Armor Mastery [in Commander; level 17]",
     "feat: Armored Regiment Training [slot class-1; level 1; taken 1]",
     "feat: Banner Twirl [slot class-6; level 4; taken 6]",
     "feat: Battlefield Intuition [in Commander; level 15]",
+    "feat: Bugbear Lore [slot ancestry-1; level 1; taken 1]",
     "feat: Charming Liar [slot skill-4; level 1; taken 4]",
     "feat: Commander's Banner [in Commander; level 1]",
     "feat: Commanding Will [in Commander; level 11]",
@@ -90,14 +96,17 @@
     "feat: Greater Weapon Specialization [in Commander; level 15]",
     "feat: Incredible Initiative [slot general-19; level 1; taken 19]",
     "feat: Keen Follower [slot general-15; level 3; taken 15]",
+    "feat: Know I Approach [slot ancestry-17; level 13; taken 17]",
     "feat: Legendary Professional [slot skill-16; level 15; taken 16]",
     "feat: Legendary Tactician [in Commander; level 19; firstTactic=Compendium.pf2e.actionspf2e.Item.ut0jFv67YpvHBzD9; secondTactic=Compendium.pf2e.actionspf2e.Item.6YIG6eVGTplWubGb]",
     "feat: Lie to Me [slot skill-14; level 1; taken 14]",
     "feat: Master Tactician [in Commander; level 15; firstTactic=Compendium.pf2e.actionspf2e.Item.EKEZGfOBKTNWTFDe; secondTactic=Compendium.pf2e.actionspf2e.Item.NVLqYqkkQaCdnWWk]",
     "feat: Mercenary Reversal [slot class-18; level 18; taken 18]",
     "feat: Military Expertise [in Commander; level 5]",
+    "feat: Mocking Invisibility [slot ancestry-13; level 9; taken 13]",
     "feat: Perception Mastery [in Commander; level 13]",
     "feat: Plant Banner [slot class-2; level 1; taken 2]",
+    "feat: Prey Disguise [slot ancestry-5; level 5; taken 5]",
     "feat: Quick Disguise [slot skill-20; level 2; taken 20]",
     "feat: Quickening Banner [slot class-16; level 14; taken 16]",
     "feat: Reactive Interference [slot class-14; level 12; taken 14]",
@@ -111,11 +120,13 @@
     "feat: Standard-Bearer's Sacrifice [slot class-12; level 10; taken 12]",
     "feat: Swift Sneak [slot skill-8; level 7; taken 8]",
     "feat: Tactics [in Commander; level 1; fifthTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; firstTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; fourthTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; secondTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; thirdTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE]",
+    "feat: Terrorize [slot ancestry-9; level 9; taken 9]",
     "feat: Untrained Improvisation [slot general-3; level 3; taken 3]",
     "feat: Warfare Expertise [in Commander; level 3]",
     "feat: Weapon Mastery [in Commander; level 13]",
     "feat: Weapon Proficiency [slot general-11; level 1; taken 11]",
     "feat: Weapon Specialization [in Commander; level 7]",
+    "heritage: Koblak Bugbear",
     "lore: Bugbear [rank 4]",
     "lore: Warfare [rank 4]",
     "spell: Fear [in Bugbear Feat 9; rank 3]",
@@ -134,21 +145,7 @@
     "Bugbear Feat 5 [occult; prepared; cha; proficiency 1] rank 1: 1 [Illusory Disguise]",
     "Bugbear Feat 9 [primal; prepared; cha; proficiency 1] rank 3: 1 [Fear]"
   ],
-  "report": {
-    "ancestry": [
-      "Bugbear"
-    ],
-    "heritage": [
-      "Koblak Bugbear"
-    ],
-    "feat": [
-      "Bugbear Lore",
-      "Know I Approach",
-      "Mocking Invisibility",
-      "Prey Disguise",
-      "Terrorize"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Tactics: Coordinating Maneuvers",

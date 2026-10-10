@@ -61,7 +61,7 @@
     "ancestry: Fetchling",
     "background: Blessed",
     "class: Witch",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 1; granted by Fetchling Lore]",
     "feat: Alchemical Crafting [slot skill-10; level 1; taken 10]",
     "feat: Breath Control [slot general-15; level 1; taken 15]",
     "feat: Canny Acumen (Reflex) [slot general-19; level 1; taken 19; cannyAcumen=system.saves.reflex.rank]",

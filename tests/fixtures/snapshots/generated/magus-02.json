@@ -156,6 +156,7 @@
     "spell: Remake Physiology [in Magus; rank 9]",
     "spell: Restyle [in Magus; rank 1]",
     "spell: Roaring Applause [in Magus; rank 3]",
+    "spell: Searing Rain [in Magus; rank 5]",
     "spell: Slither [in Magus; rank 5]",
     "spell: Slow [in Magus; rank 3]",
     "spell: Summon Elemental [in Magus; rank 2]",
@@ -188,11 +189,7 @@
     "Secrets of the Past [occult; prepared; cha; proficiency 3] rank 3: 1 [Hypercognition]",
     "Water to Water [occult; prepared; cha; proficiency 3] rank 4: 2 [Translocate, Translocate]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

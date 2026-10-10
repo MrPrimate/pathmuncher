@@ -128,6 +128,7 @@
     "spell: Read the Air [in Sorcerer; rank 0]",
     "spell: Return To Essence [in Sorcerer; rank 7]",
     "spell: Revealing Light [in Sorcerer; rank 2]",
+    "spell: Silver Spear [in Sorcerer; rank 6]",
     "spell: Speak With Magic [in Sorcerer; rank 3]",
     "spell: Stars of Another Sky [in Sorcerer; rank 8]",
     "spell: Summon Celestial [in Sorcerer; rank 5]",
@@ -150,11 +151,10 @@
   ],
   "spellcasting": [
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
-    "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Detect Magic, Wash Your Luck] | rank 1: 4 [Alarm, Thoughtful Gift, Elysian Whimsy] | rank 2: 4 [Revealing Light, Floating Harness, Ghoulish Cravings] | rank 3: 4 [Speak With Magic, Whirling Scarves, Life Pact] | rank 4: 4 [Forgotten Lines, Unfettered Movement] | rank 5: 4 [Summon Celestial, Temporary Glyph, Summon Dragon] | rank 6: 4 [Dragon Form, Catch Your Name] | rank 7: 4 [Return To Essence, Divine Decree, Interplanar Teleport] | rank 8: 4 [Stars of Another Sky, Unholy Army] | rank 9: 4 [Weapon of Judgment, Voracious Gestalt, Telepathic Demand] | rank 10: 1 [Gate]"
+    "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Detect Magic, Wash Your Luck] | rank 1: 4 [Alarm, Thoughtful Gift, Elysian Whimsy] | rank 2: 4 [Revealing Light, Floating Harness, Ghoulish Cravings] | rank 3: 4 [Speak With Magic, Whirling Scarves, Life Pact] | rank 4: 4 [Forgotten Lines, Unfettered Movement] | rank 5: 4 [Summon Celestial, Temporary Glyph, Summon Dragon] | rank 6: 4 [Dragon Form, Silver Spear, Catch Your Name] | rank 7: 4 [Return To Essence, Divine Decree, Interplanar Teleport] | rank 8: 4 [Stars of Another Sky, Unholy Army] | rank 9: 4 [Weapon of Judgment, Voracious Gestalt, Telepathic Demand] | rank 10: 1 [Gate]"
   ],
   "report": {
     "spell": [
-      "Silver Spear",
       "War March"
     ]
   },

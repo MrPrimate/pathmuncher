@@ -69,6 +69,7 @@
     "feat: Express Rider [slot skill-8; level 1; taken 8]",
     "feat: Far Shot [slot class-6; level 4; taken 6]",
     "feat: Fascinating Performance [slot skill-2; level 1; taken 2]",
+    "feat: Galloping Launch [slot class-8; level 4; taken 8]",
     "feat: Greater Natural Reflexes [in Ranger; level 15]",
     "feat: Greater Weapon Specialization [in Ranger; level 15]",
     "feat: Group Impression [in Barrister; level 1]",
@@ -129,11 +130,7 @@
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 1] rank 0: 1 [Detect Magic]",
     "Splendid Illusion [primal; prepared; cha; proficiency 3] rank 6: 1 [Illusory Scene]"
   ],
-  "report": {
-    "feat": [
-      "Galloping Launch"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Virtuosic Performer: Acting (guessed)"

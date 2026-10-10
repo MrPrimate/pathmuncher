@@ -124,6 +124,7 @@
     "spell: Force Barrage [in Witch; rank 1]",
     "spell: Foresight [in Witch; rank 9]",
     "spell: Ghostly Carrier [in Witch; rank 2]",
+    "spell: Gift of Dusk [in Witch; rank 4]",
     "spell: Hypercognition [in Witch; rank 3]",
     "spell: Incarnate Tempest of Shades [in Witch; rank 7]",
     "spell: Infinitesimal Collapse Field [in Witch; rank 7]",
@@ -164,13 +165,9 @@
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Stem the Tide [primal; prepared; cha; proficiency 4] rank 1: 1 [Protector Tree]",
-    "Witch [occult; prepared; int; proficiency 4] rank 0: 5 [Sigil, Void Warp, Bullhorn, Daze, Read the Air] | rank 1: 3 [Anticipate Peril, Quick Sort, Force Barrage] | rank 2: 3 [Shatter, Lucky Number, Ghostly Carrier] | rank 3: 3 [Speak with Plants, Reblooded, Hypercognition] | rank 4: 3 [Bestial Curse, Translocate, -] | rank 5: 3 [Telekinetic Haul, Slither, Banishment] | rank 6: 3 [Blinding Fury, Speak With Water, Awaken Entropy] | rank 7: 3 [Puppet Strings, Infinitesimal Collapse Field, Incarnate Tempest of Shades] | rank 8: 3 [Unholy Army, Shipwreck, Stars of Another Sky] | rank 9: 3 [Foresight, Voracious Gestalt, Remake Physiology] | rank 10: 1 [Manifestation]"
+    "Witch [occult; prepared; int; proficiency 4] rank 0: 5 [Sigil, Void Warp, Bullhorn, Daze, Read the Air] | rank 1: 3 [Anticipate Peril, Quick Sort, Force Barrage] | rank 2: 3 [Shatter, Lucky Number, Ghostly Carrier] | rank 3: 3 [Speak with Plants, Reblooded, Hypercognition] | rank 4: 3 [Bestial Curse, Translocate, Gift of Dusk] | rank 5: 3 [Telekinetic Haul, Slither, Banishment] | rank 6: 3 [Blinding Fury, Speak With Water, Awaken Entropy] | rank 7: 3 [Puppet Strings, Infinitesimal Collapse Field, Incarnate Tempest of Shades] | rank 8: 3 [Unholy Army, Shipwreck, Stars of Another Sky] | rank 9: 3 [Foresight, Voracious Gestalt, Remake Physiology] | rank 10: 1 [Manifestation]"
   ],
-  "report": {
-    "spell": [
-      "Gift of Dusk"
-    ]
-  },
+  "report": {},
   "described": [
     "Starless Shadow: Familiar of Stalking Night"
   ],

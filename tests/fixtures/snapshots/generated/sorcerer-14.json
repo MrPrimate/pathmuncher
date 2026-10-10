@@ -139,6 +139,7 @@
     "spell: Regenerate [in Sorcerer; rank 7]",
     "spell: Remake Physiology [in Sorcerer; rank 9]",
     "spell: Revival [in Sorcerer; rank 10]",
+    "spell: Silver Spear [in Sorcerer; rank 6]",
     "spell: Soothing Spring [in Sorcerer; rank 4]",
     "spell: Summon Animal [in Sorcerer; rank 1]",
     "spell: Summon Dragon [in Sorcerer; rank 5]",
@@ -154,13 +155,9 @@
   ],
   "spellcasting": [
     "Primal Focus Tradition [primal; focus; cha; proficiency 4]",
-    "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Frostbite, Gouging Claw, Guidance, Caustic Blast] | rank 1: 4 [Summon Animal, Mud Pit, Hippocampus Retreat] | rank 2: 4 [Floating Flame, Frozen Lungs, Darkness] | rank 3: 4 [Web of Eyes, Corpse Bloom, Insect Form] | rank 4: 4 [Unfettered Movement, Fly, Soothing Spring] | rank 5: 4 [Ember Doppelgänger, Acid Storm, Summon Dragon] | rank 6: 4 [Truesight, Blanket of Stars] | rank 7: 4 [Eclipse Burst, Fiery Body, Regenerate] | rank 8: 4 [Moment of Renewal, Desiccate, Clone Companion] | rank 9: 4 [Nature's Enmity, Remake Physiology, Metamorphosis] | rank 10: 1 [Revival]"
+    "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Frostbite, Gouging Claw, Guidance, Caustic Blast] | rank 1: 4 [Summon Animal, Mud Pit, Hippocampus Retreat] | rank 2: 4 [Floating Flame, Frozen Lungs, Darkness] | rank 3: 4 [Web of Eyes, Corpse Bloom, Insect Form] | rank 4: 4 [Unfettered Movement, Fly, Soothing Spring] | rank 5: 4 [Ember Doppelgänger, Acid Storm, Summon Dragon] | rank 6: 4 [Truesight, Blanket of Stars, Silver Spear] | rank 7: 4 [Eclipse Burst, Fiery Body, Regenerate] | rank 8: 4 [Moment of Renewal, Desiccate, Clone Companion] | rank 9: 4 [Nature's Enmity, Remake Physiology, Metamorphosis] | rank 10: 1 [Revival]"
   ],
-  "report": {
-    "spell": [
-      "Silver Spear"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Wyrmblessed"

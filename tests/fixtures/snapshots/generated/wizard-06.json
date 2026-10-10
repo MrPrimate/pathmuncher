@@ -138,6 +138,7 @@
     "spell: Quicken Time [in Wizard; rank 5]",
     "spell: Repulsion [in Wizard; rank 6]",
     "spell: Resplendent Mansion [in Wizard; rank 9]",
+    "spell: Roar of Freedom [in Wizard; rank 8]",
     "spell: Spout [in Wizard; rank 0]",
     "spell: Telekinetic Bombardment [in Wizard; rank 7]",
     "spell: Telekinetic Haul [in Wizard; rank 5]",
@@ -158,13 +159,9 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Unhampered Passage [primal; prepared; cha; proficiency 4] rank 4: 1 [Unfettered Movement]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Warp Step, Electric Arc, Phase Bolt, Detect Magic, Spout, -] | rank 1: 4 [Kinetic Ram, Hippocampus Retreat, Charm, -] | rank 2: 4 [Laughing Fit, Disintegrating Puddle, Vanish Weapon, -] | rank 3: 4 [Gravity Wave, Earthbind, Cozy Cabin, -] | rank 4: 4 [Telepathy, Flicker, Magnetize, -] | rank 5: 4 [Telekinetic Haul, Quicken Time, Horizon's Veil, -] | rank 6: 4 [Boots on the Ground, Repulsion, Cursed Metamorphosis, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Disappearance, Dream Council, -, -] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars, -] | rank 10: 1 [Indestructibility]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Warp Step, Electric Arc, Phase Bolt, Detect Magic, Spout, -] | rank 1: 4 [Kinetic Ram, Hippocampus Retreat, Charm, -] | rank 2: 4 [Laughing Fit, Disintegrating Puddle, Vanish Weapon, -] | rank 3: 4 [Gravity Wave, Earthbind, Cozy Cabin, -] | rank 4: 4 [Telepathy, Flicker, Magnetize, -] | rank 5: 4 [Telekinetic Haul, Quicken Time, Horizon's Veil, -] | rank 6: 4 [Boots on the Ground, Repulsion, Cursed Metamorphosis, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Roar of Freedom, Disappearance, Dream Council, -] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars, -] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

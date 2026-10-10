@@ -84,6 +84,7 @@
     "feat: Armored Regiment Training [slot class-2; level 1; taken 2]",
     "feat: Battle Planner [slot skill-20; level 2; taken 20]",
     "feat: Battlefield Intuition [in Commander; level 15]",
+    "feat: Become as Shadow [slot ancestry-17; level 17; taken 17]",
     "feat: Bonded Animal [slot skill-12; level 2; taken 12]",
     "feat: Canny Acumen (Will) [slot general-19; level 1; taken 19; cannyAcumen=system.saves.will.rank]",
     "feat: Commander's Banner [in Commander; level 1]",
@@ -120,6 +121,7 @@
     "feat: Slink [slot ancestry-1; level 1; taken 1]",
     "feat: Standard-Bearer's Sacrifice [slot class-10; level 10; taken 10]",
     "feat: Tactics [in Commander; level 1; fifthTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; firstTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; fourthTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; secondTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE; thirdTactic=Compendium.pf2e.actionspf2e.Item.Kp325Qf0qpF6RCDE]",
+    "feat: Umbra Ally [slot ancestry-13; level 13; taken 13]",
     "feat: Unified Theory [slot skill-18; level 15; taken 18]",
     "feat: Unmistakable Lore [slot skill-6; level 2; taken 6]",
     "feat: Untrained Improvisation [slot general-15; level 3; taken 15]",
@@ -135,12 +137,7 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "feat": [
-      "Become As Shadow",
-      "Umbra Ally"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Tactics: Coordinating Maneuvers",

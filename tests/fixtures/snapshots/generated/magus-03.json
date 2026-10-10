@@ -141,6 +141,7 @@
     "spell: Mountain Resilience [in Magus; rank 4]",
     "spell: Musical Accompaniment [in Magus; rank 0]",
     "spell: Quicken Time [in Magus; rank 5]",
+    "spell: Roar of Freedom [in Magus; rank 8]",
     "spell: Skeleton Army [in Magus; rank 6]",
     "spell: Stars of Another Sky [in Magus; rank 8]",
     "spell: Summon Construct [in Magus; rank 1]",
@@ -166,15 +167,11 @@
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 3] rank 0: 1 [Detect Magic]",
     "Light-Bending Jewel [occult; prepared; cha; proficiency 3] rank 4: 1 [Invisibility]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Musical Accompaniment, Message, Time Sense, Light, Warp Step] | rank 1: 2 [Summon Construct, Invisible Item] | rank 2: 2 [Final Sacrifice, Fear the Sun] | rank 3: 2 [Blazing Dive, Time Pocket] | rank 4: 2 [Mountain Resilience, Living Terrain] | rank 5: 2 [Quicken Time, Horizon's Veil] | rank 6: 2 [Skeleton Army, Vibrant Pattern] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Stars of Another Sky, -] | rank 9: 2 [Bilocation, Incarnate Draconic Legion]",
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Musical Accompaniment, Message, Time Sense, Light, Warp Step] | rank 1: 2 [Summon Construct, Invisible Item] | rank 2: 2 [Final Sacrifice, Fear the Sun] | rank 3: 2 [Blazing Dive, Time Pocket] | rank 4: 2 [Mountain Resilience, Living Terrain] | rank 5: 2 [Quicken Time, Horizon's Veil] | rank 6: 2 [Skeleton Army, Vibrant Pattern] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Stars of Another Sky, Roar of Freedom] | rank 9: 2 [Bilocation, Incarnate Draconic Legion]",
     "Sheltering Jewel [occult; prepared; cha; proficiency 3] rank 5: 1 [Vital Beacon]",
     "The Moon Weaver's Art [occult; prepared; cha; proficiency 3] rank 1: 1 [Illusory Object]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Virtuosic Performer: Acting (guessed)"

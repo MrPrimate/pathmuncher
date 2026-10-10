@@ -60,7 +60,7 @@
     "background: Driver",
     "class: Oracle",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 5; granted by Strix Lore]",
     "feat: Assurance (Acrobatics) [in Driver; level 1; unresolved assurance]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
     "feat: Concealing Legerdemain [slot skill-2; level 1; taken 2]",
@@ -75,6 +75,7 @@
     "feat: Expert Spellcaster [in Oracle; level 7]",
     "feat: Express Rider [slot skill-14; level 1; taken 14]",
     "feat: Extreme Curse [in Oracle; level 17]",
+    "feat: Flock as One [slot ancestry-17; level 17; taken 17]",
     "feat: Forestall Curse [slot class-14; level 14; taken 14]",
     "feat: Greater Mysterious Resolve [in Oracle; level 17]",
     "feat: Incredible Investiture [slot general-15; level 11; taken 15]",
@@ -113,6 +114,7 @@
     "feat: Unmistakable Lore [slot skill-6; level 2; taken 6]",
     "feat: Weapon Expertise [in Oracle; level 11]",
     "feat: Weapon Specialization [in Oracle; level 13]",
+    "feat: Winged Mantle [slot ancestry-13; level 13; taken 13]",
     "feat: Wings [in Strix; level 1]",
     "heritage: Nightglider Strix",
     "lore: Driving [rank 1]",
@@ -177,10 +179,6 @@
     "Thrown Voice [primal; prepared; cha; proficiency 4] rank 1: 1 [Ventriloquism]"
   ],
   "report": {
-    "feat": [
-      "Flock As One",
-      "Winged Mantle"
-    ],
     "special": [
       "Nothingness"
     ],

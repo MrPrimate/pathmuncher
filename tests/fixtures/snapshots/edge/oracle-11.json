@@ -128,7 +128,6 @@
     "spell: Cloak of Light [in Oracle; rank 4]",
     "spell: Divine Dragon's Watch [in Oracle; rank 5]",
     "spell: Divine Inspiration [in Oracle; rank 8]",
-    "spell: Divine Vessel [in Oracle; rank 7]",
     "spell: Fateful Condemnation [in Oracle; rank 6]",
     "spell: Fear the Sun [in Oracle; rank 2]",
     "spell: Final Sacrifice [in Oracle; rank 2]",
@@ -140,6 +139,7 @@
     "spell: Impending Doom [in Oracle; rank 3]",
     "spell: Incarnate Ancient Specter [in Oracle; rank 7]",
     "spell: Invisibility [in First World Adept; rank 2]",
+    "spell: Kiss the Ring [in Oracle; rank 6]",
     "spell: Massacre [in Oracle; rank 9]",
     "spell: Necrotize [in Oracle; rank 6]",
     "spell: Protection [in Oracle; rank 1]",
@@ -172,11 +172,11 @@
   "spellcasting": [
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "First World Adept [primal; prepared; cha; proficiency 4] rank 2: 2 [Invisibility, Revealing Light]",
-    "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Stabilize, Tremor Signs, Summon Instrument, Vitality Lash, Approximate] | rank 1: 4 [Runic Weapon, Fishing Spot, Protection, Summon Lesser Servitor] | rank 2: 4 [Final Sacrifice, Fear the Sun, Gentle Breeze, Allfood] | rank 3: 4 [Heatvision, Horde of Underlings, Blindness, Impending Doom] | rank 4: 4 [Sacred Nimbus, Spiritual Anamnesis, Cloak of Light, Fly] | rank 5: 4 [Divine Dragon's Watch, Spiritual Guardian, Summon Axiom, Truespeech] | rank 6: 4 [Blessed Boundary, Necrotize, Fateful Condemnation] | rank 7: 4 [Incarnate Ancient Specter, Shock to the System, Divine Vessel, Spell Riposte] | rank 8: 4 [Spiritual Epidemic, Divine Inspiration, Antimagic Field, Stars of Another Sky] | rank 9: 4 [Call Fluxwraith, Wails of the Damned, Astral Labyrinth, Massacre] | rank 10: 1 [Avatar]"
+    "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Stabilize, Tremor Signs, Summon Instrument, Vitality Lash, Approximate] | rank 1: 4 [Runic Weapon, Fishing Spot, Protection, Summon Lesser Servitor] | rank 2: 4 [Final Sacrifice, Fear the Sun, Gentle Breeze, Allfood] | rank 3: 4 [Heatvision, Horde of Underlings, Blindness, Impending Doom] | rank 4: 4 [Sacred Nimbus, Spiritual Anamnesis, Cloak of Light, Fly] | rank 5: 4 [Divine Dragon's Watch, Spiritual Guardian, Summon Axiom, Truespeech] | rank 6: 4 [Blessed Boundary, Kiss the Ring, Necrotize, Fateful Condemnation] | rank 7: 4 [Incarnate Ancient Specter, Shock to the System, Spell Riposte] | rank 8: 4 [Spiritual Epidemic, Divine Inspiration, Antimagic Field, Stars of Another Sky] | rank 9: 4 [Call Fluxwraith, Wails of the Damned, Astral Labyrinth, Massacre] | rank 10: 1 [Avatar]"
   ],
   "report": {
     "spell": [
-      "Kiss the Ring"
+      "Divine Vessel"
     ]
   },
   "described": [],

@@ -96,7 +96,7 @@
     "feat: Legendary Armor [in Champion; level 17]",
     "feat: Lengthy Diversion [slot skill-2; level 1; taken 2]",
     "feat: Liberation [level 1; granted by Cause]",
-    "feat: Lizardfolk Lore [slot ancestry-5; level 1; taken 5]",
+    "feat: Lizardfolk Lore [slot ancestry-5; level 1; taken 5; lizardfolkLore={\"label\":\"PF2E.SpecificLore.Astrology\",\"lore\":\"astrology-lore\"}]",
     "feat: Martial Weapon Mastery [in Champion; level 13]",
     "feat: Oath of the Defender [slot class-6; level 2; taken 6; oathOfTheDefender=aberration]",
     "feat: Perception Expertise [in Champion; level 11]",
@@ -142,7 +142,6 @@
   ],
   "report": {
     "special": [
-      "Astrology Lore",
       "Claw Armament"
     ]
   },

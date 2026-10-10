@@ -145,6 +145,7 @@
     "spell: Proximal Shift [in Wizard; rank 6]",
     "spell: Remake Physiology [in Wizard; rank 9]",
     "spell: Rouse Skeletons [in Wizard; rank 3]",
+    "spell: Rude awakening [in Wizard; rank 1]",
     "spell: Shadow Army [in Wizard; rank 10]",
     "spell: Shadow Strike [in Wizard; rank 4]",
     "spell: Summon Dragon [in Wizard; rank 5]",
@@ -166,13 +167,9 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Speaker in Training [primal; prepared; cha; proficiency 4] rank 1: 1 [Fleet Step]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 5 [Infectious Enthusiasm, Live Wire, Gouging Claw, Summon Instrument, Gale Blast] | rank 1: 3 [Breathe Fire, Item Facade, -] | rank 2: 3 [Everlight, Familiar's Resurrection, Blur] | rank 3: 3 [Wall of Wind, Rouse Skeletons, Wall of Thorns] | rank 4: 3 [Wall of Fire, Vapor Form, Shadow Strike] | rank 5: 3 [Summon Dragon, Etheric Shards, Glacial Skewer] | rank 6: 3 [Necrotize, Proximal Shift, Elemental Confluence] | rank 7: 3 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 3 [Earthquake, Monstrosity Form, Uncontrollable Dance] | rank 9: 3 [Falling Stars, Remake Physiology, Massacre] | rank 10: 1 [Shadow Army]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 5 [Infectious Enthusiasm, Live Wire, Gouging Claw, Summon Instrument, Gale Blast] | rank 1: 3 [Breathe Fire, Rude awakening, Item Facade] | rank 2: 3 [Everlight, Familiar's Resurrection, Blur] | rank 3: 3 [Wall of Wind, Rouse Skeletons, Wall of Thorns] | rank 4: 3 [Wall of Fire, Vapor Form, Shadow Strike] | rank 5: 3 [Summon Dragon, Etheric Shards, Glacial Skewer] | rank 6: 3 [Necrotize, Proximal Shift, Elemental Confluence] | rank 7: 3 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 3 [Earthquake, Monstrosity Form, Uncontrollable Dance] | rank 9: 3 [Falling Stars, Remake Physiology, Massacre] | rank 10: 1 [Shadow Army]"
   ],
-  "report": {
-    "spell": [
-      "Rude Awakening"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

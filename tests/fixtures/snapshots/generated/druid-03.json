@@ -144,6 +144,7 @@
     "spell: Reaper's Lantern [in Druid; rank 2]",
     "spell: Shockwave [in Druid; rank 1]",
     "spell: Sigil [in Druid; rank 0]",
+    "spell: Silver Spear [in Druid; rank 6]",
     "spell: Spout [in Druid; rank 0]",
     "spell: Tame [in Druid; rank 0]",
     "spell: Vanishing Tracks [in Druid; rank 1]",
@@ -158,14 +159,10 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Live Wire, Spout, Sigil, Glamorize, Tame] | rank 1: 3 [Shockwave, Vanishing Tracks, Metal Merged] | rank 2: 3 [Reaper's Lantern, Dancing Shield, Oaken Resilience] | rank 3: 3 [Envenom Companion, Blister Bomb, Blindness] | rank 4: 3 [Vapor Form, Fire Shield, Petal Storm] | rank 5: 3 [Confusing Cry, Plant Form, Mantle of the Magma Heart] | rank 6: 3 [Blanket of Stars, Cryostasis, -] | rank 7: 3 [Comet Charge, Energy Aegis, Mask of Terror] | rank 8: 3 [Earthquake, Arctic Rift, Burning Blossoms] | rank 9: 3 [Massacre, Pierce the Sky, Wrathful Storm] | rank 10: 1 [Primal Herd]",
+    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Live Wire, Spout, Sigil, Glamorize, Tame] | rank 1: 3 [Shockwave, Vanishing Tracks, Metal Merged] | rank 2: 3 [Reaper's Lantern, Dancing Shield, Oaken Resilience] | rank 3: 3 [Envenom Companion, Blister Bomb, Blindness] | rank 4: 3 [Vapor Form, Fire Shield, Petal Storm] | rank 5: 3 [Confusing Cry, Plant Form, Mantle of the Magma Heart] | rank 6: 3 [Blanket of Stars, Silver Spear, Cryostasis] | rank 7: 3 [Comet Charge, Energy Aegis, Mask of Terror] | rank 8: 3 [Earthquake, Arctic Rift, Burning Blossoms] | rank 9: 3 [Massacre, Pierce the Sky, Wrathful Storm] | rank 10: 1 [Primal Herd]",
     "Primal Focus Tradition [primal; focus; wis; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Silver Spear"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "Specialty Crafting: Alchemy (guessed)",

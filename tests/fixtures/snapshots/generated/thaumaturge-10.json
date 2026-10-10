@@ -52,27 +52,27 @@
     "focus": 0
   },
   "items": [
-    "action: Amulet's Abeyance [granted by Initiate Benefit (Amulet)]",
     "action: Exploit Vulnerability [granted by Exploit Vulnerability]",
     "action: Fling Magic [granted by Initiate Benefit (Wand); wandDamageType=cold]",
     "action: Implement's Interruption [granted by Initiate Benefit (Weapon)]",
     "action: Intensify Vulnerability [granted by Intensify Vulnerability]",
+    "action: Swing the Censer [granted by Initiate Benefit (Censer)]",
     "ancestry: Lizardfolk",
     "background: Pilgrim",
     "class: Thaumaturge",
-    "equipment: Amulet Implement [granted by Amulet; qty 1; worn]",
+    "equipment: Censer Implement [granted by Censer; qty 1; worn]",
     "equipment: Wand Implement [granted by Wand; qty 1; worn]",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
-    "feat: Adept Benefit (Amulet) [level 7; taken 20; granted by Intense Implement]",
+    "feat: Adept Benefit (Censer) [level 7; taken 20; granted by Intense Implement]",
     "feat: Adept Benefit (Wand) [level 7; granted by Second Adept; adeptBenefitWand=electricity]",
     "feat: Adept Benefit (Weapon) [level 7; granted by Implement Adept]",
     "feat: Ammunition Thaumaturgy [slot class-1; level 1; taken 1]",
-    "feat: Amulet [level 1; granted by Third Implement]",
     "feat: Aquatic Adaptation [in Lizardfolk; level 1]",
     "feat: Biographical Eye [slot skill-10; level 7; taken 10]",
     "feat: Bon Mot [slot skill-14; level 1; taken 14]",
     "feat: Bone Magic [slot ancestry-1; level 1; taken 1]",
     "feat: Breath Control [level 1; granted by Aquatic Adaptation]",
+    "feat: Censer [level 1; granted by Third Implement]",
     "feat: Claws [in Lizardfolk; level 1]",
     "feat: Combat Climber [level 1; granted by Cliffscale Lizardfolk]",
     "feat: Combat Climber [level 1]",
@@ -98,11 +98,11 @@
     "feat: Improvised Repair [slot general-19; level 3; taken 19]",
     "feat: Incredible Initiative [slot general-3; level 1; taken 3]",
     "feat: Incredible Investiture [slot general-15; level 11; taken 15]",
-    "feat: Initiate Benefit (Amulet) [level 1; granted by Amulet]",
+    "feat: Initiate Benefit (Censer) [level 7; granted by Censer]",
     "feat: Initiate Benefit (Wand) [level 1; granted by Wand; initiateBenefitWand=cold]",
     "feat: Initiate Benefit (Weapon) [level 1; granted by Weapon]",
     "feat: Instructive Strike [slot class-4; level 4; taken 4]",
-    "feat: Intense Implement [slot class-20; level 18; taken 20; thirdAdept=Compendium.pf2e.classfeatures.Item.l3X6D8uMlt2y6vGS]",
+    "feat: Intense Implement [slot class-20; level 18; taken 20; thirdAdept=Compendium.pf2e.classfeatures.Item.ZOlDwzTQ9PDJsJSR]",
     "feat: Intensify Investiture [slot class-12; level 12; taken 12]",
     "feat: Intensify Vulnerability [in Thaumaturge; level 9]",
     "feat: Iruxi Spirit Strike [slot ancestry-17; level 13; taken 17]",
@@ -126,7 +126,7 @@
     "feat: Terrain Advantage [slot ancestry-13; level 9; taken 13]",
     "feat: Thaumaturgic Expertise [in Thaumaturge; level 9]",
     "feat: Thaumaturgic Mastery [in Thaumaturge; level 17]",
-    "feat: Third Implement [in Thaumaturge; level 15; implement=Compendium.pf2e.classfeatures.Item.PoclGJ7BCEyIuqJe]",
+    "feat: Third Implement [in Thaumaturge; level 15; implement=Compendium.pf2e.classfeatures.Item.X1xuYSTJ7ojsoLxY]",
     "feat: Twin Weakness [slot class-14; level 10; taken 14]",
     "feat: Unlimited Esoterica [in Thaumaturge; level 19]",
     "feat: Wand [level 1; granted by First Implement and Esoterica]",
@@ -150,15 +150,11 @@
   ],
   "report": {
     "special": [
-      "Censer",
-      "Censer Adept Benefit",
-      "Censer Initiate Benefit",
-      "Censer Intensify Vulnerability",
-      "Occult Bone Magic",
-      "Swing the Censer"
+      "Occult Bone Magic"
     ]
   },
   "described": [
+    "Censer: Censer Intensify Vulnerability",
     "Wand: Wand Intensify Vulnerability",
     "Weapon: Weapon Intensify Vulnerability"
   ],
@@ -166,7 +162,6 @@
     "Initiate Benefit (Wand): Cold (guessed)",
     "Weapon: Air Repeater (guessed)",
     "Adept Benefit (Wand): Electricity (guessed)",
-    "Specialty Crafting: Alchemy (guessed)",
-    "Third Implement: Amulet (guessed)"
+    "Specialty Crafting: Alchemy (guessed)"
   ]
 }

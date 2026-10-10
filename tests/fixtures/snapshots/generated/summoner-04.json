@@ -149,6 +149,7 @@
     "spell: Protector Tree [in Summoner; rank 1]",
     "spell: Remake Physiology [in Summoner; rank 9]",
     "spell: Sacred Beasts [in Summoner; rank 1]",
+    "spell: Searing Rain [in Summoner; rank 5]",
     "spell: Skyglass Prison [in Summoner; rank 3]",
     "spell: Speak with Plants [in Summoner; rank 3]",
     "spell: Summon Stampede [in Summoner; rank 7]",
@@ -168,12 +169,9 @@
     "Bark and Tendril [primal; prepared; cha; proficiency 3] rank 2: 2 [Oaken Resilience, Entangling Flora]",
     "Flourish and Ruin [primal; prepared; cha; proficiency 3] rank 6: 2 [Field of Life, Tangling Creepers]",
     "Primal Focus Tradition [primal; focus; cha; proficiency 3]",
-    "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc] | rank 1: 2 [Protector Tree, Sacred Beasts] | rank 2: 2 [Summoner's Precaution, Gecko Grip] | rank 3: 2 [Speak with Plants, Skyglass Prison] | rank 4: 2 [Living Terrain, Bloodspray Curse] | rank 5: 2 [Blazing Fissure] | rank 6: 2 [Cryostasis, Petrify] | rank 7: 2 [Moonburst, Summon Stampede] | rank 8: 2 [Moment of Renewal, Desiccate] | rank 9: 2 [Nature's Enmity, Remake Physiology]"
+    "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc] | rank 1: 2 [Protector Tree, Sacred Beasts] | rank 2: 2 [Summoner's Precaution, Gecko Grip] | rank 3: 2 [Speak with Plants, Skyglass Prison] | rank 4: 2 [Living Terrain, Bloodspray Curse] | rank 5: 2 [Searing Rain, Blazing Fissure] | rank 6: 2 [Cryostasis, Petrify] | rank 7: 2 [Moonburst, Summon Stampede] | rank 8: 2 [Moment of Renewal, Desiccate] | rank 9: 2 [Nature's Enmity, Remake Physiology]"
   ],
   "report": {
-    "spell": [
-      "Searing Rain"
-    ],
     "pet": [
       "Eidolon"
     ]

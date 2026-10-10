@@ -140,6 +140,7 @@
     "spell: Lifewood Cage [in Druid; rank 7]",
     "spell: Moment of Renewal [in Druid; rank 8]",
     "spell: Nature's Enmity [in Druid; rank 9]",
+    "spell: Piercing Jet [in Druid; rank 2]",
     "spell: Proximal Shift [in Druid; rank 6]",
     "spell: Remake Physiology [in Druid; rank 9]",
     "spell: Seashell of Stolen Sound [in Druid; rank 1]",
@@ -159,14 +160,10 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Ignition, Approximate, Detect Magic, Tangle Vine, Gale Blast] | rank 1: 3 [Charm, Acidic Burst, Seashell of Stolen Sound] | rank 2: 3 [Disorienting Flash, Status, -] | rank 3: 3 [Cup of Dust, Soothing Blossoms, Burning Trail] | rank 4: 3 [Filter Air, Vital Beacon, Soft Landing] | rank 5: 3 [Glacial Skewer, Impaling Spike, Confusing Cry] | rank 6: 3 [Tangling Creepers, Proximal Shift, Explosive Barrage] | rank 7: 3 [Lifewood Cage, Eclipse Burst, Fiery Body] | rank 8: 3 [Burning Blossoms, Moment of Renewal, Desiccate] | rank 9: 3 [Wrathful Storm, Nature's Enmity, Remake Physiology] | rank 10: 1 [Fated Confrontation]",
+    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Ignition, Approximate, Detect Magic, Tangle Vine, Gale Blast] | rank 1: 3 [Charm, Acidic Burst, Seashell of Stolen Sound] | rank 2: 3 [Disorienting Flash, Piercing Jet, Status] | rank 3: 3 [Cup of Dust, Soothing Blossoms, Burning Trail] | rank 4: 3 [Filter Air, Vital Beacon, Soft Landing] | rank 5: 3 [Glacial Skewer, Impaling Spike, Confusing Cry] | rank 6: 3 [Tangling Creepers, Proximal Shift, Explosive Barrage] | rank 7: 3 [Lifewood Cage, Eclipse Burst, Fiery Body] | rank 8: 3 [Burning Blossoms, Moment of Renewal, Desiccate] | rank 9: 3 [Wrathful Storm, Nature's Enmity, Remake Physiology] | rank 10: 1 [Fated Confrontation]",
     "Primal Focus Tradition [primal; focus; wis; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Piercing Jet"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
     "War Conditioning: Climb (guessed)"

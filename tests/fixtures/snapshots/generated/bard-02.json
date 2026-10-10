@@ -137,6 +137,7 @@
     "spell: Penumbral Shroud [in Bard; rank 1]",
     "spell: Puppet Strings [in Bard; rank 7]",
     "spell: Repulsion [in Bard; rank 6]",
+    "spell: Shadow Form [in Bard; rank 7]",
     "spell: Shatter [in Bard; rank 2]",
     "spell: Song of Marching [in Occult Focus Tradition; rank 3]",
     "spell: Spiritual Epidemic [in Bard; rank 8]",
@@ -156,14 +157,10 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Summon Instrument, Glamorize, Infectious Enthusiasm, Forbidding Ward, Wash Your Luck] | rank 1: 3 [Mindlink, Penumbral Shroud, Thicket of Knives] | rank 2: 3 [Shatter, Lucky Number, Ghostly Carrier] | rank 3: 3 [Gravity Well, Bracing Tendrils, Far Reach] | rank 4: 3 [Infectious Melody, Whispers of the Void, Nightmare] | rank 5: 3 [Aberrant Form, Instant Minefield, Illusory Scene] | rank 6: 3 [Truesight, Repulsion, Dragon Form] | rank 7: 3 [Duplicate Foe, Puppet Strings] | rank 8: 3 [Spiritual Epidemic, Uncontrollable Dance, Unrelenting Observation] | rank 9: 3 [Wails of the Damned, Overwhelming Presence, Bilocation] | rank 10: 1 [Manifestation]",
+    "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Summon Instrument, Glamorize, Infectious Enthusiasm, Forbidding Ward, Wash Your Luck] | rank 1: 3 [Mindlink, Penumbral Shroud, Thicket of Knives] | rank 2: 3 [Shatter, Lucky Number, Ghostly Carrier] | rank 3: 3 [Gravity Well, Bracing Tendrils, Far Reach] | rank 4: 3 [Infectious Melody, Whispers of the Void, Nightmare] | rank 5: 3 [Aberrant Form, Instant Minefield, Illusory Scene] | rank 6: 3 [Truesight, Repulsion, Dragon Form] | rank 7: 3 [Duplicate Foe, Shadow Form, Puppet Strings] | rank 8: 3 [Spiritual Epidemic, Uncontrollable Dance, Unrelenting Observation] | rank 9: 3 [Wails of the Damned, Overwhelming Presence, Bilocation] | rank 10: 1 [Manifestation]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Shadow Form"
-    ]
-  },
+  "report": {},
   "described": [
     "Composition Spells: Composition Cantrips"
   ],

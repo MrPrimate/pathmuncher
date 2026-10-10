@@ -144,6 +144,7 @@
     "spell: Punishing Winds [in Druid; rank 8]",
     "spell: Read Aura [in Druid; rank 0]",
     "spell: Regenerate [in Druid; rank 7]",
+    "spell: Searing Rain [in Druid; rank 5]",
     "spell: Sigil [in Druid; rank 0]",
     "spell: Spout [in Druid; rank 0]",
     "spell: Tangling Creepers [in Druid; rank 6]",
@@ -157,14 +158,10 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Read Aura, Live Wire, Spout, Sigil, Glamorize] | rank 1: 3 [Groom Companion, Gust of Wind, Pummeling Rubble] | rank 2: 3 [Floating Flame, Frozen Lungs, Darkness] | rank 3: 3 [Animal Vision, Threefold Aspect, Moth's Supper] | rank 4: 3 [Murderous Vine, Fulminating Impact, Bestial Curse] | rank 5: 3 [Mantle of the Frozen Heart, Blazing Fissure, -] | rank 6: 3 [Frozen Fog, Necrotize, Tangling Creepers] | rank 7: 3 [Fiery Body, Regenerate, Unfettered Pack] | rank 8: 3 [Punishing Winds, Earthquake, Arctic Rift] | rank 9: 3 [Falling Stars, Massacre, Pierce the Sky] | rank 10: 1 [Element Embodied]",
+    "Druid [primal; prepared; wis; proficiency 4] rank 0: 5 [Read Aura, Live Wire, Spout, Sigil, Glamorize] | rank 1: 3 [Groom Companion, Gust of Wind, Pummeling Rubble] | rank 2: 3 [Floating Flame, Frozen Lungs, Darkness] | rank 3: 3 [Animal Vision, Threefold Aspect, Moth's Supper] | rank 4: 3 [Murderous Vine, Fulminating Impact, Bestial Curse] | rank 5: 3 [Mantle of the Frozen Heart, Searing Rain, Blazing Fissure] | rank 6: 3 [Frozen Fog, Necrotize, Tangling Creepers] | rank 7: 3 [Fiery Body, Regenerate, Unfettered Pack] | rank 8: 3 [Punishing Winds, Earthquake, Arctic Rift] | rank 9: 3 [Falling Stars, Massacre, Pierce the Sky] | rank 10: 1 [Element Embodied]",
     "Primal Focus Tradition [primal; focus; wis; proficiency 4]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

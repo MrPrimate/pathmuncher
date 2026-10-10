@@ -103,7 +103,7 @@
     "feat: Iruxi Armaments (Claw) [slot ancestry-1; level 1; taken 1; iruxiArmaments=claw]",
     "feat: Lengthy Diversion [in Insurgent; level 1]",
     "feat: Lightning Swap [slot class-2; level 2; taken 2]",
-    "feat: Lizardfolk Lore [slot ancestry-5; level 1; taken 5]",
+    "feat: Lizardfolk Lore [slot ancestry-5; level 1; taken 5; lizardfolkLore={\"label\":\"PF2E.SpecificLore.Astrology\",\"lore\":\"astrology-lore\"}]",
     "feat: Mark of the Sage (Mirrored Aegis) [slot class-18; level 16; taken 18; ikon=mirrored-aegis]",
     "feat: Mirrored Aegis [level 1; granted by Divine Spark and Ikons; existingIkon=null; grantedIkon=Compendium.pf2e.equipment-srd.Item.1k3AsSW7lpU0kEpY; mirroredAegis=granted]",
     "feat: Mortality Reforged [in Exemplar; level 15]",
@@ -147,7 +147,6 @@
   ],
   "report": {
     "special": [
-      "Astrology Lore",
       "Claw Armament"
     ]
   },

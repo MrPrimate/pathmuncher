@@ -203,24 +203,6 @@
     t.ok(!pm.getUnmatchedSpecials().includes("Manifest Soulforged Armament"), "no longer reported");
   });
 
-  test("processing: the deep-dive setting off gives the same character as on", async (t) => {
-    const exportJson = fixture("315329-magus9");
-    await pmt.useBuildVariants(t, exportJson.build);
-    pmt.answerPrompts(t, exportJson.build);
-    const before = game.settings.get("pathmuncher", "use-immediate-deep-dive");
-    t.cleanup(() => game.settings.set("pathmuncher", "use-immediate-deep-dive", before));
-
-    await game.settings.set("pathmuncher", "use-immediate-deep-dive", true);
-    const on = await pmt.actor(t, "deep dive on");
-    await pmt.importBuild(on, exportJson);
-
-    await game.settings.set("pathmuncher", "use-immediate-deep-dive", false);
-    const off = await pmt.actor(t, "deep dive off");
-    await pmt.importBuild(off, foundry.utils.deepClone(exportJson));
-
-    t.deepEqual(pmt.itemKeys(off), pmt.itemKeys(on), "items");
-  });
-
   test("processing: a rule the system's code fails on is left to the system and reported", async (t) => {
     // pf2e's ChoiceSet code throws for Grim Fascination while pathmuncher works out its choice
     const exportJson = fixture("jack-necromancer9");
@@ -384,6 +366,21 @@
     t.deepEqual(entry.taken, [{ label: "Occultism", source: "Scholar" }], "skills already taken");
     t.ok(!entry.choices.some((c) => c.value === "occultism"), "a taken skill is not offered");
     t.deepEqual(assurances(actor).map((a) => a.skill).sort(), ["occultism", "society"], "skills");
+  });
+
+  test("processing: the languages the ancestry grants are not listed again as the character's own", async (t) => {
+    // the Elf magus's export lists Common and Elven, which the ancestry gives it, among its languages
+    const exportJson = fixture("315329-magus9");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "languages");
+
+    await pmt.importBuild(actor, exportJson);
+
+    const own = actor._source.system.details.languages.value;
+    t.ok(!own.includes("common") && !own.includes("elven"), `own languages: ${own.join(", ")}`);
+    t.ok(own.includes("aklo"), "the build's other languages");
+    t.ok(["common", "elven", "aklo"].every((l) => actor.system.details.languages.value.includes(l)), "all known");
   });
 
   test("processing: a feat taken in a slot is its own copy, not one a background grants", async (t) => {

@@ -2,24 +2,26 @@
   "character": {
     "name": "PMTG Oracle 04",
     "level": 20,
-    "ancestry": null,
-    "heritage": null,
+    "ancestry": "Bugbear",
+    "heritage": "Slate-Stalker Bugbear",
     "background": "Squire",
     "class": "Oracle",
     "deity": null,
     "keyAbility": "cha",
     "attributes": {
-      "str": 3,
+      "str": 4,
       "dex": 3,
       "con": 5,
-      "int": 3,
+      "int": 2,
       "wis": 2,
       "cha": 5
     },
-    "hp": 260,
+    "hp": 270,
     "ac": 37,
     "perception": 2,
-    "senses": [],
+    "senses": [
+      "darkvision"
+    ],
     "saves": {
       "fortitude": 2,
       "reflex": 2,
@@ -45,16 +47,19 @@
     },
     "languages": [
       "chthonian",
-      "draconic"
+      "common",
+      "draconic",
+      "goblin"
     ],
     "size": "med",
     "focus": 1
   },
   "items": [
+    "ancestry: Bugbear",
     "background: Squire",
     "class: Oracle",
     "feat: A Home in Every Port [slot general-11; level 11; taken 11]",
-    "feat: Additional Lore [level 1]",
+    "feat: Additional Lore [level 1; taken 1; granted by Bugbear Lore]",
     "feat: Advanced First Aid [slot skill-8; level 7; taken 8]",
     "feat: Armor Assist [in Squire; level 1]",
     "feat: Battle Medicine [slot skill-12; level 1; taken 12]",
@@ -63,17 +68,21 @@
     "feat: Blight [level 1; granted by Mystery]",
     "feat: Bon Mot [slot skill-20; level 1; taken 20]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
+    "feat: Bugbear Lore [slot ancestry-1; level 1; taken 1]",
     "feat: Curse of Inevitable Rot [level 1; granted by Blight]",
     "feat: Divine Access [in Oracle; level 11]",
     "feat: Experienced Tracker [slot skill-2; level 1; taken 2]",
     "feat: Expert Spellcaster [in Oracle; level 7]",
     "feat: Extreme Curse [in Oracle; level 17]",
     "feat: Forager [slot skill-4; level 1; taken 4]",
+    "feat: Friend of Fear [slot ancestry-9; level 5; taken 9]",
     "feat: Gifted Power [slot class-10; level 6; taken 10]",
     "feat: Greater Mysterious Resolve [in Oracle; level 17]",
     "feat: Group Impression [slot skill-14; level 1; taken 14]",
     "feat: Incredible Initiative [slot general-3; level 1; taken 3]",
     "feat: Incredible Investiture [slot general-15; level 11; taken 15]",
+    "feat: Know I Approach [slot ancestry-17; level 13; taken 17]",
+    "feat: Leave no Trace [slot ancestry-5; level 5; taken 5]",
     "feat: Legendary Medic [slot skill-18; level 15; taken 18]",
     "feat: Legendary Professional [slot skill-16; level 15; taken 16]",
     "feat: Legendary Spellcaster [in Oracle; level 19]",
@@ -82,6 +91,7 @@
     "feat: Major Curse [in Oracle; level 11]",
     "feat: Master Spellcaster [in Oracle; level 15]",
     "feat: Meddling Futures [slot class-6; level 2; taken 6]",
+    "feat: Mocking Invisibility [slot ancestry-13; level 9; taken 13]",
     "feat: Mysterious Repertoire [slot class-14; level 14; taken 14]",
     "feat: Mysterious Resolve [in Oracle; level 7]",
     "feat: Mystery [in Oracle; level 1; mystery=Compendium.pf2e.classfeatures.Item.1PHDn7WJFtR3NgTr]",
@@ -104,6 +114,7 @@
     "feat: Weapon Specialization [in Oracle; level 13]",
     "feat: Whispers of Weakness [level 1; granted by Blight]",
     "feat: Widen Spell [slot class-2; level 1; taken 2; spellshape=null]",
+    "heritage: Slate-Stalker Bugbear",
     "lore: Bugbear [rank 4]",
     "lore: Heraldry [rank 1]",
     "spell: Angel Form [in Oracle; rank 7]",
@@ -166,21 +177,7 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Sigil, Guidance, Void Warp, Haunting Hymn, Shield] | rank 1: 4 [Sacred Beasts, Harm, Summon Lesser Servitor, Groom Companion] | rank 2: 4 [Sound Body, Watchdog, Sudden Blight, Cleanse Affliction] | rank 3: 4 [Soul Cutter, Life Connection, Familiar's Call, Heroism] | rank 4: 4 [Fly, Cloak of Light, Painful Vibrations, Dull Ambition] | rank 5: 4 [Blink Charge, Tree of Life and Death, Rewinding Step, Sending] | rank 6: 4 [Truesight, Scintillating Safeguard, Speak With Water, Blessed Boundary] | rank 7: 4 [Eclipse Burst, Angel Form, Execute, Divine Decree] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Wails of the Damned, Vampiric Revelry, Weapon of Judgment, Pierce the Sky] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {
-    "ancestry": [
-      "Bugbear"
-    ],
-    "heritage": [
-      "Slate-Stalker Bugbear"
-    ],
-    "feat": [
-      "Bugbear Lore",
-      "Friend of Fear",
-      "Know I Approach",
-      "Leave No Trace",
-      "Mocking Invisibility"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

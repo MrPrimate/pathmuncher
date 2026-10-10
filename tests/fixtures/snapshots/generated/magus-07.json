@@ -116,6 +116,7 @@
     "spell: Chain Lightning [in Magus; rank 6]",
     "spell: Confusing Colors [in Magus; rank 8]",
     "spell: Conjurer's Countermeasure [in Arcane Focus Tradition; rank 3]",
+    "spell: Curse of Slippery Steps [in Magus; rank 1]",
     "spell: Desiccate [in Magus; rank 8]",
     "spell: Draw the Lightning [in Magus; rank 4]",
     "spell: Eclipse Burst [in Magus; rank 7]",
@@ -159,13 +160,9 @@
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
     "Born of Celestial [divine; prepared; cha; proficiency 3] rank 0: 1 [Know the Way]",
     "Brilliant Vision [occult; prepared; cha; proficiency 3] rank 2: 1 [See the Unseen]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Live Wire, Gouging Claw, Summon Instrument, Gale Blast, Telekinetic Hand] | rank 1: 2 [Mystic Armor, -] | rank 2: 2 [Hidebound, Shift Perspective] | rank 3: 2 [Weapon Tide, Wall of Wind] | rank 4: 2 [Draw the Lightning, Freezing Touch] | rank 5: 2 [Invoke Spirits, Instant Minefield] | rank 6: 2 [Chain Lightning, Unexpected Transposition] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Desiccate, Confusing Colors] | rank 9: 2 [Pierce the Sky, Implosion]"
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Live Wire, Gouging Claw, Summon Instrument, Gale Blast, Telekinetic Hand] | rank 1: 2 [Mystic Armor, Curse of Slippery Steps] | rank 2: 2 [Hidebound, Shift Perspective] | rank 3: 2 [Weapon Tide, Wall of Wind] | rank 4: 2 [Draw the Lightning, Freezing Touch] | rank 5: 2 [Invoke Spirits, Instant Minefield] | rank 6: 2 [Chain Lightning, Unexpected Transposition] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Desiccate, Confusing Colors] | rank 9: 2 [Pierce the Sky, Implosion]"
   ],
-  "report": {
-    "spell": [
-      "Curse of Slippery Steps"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

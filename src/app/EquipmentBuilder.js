@@ -398,7 +398,6 @@ export class EquipmentBuilder {
       itemData.system.grade = grade.type;
     }
 
-    // await this.#applyPropertyRunes(parsedItem, itemData);
     for (const property of parsedItem.runes) {
       await this.#addSubitemsToTechUpgrades(itemData, property);
     }

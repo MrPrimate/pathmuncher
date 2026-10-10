@@ -146,6 +146,7 @@
     "spell: Summon Dragon [in Sorcerer; rank 5]",
     "spell: Telekinetic Projectile [in Sorcerer; rank 0]",
     "spell: True Target [in Sorcerer; rank 7]",
+    "spell: Truesight [in Sorcerer; rank 6]",
     "spell: Uncontrollable Dance [in Sorcerer; rank 8]",
     "spell: Unrelenting Observation [in Sorcerer; rank 8]",
     "spell: Vampiric Exsanguination [in Sorcerer; rank 6]",
@@ -163,13 +164,9 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
-    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Approximate, Figment, Telekinetic Projectile, Caustic Blast, Detect Magic] | rank 1: 4 [Horizon Thunder Sphere, Dizzying Colors, Metal Merged, Illusory Disguise] | rank 2: 4 [Ignite Fireworks, See the Unseen, Revealing Light, Revealing Light] | rank 3: 4 [Levitate, Day's Weight, Vampiric Feast, Enthrall] | rank 4: 4 [Vapor Form, Shadow Strike, Reflective Scales, Creation] | rank 5: 4 [Rewinding Step, Ember Doppelgänger, Summon Dragon, Wall of Stone] | rank 6: 4 [Wall of Force, Frozen Fog, Vampiric Exsanguination] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, Energy Aegis] | rank 8: 4 [Uncontrollable Dance, Unrelenting Observation, Burning Blossoms, Earthquake] | rank 9: 4 [Metamorphosis, Vampiric Revelry, Resplendent Mansion, Resplendent Mansion] | rank 10: 1 [Freeze Time, Remake]"
+    "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Approximate, Figment, Telekinetic Projectile, Caustic Blast, Detect Magic] | rank 1: 4 [Horizon Thunder Sphere, Dizzying Colors, Metal Merged, Illusory Disguise] | rank 2: 4 [Ignite Fireworks, See the Unseen, Revealing Light, Revealing Light] | rank 3: 4 [Levitate, Day's Weight, Vampiric Feast, Enthrall] | rank 4: 4 [Vapor Form, Shadow Strike, Reflective Scales, Creation] | rank 5: 4 [Rewinding Step, Ember Doppelgänger, Summon Dragon, Wall of Stone] | rank 6: 4 [Wall of Force, Frozen Fog, Vampiric Exsanguination, Truesight] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, Energy Aegis] | rank 8: 4 [Uncontrollable Dance, Unrelenting Observation, Burning Blossoms, Earthquake] | rank 9: 4 [Metamorphosis, Vampiric Revelry, Resplendent Mansion, Resplendent Mansion] | rank 10: 1 [Freeze Time, Remake]"
   ],
-  "report": {
-    "spell": [
-      "True Seeing"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline: Genie (Jabali): Blood Magic"
   ],

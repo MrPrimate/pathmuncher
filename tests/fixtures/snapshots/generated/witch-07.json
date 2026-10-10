@@ -140,6 +140,7 @@
     "spell: Moment of Renewal [in Witch; rank 8]",
     "spell: Nature's Enmity [in Witch; rank 9]",
     "spell: Patron's Puppet [in Primal Focus Tradition; rank 1]",
+    "spell: Piercing Jet [in Witch; rank 2]",
     "spell: Proximal Shift [in Witch; rank 6]",
     "spell: Remake Physiology [in Witch; rank 9]",
     "spell: Return the Favor [in Primal Focus Tradition; rank 3]",
@@ -166,13 +167,9 @@
     "Light-Bending Jewel [occult; prepared; cha; proficiency 4] rank 4: 1 [Invisibility]",
     "Primal Focus Tradition [primal; focus; int; proficiency 4]",
     "Sheltering Jewel [occult; prepared; cha; proficiency 4] rank 5: 1 [Vital Beacon]",
-    "Witch [primal; prepared; int; proficiency 4] rank 0: 7 [Ignition, Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc, Frostbite] | rank 1: 3 [Charm, Acidic Burst, Seashell of Stolen Sound] | rank 2: 3 [Disorienting Flash, Status, -] | rank 3: 3 [Cup of Dust, Soothing Blossoms, Burning Trail] | rank 4: 3 [Filter Air, Vital Beacon, Soft Landing] | rank 5: 3 [Glacial Skewer, Impaling Spike, Confusing Cry] | rank 6: 3 [Tangling Creepers, Proximal Shift, Explosive Barrage] | rank 7: 3 [Lifewood Cage, Eclipse Burst, Fiery Body] | rank 8: 3 [Burning Blossoms, Moment of Renewal, Desiccate] | rank 9: 3 [Wrathful Storm, Nature's Enmity, Remake Physiology] | rank 10: 1 [Fated Confrontation]"
+    "Witch [primal; prepared; int; proficiency 4] rank 0: 7 [Ignition, Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc, Frostbite] | rank 1: 3 [Charm, Acidic Burst, Seashell of Stolen Sound] | rank 2: 3 [Disorienting Flash, Piercing Jet, Status] | rank 3: 3 [Cup of Dust, Soothing Blossoms, Burning Trail] | rank 4: 3 [Filter Air, Vital Beacon, Soft Landing] | rank 5: 3 [Glacial Skewer, Impaling Spike, Confusing Cry] | rank 6: 3 [Tangling Creepers, Proximal Shift, Explosive Barrage] | rank 7: 3 [Lifewood Cage, Eclipse Burst, Fiery Body] | rank 8: 3 [Burning Blossoms, Moment of Renewal, Desiccate] | rank 9: 3 [Wrathful Storm, Nature's Enmity, Remake Physiology] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {
-    "spell": [
-      "Piercing Jet"
-    ]
-  },
+  "report": {},
   "described": [
     "Ripple in the Deep: Familiar of Overwhelming Tides"
   ],

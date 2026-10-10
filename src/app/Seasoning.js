@@ -78,11 +78,6 @@ export class Seasoning {
     return Seasoning.getFoundryEquipment(pbName)?.foundryName ?? pbName;
   }
 
-  // static getFoundryFeatureName(pbName) {
-  //   const match = Seasoning.FEAT_RENAME_MAP(pbName).find((map) => map.pbName == pbName);
-  //   return match ?? { pbName, foundryName: pbName, details: undefined };
-  // }
-
   static RESTRICTED_EQUIPMENT() {
     return RESTRICTED_EQUIPMENT;
   }

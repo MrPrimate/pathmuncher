@@ -10,7 +10,6 @@ const CONSTANTS = {
     RESTRICT_TO_TRUSTED: "restrict-to-trusted",
     USE_CUSTOM_COMPENDIUM_MAPPINGS: "use-custom-compendium-mappings",
     CUSTOM_COMPENDIUM_MAPPINGS: "custom-compendium-mappings",
-    USE_IMMEDIATE_DEEP_DIVE: "use-immediate-deep-dive",
     DISPLAY_TITLE: "display-title",
     ACTIVE_GM: "active-gm",
   },
@@ -214,14 +213,6 @@ CONSTANTS.DEFAULT_SETTINGS = {
     config: false,
     type: Boolean,
     default: false,
-  },
-
-  [CONSTANTS.SETTINGS.USE_IMMEDIATE_DEEP_DIVE]: {
-    name: `${CONSTANTS.FLAG_NAME}.Settings.UseImmediateDeepDive.Name`,
-    scope: "world",
-    config: false,
-    type: Boolean,
-    default: true,
   },
 
   [CONSTANTS.SETTINGS.CUSTOM_COMPENDIUM_MAPPINGS]: {

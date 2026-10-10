@@ -141,6 +141,7 @@
     "spell: Project Image [in Sorcerer; rank 7]",
     "spell: Remake Physiology [in Sorcerer; rank 9]",
     "spell: Retrocognition [in Sorcerer; rank 7]",
+    "spell: Roar of Freedom [in Sorcerer; rank 8]",
     "spell: Sending [in Sorcerer; rank 5]",
     "spell: Shield [in Sorcerer; rank 0]",
     "spell: Soft Landing [in Sorcerer; rank 4]",
@@ -165,13 +166,9 @@
     "Astral Blink [arcane; prepared; cha; proficiency 4] rank 4: 1 [Translocate]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
-    "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Warp Step, Shield, Figment, Approximate] | rank 1: 4 [Command, Object Reading, Echoing Weapon] | rank 2: 4 [Translate, Floating Harness, Darkvision] | rank 3: 4 [Begone, Speak With Magic, Wanderer's Guide] | rank 4: 4 [Suggestion, Soft Landing, Hop, Skip, Jump] | rank 5: 4 [Sending, Etheric Shards, Incarnate Faerie Revelers] | rank 6: 4 [Dragon Form, Vampiric Exsanguination, Cryostasis] | rank 7: 4 [Retrocognition, Project Image, Mask of Terror] | rank 8: 4 [Disappearance, Dream Council] | rank 9: 4 [Foresight, Voracious Gestalt, Remake Physiology] | rank 10: 1 [Indestructibility]"
+    "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Warp Step, Shield, Figment, Approximate] | rank 1: 4 [Command, Object Reading, Echoing Weapon] | rank 2: 4 [Translate, Floating Harness, Darkvision] | rank 3: 4 [Begone, Speak With Magic, Wanderer's Guide] | rank 4: 4 [Suggestion, Soft Landing, Hop, Skip, Jump] | rank 5: 4 [Sending, Etheric Shards, Incarnate Faerie Revelers] | rank 6: 4 [Dragon Form, Vampiric Exsanguination, Cryostasis] | rank 7: 4 [Retrocognition, Project Image, Mask of Terror] | rank 8: 4 [Roar of Freedom, Disappearance, Dream Council] | rank 9: 4 [Foresight, Voracious Gestalt, Remake Physiology] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Nymph"

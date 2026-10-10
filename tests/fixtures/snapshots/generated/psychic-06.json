@@ -127,6 +127,7 @@
     "spell: Blister [in Psychic; rank 5]",
     "spell: Bloodspray Curse [in Psychic; rank 4]",
     "spell: Collective Transposition [in Psychic; rank 6]",
+    "spell: Devil's Horseshoe [in Psychic; rank 1]",
     "spell: Disappearance [in Psychic; rank 8]",
     "spell: Distortion Lens [in Occult Focus Tradition; rank 1]",
     "spell: Enlarge [in Psychic; rank 2]",
@@ -142,6 +143,7 @@
     "spell: Phase Bolt [in Occult Focus Tradition; rank 1]",
     "spell: Quandary [in Psychic; rank 8]",
     "spell: Rally Point [in Psychic; rank 3]",
+    "spell: Roar of Freedom [in Psychic; rank 8]",
     "spell: Shadow Army [in Psychic; rank 10]",
     "spell: Slow [in Psychic; rank 3]",
     "spell: Soul Cutter [in Psychic; rank 3]",
@@ -165,14 +167,9 @@
   ],
   "spellcasting": [
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
-    "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Figment, Approximate, Artistic Recollection] | rank 1: 2 [Mystic Armor, Thoughtful Gift] | rank 2: 2 [Translate, Floating Harness, Enlarge] | rank 3: 2 [Soul Cutter, Slow, Rally Point] | rank 4: 2 [Bloodspray Curse, Luring Wail, Translocate] | rank 5: 2 [Blister, Imaginary Lockbox, Strange Geometry] | rank 6: 2 [Tentacular Innervation, Suspended Retribution, Collective Transposition] | rank 7: 2 [Time Beacon, Warp Mind, Momentary Recovery] | rank 8: 2 [Disappearance, Quandary] | rank 9: 2 [Unfathomable Song, Incarnate Draconic Legion, Bilocation] | rank 10: 1 [Indestructibility, Shadow Army]"
+    "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Figment, Approximate, Artistic Recollection] | rank 1: 2 [Mystic Armor, Devil's Horseshoe, Thoughtful Gift] | rank 2: 2 [Translate, Floating Harness, Enlarge] | rank 3: 2 [Soul Cutter, Slow, Rally Point] | rank 4: 2 [Bloodspray Curse, Luring Wail, Translocate] | rank 5: 2 [Blister, Imaginary Lockbox, Strange Geometry] | rank 6: 2 [Tentacular Innervation, Suspended Retribution, Collective Transposition] | rank 7: 2 [Time Beacon, Warp Mind, Momentary Recovery] | rank 8: 2 [Roar of Freedom, Disappearance, Quandary] | rank 9: 2 [Unfathomable Song, Incarnate Draconic Legion, Bilocation] | rank 10: 1 [Indestructibility, Shadow Army]"
   ],
-  "report": {
-    "spell": [
-      "Devil's Horseshoe",
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

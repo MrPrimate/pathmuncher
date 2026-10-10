@@ -54,7 +54,7 @@
       "thalassic"
     ],
     "size": "med",
-    "focus": 0
+    "focus": 1
   },
   "items": [
     "action: Cast a Spell [granted by Wizard Spellcasting]",
@@ -65,7 +65,7 @@
     "class: Wizard",
     "feat: Alchemical Crafting [slot skill-4; level 1; taken 4]",
     "feat: Arcane Bond [in Wizard; level 1]",
-    "feat: Arcane School [in Wizard; level 1; arcaneSchool=Compendium.pf2e.classfeatures.Item.srcPBNjhq7FBSmi3]",
+    "feat: Arcane School [in Wizard; level 1; arcaneSchool=Compendium.pf2e.classfeatures.Item.0QAFC61tpP63GUQa]",
     "feat: Arcane Thesis [in Wizard; level 1; arcaneThesis=Compendium.pf2e.classfeatures.Item.Klb35AwlkNrq1gpB]",
     "feat: Archwizard's Spellcraft [in Wizard; level 19]",
     "feat: Biographical Eye [slot skill-8; level 7; taken 8]",
@@ -97,8 +97,8 @@
     "feat: Prodigious Will [in Wizard; level 17]",
     "feat: Rapid Affixture [slot skill-10; level 7; taken 10]",
     "feat: Razorsharp Bite [slot ancestry-1; level 1; taken 1]",
-    "feat: Red Mantis Magic School [level 1; granted by Arcane School]",
     "feat: Reflex Expertise [in Wizard; level 5]",
+    "feat: School of Shadow Veils [level 1; granted by Arcane School]",
     "feat: Seasoned [slot skill-12; level 1; taken 12]",
     "feat: Shield Block [slot general-15; level 1; taken 15]",
     "feat: Sign Language [slot skill-14; level 1; taken 14]",
@@ -145,6 +145,7 @@
     "spell: Skeleton Army [in Wizard; rank 6]",
     "spell: Stars of Another Sky [in Wizard; rank 8]",
     "spell: Telekinetic Projectile [in Wizard; rank 0]",
+    "spell: The Night is Mine [in Arcane Focus Tradition; rank 1]",
     "spell: True Target [in Wizard; rank 7]",
     "spell: Warrior's Regret [in Wizard; rank 2]",
     "spell: Winning Streak [in Wizard; rank 4]",
@@ -161,17 +162,9 @@
     "Form of the Sea [primal; prepared; cha; proficiency 4] rank 7: 1 [Elemental Form]",
     "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Figment, Telekinetic Projectile, Caustic Blast, Sigil, Frostbite, -] | rank 1: 4 [Gravitational Pull, Gentle Landing, Groom Companion, -] | rank 2: 4 [Warrior's Regret, Environmental Endurance, Dimensional Drop, -] | rank 3: 4 [Restraining Chains, Levitate, Day's Weight, -] | rank 4: 4 [Freezing Touch, Nightmare, Winning Streak, -] | rank 5: 4 [Desperate Repair, Hallucination, Invoke Spirits, -] | rank 6: 4 [Incarnate Wild Rose, Daemon Form, Skeleton Army, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Incarnate Archmage, Metallic Meteorite Glyph, Stars of Another Sky, -] | rank 9: 4 [Remake Physiology, Massacre, Phantasmagoria, -] | rank 10: 1 [Freeze Time]"
   ],
-  "report": {
-    "special": [
-      "Arcane School: School of Shadow Veils"
-    ],
-    "spell": [
-      "The Night Is Mine"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": [
-    "Arcane School: Red Mantis Magic School (guessed)",
     "Virtuosic Performer: Acting (guessed)"
   ]
 }

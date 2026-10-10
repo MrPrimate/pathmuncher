@@ -164,6 +164,7 @@
     "spell: Resplendent Mansion [in Wizard; rank 9]",
     "spell: Restyle [in Wizard; rank 1]",
     "spell: Retrieving Hook [in Wizard; rank 2]",
+    "spell: Roar of Freedom [in Wizard; rank 8]",
     "spell: Sanguine Mist [in Wizard; rank 4]",
     "spell: Shattering Gem [in Wizard; rank 1]",
     "spell: Summon Dragon [in Wizard; rank 5]",
@@ -188,11 +189,7 @@
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Wizard [arcane; prepared; int; proficiency 4] rank 0: 8 [Artistic Recollection, Protect Companion, Glamorize, Infectious Enthusiasm, Live Wire, Gouging Claw, Summon Instrument, -] | rank 1: 4 [Shattering Gem, Restyle, Breathe Fire, -] | rank 2: 4 [Phantom Crowd, Peaceful Rest, Helpful Reload, -] | rank 3: 4 [Web of Eyes, Web of Eyes, Widow’s Bite, -] | rank 4: 4 [Force Rain, Fly, Sanguine Mist, -] | rank 5: 4 [Instant Minefield, Web of Eyes, Mantle of the Frozen Heart, -] | rank 6: 4 [Dragon Form, Petrify, Collective Transposition, -] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, -] | rank 8: 4 [Arctic Rift, Desiccate, Confusing Colors, -] | rank 9: 4 [Resplendent Mansion, Falling Stars, Remake Physiology, -] | rank 10: 1 [Nullify]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

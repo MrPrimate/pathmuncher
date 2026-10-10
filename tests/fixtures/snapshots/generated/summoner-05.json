@@ -136,12 +136,14 @@
     "spell: Empty Pack [in Summoner; rank 2]",
     "spell: Evolution Surge [in Arcane Focus Tradition; rank 1]",
     "spell: Frostbite [in Summoner; rank 0]",
+    "spell: Gift of Dusk [in Summoner; rank 4]",
     "spell: Grisly Growths [in Summoner; rank 5]",
     "spell: Implosion [in Summoner; rank 9]",
     "spell: Living Thunderbolt [in Summoner; rank 6]",
     "spell: Mist [in Summoner; rank 2]",
     "spell: Restraining Chains [in Summoner; rank 3]",
     "spell: Runic Body [in Summoner; rank 1]",
+    "spell: Searing Rain [in Summoner; rank 5]",
     "spell: Shield [in Summoner; rank 0]",
     "spell: Sigil [in Summoner; rank 0]",
     "spell: Telekinetic Projectile [in Summoner; rank 0]",
@@ -157,13 +159,9 @@
   ],
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 3]",
-    "Summoner [arcane; spontaneous; cha; proficiency 3] rank 0: 5 [Telekinetic Projectile, Caustic Blast, Sigil, Frostbite, Shield] | rank 1: 2 [Echoing Weapon, Runic Body] | rank 2: 2 [Empty Pack, Mist] | rank 3: 2 [Croak Voice, Restraining Chains] | rank 4: 2 [Countless Eyes] | rank 5: 2 [Grisly Growths] | rank 6: 2 [Elemental Confluence, Living Thunderbolt] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Uncontrollable Dance, Unrelenting Observation] | rank 9: 2 [Implosion, Bilocation]"
+    "Summoner [arcane; spontaneous; cha; proficiency 3] rank 0: 5 [Telekinetic Projectile, Caustic Blast, Sigil, Frostbite, Shield] | rank 1: 2 [Echoing Weapon, Runic Body] | rank 2: 2 [Empty Pack, Mist] | rank 3: 2 [Croak Voice, Restraining Chains] | rank 4: 2 [Gift of Dusk, Countless Eyes] | rank 5: 2 [Searing Rain, Grisly Growths] | rank 6: 2 [Elemental Confluence, Living Thunderbolt] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Uncontrollable Dance, Unrelenting Observation] | rank 9: 2 [Implosion, Bilocation]"
   ],
   "report": {
-    "spell": [
-      "Gift of Dusk",
-      "Searing Rain"
-    ],
     "pet": [
       "Eidolon"
     ]

@@ -64,6 +64,7 @@
     "feat: Advanced Revelation [slot class-6; level 6; taken 6]",
     "feat: Assurance (Deception) [slot skill-2; level 1; taken 2; assurance=deception]",
     "feat: Backup Disguise [slot skill-4; level 2; taken 4]",
+    "feat: Become as Shadow [slot ancestry-17; level 17; taken 17]",
     "feat: Blaze of Revelation [slot class-18; level 18; taken 18]",
     "feat: Bones [level 1; granted by Mystery]",
     "feat: Breath Control [slot general-19; level 1; taken 19]",
@@ -109,6 +110,7 @@
     "feat: Slippery Secrets [slot skill-8; level 7; taken 8]",
     "feat: Spell Repertoire [in Oracle; level 1]",
     "feat: Surging Might [slot class-8; level 8; taken 8]",
+    "feat: Umbra Ally [slot ancestry-13; level 13; taken 13]",
     "feat: Untrained Improvisation [slot general-7; level 3; taken 7]",
     "feat: Weapon Expertise [in Oracle; level 11]",
     "feat: Weapon Specialization [in Oracle; level 13]",
@@ -174,12 +176,7 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Void Warp, Haunting Hymn, Shield, Forbidding Ward, Know the Way, Void Warp] | rank 1: 4 [Alarm, Concordant Choir, Benediction, Heal, Grim Tendrils] | rank 2: 4 [Familiar's Resurrection, Status, Bone Spray, Claws of the Otter, False Vitality] | rank 3: 4 [Wanderer's Guide, Vampiric Feast, Weapon Tide, Soothing Blossoms, Ghostly Weapon] | rank 4: 4 [Seal Fate, Outcast's Curse, Vital Seed, Unfettered Movement] | rank 5: 4 [Summon Dragon, Blessing of Defiance, Incarnate Skeletal Giant, Mirror Malefactors] | rank 6: 4 [Field of Life, Sacred Form, Demon Form, Repulsion] | rank 7: 4 [Incarnate Tempest of Shades, Regenerate, Deity's Strike, Incarnate Ancient Specter] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Voracious Gestalt, Sacred Covenant, Telepathic Demand, Incarnate Draconic Legion] | rank 10: 1 [Tear the Veil, Gate]"
   ],
-  "report": {
-    "feat": [
-      "Become As Shadow",
-      "Umbra Ally"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }

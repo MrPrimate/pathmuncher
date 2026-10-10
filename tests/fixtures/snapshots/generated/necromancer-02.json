@@ -109,6 +109,7 @@
     "feat: Slippery Secrets [slot skill-10; level 7; taken 10]",
     "feat: Swift Sneak [slot skill-8; level 7; taken 8]",
     "feat: The Hallowed Dead [slot class-4; level 1; taken 4]",
+    "feat: Umbra Ally [slot ancestry-17; level 13; taken 17]",
     "feat: Undead Lore [in Necromancer; level 1]",
     "feat: Undying Resilience [in Necromancer; level 17]",
     "feat: Unnatural Fortitude [in Necromancer; level 11]",
@@ -154,6 +155,7 @@
     "spell: Retrocognition [in Necromancer; rank 7]",
     "spell: Rip the Spirit [in Necromancer; rank 5]",
     "spell: Shadow Blast [in Shadow's Assault; rank 6]",
+    "spell: Shadow Form [in Necromancer; rank 7]",
     "spell: Shatter [in Necromancer; rank 2]",
     "spell: Sound Body [in Necromancer; rank 2]",
     "spell: Spiritual Epidemic [in Necromancer; rank 8]",
@@ -179,18 +181,11 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [
-    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [Summon Instrument, Glamorize, Infectious Enthusiasm, Forbidding Ward, Wash Your Luck] | rank 1: 2 [Mindlink, Penumbral Shroud] | rank 2: 2 [Shatter, Lucky Number] | rank 3: 2 [Gravity Well, Bracing Tendrils] | rank 4: 2 [Infectious Melody, Whispers of the Void] | rank 5: 2 [Aberrant Form, Gravity Well] | rank 6: 2 [Truesight, Repulsion] | rank 7: 2 [Duplicate Foe, -] | rank 8: 2 [Spiritual Epidemic, Uncontrollable Dance] | rank 9: 2 [Wails of the Damned, Overwhelming Presence] | rank 10: 1 [Manifestation]",
+    "Necromancer [occult; prepared; int; proficiency 4] rank 0: 5 [Summon Instrument, Glamorize, Infectious Enthusiasm, Forbidding Ward, Wash Your Luck] | rank 1: 2 [Mindlink, Penumbral Shroud] | rank 2: 2 [Shatter, Lucky Number] | rank 3: 2 [Gravity Well, Bracing Tendrils] | rank 4: 2 [Infectious Melody, Whispers of the Void] | rank 5: 2 [Aberrant Form, Gravity Well] | rank 6: 2 [Truesight, Repulsion] | rank 7: 2 [Duplicate Foe, Shadow Form] | rank 8: 2 [Spiritual Epidemic, Uncontrollable Dance] | rank 9: 2 [Wails of the Damned, Overwhelming Presence] | rank 10: 1 [Manifestation]",
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Shadow's Assault [occult; prepared; cha; proficiency 4] rank 6: 1 [Shadow Blast]"
   ],
-  "report": {
-    "feat": [
-      "Umbra Ally"
-    ],
-    "spell": [
-      "Shadow Form"
-    ]
-  },
+  "report": {},
   "described": [
     "Necromancer Spellcasting: Dirge"
   ],

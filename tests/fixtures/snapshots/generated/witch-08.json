@@ -150,6 +150,7 @@
     "spell: Protect Companion [in Witch; rank 0]",
     "spell: Puff of Poison [in Witch; rank 0]",
     "spell: Retrieving Hook [in Witch; rank 2]",
+    "spell: Searing Rain [in Witch; rank 5]",
     "spell: Tracking Mayflies [in Witch; rank 3]",
     "spell: Vitality Lash [in Witch; rank 0]",
     "spellcastingEntry: Primal Focus Tradition",
@@ -161,13 +162,9 @@
   ],
   "spellcasting": [
     "Primal Focus Tradition [primal; focus; int; proficiency 4]",
-    "Witch [primal; prepared; int; proficiency 4] rank 0: 7 [Guidance, Caustic Blast, Protect Companion, Light, Vitality Lash, Puff of Poison, Prestidigitation] | rank 1: 3 [Pest Form, Juvenile Companion, Camel Spit] | rank 2: 3 [Retrieving Hook, Humanoid Form, Final Sacrifice] | rank 3: 3 [Bottomless Stomach, Antlion Trap, Tracking Mayflies] | rank 4: 3 [Creation, Fey Form, Freezing Touch] | rank 5: 3 [Moon Frenzy, Mantle of the Frozen Heart, -] | rank 6: 3 [Explosive Barrage, Flame Vortex, Field of Life] | rank 7: 3 [Frigid Flurry, Execute, Lifewood Cage] | rank 8: 3 [Clone Companion, Monstrosity Form, Metallic Meteorite Glyph] | rank 9: 3 [Metamorphosis, One with the Land, Implosion] | rank 10: 1 [Nullify]"
+    "Witch [primal; prepared; int; proficiency 4] rank 0: 7 [Guidance, Caustic Blast, Protect Companion, Light, Vitality Lash, Puff of Poison, Prestidigitation] | rank 1: 3 [Pest Form, Juvenile Companion, Camel Spit] | rank 2: 3 [Retrieving Hook, Humanoid Form, Final Sacrifice] | rank 3: 3 [Bottomless Stomach, Antlion Trap, Tracking Mayflies] | rank 4: 3 [Creation, Fey Form, Freezing Touch] | rank 5: 3 [Moon Frenzy, Mantle of the Frozen Heart, Searing Rain] | rank 6: 3 [Explosive Barrage, Flame Vortex, Field of Life] | rank 7: 3 [Frigid Flurry, Execute, Lifewood Cage] | rank 8: 3 [Clone Companion, Monstrosity Form, Metallic Meteorite Glyph] | rank 9: 3 [Metamorphosis, One with the Land, Implosion] | rank 10: 1 [Nullify]"
   ],
-  "report": {
-    "spell": [
-      "Searing Rain"
-    ]
-  },
+  "report": {},
   "described": [
     "Silence in Snow: Familiar of Freezing Rime"
   ],

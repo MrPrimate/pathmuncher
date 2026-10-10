@@ -138,6 +138,7 @@
     "spell: Quicken Time [in Magus; rank 5]",
     "spell: Repulsion [in Magus; rank 6]",
     "spell: Resplendent Mansion [in Magus; rank 9]",
+    "spell: Roar of Freedom [in Magus; rank 8]",
     "spell: Shooting Star [in Arcane Focus Tradition; rank 1]",
     "spell: Spout [in Magus; rank 0]",
     "spell: Telekinetic Bombardment [in Magus; rank 7]",
@@ -161,13 +162,9 @@
     "Arcane Focus Tradition [arcane; focus; int; proficiency 3]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 3] rank 0: 1 [Detect Magic]",
     "Horn And Bone Incantation [primal; prepared; cha; proficiency 3] rank 2: 2 [Animal Form, Humanoid Form]",
-    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Warp Step, Electric Arc, Phase Bolt, Detect Magic, Spout] | rank 1: 2 [Kinetic Ram, Hippocampus Retreat] | rank 2: 2 [Laughing Fit, Disintegrating Puddle] | rank 3: 2 [Gravity Wave, Earthbind] | rank 4: 2 [Telepathy, Flicker] | rank 5: 2 [Telekinetic Haul, Quicken Time] | rank 6: 2 [Boots on the Ground, Repulsion] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Disappearance, -] | rank 9: 2 [Vampiric Revelry, Resplendent Mansion]"
+    "Magus [arcane; prepared; int; proficiency 3] rank 0: 5 [Warp Step, Electric Arc, Phase Bolt, Detect Magic, Spout] | rank 1: 2 [Kinetic Ram, Hippocampus Retreat] | rank 2: 2 [Laughing Fit, Disintegrating Puddle] | rank 3: 2 [Gravity Wave, Earthbind] | rank 4: 2 [Telepathy, Flicker] | rank 5: 2 [Telekinetic Haul, Quicken Time] | rank 6: 2 [Boots on the Ground, Repulsion] | rank 7: 2 [Incarnate Tempest of Shades, Telekinetic Bombardment] | rank 8: 2 [Roar of Freedom, Disappearance] | rank 9: 2 [Vampiric Revelry, Resplendent Mansion]"
   ],
-  "report": {
-    "spell": [
-      "Roar of Freedom"
-    ]
-  },
+  "report": {},
   "described": [],
   "prompts": []
 }
