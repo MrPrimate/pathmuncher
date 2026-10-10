@@ -64,6 +64,30 @@ export class PetShop {
     return petData;
   }
 
+  /**
+   * The compendium entry for a Pathbuilder familiar ability, and the choice its name makes. Pathbuilder
+   * names an ability with a choice by the option taken ("Damage Avoidance (Reflex)"), where pf2e has
+   * one ability whose ChoiceSet takes it: { indexMatch, choice } with choice the option's slug, or null.
+   */
+  static abilityMatch(index, abilityName) {
+    const sluggify = game.pf2e.system.sluggify;
+    const exact = index.find((i) => i.system?.slug === sluggify(abilityName));
+    if (exact) return { indexMatch: exact, choice: null };
+    const [, baseName, option] = abilityName.match(/^(.+?)\s*\(([^)]+)\)$/) ?? [];
+    const base = baseName ? index.find((i) => i.system?.slug === sluggify(baseName)) : undefined;
+    return base ? { indexMatch: base, choice: sluggify(option) } : { indexMatch: undefined, choice: null };
+  }
+
+  /** Sets the option an ability's name chose on the ChoiceSet that offers it. Whether one did. */
+  static applyAbilityChoice(doc, choice) {
+    const rule = (doc.system.rules ?? []).find((r) => r.key === "ChoiceSet"
+      && Array.isArray(r.choices) && r.choices.some((c) => c.value === choice));
+    if (!rule) return false;
+    rule.selection = choice;
+    if (rule.flag) foundry.utils.setProperty(doc, `flags.${game.system.id}.rulesSelections.${rule.flag}`, choice);
+    return true;
+  }
+
   async #generatePetFeatures(pet, json) {
     const compendium = game.packs.get("pf2e.familiar-abilities") ?? game.packs.get("sf2e.familiar-abilities");
     const index = await compendium.getIndex({ fields: ["name", "type", "system.slug"] });
@@ -71,7 +95,7 @@ export class PetShop {
     this.bad[pet._id] = [];
 
     for (const featureName of json.abilities) {
-      const indexMatch = index.find((i) => i.system.slug === game.pf2e.system.sluggify(featureName));
+      const { indexMatch, choice } = PetShop.abilityMatch(index, featureName);
       if (!indexMatch) {
         logger.warn(`Unable to match pet feature ${featureName}`, { pet, json, name: featureName });
         this.bad[pet._id].push({ pbName: featureName, type: "feature", details: { pet, json, name: featureName } });
@@ -79,8 +103,16 @@ export class PetShop {
       }
       const doc = (await compendium.getDocument(indexMatch._id)).toObject();
       doc._id = foundry.utils.randomID();
+      // an option the ability doesn't offer is left for the system to ask
+      if (choice) PetShop.applyAbilityChoice(doc, choice);
       this.result.features[pet._id].push(doc);
     }
+  }
+
+  /** The abilities no compendium item matched, for the import report: [{ pbName: "<ability> (<pet>)", type: "familiar" }]. */
+  get unmatched() {
+    return this.result.pets.flatMap((pet) => (this.bad[pet._id] ?? [])
+      .map((b) => ({ pbName: `${b.pbName} (${pet.name})`, type: "familiar", details: b.details })));
   }
 
   async buildPet(json) {
@@ -118,7 +150,7 @@ export class PetShop {
     await this.updatePets();
 
     logger.debug("Pets", {
-      results: this.results,
+      results: this.result,
       bad: this.bad,
     });
   }

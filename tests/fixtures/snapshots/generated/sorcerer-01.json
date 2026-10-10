@@ -62,7 +62,8 @@
     "feat: Acupuncturist [slot skill-16; level 1; taken 16]",
     "feat: Advanced First Aid [slot skill-10; level 7; taken 10]",
     "feat: Armor Proficiency (Light) [slot general-3; level 1; taken 3; armorProficiency=light]",
-    "feat: Assurance (Medicine) [slot skill-20; level 1; taken 20; unresolved assurance]",
+    "feat: Assurance (Acrobatics) [in Raised by Belief; level 1; assurance=acrobatics]",
+    "feat: Assurance (Medicine) [slot skill-20; level 1; taken 20; assurance=medicine]",
     "feat: Bespell Strikes [slot class-6; level 4; taken 6]",
     "feat: Blood Sovereignty [slot class-16; level 12; taken 16]",
     "feat: Bloodline Conduit [slot class-20; level 20; taken 20]",
@@ -161,8 +162,7 @@
     "Bloodline: Genie (Marid)"
   ],
   "prompts": [
-    "Assurance: null (guessed)",
-    "Crossblooded Evolution: Bloodline: Aesir (guessed)",
-    "Assurance: Medicine"
+    "Assurance: Acrobatics",
+    "Crossblooded Evolution: Bloodline: Aesir (guessed)"
   ]
 }

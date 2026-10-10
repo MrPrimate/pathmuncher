@@ -173,7 +173,9 @@
         "Described": "Part of another feature",
         "DescribedHint": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
         "Rules": "Rules to check",
-        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added."
+        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added.",
+        "Pets": "Pets not imported",
+        "PetsHint": "Pathmuncher imports familiars only. Create these from the build by hand."
       }
     },
     "Importer": {

@@ -62,7 +62,8 @@
     "class: Rogue",
     "feat: Additional Lore [level 1; taken 5; granted by Jotunborn Lore]",
     "feat: Agile Mind [in Rogue; level 17]",
-    "feat: Assurance (Crafting) [slot skill-12; level 1; taken 12; assurance=crafting]",
+    "feat: Assurance (Acrobatics) [in Raised by Belief; level 1; assurance=acrobatics]",
+    "feat: Assurance (Athletics) [slot skill-12; level 1; taken 12; assurance=athletics]",
     "feat: Backup Disguise [slot skill-6; level 2; taken 6]",
     "feat: Canny Acumen (Perception) [slot general-15; level 1; taken 15; cannyAcumen=system.perception.rank]",
     "feat: Caretaker's Restoration [slot ancestry-1; level 1; taken 1]",
@@ -136,5 +137,7 @@
   "spellcasting": [],
   "report": {},
   "described": [],
-  "prompts": []
+  "prompts": [
+    "Assurance: Acrobatics"
+  ]
 }

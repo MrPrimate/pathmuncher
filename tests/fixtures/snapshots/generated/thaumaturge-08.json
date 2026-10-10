@@ -69,7 +69,8 @@
     "feat: Adept Benefit (Shield) [level 7; granted by Implement Adept]",
     "feat: Adept Benefit (Tome) [level 7; granted by Second Adept]",
     "feat: Amulet [level 1; granted by Third Implement]",
-    "feat: Assurance (Occultism) [slot skill-12; level 1; taken 12; unresolved assurance]",
+    "feat: Assurance (Acrobatics) [in Raised by Belief; level 1; assurance=acrobatics]",
+    "feat: Assurance (Occultism) [slot skill-12; level 1; taken 12; assurance=occultism]",
     "feat: Breached Defenses [slot class-6; level 4; taken 6]",
     "feat: Can't Fall Here [slot ancestry-13; level 13; taken 13]",
     "feat: Cantorian Restoration [slot ancestry-17; level 17; taken 17]",
@@ -155,10 +156,9 @@
     "Tome: Tome Adept Benefit, Tome Intensify Vulnerability"
   ],
   "prompts": [
-    "Assurance: null (guessed)",
+    "Assurance: Acrobatics",
     "Shield: Buckler (guessed)",
     "Implement Adept: Shield",
-    "Implement Paragon: Shield",
-    "Assurance: Occultism"
+    "Implement Paragon: Shield"
   ]
 }

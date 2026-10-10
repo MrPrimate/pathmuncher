@@ -527,7 +527,7 @@ export class Pathmuncher {
   //       "onDelete": "cascade"
   //     }
 
-  #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+  #parsedFeatureMatch(type, document, slug, { ignoreAdded, isChoiceMatch = false, featType = null, excludeSlotPicks = false } = {}) {
     if (utils.isObject(slug)) {
       if (slug.size) {
         slug = slug.size;
@@ -564,6 +564,7 @@ export class Pathmuncher {
           || f.type === featType
         )
         && !f.isChoice
+        && !(excludeSlotPicks && Pathmuncher.#pickedInSlot(f))
         && this.names.entryMatches(f, slug),
     );
     // an item granted by another (document) is Pathbuilder's awarded or child entry, not one taken
@@ -601,13 +602,13 @@ export class Pathmuncher {
     return featMatch;
   }
 
-  #findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch = false, featType = null } = {}) {
+  #findAllFeatureMatch(document, slug, { ignoreAdded, isChoiceMatch = false, featType = null, excludeSlotPicks = false } = {}) {
     if (["equipment", "consumable"].includes(document.type)) {
       const equipmentMatch = this.#parsedFeatureMatch("equipment", document, slug, { ignoreAdded });
       return equipmentMatch;
     }
     // console.warn("Finding all feature matches", { document, slug, ignoreAdded, isChoiceMatch, featType });
-    const featMatch = this.#parsedFeatureMatch("feats", document, slug, { ignoreAdded, featType });
+    const featMatch = this.#parsedFeatureMatch("feats", document, slug, { ignoreAdded, featType, excludeSlotPicks });
     if (featMatch) return featMatch;
     const specialMatch = this.#parsedFeatureMatch("specials", document, slug, { ignoreAdded, isChoiceMatch });
     if (specialMatch) return specialMatch;
@@ -617,9 +618,29 @@ export class Pathmuncher {
     // return classMatch;
   }
 
-  /** The Pathbuilder feat or special a granted item stands for, under any name it may be listed under. */
+  /**
+   * Whether the build took a Pathbuilder feat in a feat slot of its own ("Skill Feat 12", "Kitsune Feat
+   * 1"), rather than as a choice of another feature, which Pathbuilder may also list as standard
+   * ("Heritage Featadditional lore" for the Additional Lore a heritage grants).
+   */
+  static #pickedInSlot(pBFeat) {
+    return pBFeat.isStandard === true && (/\s\d+$/).test(pBFeat.featChoiceRef ?? "");
+  }
+
+  /** Whether an item is a feat that can be taken more than once (pf2e's maxTakable is null or above 1: Assurance). */
+  static #repeatable(document) {
+    const maxTakable = document.system?.maxTakable;
+    return document.type === "feat" && (maxTakable === null || maxTakable > 1);
+  }
+
+  /**
+   * The Pathbuilder feat or special a granted item stands for, under any name it may be listed under.
+   * A feat that can be taken more than once (Assurance) is never the one the build took in a slot of
+   * its own: Pathbuilder lists a granted copy separately, as awarded, and when it has none (a
+   * placeholder background like Raised by Belief grants nothing there) the granted copy is extra.
+   */
   #grantedFeatureMatch(document, { originType = null, grantedAs = null } = {}) {
-    const matchOptions = { ignoreAdded: true, featType: originType };
+    const matchOptions = { ignoreAdded: true, featType: originType, excludeSlotPicks: Pathmuncher.#repeatable(document) };
     for (const slug of this.names.itemSlugs(document, { grantedAs })) {
       const match = this.#findAllFeatureMatch(document, slug, matchOptions);
       if (match) return match;
@@ -959,11 +980,10 @@ export class Pathmuncher {
    * source the item that granted that copy, if one did.
    */
   #takenElsewhere(document, ruleEntry, choices) {
-    const maxTakable = document.system.maxTakable;
-    if (document.type !== "feat" || !(maxTakable === null || maxTakable > 1)) return [];
+    if (!Pathmuncher.#repeatable(document)) return [];
     const slug = document.system.slug ?? Seasoning.slug(document.name);
     const flag = Pathmuncher.#ruleFlag(document, ruleEntry);
-    return this.result.feats
+    const fromResult = this.result.feats
       .filter((other) => other._id !== document._id && (other.system.slug ?? Seasoning.slug(other.name)) === slug)
       .map((other) => {
         const rule = (other.system.rules ?? []).find((r) => r.key === "ChoiceSet" && Pathmuncher.#ruleFlag(other, r) === flag);
@@ -976,6 +996,14 @@ export class Pathmuncher {
         };
       })
       .filter((taken) => utils.isString(taken.value));
+    // and what the build's own copies, taken in slots and not yet read, chose: a copy granted earlier
+    // (Raised by Belief's Assurance) leaves the skill feat Assurance its Athletics
+    const pending = this.parsed.feats
+      .filter((f) => !f.added && f.extra && Pathmuncher.#pickedInSlot(f) && this.names.entryMatches(f, slug))
+      .map((f) => choices.find((c) => Seasoning.slug(f.extra) === c.value || Seasoning.slug(f.extra) === Seasoning.slug(game.i18n.localize(c.label ?? ""))))
+      .filter(Boolean)
+      .map((c) => ({ value: c.value, label: game.i18n.localize(c.label ?? ""), source: null }));
+    return [...fromResult, ...pending];
   }
 
   #deferChoice(document, ruleEntry, choices, taken = []) {
@@ -1015,15 +1043,22 @@ export class Pathmuncher {
    * [{ id, item: { name, img, type }, prompt, choices: [{ value, label, img, uuid }] }]
    */
   get unansweredChoiceList() {
-    return this.unansweredChoices.map(({ id, document, ruleEntry, choices, taken }) => ({
-      id,
-      item: { name: document.name, img: document.img, type: document.type },
-      prompt: utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : "",
-      // where the item comes from, and what other copies of it already chose
-      origin: this.#resultItemName(document.flags?.[game.system.id]?.grantedBy?.id),
-      taken: taken.map(({ label, source }) => ({ label, source })),
-      choices,
-    }));
+    return this.unansweredChoices.map(({ id, document, ruleEntry, choices, taken }) => {
+      // what the other copies chose, now that every copy is in the result: a copy read after this
+      // choice was held back (the build's own Assurance after Raised by Belief's) is left out too
+      const takenNow = [...taken, ...this.#takenElsewhere(document, ruleEntry, choices)]
+        .filter((t, i, all) => all.findIndex((o) => o.value === t.value) === i);
+      const open = choices.filter((c) => !takenNow.some((t) => t.value === c.value));
+      return {
+        id,
+        item: { name: document.name, img: document.img, type: document.type },
+        prompt: utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : "",
+        // where the item comes from (what granted it, or the item it is part of), and what other copies of it already chose
+        origin: this.#resultItemName(document.flags?.[game.system.id]?.grantedBy?.id) ?? this.#resultItemName(document.system?.location),
+        taken: takenNow.map(({ label, source }) => ({ label, source })),
+        choices: open.length > 0 ? open : choices,
+      };
+    });
   }
 
   /** Sets the selections the user made ({ id: value }) as pf2e would; anything unanswered is asked by pf2e during the import. */
@@ -1921,13 +1956,16 @@ export class Pathmuncher {
           pBFeat.unmatched(`no ${type} compendium entry`);
           continue;
         }
-        if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`)) {
+        const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+        // a feat a feature already added is included, unless the build took it again in a slot of its
+        // own: a feat taken more than once (Raised by Belief's Assurance and a skill feat Assurance)
+        const ownCopy = Pathmuncher.#pickedInSlot(pBFeat) && Pathmuncher.#repeatable(doc);
+        if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`) && !ownCopy) {
           logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
           pBFeat.settle(ParsedEntry.STATUS.INCLUDED, { reason: "already added by a feature" });
           continue;
         }
 
-        const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
         const docData = doc.toObject();
         docData._id = foundry.utils.randomID();
         pBFeat.settle(ParsedEntry.STATUS.CREATED, { itemId: docData._id });
@@ -2084,6 +2122,9 @@ export class Pathmuncher {
     await this.#processCore();
     this.statusUpdate(2, 12, "Formula");
     await this.#processFormulas();
+    // before the core items, whose choices may depend on the skills trained (Raised by Belief's
+    // Assurance offers the skills the character is trained in)
+    this.#setSkills(true);
     this.statusUpdate(3, 12, "Deity");
     await this.#processGenericCompendiumLookup("deities", this.source.deity, "deity");
 
@@ -2094,7 +2135,6 @@ export class Pathmuncher {
     this.statusUpdate(6, 12, "Background");
     await this.#processGenericCompendiumLookup("backgrounds", this.source.background, "background");
 
-    this.#setSkills(true);
     this.#setLanguages();
 
     this.statusUpdate(7, 12, "Class");

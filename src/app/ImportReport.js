@@ -115,7 +115,7 @@ export class ImportReport {
    * { type, label, names } for the categories that have any, in the order they are shown.
    */
   /** Report groups that are not a kind of item, with their own heading and hint (Dialogs.Report.<key>, <key>Hint). */
-  static REPORT_GROUPS = { described: "Described", rule: "Rules" };
+  static REPORT_GROUPS = { described: "Described", rule: "Rules", pet: "Pets" };
 
   getImportReport() {
     const bad = (type, option, filter = () => true) => (option === null || this.options[option]
@@ -146,6 +146,7 @@ export class ImportReport {
       ["ritual", bad("ritual", "addSpells")],
       ["formula", bad("formula", "addFormulas")],
       ["familiar", bad("familiar", "addFamiliars")],
+      ["pet", this.unimportedPets()],
       ["rule", bad("rule", null)],
     ];
     const labels = {
@@ -163,6 +164,13 @@ export class ImportReport {
         ...(type === "described" && { origins: described }),
       }))
       .filter((group) => group.names.length > 0);
+  }
+
+  /** The build's pets other than familiars (animal companions, mounts), which are not imported: "<name> (<type>)". */
+  unimportedPets() {
+    return (this.source.pets ?? [])
+      .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar")
+      .map((pet) => (pet.name ? `${pet.name} (${pet.type})` : pet.type));
   }
 
   async postImportCheck() {

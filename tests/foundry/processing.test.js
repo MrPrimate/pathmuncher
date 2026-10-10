@@ -386,6 +386,31 @@
     t.deepEqual(assurances(actor).map((a) => a.skill).sort(), ["occultism", "society"], "skills");
   });
 
+  test("processing: a feat taken in a slot is its own copy, not one a background grants", async (t) => {
+    // Pathbuilder's placeholder Raised by Belief grants nothing; pf2e's grants an Assurance for the
+    // deity's skill, which the build (no deity) doesn't settle. The skill feat Assurance is Athletics.
+    const exportJson = foundry.utils.deepClone(globalThis.__pmtGenerated["rogue-05"]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "assurance from background");
+    let asked = [];
+    const resolveUnansweredChoices = (unanswered) => {
+      asked = unanswered;
+      const assurance = unanswered.find((u) => u.item.name === "Assurance");
+      return assurance ? { [assurance.id]: "religion" } : {};
+    };
+
+    await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices });
+
+    const own = actor.items.find((i) => i.slug === "assurance" && i.system.location === "skill-12");
+    t.equal(own?.flags.pf2e?.rulesSelections?.assurance, "athletics", "the skill feat keeps its skill");
+    const entry = asked.find((u) => u.item.name === "Assurance");
+    t.equal(entry?.origin, "Raised by Belief", "the background's copy is asked, with where it comes from");
+    t.deepEqual(entry?.taken.map((x) => x.label), ["Athletics"], "the skill feat's skill is taken");
+    t.ok(!entry?.choices.some((c) => c.value === "athletics"), "and not offered");
+    t.deepEqual(assurances(actor).map((a) => a.skill).sort(), ["athletics", "religion"], "skills");
+  });
+
   // Pathbuilder's "Bullets (10 rounds)" where each firearm in Foundry takes its own rounds; the
   // gunslinger's Axe Musket and Coat Pistol take Rounds (Axe Musket) and Rounds (Coat Pistol)
   const withBullets = (weapons = null) => {

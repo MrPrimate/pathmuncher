@@ -249,6 +249,8 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       });
       await petShop.processPets();
       await petShop.addPetEffects();
+      // abilities no compendium item matched, in the import notes' Familiars
+      pathmuncher.bad.push(...petShop.unmatched);
     }
     logger.debug("Final import details", { actor: this.actor, pathmuncher, options });
     return pathmuncher;

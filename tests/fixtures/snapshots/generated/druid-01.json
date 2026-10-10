@@ -159,7 +159,11 @@
     "Fearsome Form [primal; prepared; cha; proficiency 4] rank 7: 1 [Mask of Terror]",
     "Primal Focus Tradition [primal; focus; wis; proficiency 4]"
   ],
-  "report": {},
+  "report": {
+    "pet": [
+      "Fang - Savage Wolf (Animal Companion)"
+    ]
+  },
   "described": [],
   "prompts": []
 }

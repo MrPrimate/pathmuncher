@@ -137,7 +137,11 @@
   "spellcasting": [
     "Divine Focus Tradition [divine; focus; cha; proficiency 3]"
   ],
-  "report": {},
+  "report": {
+    "pet": [
+      "Bastion - Young Horse (Animal Companion)"
+    ]
+  },
   "described": [
     "Sarenrae: Anathema"
   ],

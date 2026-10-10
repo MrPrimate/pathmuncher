@@ -122,7 +122,13 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {},
+  "report": {
+    "pet": [
+      "Kestrel - Nimble Bird (Animal Companion)"
+    ]
+  },
   "described": [],
-  "prompts": []
+  "prompts": [
+    "Assurance: Acrobatics"
+  ]
 }
