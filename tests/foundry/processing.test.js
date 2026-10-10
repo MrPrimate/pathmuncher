@@ -2,7 +2,7 @@
 (() => {
   const { test } = pmt;
   const fixture = (name) => foundry.utils.deepClone(pmt.fixtures[name]);
-  const generated = (name) => foundry.utils.deepClone(globalThis.__pmtGenerated[name]);
+  const edge = (name) => foundry.utils.deepClone(globalThis.__pmtEdge[name]);
 
   test("processing: a container with no compendium match is created on the actor only", async (t) => {
     const exportJson = fixture("304883-thaumaturge1");
@@ -57,7 +57,7 @@
 
   test("processing: an awarded feat Pathbuilder repeats in specials is created once", async (t) => {
     // Beast Trainer (orc, 13) grants Train Animal; the export lists it as an awarded feat and a special
-    const exportJson = generated("cleric-03");
+    const exportJson = edge("cleric-03");
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "repeated special");
@@ -71,7 +71,7 @@
 
   test("processing: a cleric's \"Domain: X\" special answers Domain Initiate", async (t) => {
     // Sarenrae's domains are fire, healing, sun and truth; the generated build picked one she lacks
-    const exportJson = generated("cleric-01");
+    const exportJson = edge("cleric-01");
     exportJson.build.specials = exportJson.build.specials.map((s) => (s.startsWith("Domain: ") ? "Domain: Healing" : s));
     await pmt.useBuildVariants(t, exportJson.build);
     const prompts = pmt.answerPrompts(t, exportJson.build);
@@ -86,7 +86,7 @@
 
   test("processing: a class feature the class lists under another name matches Pathbuilder's name", async (t) => {
     // the Champion class grants "Weapon Mastery" at 13 as the item Martial Weapon Mastery
-    const exportJson = generated("champion-02");
+    const exportJson = edge("champion-02");
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "class feature alias");
@@ -106,7 +106,7 @@
       "sorcerer-17": ["bloodline-genie", "genie", (v) => v === "jaathoom"],
     };
     for (const [name, [slug, flag, check]] of Object.entries(expected)) {
-      const exportJson = generated(name);
+      const exportJson = edge(name);
       await pmt.useBuildVariants(t, exportJson.build);
       const prompts = pmt.answerPrompts(t, exportJson.build);
       const actor = await pmt.actor(t, `bloodline ${name}`);
@@ -124,7 +124,7 @@
   test("processing: an item's several choices of one kind never take the same Pathbuilder entry twice", async (t) => {
     // the Commander's Tactics item chooses five tactics; this build names one basic tactic (Coordinating
     // Maneuvers) and higher ones, so pathmuncher answers the first choice and leaves the rest to the user
-    const exportJson = generated("commander-02");
+    const exportJson = edge("commander-02");
     await pmt.useBuildVariants(t, exportJson.build);
     // leave the choices pathmuncher cannot answer to the user: dismiss their prompts
     const hook = Hooks.on("renderApplicationV2", (app) => {
@@ -165,7 +165,7 @@
 
   test("processing: a skill choice given as the path it trains is settled by the proficiencies", async (t) => {
     // Mastermind trains Arcana, Nature, Occultism or Religion ("system.skills.nature.rank"); only Nature is trained
-    const exportJson = generated("rogue-02");
+    const exportJson = edge("rogue-02");
     await pmt.useBuildVariants(t, exportJson.build);
     const prompts = pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "mastermind");
@@ -299,7 +299,7 @@
   // a surki champion whose ancestry feats' choices are not in the export, following a deity that
   // allows the build's unholy cause, so the deity and cause need no answers
   const surkiChampion = () => {
-    const exportJson = generated("champion-01");
+    const exportJson = edge("champion-01");
     exportJson.build.deity = "Asmodeus";
     return exportJson;
   };
@@ -349,7 +349,7 @@
   test("processing: a second Assurance never takes a skill another Assurance has", async (t) => {
     // the Scholar (Occultism) background grants Assurance (Occultism); Gnome Obsession grants another,
     // which takes Religion: the only other skill the build is trained in
-    const exportJson = generated("oracle-11");
+    const exportJson = edge("oracle-11");
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "assurance twice");
@@ -364,7 +364,7 @@
 
   test("processing: an Assurance the build doesn't settle is asked with where it comes from and what is taken", async (t) => {
     // trained in Religion and Society besides Occultism, so the build leaves the skill open
-    const exportJson = generated("oracle-11");
+    const exportJson = edge("oracle-11");
     exportJson.build.proficiencies.society = 2;
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);

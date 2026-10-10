@@ -103,6 +103,15 @@ if (fs.existsSync(generatedDir)) {
     await evaluate(`globalThis.__pmtGenerated[${JSON.stringify(f.replace(/\.json$/, ""))}] = ${fs.readFileSync(path.join(generatedDir, f), "utf8")};`);
   }
 }
+// the edge-case builds (pmt.edge): older generated builds, made without Pathbuilder's rules, that tests use
+// for input a player could produce but the legal generated set never does
+const edgeDir = path.join(fixtureDir, "edge");
+await evaluate(`globalThis.__pmtEdge = {};`);
+if (fs.existsSync(edgeDir)) {
+  for (const f of fs.readdirSync(edgeDir).filter((f) => f.endsWith(".json")).sort()) {
+    await evaluate(`globalThis.__pmtEdge[${JSON.stringify(f.replace(/\.json$/, ""))}] = ${fs.readFileSync(path.join(edgeDir, f), "utf8")};`);
+  }
+}
 // the saved snapshots, by fixture name ("142926-wizard20", "generated/cleric-01")
 const snapshotDir = path.join(here, "../fixtures/snapshots");
 const snapshotFiles = (dir, prefix = "") => (fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : [])

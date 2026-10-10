@@ -85,8 +85,9 @@
       knownGaps: [],
     },
     "jack-necromancer9": {
-      // the others are sections of Basic Undead Benefits and Necromancer Spellcasting
-      unmatchedSpecials: ["Thralls"],
+      // the others are sections of Basic Undead Benefits and Necromancer Spellcasting; Thralls has no item
+      // and is ignored
+      unmatchedSpecials: [],
       // Grim Fascination's choice comes from the "Bone Fascination" special
       prompts: [],
       knownGaps: [],

@@ -9,7 +9,7 @@ import { FeatureNames } from "../../src/app/FeatureNames.js";
 import { ParsedEntry } from "../../src/app/ParsedEntry.js";
 
 const fixtureDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../fixtures/pathbuilder");
-const exports = [fixtureDir, path.join(fixtureDir, "generated")].flatMap((dir) => fs.readdirSync(dir)
+const exports = [fixtureDir, path.join(fixtureDir, "generated"), path.join(fixtureDir, "edge")].flatMap((dir) => fs.readdirSync(dir)
   .filter((f) => f.endsWith(".json"))
   .map((f) => [path.relative(fixtureDir, path.join(dir, f)), JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"))]));
 

@@ -33,13 +33,13 @@ const ASMODEUS = {
 };
 
 const conflictsFor = (name, deity) => {
-  const { build } = fixture(`generated/${name}`);
+  const { build } = fixture(`edge/${name}`);
   return deityConflicts(deity, buildDeityChoices(build.specials, build.feats));
 };
 
 describe("buildDeityChoices", () => {
   it("reads a cleric's domain, font and sanctification", () => {
-    const choices = buildDeityChoices(fixture("generated/cleric-01").build.specials);
+    const choices = buildDeityChoices(fixture("edge/cleric-01").build.specials);
     assert.deepEqual(choices.domains, [{ special: "Domain: Death", slug: "death" }]);
     assert.deepEqual(choices.font, { special: "Healing Font", value: "heal" });
     assert.deepEqual(choices.sanctification, { special: "Neither", value: "none" });
@@ -47,7 +47,7 @@ describe("buildDeityChoices", () => {
   });
 
   it("reads the sanctification a champion's cause needs", () => {
-    assert.deepEqual(buildDeityChoices(fixture("generated/champion-01").build.specials).cause,
+    assert.deepEqual(buildDeityChoices(fixture("edge/champion-01").build.specials).cause,
       { special: "Desecration Cause (Unholy)", name: "Desecration", value: "unholy" });
     assert.deepEqual(buildDeityChoices(["Justice Cause"]).cause, { special: "Justice Cause", name: "Justice", value: null });
   });

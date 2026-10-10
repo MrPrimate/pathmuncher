@@ -2,7 +2,7 @@
 (() => {
   const { test } = pmt;
   const fixture = (name) => foundry.utils.deepClone(pmt.fixtures[name]);
-  const generated = (name) => foundry.utils.deepClone(globalThis.__pmtGenerated[name]);
+  const edge = (name) => foundry.utils.deepClone(globalThis.__pmtEdge[name]);
 
   test("report: the post-import dialog lists what is unmatched and not Pathbuilder's labels", async (t) => {
     const exportJson = fixture("315329-magus9");
@@ -49,7 +49,8 @@
     }, "described specials by feature");
     const healing = pm.getDescribedSpecials().find((o) => o.name === "Basic Undead Benefits").specials[0];
     t.ok(healing.text.startsWith("You are damaged by"), healing.text);
-    t.deepEqual(pm.getUnmatchedSpecials(), ["Thralls"], "still unmatched");
+    // Thralls, the one special without a feature, is ignored rather than reported
+    t.deepEqual(pm.getUnmatchedSpecials(), [], "nothing left unmatched");
 
     let html = null;
     const hook = Hooks.on("renderDialogV2", (dialog) => {
@@ -73,7 +74,7 @@
 
   test("report: a special named after its feature and section is found in that feature", async (t) => {
     // Pathbuilder's "Animal Instinct Raging Resistance" is the "Raging Resistance (9th)" section of Animal Instinct
-    const exportJson = generated("barbarian-01");
+    const exportJson = edge("barbarian-01");
     await pmt.useBuildVariants(t, exportJson.build);
     pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "instinct sections");
@@ -88,7 +89,7 @@
     // a thaumaturge's implements appear once per tier; "Thaumaturge Weapon Expertise" is Weapon Expertise;
     // the psychic's "Weapon Specialization" is Psychic Weapon Specialization
     for (const [name, specials] of [["thaumaturge-02", ["Bell", "Mirror", "Thaumaturge Weapon Expertise"]], ["psychic-01", ["Weapon Specialization"]]]) {
-      const exportJson = generated(name);
+      const exportJson = edge(name);
       await pmt.useBuildVariants(t, exportJson.build);
       pmt.answerPrompts(t, exportJson.build);
       const actor = await pmt.actor(t, `repeated ${name}`);

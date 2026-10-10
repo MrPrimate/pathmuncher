@@ -15,8 +15,8 @@ npm test
 This uses Node's built-in test runner (Node 22+), so it needs no extra dependencies.
 `tests/unit/setup.mjs` stubs the few Foundry globals touched at import time. Extend it when a test
 needs more. Use these for anything that doesn't need the pf2e system: parsing and normalising
-exports, name and slot mapping, and similar. `build-parser.test.mjs` reads every fixture and
-generated build into parsed entries (`BuildParser`), so a change to reading exports is checked
+exports, name and slot mapping, and similar. `build-parser.test.mjs` reads every fixture,
+generated build and edge-case build into parsed entries (`BuildParser`), so a change to reading exports is checked
 against all of them in under a second.
 
 ## Foundry tests
@@ -107,8 +107,8 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - `pmt.characterSnapshot` records the character's details, every item as one line (slot, levels,
     what granted it, its choices, quantity, container, runes), the spellcasting entries, the
     post-import report and the prompts. Item ids become item names and lists are sorted.
-  - Covers every fixture and the first generated build of each class. `PMT_SNAPSHOT_ALL=1` covers
-    every generated build.
+  - Covers every fixture, every edge-case build and the first generated build of each class.
+    `PMT_SNAPSHOT_ALL=1` covers every generated build.
   - When a change is meant to alter the result, rerun with `PMT_UPDATE_SNAPSHOTS=1` to rewrite the
     snapshots, and review their diff before committing.
   - A run over every build takes about 40 minutes. Split it with `PMT_CHUNK`: `PMT_CHUNK=1/4` up to
@@ -140,9 +140,9 @@ Add new behaviour tests next to these as plain scripts that call `pmt.test(name,
 
 ## Survey of generated builds
 
-`fixtures/pathbuilder/generated/` holds level 20 builds made in Pathbuilder for every class and
-each option of its subclass choice (muse, school, bloodline, eidolon, ...), with feats and spells
-picked from Pathbuilder's own tables. They are too many for every run, so they are surveyed rather
+`fixtures/pathbuilder/generated/` holds legal level 20 builds made in Pathbuilder for every class
+and each option of its subclass choice (muse, school, bloodline, eidolon, ...), with feats and
+spells picked from Pathbuilder's own tables (see `fixtures/README.md`). They are too many for every run, so they are surveyed rather
 than tested:
 
 ```sh

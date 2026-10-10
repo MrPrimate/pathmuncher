@@ -21,7 +21,7 @@ describe("kineticGatePlan", () => {
       "kineticist-06": ["fork", "air Aura", "fork", "wood Elemental Resistance"],
     };
     for (const [name, plan] of Object.entries(expected)) {
-      assert.deepEqual(summary(kineticGatePlan(fixture(`generated/${name}`).build.specials)), plan, name);
+      assert.deepEqual(summary(kineticGatePlan(fixture(`edge/${name}`).build.specials)), plan, name);
     }
   });
 
@@ -45,17 +45,17 @@ describe("kineticGatePlan", () => {
 
 describe("kineticGateOwnJunctions", () => {
   it("is a single gate's Impulse junction, listed before any threshold", () => {
-    assert.deepEqual(kineticGateOwnJunctions(fixture("generated/kineticist-01").build.specials), [
+    assert.deepEqual(kineticGateOwnJunctions(fixture("edge/kineticist-01").build.specials), [
       { special: "Air Impulse Junction", additions: ["Impulse"] },
     ]);
   });
 
   it("is nothing for a dual gate, whose Impulse junction is an expansion's choice", () => {
-    assert.deepEqual(kineticGateOwnJunctions(fixture("generated/kineticist-04").build.specials), []);
+    assert.deepEqual(kineticGateOwnJunctions(fixture("edge/kineticist-04").build.specials), []);
   });
 
   it("is settled with the gate when the build is read, so it is not reported as unmatched", () => {
-    const source = BuildParser.normaliseSource(fixture("generated/kineticist-01").build);
+    const source = BuildParser.normaliseSource(fixture("edge/kineticist-01").build);
     const names = new FeatureNames({ className: source.class, ancestry: source.ancestry, heritage: source.heritage });
     const pm = {
       source,

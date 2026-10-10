@@ -1,8 +1,8 @@
 // Snapshots: what each import produces (pmt.characterSnapshot), compared with the snapshot saved in
 // tests/fixtures/snapshots. Any change to the result fails the test with the lines that changed, so a
 // refactor shows exactly what it moved. When a change is intended, rerun with PMT_UPDATE_SNAPSHOTS=1
-// to rewrite the snapshots, and review their diff. Covers every fixture and, of the generated builds,
-// the first of each class; PMT_SNAPSHOT_ALL=1 covers every generated build.
+// to rewrite the snapshots, and review their diff. Covers every fixture, every edge-case build and, of
+// the generated builds, the first of each class; PMT_SNAPSHOT_ALL=1 covers every generated build.
 (() => {
   const { test } = pmt;
   const saved = globalThis.__pmtSnapshots ?? {};
@@ -23,6 +23,7 @@
     ...Object.entries(generated)
       .filter(([name]) => globalThis.__pmtSnapshotAll || firstOfClass.has(name))
       .map(([name, exportJson]) => [`generated/${name}`, exportJson]),
+    ...Object.entries(globalThis.__pmtEdge ?? {}).map(([name, exportJson]) => [`edge/${name}`, exportJson]),
   ];
 
   for (const [name, exportJson] of builds) {

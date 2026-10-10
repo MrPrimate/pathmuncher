@@ -16,25 +16,47 @@ reuses ids, so the ones taken from issues are not necessarily the characters fir
 
 ## Generated builds (`generated/`)
 
-Level 20 builds made in the Pathbuilder web app (v111, remaster on, all books).
-The set covers every class, with one build for each option of its subclass choice: muse,
-doctrine, order, edge, racket, school, patron, research field, instinct, cause, methodology,
-mystery, bloodline, style, practice, ikon, innovation, way, conscious mind, implement, hybrid study,
-grim fascination, eidolon and element. Classes without one get two builds.
+Builds made in the Pathbuilder web app (v111, remaster on, all books), all of them legal: Pathbuilder
+shows each with no warnings and nothing left to choose. The set covers every class, with one build
+for each option of its subclass choice: muse, doctrine, order, edge, racket, school, patron, research
+field, instinct, cause, methodology, mystery, bloodline, style, practice, ikon, innovation, way,
+conscious mind, implement, hybrid study, grim fascination, eidolon and element. Classes without one
+get two builds.
 
-- `<class>-<nn>.json` matches the Pathbuilder character `PMTG <Class> <nn>`.
+- `<class>-<nn>.json` matches the Pathbuilder character `PMTG <Class> <nn>`, at level 20.
 - Ancestries rotate through those with their own heritage and feat tables. Every fifth build takes
   a versatile heritage.
-- Each class choice is the next option in turn; the other choices (font, thesis, deity weapon, and
-  so on) are spread across the options.
-- Feats fill every class, ancestry, skill and general slot from Pathbuilder's tables, with
-  prerequisites met where the tables give them. Spells fill every slot of each spellcasting entry.
-- Ability boosts and skill increases are left unassigned, so Pathbuilder fills in the attributes
-  itself. Expect attribute and skill differences.
-- Spellbook casters (wizard, witch, magus, necromancer) export their spells as `prepared` with an
-  empty spellbook (`spells`): the generator fills the prepared slots, not the spellbook.
-- Some builds break the rules. Pathbuilder offers every domain whatever the deity, and lets a muse
-  or feat be chosen twice. The prompts they cause are not pathmuncher's fault.
+- Ability boosts are assigned at every boost level, four different attributes each time, the key
+  attribute among them. Skills are trained, raised within the rank each level allows, and the
+  bonus languages an Intelligence modifier gives are chosen.
+- Every feat is common, meets its prerequisites, and fills its slot: class, ancestry, skill,
+  general, and the others a class or ancestry adds (a summoner's Evolution Feat, a racket's
+  Dedication Feat, Remnants of the Past's limited choices). Feats that add a pet or a choice the
+  build leaves open are not taken (Pet, Familiar, Animal Companion, Additional Lore and the like),
+  except where a limited choice offers nothing else and in the pet builds below.
+- Choices that depend on a deity follow pf2e's deity data: a cleric's font, domains, favored weapon
+  and sanctification, and a champion's cause (an unholy cause takes Abadar). Pathbuilder offers every
+  option for each and checks none of them.
+- Skill choices of feats (Assurance, Automatic Knowledge) take a skill the build is trained in.
+- Spells fill every slot, repertoire and innate choice, from common spells of the right tradition and
+  rank. An animist's apparitions are chosen and give it its apparition spells. Spellbook casters
+  (wizard, witch, magus, necromancer) export their spells as `prepared` with an empty spellbook
+  (`spells`).
+- Pets were set up in the paid app for nine builds:
+
+  | Build | Pet |
+  | --- | --- |
+  | witch-01 | specific familiar (Pipefox, "Smudge") with one chosen ability |
+  | witch-09 | familiar "Omen", six abilities including a master ability (Lifelink) |
+  | wizard-02 | familiar, six abilities including Cantrip Connection and Damage Avoidance (Reflex) |
+  | druid-02 | leaf order familiar, three abilities including Fast Movement (Land) |
+  | psychic-06, thaumaturge-01 | the familiar from an awarded Pet feat, two abilities |
+  | druid-01 | animal order companion: a savage wolf "Fang" with Mature, Incredible and Specialized Companion (Tracker) |
+  | ranger-02 | Animal Companion added: a nimble bird "Kestrel" with the same feats (Ambusher) and light barding |
+  | champion-02 | Faithful Steed added: a young horse "Bastion" |
+
+  The other builds keep Pathbuilder's defaults: their familiars have no abilities. Pathbuilder's
+  export has no eidolon data at all (`pets` stays empty for a summoner).
 - No Free Archetype: the free web app will not open those builds.
 
 `kineticist-07.json` to `kineticist-14.json` (Pathbuilder characters `PMTK K1` to `PMTK K8`) test
@@ -53,25 +75,28 @@ threshold an Expand the Portal or a Fork the Path:
 | 14 | dual earth and metal | expand ×4 |
 
 Class feat slots also take impulses of the same elements, and universal ones such as Command
-Elemental, so a class impulse can be mistaken for a gate's or threshold's.
+Elemental, so a class impulse can be mistaken for a gate's or threshold's. A gate's or fork's own
+slots take a 1st-level impulse of that element, and an Expand the Portal slot an impulse "for one of
+your kinetic elements", as the rules and pf2e's choice require: Pathbuilder offers any impulse there
+and does not flag the wrong ones.
 
-Unlike the other generated builds, these are legal builds that Pathbuilder shows with no warnings:
-- ability boosts are assigned at every boost level, and skills are trained and increased;
-- every feat meets its prerequisites, and every feat is common;
-- a gate's or fork's own slots take a 1st-level impulse of that element;
-- an Expand the Portal slot takes an impulse "for one of your kinetic elements", as the rules and
-  pf2e's choice require. Pathbuilder offers any impulse there and does not flag the wrong ones.
+`survey.test.js` imports them all when `PMT_SURVEY=1`. `snapshot.test.js` snapshots the first of each
+class, and all of them with `PMT_SNAPSHOT_ALL=1`.
 
-Languages and the cantrip choice of First World Magic (`kineticist-09`) are left unselected.
+## Edge-case builds (`edge/`)
 
-`survey.test.js` imports them all when `PMT_SURVEY=1`. Other tests use them by name through
-`globalThis.__pmtGenerated`.
+Earlier generated builds, made without the rules above: attributes and skills unassigned, feats whose
+prerequisites are unmet, uncommon picks, a domain or font the deity does not grant (`cleric-01`), and
+kineticist impulses no Expand the Portal can take (`kineticist-02`, `-04`, `-06`). Players make
+builds like these, so tests that check how an import copes with them use these by name through
+`globalThis.__pmtEdge`. They keep their old names (`cleric-01` and so on), which now also name
+different legal builds in `generated/`. Every edge build is snapshotted.
 
 ## Snapshots (`../snapshots/`)
 
-`snapshots/<fixture>.json` and `snapshots/generated/<build>.json` record what importing each build
-produced: the character's details, every item as one line, the spellcasting entries, the
-post-import report and the prompts. `snapshot.test.js` fails when an import no longer matches its
+`snapshots/<fixture>.json`, `snapshots/generated/<build>.json` and `snapshots/edge/<build>.json`
+record what importing each build produced: the character's details, every item as one line, the
+spellcasting entries, the post-import report and the prompts. `snapshot.test.js` fails when an import no longer matches its
 snapshot. They are written by the tests (`PMT_UPDATE_SNAPSHOTS=1`), never by hand. They hold
 compendium names and ids, so a pf2e update that renames or changes items changes them too.
 
