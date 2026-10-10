@@ -19,7 +19,7 @@ import { EvaluationActor } from "./EvaluationActor.js";
 import { FeatureNames } from "./FeatureNames.js";
 import { ImportReport } from "./ImportReport.js";
 import { ParsedEntry } from "./ParsedEntry.js";
-import { Pf2eRules } from "./Pf2eRules.js";
+import { CompendiumQueries, Pf2eRules } from "./Pf2eRules.js";
 import { Seasoning } from "./Seasoning.js";
 import { SpellBuilder } from "./SpellBuilder.js";
 
@@ -91,6 +91,8 @@ export class Pathmuncher {
       weapons: [],
     };
     this.usedLocations = new Set();
+    // the compendium items ChoiceSet filters are tested against, made once for the import
+    this.compendiumQueries = new CompendiumQueries();
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};
@@ -1063,7 +1065,7 @@ export class Pathmuncher {
     const cleansedChoiceSet = foundry.utils.deepClone(choiceSet);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const choiceSetRules = Pf2eRules.ruleElement(cleansedChoiceSet, item);
+      const choiceSetRules = Pf2eRules.ruleElement(cleansedChoiceSet, item, { queries: this.compendiumQueries });
       const rollOptions = Pf2eRules.rollOptions(tempActor, item);
       const offered = await Pf2eRules.choices(choiceSetRules, rollOptions);
       // a feat taken more than once takes a different option each time: not one another copy has
@@ -1137,7 +1139,7 @@ export class Pathmuncher {
       const tempSet = foundry.utils.deepClone(choiceSet);
       logger.debug(`Starting dynamic selection for ${document.name}`, { document, choiceSet, tempSet, Pathmuncher: this });
       // the system asks with only the options still open
-      const selectionRules = taken.length > 0 ? Pf2eRules.ruleElement({ ...cleansedChoiceSet, choices }, item) : choiceSetRules;
+      const selectionRules = taken.length > 0 ? Pf2eRules.ruleElement({ ...cleansedChoiceSet, choices }, item, { queries: this.compendiumQueries }) : choiceSetRules;
       await Pf2eRules.makeSelection(selectionRules, { item, actor: tempActor, ruleSource: tempSet });
       if (this.devMode) logger.warn("chociesetdata", {
         choiceSetRules,
@@ -1221,7 +1223,7 @@ export class Pathmuncher {
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item);
+      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item, { queries: this.compendiumQueries });
       const rollOptions = Pf2eRules.rollOptions(tempActor, item);
 
       if (rule.predicate && !Pf2eRules.predicatePasses(ruleElement, rollOptions)) return false;
@@ -1259,7 +1261,7 @@ export class Pathmuncher {
     const cleansedRule = foundry.utils.deepClone(rule);
     try {
       const item = tempActor.getEmbeddedDocument("Item", document._id);
-      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item);
+      const ruleElement = Pf2eRules.ruleElement(cleansedRule, item, { queries: this.compendiumQueries });
       return rule.predicate ? Pf2eRules.predicatePasses(ruleElement, Pf2eRules.rollOptions(tempActor, item)) : true;
     } catch (err) {
       logger.error("Something has gone most wrong during rule predicate checking", {
@@ -1986,8 +1988,28 @@ export class Pathmuncher {
     foundry.utils.setProperty(this.result.character, "system.crafting.formulas", uuids);
   }
 
+  /**
+   * Fetches the compendium documents for the build's feats and specials in one request per pack. The
+   * feats are then read one by one, each from the pack's cache rather than its own request to the
+   * server (about 50 ms each when a world's packs are first read).
+   */
+  async #prefetchFeatDocuments() {
+    const ids = new Map();
+    for (const pBFeat of [...this.parsed.feats, ...this.parsed.specials]) {
+      for (const type of ["feats", "classFeatures"]) {
+        const match = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
+        if (!match || match.pack.has(match.i._id)) continue;
+        if (!ids.has(match.pack)) ids.set(match.pack, new Set());
+        ids.get(match.pack).add(match.i._id);
+      }
+    }
+    // eslint-disable-next-line camelcase
+    await Promise.all([...ids].map(([pack, packIds]) => pack.getDocuments({ _id__in: [...packIds] })));
+  }
+
   async #processFeats() {
     this.#sortParsedFeats();
+    await this.#prefetchFeatDocuments();
     await this.#generateFeatItems("classFeatures", { typeFilter: "Mythic Feat", levelCap: "calling" });
     // pre pass for standard items
     for (let i = 1; i <= this.characterLevel; i++) {

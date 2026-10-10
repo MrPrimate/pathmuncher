@@ -4,6 +4,7 @@
 - The temp-folder settings have been removed.
 - Players without permission to delete actors can now import.
 - Imports are faster and produce much less console output.
+- Imports take about half as long again. Feats are created in a few batches rather than one at a time, the build's feats and spells are fetched from the compendiums together rather than one by one, and choices that offer "any feat matching ..." no longer rebuild the whole compendium each time they are looked at.
 - Pathbuilder lets a cleric or champion pick domains, a divine font or a sanctification (or a cause needing one) that their deity does not allow. The importer now spots this and asks: keep the deity and pick choices it allows, or keep the choices and pick (or drop in) a deity that allows them all.
 - If Foundry's rule code fails on one item's choice or granted item, the import carries on. Foundry applies that rule itself when the item is created, and the import notes list the item under "Rules to check".
 - An Adventurer's Pack no longer stops a Starfinder 2e import. SF2e has no backpack to hold it, so it is listed in the import notes instead.

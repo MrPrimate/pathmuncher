@@ -10,6 +10,51 @@ import utils from "../utils.js";
  */
 export class ActorWriter {
 
+  /**
+   * Whether the system needs the items created before this one already on the actor to create it.
+   * On creating an item the system works out its ChoiceSets' options and tests its ChoiceSets' and
+   * GrantItems' predicates against the actor as it is, not the items created alongside it. So a
+   * ChoiceSet whose options come from the actor (a path into its data or flags, its items, its
+   * attacks, or a compendium filter on its roll options) or a rule with a predicate needs the items
+   * before it: Psi Development's psi cantrips are an actor flag The Tangible Dream sets.
+   */
+  static dependsOnActor(item) {
+    // the roll options a predicate statement names, however deeply it nests them ({ "lte": ["item:level", 5] })
+    const options = (statement) => {
+      if (typeof statement === "string") return [statement];
+      if (Array.isArray(statement)) return statement.flatMap(options);
+      return utils.isObject(statement) ? Object.values(statement).flatMap(options) : [];
+    };
+    return (item.system?.rules ?? []).some((rule) => {
+      if (!["ChoiceSet", "GrantItem"].includes(rule.key)) return false;
+      if (Array.isArray(rule.predicate) && rule.predicate.length > 0) return true;
+      if (rule.key !== "ChoiceSet") return false;
+      const choices = rule.choices;
+      if (typeof choices === "string") return true;
+      if (Array.isArray(choices)) return choices.some((c) => Array.isArray(c?.predicate) && c.predicate.length > 0);
+      if (utils.isObject(choices)) {
+        if (choices.ownedItems || choices.attacks || choices.unarmedAttacks) return true;
+        return Array.isArray(choices.filter) && options(choices.filter).some((o) => !(/^(item|parent):/).test(o));
+      }
+      return false;
+    });
+  }
+
+  /**
+   * The feats split into batches to create one after another, in order: a feat that depends on the
+   * actor (dependsOnActor) starts a new batch, so everything before it is on the actor when it is
+   * created. Creating each feat on its own did the same at the cost of a round trip, and the system
+   * preparing the whole actor again, for every feat.
+   */
+  static featBatches(feats) {
+    const batches = [];
+    for (const feat of feats) {
+      if (batches.length === 0 || ActorWriter.dependsOnActor(feat)) batches.push([]);
+      batches.at(-1).push(feat);
+    }
+    return batches;
+  }
+
   /** @param {Pathmuncher} pm  the import this works for, whose state it reads and adds to */
   constructor(pm) {
     this.pm = pm;
@@ -178,13 +223,10 @@ export class ActorWriter {
     if (this.options.addLores) await this.#createAndUpdateItemsWithRuleRestore(this.result.lores);
 
     if (this.options.addFeats) {
-      // one at a time, in order: the system evaluates a feat's choices against the items already on
-      // the actor (Psi Development's psi cantrip depends on The Tangible Dream), so a single batch
-      // makes it prompt with no options
-      const featCount = this.result.feats.length;
-      for (const [i, feat] of this.result.feats.entries()) {
-        this.pm.statusUpdate(i, featCount, "Feats", "Eating");
-        await this.#createAndUpdateItemsWithRuleRestore([feat]);
+      const batches = ActorWriter.featBatches(this.result.feats);
+      for (const [i, batch] of batches.entries()) {
+        this.pm.statusUpdate(i, batches.length, "Feats", "Eating");
+        await this.#createAndUpdateItemsWithRuleRestore(batch);
       }
     }
     if (this.options.addSpells) {

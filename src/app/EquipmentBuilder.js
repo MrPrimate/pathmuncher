@@ -522,6 +522,11 @@ export class EquipmentBuilder {
         { slug: "credstick", type: "sp" },
       ];
 
+    // the coins in one request, so the loop reads them from the pack's cache
+    const coinIds = moneyLookup.map((lookup) => index.find((i) => i.system.slug === lookup.slug)?._id).filter(Boolean);
+    // eslint-disable-next-line camelcase
+    if (coinIds.length > 0) await compendium.getDocuments({ _id__in: coinIds });
+
     for (const lookup of moneyLookup) {
       const indexMatch = index.find((i) => i.system.slug === lookup.slug);
       if (indexMatch) {

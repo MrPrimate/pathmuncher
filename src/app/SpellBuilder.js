@@ -180,11 +180,43 @@ export class SpellBuilder {
     return data;
   }
 
-  async #loadSpell(spell, casterId, debugData) {
+  /** A Pathbuilder spell's compendium name and index match, if it has one. */
+  #spellMatch(spell) {
     const spellName = spellRename(spell.split("(")[0].trim());
+    return { spellName, indexMatch: this.compendiumMatchers["spells"].getMatch(spell, spellName, true) };
+  }
+
+  /**
+   * Fetches the build's spells in one request per pack, so loading them one by one reads each from the
+   * pack's cache rather than asking the server for it.
+   */
+  async #prefetchSpells() {
+    const spells = new Set();
+    for (const caster of this.source.spellCasters ?? []) {
+      for (const block of [...(caster.spells ?? []), ...(caster.prepared ?? [])]) {
+        for (const spell of block.list ?? []) spells.add(spell);
+      }
+    }
+    for (const tradition of Object.values(this.source.focus ?? {})) {
+      for (const ability of Object.values(tradition ?? {})) {
+        for (const spell of [...(ability?.focusCantrips ?? []), ...(ability?.focusSpells ?? [])]) spells.add(spell);
+      }
+    }
+    const ids = new Map();
+    for (const spell of spells) {
+      const { indexMatch } = this.#spellMatch(spell);
+      if (!indexMatch || indexMatch.pack.has(indexMatch.i._id)) continue;
+      if (!ids.has(indexMatch.pack)) ids.set(indexMatch.pack, new Set());
+      ids.get(indexMatch.pack).add(indexMatch.i._id);
+    }
+    // eslint-disable-next-line camelcase
+    await Promise.all([...ids].map(([pack, packIds]) => pack.getDocuments({ _id__in: [...packIds] })));
+  }
+
+  async #loadSpell(spell, casterId, debugData) {
+    const { spellName, indexMatch } = this.#spellMatch(spell);
     logger.debug("spell details", { spell, spellName, debugData });
 
-    const indexMatch = this.compendiumMatchers["spells"].getMatch(spell, spellName, true);
     if (!indexMatch) {
       if (debugData.psychicAmpSpell) return undefined;
       logger.error(`Unable to match spell ${spell}`, { spell, spellName, debugData });
@@ -336,6 +368,7 @@ export class SpellBuilder {
   }
 
   async processSpells() {
+    await this.#prefetchSpells();
     for (const caster of this.source.spellCasters) {
       logger.debug("Generating caster for", caster);
       if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;

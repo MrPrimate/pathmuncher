@@ -12,6 +12,8 @@ class ChoiceSet extends RuleElement {
   inflateChoices() {}
 
   preCreate() {}
+
+  queryCompendium() {}
 }
 class GrantItem extends RuleElement {
   preCreate() {}
@@ -35,7 +37,7 @@ describe("Pf2eRules.missing", () => {
       preCreate() {}
     }
     game.pf2e = { ...original, RuleElements: { all: { ChoiceSet: OldChoiceSet } } };
-    assert.deepEqual(Pf2eRules.missing(), ["ChoiceSet.inflateChoices", "GrantItem"]);
+    assert.deepEqual(Pf2eRules.missing(), ["ChoiceSet.inflateChoices", "ChoiceSet.queryCompendium", "GrantItem"]);
   });
 
   it("names them all when there are no rule elements at all", () => {
