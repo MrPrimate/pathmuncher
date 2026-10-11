@@ -2,6 +2,8 @@ import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
 import { AmmunitionDialog } from "./AmmunitionDialog.js";
+import { BFFBuilder } from "./BFFBuilder.js";
+import { CompanionDialog } from "./CompanionDialog.js";
 import { DeityConflictDialog } from "./DeityConflictDialog.js";
 import { ImportMemory } from "./ImportMemory.js";
 import { ImportReport } from "./ImportReport.js";
@@ -16,7 +18,7 @@ const OPTION_GROUPS = [
   { id: "Character", options: ["addName", "addClass", "addAncestry", "addHeritage", "addBackground", "addDeity"] },
   {
     id: "Features",
-    options: ["addFeats", "addLores", "addSpells", { key: "adjustBlendedSlots", parent: "addSpells" }, "addFormulas", "addFamiliars"],
+    options: ["addFeats", "addLores", "addSpells", { key: "adjustBlendedSlots", parent: "addSpells" }, "addFormulas", "addFamiliars", "addCompanions"],
   },
   { id: "Inventory", options: ["addEquipment", "addWeapons", "addArmor", "addTreasure", "addMoney"] },
 ];
@@ -192,6 +194,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       resolveDeityConflict: DeityConflictDialog.choose,
       resolveUnansweredChoices: UnansweredChoicesDialog.choose,
       resolveAmmunition: AmmunitionDialog.choose,
+      resolveCompanionActor: CompanionDialog.choose,
     }, { reuse });
     logger.debug("Pathmuncher options", options);
 
@@ -269,6 +272,13 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       await petShop.addPetEffects();
       // abilities no compendium item matched, in the import notes' Familiars
       pathmuncher.bad.push(...petShop.unmatched);
+    }
+    if (options.addCompanions && BFFBuilder.active) {
+      const bff = new BFFBuilder({ pathmuncher, master: this.actor, resolveCompanionActor: options.resolveCompanionActor });
+      await bff.build();
+      // the companions made are not listed as pets not imported; what of them matched nothing is
+      pathmuncher.importedPets = bff.imported.map((c) => c.pet);
+      pathmuncher.bad.push(...bff.bad);
     }
     await memory.save(pathmuncher, { source, report: pathmuncher.getImportReport() });
     logger.debug("Final import details", { actor: this.actor, pathmuncher, options });

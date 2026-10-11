@@ -120,6 +120,13 @@
         "AsBuilt": "Import as built",
         "Cancel": "Cancel import"
       },
+      "Companion": {
+        "Title": "Pathmuncher | Companion",
+        "Content": "{pet} is {master}'s companion, and has no character of its own yet. Make a new character for it, or build it on one of these characters: they are blank or made for a companion, and no other player owns them.",
+        "New": "New character: {name}",
+        "Import": "Build companion",
+        "Skip": "Leave it out"
+      },
       "Ammunition": {
         "Title": "Pathmuncher | Ammunition",
         "Content": "Pathbuilder lists this ammunition once, but each of these weapons takes its own. Drag each stack onto the weapon it is for. Split a stack to share it between weapons, or add more. Stacks not given to a weapon are not imported.",
@@ -175,7 +182,7 @@
         "Rules": "Rules to check",
         "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
         "Pets": "Pets not imported",
-        "PetsHint": "Pathmuncher imports familiars only, and Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand.",
+        "PetsHint": "Pathmuncher imports familiars, and animal companions when the PF2e Companion Compendia module is active. Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand.",
         "ImportedAt": "Imported {date}."
       }
     },
@@ -216,6 +223,7 @@
         "adjustBlendedSlots": "Adjust for blended spell slots",
         "addFormulas": "Formulas",
         "addFamiliars": "Familiars",
+        "addCompanions": "Animal companions",
         "addEquipment": "Equipment",
         "addWeapons": "Weapons",
         "addArmor": "Armor and shields",
@@ -265,6 +273,7 @@
       "FeatureRec": "Feature Reconciliation",
       "Familiar": "Familiar",
       "Familiars": "Familiars",
+      "Companions": "Companions",
       "Finished": "Finished",
       "Cancel": "Cancel",
       "Computing": "Computing",
@@ -277,7 +286,8 @@
     },
     "Folders": {
       "Familiar": "Familiars",
-      "Familiars": "Familiars"
+      "Familiars": "Familiars",
+      "Companions": "Companions"
     },
     "CompendiumGroups": {
       "feats": "Feats",

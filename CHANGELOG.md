@@ -1,5 +1,6 @@
 # Next up
 
+- Animal companions are imported when the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module is active, each as a character of its own built from that module: its animal, its master's level, Mature, Nimble or Savage, Specialized with its specializations, and barding. The first import asks whether to make a new character for the companion or build it on a character no other player owns; the companion is then linked to its master, and later imports update it, keeping anything added to it by hand. A new "Animal companions" import option turns this off.
 - An import now keeps the Pathbuilder build, its import notes and the answers you gave on the actor. The next import offers "Re-use import answers from the last import?" (ticked by default): the choices you answered (in the choices dialog or when the system asked), the deity, items dropped in for missing ones, and which hand-added items to keep are given again where the same question comes up, and only new questions are asked. "Last import notes" in the importer shows the last import's notes again.
 - Choices are now worked out without creating temporary actors.
 - The temp-folder settings have been removed.

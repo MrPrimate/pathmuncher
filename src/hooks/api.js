@@ -1,3 +1,4 @@
+import { BFFBuilder } from "../app/BFFBuilder.js";
 import { CompendiumMatcher } from "../app/CompendiumMatcher.js";
 import { CompendiumSelector } from "../app/CompendiumSelector.js";
 import { ImportMemory } from "../app/ImportMemory.js";
@@ -14,6 +15,7 @@ import utils from "../utils.js";
 
 export function registerAPI() {
   game.modules.get(CONSTANTS.MODULE_NAME).api = {
+    BFFBuilder,
     ImportMemory,
     Pathmuncher,
     PathmuncherImporter,

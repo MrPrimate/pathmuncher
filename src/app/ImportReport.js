@@ -150,12 +150,14 @@ export class ImportReport {
       ["formula", bad("formula", "addFormulas")],
       ["familiar", bad("familiar", "addFamiliars")],
       ["pet", this.unimportedPets()],
+      ["companion", bad("companion", "addCompanions")],
       ["rule", bad("rule", null)],
     ];
     const labels = {
       class: "Class", ancestry: "Ancestry", heritage: "Heritage", background: "Background", deity: "Deity",
       feat: "Feats", special: "Specials", equipment: "Equipment", weapon: "Weapons", armor: "Armor",
       spellcasting: "Spellcasting", spell: "Spells", ritual: "Rituals", formula: "Formulas", familiar: "Familiars",
+      companion: "Companions",
     };
     return groups
       .map(([type, names]) => ({
@@ -170,13 +172,14 @@ export class ImportReport {
   }
 
   /**
-   * The build's pets other than familiars (animal companions, mounts), which are not imported:
-   * "<name> (<type>)"; and a summoner's eidolon, which Pathbuilder's export leaves out, with what
-   * the build says of it ("Eidolon (Energy Heart: electricity)").
+   * The build's pets other than familiars that were not imported (animal companions without the
+   * companion module, mounts): "<name> (<type>)"; and a summoner's eidolon, which Pathbuilder's
+   * export leaves out, with what the build says of it ("Eidolon (Energy Heart: electricity)").
    */
   unimportedPets() {
+    const imported = this.pm.importedPets ?? [];
     const pets = (this.source.pets ?? [])
-      .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar")
+      .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar" && !imported.includes(pet))
       .map((pet) => (pet.name ? `${pet.name} (${pet.type})` : pet.type));
     if ([this.source.class, this.source.dualClass].includes("Summoner")) {
       const notes = this.pm.eidolonNotes ?? [];

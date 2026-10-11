@@ -76,6 +76,8 @@ export class Pathmuncher {
     this.compendiumQueries = new CompendiumQueries();
     // what the build says about the summoner's eidolon, which is not imported (#settleEidolonSpecials)
     this.eidolonNotes = [];
+    // the build's pets made into companions (BFFBuilder), which the import notes don't list as not imported
+    this.importedPets = [];
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};

@@ -83,7 +83,13 @@
     const name = `PMTEST ${label}`;
     for (const a of game.actors.filter((x) => x.getFlag("world", "pmtest") === name)) await a.delete();
     const actor = await Actor.create(foundry.utils.mergeObject({ name, type: "character", flags: { world: { pmtest: name } } }, data));
-    if (!pmt.keep) ctx.cleanup(() => game.actors.get(actor.id)?.delete());
+    if (!pmt.keep) {
+      ctx.cleanup(async () => {
+        // with the companions an import made for it
+        for (const companion of game.actors.filter((a) => a.getFlag("pathmuncher", "master")?.uuid === actor.uuid)) await companion.delete();
+        await game.actors.get(actor.id)?.delete();
+      });
+    }
     return actor;
   };
 
@@ -247,6 +253,11 @@
     const closeReport = Hooks.on("renderDialogV2", (dialog) => {
       // choices the build doesn't answer: picking none leaves them to the system's prompts, as before
       if (dialog.options.classes?.includes("pathmuncher-unanswered-choices-dialog")) {
+        setTimeout(() => dialog.element.querySelector("button[data-action='import']")?.click(), 20);
+        return;
+      }
+      // a companion with no character yet: a new one, as offered
+      if (dialog.options.classes?.includes("pathmuncher-companion-dialog")) {
         setTimeout(() => dialog.element.querySelector("button[data-action='import']")?.click(), 20);
         return;
       }

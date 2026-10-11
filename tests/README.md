@@ -130,6 +130,14 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - With re-use on, a choice answered last time isn't asked again; with it off, it is.
   - How ammunition is shared out is asked each time.
   - The importer's re-use box and notes button appear only once there is a last import.
+- `companions.test.js`: animal companions made with the PF2e Companion Compendia module
+  (`BFFBuilder`), registered only in a world where that module is active.
+  - A companion is a character with its animal, level, advancement feats and barding, linked to its
+    master, made without prompts.
+  - The next import updates the same character and keeps what was added to it by hand.
+  - A companion goes to the character picked for it; only characters no other player owns, that are
+    blank or made for a companion, are offered.
+  - An animal the module doesn't have is reported, with no character made.
 - `rename-targets.test.js`: every target in the rename tables (`src/data/features.js`,
   `equipment.js` and `spells.js`) is in the compendiums the importer searches. See
   [After a system update](#after-a-system-update).

@@ -47,6 +47,7 @@ const CONSTANTS = {
     addName: true,
     addClass: true,
     addFamiliars: true,
+    addCompanions: true,
     addFormulas: true,
   },
 

@@ -21,7 +21,11 @@ Import characters from Pathbuilder (or Hephaistos 2E) to Foundry Pathfinder 2e/S
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
 
-To use this module the users must have the CREATE ACTOR ability, as it imports familiars as their own actors and saves a copy of the character if an import fails part way.
+To use this module the users must have the CREATE ACTOR ability, as it imports familiars and animal companions as their own actors and saves a copy of the character if an import fails part way.
+
+## Animal companions
+
+With the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module active, a build's animal companions are imported as characters of their own, the way that module builds them: the animal as the ancestry, at the character's level, with Mature, Nimble or Savage and Specialized as Pathbuilder has them, and any barding. The first import asks which character each companion goes to: a new one, or a character no other player owns that is blank or made for a companion. Later imports update the same character, keeping anything added to it by hand. Without the module, companions are listed in the import notes.
 
 ## Known Issues
 
