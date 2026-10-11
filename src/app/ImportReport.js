@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
 import { BAD_IGNORE_FEATURES, remasterTermNames } from "../data/features.js";
 import logger from "../logger.js";

@@ -192,6 +192,19 @@ export class SpellBuilder {
    * pack's cache rather than asking the server for it.
    */
   async #prefetchSpells() {
+    const ids = new Map();
+    for (const spell of this.#buildSpellNames()) {
+      const { indexMatch } = this.#spellMatch(spell);
+      if (!indexMatch || indexMatch.pack.has(indexMatch.i._id)) continue;
+      if (!ids.has(indexMatch.pack)) ids.set(indexMatch.pack, new Set());
+      ids.get(indexMatch.pack).add(indexMatch.i._id);
+    }
+    // eslint-disable-next-line camelcase
+    await Promise.all([...ids].map(([pack, packIds]) => pack.getDocuments({ _id__in: [...packIds] })));
+  }
+
+  /** The names of every spell the build's casters and focus abilities have. */
+  #buildSpellNames() {
     const spells = new Set();
     for (const caster of this.source.spellCasters ?? []) {
       for (const block of [...(caster.spells ?? []), ...(caster.prepared ?? [])]) {
@@ -203,15 +216,7 @@ export class SpellBuilder {
         for (const spell of [...(ability?.focusCantrips ?? []), ...(ability?.focusSpells ?? [])]) spells.add(spell);
       }
     }
-    const ids = new Map();
-    for (const spell of spells) {
-      const { indexMatch } = this.#spellMatch(spell);
-      if (!indexMatch || indexMatch.pack.has(indexMatch.i._id)) continue;
-      if (!ids.has(indexMatch.pack)) ids.set(indexMatch.pack, new Set());
-      ids.get(indexMatch.pack).add(indexMatch.i._id);
-    }
-    // eslint-disable-next-line camelcase
-    await Promise.all([...ids].map(([pack, packIds]) => pack.getDocuments({ _id__in: [...packIds] })));
+    return spells;
   }
 
   async #loadSpell(spell, casterId, debugData) {
@@ -268,7 +273,6 @@ export class SpellBuilder {
               && preparedAtLevel.length === 0 && spellSelection.list.length <= caster.perDay[level])
           ) {
             logger.debug(`Preparing spell ${itemData.name} for level ${level}`, { spell });
-            // eslint-disable-next-line require-atomic-updates
             instance.system.slots[`slot${level}`].prepared[preparedValue] = { id: itemData._id };
             preparedValue++;
           }
@@ -394,7 +398,7 @@ export class SpellBuilder {
     await this.#prefetchSpells();
     for (const caster of this.source.spellCasters) {
       logger.debug("Generating caster for", caster);
-      if (Number.isInteger(parseInt(caster.focusPoints))) this.result.focusPool += caster.focusPoints;
+      if (Number.isInteger(parseInt(caster.focusPoints, 10))) this.result.focusPool += caster.focusPoints;
       const instance = this.#generateSpellCaster(caster);
       logger.debug("Generated caster instance", instance);
       const spellEnhancements = Seasoning.getSpellCastingFeatureAdjustment(caster.name);

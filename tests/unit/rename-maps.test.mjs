@@ -2,9 +2,10 @@
 // Paizo's gods, places and peoples), spelling, and naming patterns.
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { EQUIPMENT_RENAME_MAP } from "../../src/data/equipment.js";
-import { FEAT_RENAME_MAP } from "../../src/data/features.js";
-import { spellRename } from "../../src/data/spells.js";
+import CONSTANTS from "../../src/constants.js";
+import { EQUIPMENT_RENAME_MAP, EQUIPMENT_RENAME_STATIC_MAP } from "../../src/data/equipment.js";
+import { CHOICE_VALUE_RENAMES, FEAT_RENAME_MAP, FEAT_RENAME_STATIC_MAP } from "../../src/data/features.js";
+import { PATHBUILDER_SPELLINGS, REMASTER_NAMES, spellRename } from "../../src/data/spells.js";
 
 // the name each is looked up under first, as the importer does
 const equipment = (pbName) => EQUIPMENT_RENAME_MAP(pbName).find((e) => e.pbName === pbName)?.foundryName ?? pbName;
@@ -46,5 +47,39 @@ describe("rename maps", () => {
     // pf2e and sf2e have "Life" and "Reposition" too, so dropping the suffix would find the wrong item
     assert.equal(feature("Life Connection"), "Life Connection");
     assert.equal(feature("Reposition Exocortex"), "Reposition Exocortex");
+  });
+});
+
+// the tables whose targets tests/foundry/rename-targets.test.js looks for in the compendiums
+describe("rename tables", () => {
+  const tables = {
+    features: FEAT_RENAME_STATIC_MAP.concat(CHOICE_VALUE_RENAMES),
+    equipment: EQUIPMENT_RENAME_STATIC_MAP,
+    spells: REMASTER_NAMES.concat(PATHBUILDER_SPELLINGS),
+  };
+  // the modules whose packs the importer searches
+  const modules = new Set(Object.values(CONSTANTS.CORE_COMPENDIUM_MAPPINGS).flat().map((pack) => pack.split(".")[0]));
+
+  it("tag an entry only with a system and a module whose packs are searched", () => {
+    for (const [name, entries] of Object.entries(tables)) {
+      for (const e of entries) {
+        const label = `${name}: ${e.pbName}`;
+        assert.deepEqual(Object.keys(e).filter((key) => !["pbName", "foundryName", "system", "module"].includes(key)), [], label);
+        if (e.system) assert.ok(["pf2e", "sf2e"].includes(e.system), `${label} system ${e.system}`);
+        if (e.module) assert.ok(modules.has(e.module), `${label} module ${e.module}`);
+      }
+    }
+  });
+
+  it("rename each name once for each system, to another name", () => {
+    for (const [name, entries] of Object.entries(tables)) {
+      const seen = new Set();
+      for (const e of entries) {
+        const key = `${e.system ?? "pf2e"}:${e.pbName}`;
+        assert.ok(!seen.has(key), `${name}: ${key} twice`);
+        seen.add(key);
+        assert.ok(e.foundryName && e.foundryName !== e.pbName, `${name}: ${e.pbName} to itself`);
+      }
+    }
   });
 });

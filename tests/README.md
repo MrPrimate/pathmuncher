@@ -125,6 +125,32 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - Hand-added items are offered in the keep dialog; cancelling changes nothing.
   - Actors imported before items were flagged are replaced without asking.
   - Unticked options (money, armor, formulas) leave their items alone.
+- `memory.test.js`: what an import keeps on the actor (`flags.pathmuncher.lastImport`).
+  - The build, the import notes and the answers given, including those the system asked for.
+  - With re-use on, a choice answered last time isn't asked again; with it off, it is.
+  - How ammunition is shared out is asked each time.
+  - The importer's re-use box and notes button appear only once there is a last import.
+- `rename-targets.test.js`: every target in the rename tables (`src/data/features.js`,
+  `equipment.js` and `spells.js`) is in the compendiums the importer searches. See
+  [After a system update](#after-a-system-update).
+
+### After a system update
+
+The rename tables map Pathbuilder's names to the compendiums' names. A pf2e or sf2e release that
+renames or drops an item leaves its entry pointing at nothing, and builds with that item import it
+as unmatched. After either system updates, run the check in a pf2e world and in an sf2e world:
+
+```sh
+CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:foundry -- "rename targets"
+```
+
+Each world checks the entries for its own system. An entry is pf2e's unless it is tagged
+`system: "sf2e"`. Entries for a module's content are tagged with the module (`module:
+"pf2e-legacy-content"` for the pre-remaster names) and are checked only in a world where that module
+is active. Choice options that aren't compendium items (the dragon a draconic bloodline takes) are
+kept apart in `CHOICE_VALUE_RENAMES` and not checked. For a target that isn't found, look up the
+item's new name and update the entry, tag it, or remove it if the item is gone. The unit tests check
+the tables' tags and that no name is renamed twice.
 
 Add new behaviour tests next to these as plain scripts that call `pmt.test(name, async (t) => ...)`.
 `lib.js` documents the helpers:

@@ -27,14 +27,21 @@ let target = targets.find((t) => t.type === "page" && t.url.startsWith(FVTT_URL)
 if (!target) target = await (await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: "PUT" })).json();
 
 const ws = new WebSocket(target.webSocketDebuggerUrl);
-await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
+await new Promise((resolve, reject) => {
+  ws.onopen = resolve;
+  ws.onerror = reject;
+});
 let nextId = 0;
 const pending = new Map();
 const pageErrors = [];
 let listening = false;
 ws.onmessage = (event) => {
   const m = JSON.parse(event.data);
-  if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); return; }
+  if (m.id && pending.has(m.id)) {
+    pending.get(m.id)(m);
+    pending.delete(m.id);
+    return;
+  }
   if (listening && m.method === "Runtime.exceptionThrown") {
     pageErrors.push((m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text ?? "").split("\n")[0]);
   }

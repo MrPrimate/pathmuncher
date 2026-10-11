@@ -3,7 +3,7 @@
 
 globalThis.window = globalThis;
 
-const getProperty = (object, key) => key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), object);
+const getProperty = (object, key) => key.split(".").reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), object);
 
 const setProperty = (object, key, value) => {
   const parts = key.split(".");

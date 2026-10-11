@@ -426,7 +426,12 @@
     const actor = await pmt.actor(t, "one gun's rounds");
     let asked = false;
 
-    const pm = await pmt.importBuild(actor, exportJson, { resolveAmmunition: () => (asked = true) && [] });
+    const pm = await pmt.importBuild(actor, exportJson, {
+      resolveAmmunition: () => {
+        asked = true;
+        return [];
+      },
+    });
 
     t.equal(asked, false, "not asked");
     t.deepEqual(ammunition(actor), { "Rounds (Coat Pistol)": 10 }, "ammunition");

@@ -1,4 +1,3 @@
-/* eslint-disable no-console -- the survey records console errors raised during each import */
 // Survey of the generated level 20 builds (fixtures/pathbuilder/generated, one per class and subclass
 // choice). Only runs with PMT_SURVEY=1. Each import passes unless it throws; what it finds goes to the
 // log as one "SURVEY {json}" line for tests/foundry/survey-report.py to summarise: the pf2e prompts

@@ -196,7 +196,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
     logger.debug("Pathmuncher options", options);
 
     this.#setImporting(true);
-    let completed = null;
+    let completed;
     try {
       completed = await this.#import(options, data, { memory, reuse });
     } finally {

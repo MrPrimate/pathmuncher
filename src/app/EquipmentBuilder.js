@@ -189,7 +189,6 @@ export class EquipmentBuilder {
       };
       // settled after its own rules are read, which can match the entry's extra (a choice it makes)
       await this.pm.addGrantedItems(itemData, options);
-      // eslint-disable-next-line require-atomic-updates
       e.settle(ParsedEntry.STATUS.CREATED, { itemId: itemData._id });
     }
   }
@@ -298,7 +297,6 @@ export class EquipmentBuilder {
     }
   }
 
-  // eslint-disable-next-line complexity
   async applyRunes(parsedItem, itemData, type) {
     if (itemData.type == "shield") {
       parsedItem.runes.forEach((rune) => {

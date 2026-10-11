@@ -283,7 +283,7 @@ export class Pathmuncher {
     if (location && !this.usedLocations.has(location)) {
       document.system.location = location;
       // as the system records when a feat is dropped into a slot
-      foundry.utils.setProperty(document, "system.level.taken", parseInt(location.split("-").pop()));
+      foundry.utils.setProperty(document, "system.level.taken", parseInt(location.split("-").pop(), 10));
       this.usedLocations.add(location);
     }
   }
@@ -1381,7 +1381,7 @@ export class Pathmuncher {
     }
   }
 
-  // eslint-disable-next-line complexity, no-unused-vars
+  // eslint-disable-next-line complexity
   async #addGrantedRules(document, originType = null, choiceHint = null) {
     if (document.system.rules.length === 0) return;
     logger.debug(`addGrantedRules for ${document.name}`, () => foundry.utils.duplicate(document));
@@ -1652,15 +1652,15 @@ export class Pathmuncher {
       .sort(([, a], [, b]) => a.level - b.level);
     for (const [key, grantedFeature] of featureItemMap) {
       logger.debug(`Checking ${document.name} granted item ${grantedFeature.name}, level(${grantedFeature.level}) with key: ${key}`, grantedFeature);
-      if (parseInt(grantedFeature.level) > foundry.utils.getProperty(this.result.character, "system.details.level.value")
-        || parseInt(grantedFeature.level) !== level
+      if (parseInt(grantedFeature.level, 10) > foundry.utils.getProperty(this.result.character, "system.details.level.value")
+        || parseInt(grantedFeature.level, 10) !== level
       ) {
         logger.verbose(`Not processing ${grantedFeature.name} due to level data mismatch`, () => ({
           grantedFeature,
           level,
           levelCap,
-          greaterLevelCheck: parseInt(grantedFeature.level) > foundry.utils.getProperty(this.result.character, "system.details.level.value"),
-          noLevelMatchCheck: parseInt(grantedFeature.level) !== level,
+          greaterLevelCheck: parseInt(grantedFeature.level, 10) > foundry.utils.getProperty(this.result.character, "system.details.level.value"),
+          noLevelMatchCheck: parseInt(grantedFeature.level, 10) !== level,
           characterLevel: foundry.utils.getProperty(this.result.character, "system.details.level.value"),
         }));
         continue;
@@ -1677,7 +1677,7 @@ export class Pathmuncher {
       featureDoc._id = foundry.utils.randomID();
       foundry.utils.setProperty(featureDoc.system, "location", document._id);
       // a shared feature (e.g. Weapon Expertise) has its own level; the class decides when it is gained
-      if (featureDoc.system.level) featureDoc.system.level.value = parseInt(grantedFeature.level);
+      if (featureDoc.system.level) featureDoc.system.level.value = parseInt(grantedFeature.level, 10);
       this.#createGrantedItem(featureDoc, document, { originType, applyFeatLocation, grantedAs: grantedFeature.name });
       if (foundry.utils.hasProperty(featureDoc, "system.rules")) {
         logger.debug(`Processing granted rules for granted item document ${featureDoc.name}`, () => foundry.utils.duplicate(featureDoc));

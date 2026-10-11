@@ -71,7 +71,12 @@
     });
     let asked = false;
 
-    const { actor, pm } = await importStarbuilder(t, "sf2e ammunition", exportJson, { resolveAmmunition: () => (asked = true) && [] });
+    const { actor, pm } = await importStarbuilder(t, "sf2e ammunition", exportJson, {
+      resolveAmmunition: () => {
+        asked = true;
+        return [];
+      },
+    });
 
     t.equal(asked, false, "ammunition shared by every weapon of its kind is not asked about");
     t.deepEqual(ammunition(actor), [

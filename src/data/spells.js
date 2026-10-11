@@ -8,7 +8,7 @@ export const FEAT_SPELLCASTING = [
   { name: "Rat Magic", showSlotless: false, knownSpells: [], preparePBSpells: true },
 ];
 
-const REMASTER_NAMES = [
+export const REMASTER_NAMES = [
   { pbName: "Animate Dead", foundryName: "Summon Undead" },
   { pbName: "Augment Summoning", foundryName: "Fortify Summoning" },
   { pbName: "Baleful Polymorph", foundryName: "Cursed Metamorphosis" },
@@ -123,11 +123,11 @@ const REMASTER_NAMES = [
 ];
 
 // spelled differently in Pathbuilder, whichever content is installed
-const PATHBUILDER_SPELLINGS = [
-  { pbName: "Weapon of Judgement", foundryName: "Weapon of Judgment" },
+export const PATHBUILDER_SPELLINGS = [
+  { pbName: "Weapon of Judgement", foundryName: "Weapon of Judgment", module: "pf2e-legacy-content" },
   { pbName: "Ember Doppelganger", foundryName: "Ember Doppelgänger" },
-  { pbName: "Censoremoji", foundryName: "Censormoji" },
-  { pbName: "Danceemoji", foundryName: "Dancemoji" },
+  { pbName: "Censoremoji", foundryName: "Censormoji", system: "sf2e" },
+  { pbName: "Danceemoji", foundryName: "Dancemoji", system: "sf2e" },
   // named without their god or place
   { pbName: "God Caller's Defense", foundryName: "Domora's Defense" },
   { pbName: "Keen Axes", foundryName: "Kgalaserke's Axes" },

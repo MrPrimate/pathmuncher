@@ -2,13 +2,16 @@ const path = require('path');
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
+  mode: "production",
   devtool: "source-map",
   entry: './src/module.js',
   optimization: {
-    minimize: false,
+    minimize: true,
     minimizer: [
       new TerserPlugin({
         terserOptions: {
+          // Foundry names hooks after classes (renderPathmuncherImporter), so they keep their names
+          keep_classnames: true,
           format: {
             comments: false,
           },

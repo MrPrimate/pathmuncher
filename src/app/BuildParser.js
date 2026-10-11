@@ -137,7 +137,7 @@ export class BuildParser {
   #nameMapSourceEquipmentAddHandwraps(e) {
     const name = Seasoning.getFoundryEquipmentName(e[0]);
     const potencyMatch = e[0].match(/\(\+(\d)[\s)]/i);
-    const potency = potencyMatch ? parseInt(potencyMatch[1]) : 0;
+    const potency = potencyMatch ? parseInt(potencyMatch[1], 10) : 0;
     const strikingMatch = e[0].match(/\d( \w*)? (Striking)/i);
     const striking = strikingMatch
       ? Seasoning.slugD(`${(strikingMatch[1] ?? "").trim()}${(strikingMatch[2] ?? "").trim()}`) // `${(strikingMatch[2] ?? "").toLowerCase().trim()}${(strikingMatch[1] ?? "").trim()}`.trim()
