@@ -154,7 +154,11 @@
     "Primal Focus Tradition [primal; focus; cha; proficiency 4]",
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Create Earthen Facsimile, Ignition, Approximate, Detect Magic] | rank 1: 4 [Restyle, Decompose, Fleet Step] | rank 2: 4 [Speak with Animals, Elemental Zone, Peaceful Rest] | rank 3: 4 [Bone Moth's Kiss, Feet to Fins, Aqueous Orb] | rank 4: 4 [Cloak of Light, Aerial Form, Elemental Gift] | rank 5: 4 [Summon Dragon, Moon Frenzy, Mantle of the Frozen Heart] | rank 6: 4 [Cursed Metamorphosis, Elemental Confluence, Dragon Form] | rank 7: 4 [Energy Aegis, Mask of Terror, Sunburst] | rank 8: 4 [Arctic Rift, Burning Blossoms, Moment of Renewal] | rank 9: 4 [Pierce the Sky, Wrathful Storm, Nature's Enmity] | rank 10: 1 [Planar Collision]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

@@ -175,7 +175,11 @@
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Prestidigitation, Detect Magic, Wash Your Luck, Summon Instrument, Message] | rank 1: 4 [Sanctuary, Infuse Vitality, Bane, Echoing Weapon] | rank 2: 4 [Floating Harness, Water Breathing, Dancing Shield, Helpful Reload] | rank 3: 4 [Focusing Hum, Speak With Magic, Mind of Menace, Far Reach] | rank 4: 4 [Vital Seed, Unfettered Movement, Soothing Spring, Bloodspray Curse] | rank 5: 4 [Speak with Stones, Summon Celestial, Whispers of a Dead Goddess, Healing Well] | rank 6: 4 [Zealous Conviction, Patron's Protector, Truesight, Scintillating Safeguard] | rank 7: 4 [Energy Aegis, Cosmic Form, Fiendish Rift, Eclipse Burst] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Foresight, Voracious Gestalt, Sacred Covenant, Telepathic Demand] | rank 10: 1 [Manifestation]",
     "Otherworldly Acumen [occult; prepared; cha; proficiency 4] rank 2: 1 [Shatter]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Oracle"
+    ]
+  },
   "described": [],
   "prompts": []
 }

@@ -163,7 +163,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Know the Way, Bullhorn, Read Aura, Divine Lance] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link] | rank 2: 4 [Charitable Urge, Peaceful Rest, Imprinting Hand] | rank 3: 4 [Defensive Prescience, Dream Message, Behold the Weave] | rank 4: 4 [Bloodspray Curse, Vital Beacon, Gift of Dusk] | rank 5: 4 [Mirror Malefactors, Breath of Life, Scouting Eye] | rank 6: 4 [Patron's Protector, Truesight, Scintillating Safeguard] | rank 7: 4 [Moonburst, Incarnate Tempest of Shades, Regenerate] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Telepathic Demand, Incarnate Draconic Legion, Massacre] | rank 10: 1 [Nullify]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Draconic (Empyreal)"

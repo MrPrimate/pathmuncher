@@ -175,7 +175,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Telekinetic Hand, Haunting Hymn, Detect Magic, Tame, Void Warp] | rank 1: 4 [Sky Sight, Mending, Message Rune, Grim Tendrils, Dome of Tranquility] | rank 2: 4 [Summoner's Visage, Sound Body, Disorienting Flash, Darkness, Animus Mine] | rank 3: 4 [Chosen Gravity, Spontaneous Cartography, Gravity Well, Chilling Darkness, Fractious Echo] | rank 4: 4 [Flicker, Sudden Swarm, Bloodspray Curse, Phantasmal Killer, Vapor Form] | rank 5: 4 [Speak with Stones, Spiked Carapace, Blister, Shadow Siphon, Synesthesia] | rank 6: 4 [Doom Mark, Scintillating Safeguard, Patron's Protector, Collective Transposition, Doom Mark] | rank 7: 4 [Puppet Strings, Infinitesimal Collapse Field, Incarnate Tempest of Shades, Duplicate Foe, Energy Aegis] | rank 8: 4 [Dream Council, Spirit Song, Spiritual Epidemic, Disappearance] | rank 9: 4 [Bilocation, Vampiric Revelry, Unfathomable Song] | rank 10: 1 [Nullify]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Shadow: Blood Magic"
   ],

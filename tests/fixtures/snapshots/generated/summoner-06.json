@@ -166,6 +166,9 @@
     "Summoner [divine; spontaneous; cha; proficiency 3] rank 0: 5 [Shield, Forbidding Ward, Know the Way, Bullhorn, Read Aura] | rank 1: 2 [Sanctuary, Infuse Vitality] | rank 2: 2 [Darkvision, Lucky Number] | rank 3: 2 [Warding Aggression, Lively Flight] | rank 4: 2 [Whispers of the Void, Implement of Destruction] | rank 5: 2 [Sending, Divine Immolation] | rank 6: 2 [Necrotize, Spirit Blast] | rank 7: 2 [Fiendish Rift, Eclipse Burst] | rank 8: 2 [Incarnate Deific Herald, Canticle of Everlasting Grief] | rank 9: 2 [Weapon of Judgment, Pierce the Sky]"
   ],
   "report": {
+    "signature": [
+      "Summoner"
+    ],
     "pet": [
       "Eidolon"
     ]

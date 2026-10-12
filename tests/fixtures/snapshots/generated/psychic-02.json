@@ -160,7 +160,11 @@
     "Otherworldly Acumen [occult; prepared; cha; proficiency 4] rank 2: 1 [Shatter]",
     "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Summon Instrument, Glamorize, Infectious Enthusiasm] | rank 1: 2 [Mindlink, Penumbral Shroud] | rank 2: 2 [Shatter, Lucky Number] | rank 3: 2 [Gravity Well, Bracing Tendrils] | rank 4: 2 [Infectious Melody, Whispers of the Void] | rank 5: 2 [Aberrant Form, Instant Minefield] | rank 6: 2 [Truesight, Repulsion] | rank 7: 2 [Duplicate Foe, Shadow Form] | rank 8: 2 [Spiritual Epidemic, Uncontrollable Dance] | rank 9: 2 [Wails of the Damned, Overwhelming Presence] | rank 10: 1 [Manifestation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": []
 }

@@ -165,6 +165,9 @@
     "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Know the Way, Scatter Scree, Read Aura, Live Wire, Spout] | rank 1: 2 [Propelling Air Stream, Hydraulic Push] | rank 2: 2 [Summoner's Precaution, Gecko Grip] | rank 3: 2 [Slow, Envenom Companion] | rank 4: 2 [Hydraulic Torrent, Tortoise and the Hare] | rank 5: 2 [Acid Storm, Summon Dragon] | rank 6: 2 [Tree of Seasons, Blinding Fury] | rank 7: 2 [Cosmic Form, Moonburst] | rank 8: 2 [Metallic Meteorite Glyph, Migration] | rank 9: 2 [Implosion, Incarnate Draconic Legion]"
   ],
   "report": {
+    "signature": [
+      "Summoner"
+    ],
     "pet": [
       "Eidolon"
     ]

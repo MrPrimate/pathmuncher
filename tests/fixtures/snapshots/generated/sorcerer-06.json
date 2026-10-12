@@ -159,7 +159,11 @@
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
     "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Warp Step, Electric Arc, Phase Bolt, Detect Magic] | rank 1: 4 [Kinetic Ram, Hippocampus Retreat, Charm] | rank 2: 4 [Laughing Fit, Disintegrating Puddle, Vanish Weapon] | rank 3: 4 [Gravity Wave, Earthbind, Cozy Cabin] | rank 4: 4 [Telepathy, Flicker, Magnetize] | rank 5: 4 [Telekinetic Haul, Quicken Time, Horizon's Veil] | rank 6: 4 [Boots on the Ground, Repulsion, Cursed Metamorphosis] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind] | rank 8: 4 [Roar of Freedom, Disappearance, Dream Council] | rank 9: 4 [Vampiric Revelry, Resplendent Mansion, Falling Stars] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Diabolic, Draconic (Time)"

@@ -157,7 +157,11 @@
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Psychic [occult; spontaneous; int; proficiency 4] rank 0: 3 [Guidance, Phase Bolt, Read Aura] | rank 1: 2 [Déjà Vu, Phantasmal Minion] | rank 2: 2 [Summoner's Visage, Sound Body] | rank 3: 2 [Behold the Weave, Inertia Lock] | rank 4: 2 [Friends to Foes, Countless Eyes] | rank 5: 2 [Glossolalia, Summon Entity] | rank 6: 2 [Wall of Force, Expunge Blood] | rank 7: 2 [Retrocognition, Project Image] | rank 8: 2 [Confusing Colors, Holy Host] | rank 9: 2 [Bilocation, Vampiric Revelry] | rank 10: 1 [Nullify]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": []
 }

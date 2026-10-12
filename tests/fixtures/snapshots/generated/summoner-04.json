@@ -172,6 +172,9 @@
     "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Approximate, Detect Magic, Tangle Vine, Gale Blast, Electric Arc] | rank 1: 2 [Protector Tree, Sacred Beasts] | rank 2: 2 [Summoner's Precaution, Gecko Grip] | rank 3: 2 [Speak with Plants, Skyglass Prison] | rank 4: 2 [Living Terrain, Bloodspray Curse] | rank 5: 2 [Searing Rain, Blazing Fissure] | rank 6: 2 [Cryostasis, Petrify] | rank 7: 2 [Moonburst, Summon Stampede] | rank 8: 2 [Moment of Renewal, Desiccate] | rank 9: 2 [Nature's Enmity, Remake Physiology]"
   ],
   "report": {
+    "signature": [
+      "Summoner"
+    ],
     "pet": [
       "Eidolon"
     ]

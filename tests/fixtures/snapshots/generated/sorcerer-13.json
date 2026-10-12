@@ -161,7 +161,11 @@
     "Primal Rampage [primal; prepared; cha; proficiency 4] rank 4: 2 [Unfettered Movement, Mountain Resilience]",
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Stabilize, Create Earthen Facsimile, Ignition, Approximate, Detect Magic] | rank 1: 4 [Fear, Shattering Gem, Tailwind] | rank 2: 4 [Sure Footing, Frog Tongue, Tacky Pine Sap] | rank 3: 4 [Curse of Lost Time, Speak with Plants, Skyglass Prison] | rank 4: 4 [Draw the Lightning, Crystallized Vapors, Reflective Scales] | rank 5: 4 [Healing Well, Tree of Life and Death, Lightning Storm] | rank 6: 4 [Chain Lightning, Incarnate Wild Rose, Truesight] | rank 7: 4 [Regenerate, Unfettered Pack, Cosmic Form] | rank 8: 4 [Earthquake, Arctic Rift, Burning Blossoms] | rank 9: 4 [Massacre, Pierce the Sky, Wrathful Storm] | rank 10: 1 [Primal Herd]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

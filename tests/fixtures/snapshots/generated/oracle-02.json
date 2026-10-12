@@ -184,6 +184,9 @@
   "report": {
     "special": [
       "Dust"
+    ],
+    "signature": [
+      "Oracle"
     ]
   },
   "described": [],

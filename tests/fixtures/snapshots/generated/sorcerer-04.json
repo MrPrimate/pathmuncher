@@ -162,7 +162,11 @@
     "Emissary Assistance [primal; prepared; cha; proficiency 4] rank 3: 2 [Feet to Fins, Water Breathing]",
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Sigil, Guidance, Void Warp, Haunting Hymn] | rank 1: 4 [Sacred Beasts, Harm, Summon Lesser Servitor] | rank 2: 4 [Sound Body, Watchdog, Sudden Blight] | rank 3: 4 [Soul Cutter, Life Connection, Familiar's Call] | rank 4: 4 [Fly, Cloak of Light, Painful Vibrations] | rank 5: 4 [Blink Charge, Tree of Life and Death, Rewinding Step] | rank 6: 4 [Truesight, Scintillating Safeguard, Speak With Water] | rank 7: 4 [Eclipse Burst, Angel Form, Execute] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Wails of the Damned, Vampiric Revelry, Weapon of Judgment] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

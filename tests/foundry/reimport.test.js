@@ -115,6 +115,34 @@
       || foundry.utils.getProperty(actor.items.get(i.flags.pf2e?.grantedBy?.id) ?? {}, IMPORTED)), `items flagged after re-import: ${actor.items.filter((i) => !foundry.utils.getProperty(i, IMPORTED)).map((i) => `${i.type}:${i.name}`)}`);
   });
 
+  test("reimport: signature spells marked on the sheet are marked again", async (t) => {
+    // Pathbuilder's export doesn't say which spells are signature spells, so the first import notes
+    // them as to choose; marks made on the sheet are all a re-import has to go on
+    const exportJson = foundry.utils.deepClone(globalThis.__pmtGenerated["sorcerer-12"]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "signature");
+    const signature = () => {
+      const entry = actor.itemTypes.spellcastingEntry.find((e) => e.name === "Sorcerer");
+      return actor.itemTypes.spell.filter((s) => s.system.location.value === entry.id && s.system.location.signature);
+    };
+    const notes = (pm) => pm.getImportReport().find((g) => g.type === "signature")?.names;
+
+    let pm = await pmt.importBuild(actor, exportJson);
+    t.deepEqual(signature().map((s) => s.name), [], "none marked by the import");
+    t.deepEqual(notes(pm), ["Sorcerer"], "the import notes ask for them");
+
+    const entry = actor.itemTypes.spellcastingEntry.find((e) => e.name === "Sorcerer");
+    const slow = actor.itemTypes.spell.find((s) => s.name === "Slow" && s.system.location.value === entry.id);
+    await slow.update({ "system.location.signature": true });
+    pm = await pmt.importBuild(actor, exportJson);
+
+    const marked = signature();
+    t.deepEqual(marked.map((s) => `${s.name} ${s.system.location.heightenedLevel}`), ["Slow 3"], "Slow is a signature spell again");
+    t.ok(!actor.items.has(slow.id), "on the new copy of the spell");
+    t.equal(notes(pm), undefined, "nothing left to choose");
+  });
+
   test("reimport: addMoney off keeps the actor's coins", async (t) => {
     const { actor, exportJson } = await imported(t, "money");
     t.equal(actor.inventory.coins.gp, 4, "fixture premise");

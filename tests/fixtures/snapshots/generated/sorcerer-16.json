@@ -177,7 +177,11 @@
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Tame, Stabilize, Create Earthen Facsimile, Ignition, Figment] | rank 1: 4 [Synchronize, Fishing Spot, Grease, Charm] | rank 2: 4 [Retrieving Hook, Humanoid Form, Final Sacrifice, Laughing Fit] | rank 3: 4 [Lightning Lasso, Cup of Dust, Soothing Blossoms, Enthrall] | rank 4: 4 [Weapon Storm, Vapor Form, Fire Shield, Suggestion] | rank 5: 4 [Grisly Growths, Ember Doppelgänger, Acid Storm, Hallucination] | rank 6: 4 [Petrify, Scintillating Safeguard, Speak With Water, Mislead] | rank 7: 4 [Volcanic Eruption, Frigid Flurry, Execute, Visions of Danger] | rank 8: 4 [Punishing Winds, Earthquake, Arctic Rift, Uncontrollable Dance] | rank 9: 4 [Falling Stars, Massacre, Pierce the Sky, Metamorphosis] | rank 10: 1 [Element Embodied, Nullify]",
     "Water to Water [occult; prepared; cha; proficiency 4] rank 4: 2 [Translocate, Translocate]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

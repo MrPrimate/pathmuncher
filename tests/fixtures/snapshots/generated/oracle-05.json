@@ -176,7 +176,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Void Warp, Haunting Hymn, Shield, Forbidding Ward, Know the Way, Void Warp] | rank 1: 4 [Alarm, Concordant Choir, Benediction, Heal, Grim Tendrils] | rank 2: 4 [Familiar's Resurrection, Status, Bone Spray, Claws of the Otter, False Vitality] | rank 3: 4 [Wanderer's Guide, Vampiric Feast, Weapon Tide, Soothing Blossoms, Ghostly Weapon] | rank 4: 4 [Seal Fate, Outcast's Curse, Vital Seed, Unfettered Movement] | rank 5: 4 [Summon Dragon, Blessing of Defiance, Incarnate Skeletal Giant, Mirror Malefactors] | rank 6: 4 [Field of Life, Sacred Form, Demon Form, Repulsion] | rank 7: 4 [Incarnate Tempest of Shades, Regenerate, Deity's Strike, Incarnate Ancient Specter] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Voracious Gestalt, Sacred Covenant, Telepathic Demand, Incarnate Draconic Legion] | rank 10: 1 [Tear the Veil, Gate]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Oracle"
+    ]
+  },
   "described": [],
   "prompts": []
 }

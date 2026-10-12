@@ -160,7 +160,11 @@
     "Shadow's Assault [occult; prepared; cha; proficiency 4] rank 6: 1 [Shadow Blast]",
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Detect Magic, Tangle Vine, Gale Blast, Electric Arc, Frostbite] | rank 1: 4 [Acidic Burst, Seashell of Stolen Sound, Dome of Tranquility] | rank 2: 4 [Speak with Animals, Elemental Zone, Peaceful Rest] | rank 3: 4 [Companion's Shadow, Haste, Bottomless Stomach] | rank 4: 4 [Sudden Swarm, Draw the Lightning, Crystallized Vapors] | rank 5: 4 [Wall of Ice, Toxic Cloud, Elemental Form] | rank 6: 4 [Blanket of Stars, Silver Spear, Cryostasis] | rank 7: 4 [Summon Stampede, Comet Charge, Energy Aegis] | rank 8: 4 [Punishing Winds, Earthquake, Arctic Rift] | rank 9: 4 [Falling Stars, Massacre, Pierce the Sky] | rank 10: 1 [Element Embodied]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Phoenix: Blood Magic"
   ],

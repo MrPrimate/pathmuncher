@@ -142,6 +142,8 @@ export class ImportReport {
       ["armor", unmatchedItems("armor", "armor", "addArmor")],
       ["spellcasting", bad("spellcasting", "addSpells")],
       ["spell", bad("spell", "addSpells")],
+      // the spellcasting entries whose signature spells are to be marked by hand (ActorWriter)
+      ["signature", this.options.addSpells ? (this.pm.unmarkedSignatureEntries ?? []) : []],
       ["ritual", bad("ritual", "addSpells")],
       ["formula", bad("formula", "addFormulas")],
       ["familiar", bad("familiar", "addFamiliars")],

@@ -174,7 +174,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Forbidding Ward, Wash Your Luck, Prestidigitation, Musical Accompaniment, Detect Magic] | rank 1: 4 [Sanctuary, Thoughtful Gift, Disguise Magic, Ill Omen] | rank 2: 4 [Dimensional Drop, Unrelenting Gravity, Silence, Augury] | rank 3: 4 [Inertia Lock, Haste, Mind of Menace, Wanderer's Guide] | rank 4: 4 [Painful Vibrations, Anchoring Air, Outcast's Curse, Suggestion] | rank 5: 4 [Blink Charge, Shock and Awe, Mariner's Curse, Shadow Siphon] | rank 6: 4 [Collective Transposition, Truesight, Repulsion, Truesight] | rank 7: 4 [Infinitesimal Collapse Field, Incarnate Tempest of Shades, Incarnate Ancient Specter, Retrocognition] | rank 8: 4 [Holy Host, Unholy Army, Shipwreck, Unrelenting Observation] | rank 9: 4 [Vampiric Revelry, Unfathomable Song, Incarnate Draconic Legion, Weird] | rank 10: 1 [Shadow Army, Alter Reality]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Harrow: Blood Magic"
   ],

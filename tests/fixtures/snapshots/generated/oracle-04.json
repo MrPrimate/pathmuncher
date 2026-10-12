@@ -177,7 +177,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Sigil, Guidance, Void Warp, Haunting Hymn, Shield] | rank 1: 4 [Sacred Beasts, Harm, Summon Lesser Servitor, Groom Companion] | rank 2: 4 [Sound Body, Watchdog, Sudden Blight, Cleanse Affliction] | rank 3: 4 [Soul Cutter, Life Connection, Familiar's Call, Heroism] | rank 4: 4 [Fly, Cloak of Light, Painful Vibrations, Dull Ambition] | rank 5: 4 [Blink Charge, Tree of Life and Death, Rewinding Step, Sending] | rank 6: 4 [Truesight, Scintillating Safeguard, Speak With Water, Blessed Boundary] | rank 7: 4 [Eclipse Burst, Angel Form, Execute, Divine Decree] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Wails of the Damned, Vampiric Revelry, Weapon of Judgment, Pierce the Sky] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Oracle"
+    ]
+  },
   "described": [],
   "prompts": []
 }

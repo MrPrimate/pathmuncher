@@ -158,7 +158,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Read the Air, Light, Warp Step, Shield] | rank 1: 4 [Bless, Summon Fey, Breadcrumbs] | rank 2: 4 [Murder of Crows, Illusory Creature, Blistering Invective] | rank 3: 4 [Familiar's Face, Moth's Supper, Ghost Rush] | rank 4: 4 [Fetch, Telepathy, Morass of Ages] | rank 5: 4 [Calcium Rain, Shadow Blast, Quicken Time] | rank 6: 4 [Boots on the Ground, Vibrant Pattern, Doom Mark] | rank 7: 4 [Orb of Twisting Fate, Telekinetic Bombardment, Momentary Recovery] | rank 8: 4 [Unrelenting Observation, Canticle of Everlasting Grief, Falling Sky] | rank 9: 4 [Resplendent Mansion, Phantasmagoria, Foresight] | rank 10: 1 [Tear the Veil]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Draconic (Conspirator)"

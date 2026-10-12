@@ -170,7 +170,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Read Aura, Divine Lance, Vitality Lash, Approximate, Prestidigitation] | rank 1: 4 [Sacred Beasts, Harm, Summon Lesser Servitor, Groom Companion] | rank 2: 4 [Radiant Field, Spiritual Armament, Dispel Magic, Summoner's Visage] | rank 3: 4 [Tiny Wings, Rouse Skeletons, Ghost Rush, Whirling Scarves] | rank 4: 4 [Filter Air, Planar Tether, Sanguine Mist, Seal Fate] | rank 5: 4 [Glossolalia, Invoke Spirits, Banishment, Speak with Stones] | rank 6: 4 [Daemon Form, Field of Life, Sacred Form, Demon Form] | rank 7: 4 [Cosmic Form, Fiendish Rift, Eclipse Burst, Angel Form] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Overwhelming Presence, Weapon of Judgment, Foresight, Voracious Gestalt] | rank 10: 2 [Theogeny, Avatar]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Oracle"
+    ]
+  },
   "described": [],
   "prompts": []
 }

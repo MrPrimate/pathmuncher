@@ -185,7 +185,11 @@
     "Oracle [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Wash Your Luck, Summon Instrument, Message, Daze, Read the Air] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link, Runic Body] | rank 2: 4 [Deafness, Summoner's Precaution, Clear Mind, Create Food] | rank 3: 4 [Fractious Echo, Show the Way, Holy Light, Bind Undead] | rank 4: 4 [Pernicious Poltergeist, Vampiric Maiden, Holy Cascade, Filter Air] | rank 5: 4 [Warshard Shot, Summon Monitor, Spiritual Guardian, Confusing Cry] | rank 6: 4 [Dragon Form, Daemon Form, Field of Life, Sacred Form] | rank 7: 4 [Divine Decree, Sunburst, Moonburst, Incarnate Tempest of Shades] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky, Divine Armageddon] | rank 9: 4 [Vampiric Revelry, Weapon of Judgment, Pierce the Sky, Overwhelming Presence] | rank 10: 1 [Avatar]",
     "Wellspring Gnome [arcane; prepared; cha; proficiency 4] rank 0: 1 [Prestidigitation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Oracle"
+    ]
+  },
   "described": [],
   "prompts": []
 }

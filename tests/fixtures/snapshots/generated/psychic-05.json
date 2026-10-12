@@ -172,6 +172,9 @@
     "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Haunting Hymn, Detect Magic, Tame] | rank 1: 2 [Synchronize, Connective Current, Dizzying Colors] | rank 2: 2 [See the Unseen, Albatross Curse, Invisibility] | rank 3: 2 [Familiar's Call, Bind Undead, Sea of Thought] | rank 4: 2 [Fly, Tortoise and the Hare, Containment] | rank 5: 2 [Hallucination, Mirror Malefactors, Etheric Shards] | rank 6: 2 [Cursed Metamorphosis, Spirit Blast, Scintillating Safeguard] | rank 7: 2 [Infinitesimal Collapse Field, Incarnate Tempest of Shades, Project Image] | rank 8: 2 [Uncontrollable Dance, Unrelenting Observation, Confusing Colors] | rank 9: 2 [Voracious Gestalt, Remake Physiology, Resplendent Mansion] | rank 10: 1 [Freeze Time, Gate]"
   ],
   "report": {
+    "signature": [
+      "Psychic"
+    ],
     "rule": [
       "Assurance (Lore: Piloting)"
     ]

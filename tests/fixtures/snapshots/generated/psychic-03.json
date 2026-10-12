@@ -171,7 +171,11 @@
     "Occult Focus Tradition [occult; focus; int; proficiency 4]",
     "Psychic [occult; spontaneous; int; proficiency 4] rank 0: 3 [Time Sense, Sigil, Void Warp, Glamorize, Illuminate] | rank 1: 2 [Agitate, Lose the Path, Breathe Fire] | rank 2: 2 [Charitable Urge, Radiant Field, Blazing Bolt] | rank 3: 2 [Roaring Applause, Begone, Fireball] | rank 4: 2 [Vapor Form, Vital Seed, Ice Storm] | rank 5: 2 [Wave of Despair, Tree of Life and Death, Howling Blizzard] | rank 6: 2 [Proximal Shift, Poltergeist's Fury, Frozen Fog] | rank 7: 2 [Telekinetic Bombardment, Momentary Recovery, Volcanic Eruption] | rank 8: 2 [Stop Heart, Roar of Freedom, Arctic Rift] | rank 9: 2 [Phantasmagoria, Foresight, Falling Stars] | rank 10: 1 [Fabricated Truth, Dragon Turret]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": [
     "Specialty Crafting: Alchemy (guessed)"

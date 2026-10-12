@@ -162,7 +162,11 @@
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Prestidigitation, Know the Way, Scatter Scree, Read Aura] | rank 1: 4 [Noxious Vapors, Gentle Landing, Rude awakening] | rank 2: 4 [Disorienting Flash, Piercing Jet, Status] | rank 3: 4 [Primal Chorus, Animal Vision, Threefold Aspect] | rank 4: 4 [Magnetize, Coral Eruption, Blood Chestnuts] | rank 5: 4 [Mariner's Curse, Healing Well, Tree of Life and Death] | rank 6: 4 [Silver Spear, Cryostasis, Petrify] | rank 7: 4 [Execute, Lifewood Cage, Eclipse Burst] | rank 8: 4 [Monstrosity Form, Metallic Meteorite Glyph, Migration] | rank 9: 4 [One with the Land, Implosion, Incarnate Draconic Legion] | rank 10: 1 [Indestructibility]",
     "Trickster Tengu [primal; prepared; cha; proficiency 4] rank 7: 1 [Aerial Form]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic",
     "Tengu Feather Fan: Wave Fan"

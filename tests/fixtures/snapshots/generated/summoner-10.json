@@ -169,6 +169,9 @@
     "Summoner [primal; spontaneous; cha; proficiency 3] rank 0: 5 [Create Earthen Facsimile, Ignition, Approximate, Detect Magic, Tangle Vine] | rank 1: 2 [Restyle, Decompose] | rank 2: 2 [Speak with Animals, Elemental Zone] | rank 3: 2 [Bone Moth's Kiss, Feet to Fins] | rank 4: 2 [Cloak of Light, Aerial Form] | rank 5: 2 [Summon Dragon, Moon Frenzy] | rank 6: 2 [Cursed Metamorphosis, Elemental Confluence] | rank 7: 2 [Energy Aegis, Mask of Terror] | rank 8: 2 [Arctic Rift, Burning Blossoms] | rank 9: 2 [Pierce the Sky, Wrathful Storm]"
   ],
   "report": {
+    "signature": [
+      "Summoner"
+    ],
     "pet": [
       "Eidolon"
     ]

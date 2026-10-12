@@ -156,7 +156,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Sorcerer [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Light, Warp Step, Shield] | rank 1: 4 [Bane, Spirit Link, Biting Words] | rank 2: 4 [Darkness, Vomit Swarm, Thundering Dominance] | rank 3: 4 [Dream Message, Bottomless Stomach, Time Pocket] | rank 4: 4 [Outcast's Curse, Implement of Destruction, Haunting Spirit] | rank 5: 4 [Mariner's Curse, Rip the Spirit, Horizon's Veil] | rank 6: 4 [Vampiric Exsanguination, Cryostasis, Zealous Conviction] | rank 7: 4 [Warp Mind, Visions of Danger, True Target] | rank 8: 4 [Quandary, Confusing Colors, Holy Host] | rank 9: 4 [Incarnate Draconic Legion, Resplendent Mansion, Phantasmagoria] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic",
     "Bloodline: Genie (Marid)"

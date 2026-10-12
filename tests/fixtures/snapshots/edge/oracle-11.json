@@ -177,6 +177,9 @@
   "report": {
     "spell": [
       "Divine Vessel"
+    ],
+    "signature": [
+      "Oracle"
     ]
   },
   "described": [],

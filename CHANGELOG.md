@@ -1,5 +1,6 @@
 # Next up
 
+- Signature spells: Pathbuilder's export doesn't say which spells are a bard's, oracle's, psychic's, sorcerer's or summoner's signature spells, so the import notes now list the spellcasting entry under "Signature spells to choose", to mark on the character sheet. A later import marks the same spells again instead of clearing them.
 - The warning for a dual class character now says what happens (only the first class is imported) and can be translated, as can every heading in the import notes. The dialogs' layouts moved into templates, so they can be restyled or translated without touching the code.
 - On smaller screens the importer and Pathmuncher's other windows fit the screen: what doesn't fit scrolls, and the Import button and other buttons stay in view.
 - The Choices to make window shows more to decide by: each item's description (scrolling when long), its kind, level and traits, and the Pathbuilder slot and level it was taken at. The list scrolls when there are many choices, so the buttons stay on screen.

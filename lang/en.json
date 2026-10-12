@@ -216,6 +216,7 @@
           "armor": "Armor",
           "spellcasting": "Spellcasting",
           "spell": "Spells",
+          "signature": "Signature spells to choose",
           "ritual": "Rituals",
           "formula": "Formulas",
           "familiar": "Familiars",
@@ -226,6 +227,7 @@
         },
         "Hints": {
           "described": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
+          "signature": "Pathbuilder's export doesn't say which spells are signature spells. Mark them on the character sheet; the next import keeps them.",
           "rule": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
           "pet": "Pathmuncher imports familiars, and animal companions and a summoner's eidolon when the PF2e Companion Compendia module is active. Create these from the build by hand.",
           "companionChoice": "Pathbuilder's export leaves out these choices for companions and eidolons, so the import made them. Change any that are wrong on the companion's items; the next import keeps them."

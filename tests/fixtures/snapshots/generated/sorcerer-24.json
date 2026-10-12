@@ -171,7 +171,11 @@
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
     "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Sigil, Frostbite, Shield, Tangle Vine, Detect Magic] | rank 1: 4 [Groom Companion, Grim Tendrils, Anticipate Peril, Force Barrage] | rank 2: 4 [Oaken Resilience, Helpful Scribe, Deafness, Dispel Magic] | rank 3: 4 [Hypnotize, Iron Rain, Feet to Fins, Haste] | rank 4: 4 [Weapon Storm, Vision of Death, Sudden Swarm, Translocate] | rank 5: 4 [Subconscious Suggestion, Rewinding Step, Ember Doppelgänger, Scouting Eye] | rank 6: 4 [Spellwrack, Tangling Creepers, Phantasmal Calamity, Disintegrate] | rank 7: 4 [Incarnate Tempest of Shades, Telekinetic Bombardment, Warp Mind, Retrocognition] | rank 8: 4 [Unrelenting Observation, Burning Blossoms, Falling Sky, Quandary] | rank 9: 4 [Massacre, Phantasmagoria, Pierce the Sky, Implosion] | rank 10: 1 [Planar Collision, Remake]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

@@ -162,6 +162,9 @@
     "Summoner [arcane; spontaneous; cha; proficiency 3] rank 0: 5 [Telekinetic Projectile, Caustic Blast, Sigil, Frostbite, Shield] | rank 1: 2 [Echoing Weapon, Runic Body] | rank 2: 2 [Empty Pack, Mist] | rank 3: 2 [Croak Voice, Restraining Chains] | rank 4: 2 [Gift of Dusk, Countless Eyes] | rank 5: 2 [Searing Rain, Grisly Growths] | rank 6: 2 [Elemental Confluence, Living Thunderbolt] | rank 7: 2 [True Target, Eclipse Burst] | rank 8: 2 [Uncontrollable Dance, Unrelenting Observation] | rank 9: 2 [Implosion, Bilocation]"
   ],
   "report": {
+    "signature": [
+      "Summoner"
+    ],
     "pet": [
       "Eidolon (Energy Heart: electricity)"
     ]

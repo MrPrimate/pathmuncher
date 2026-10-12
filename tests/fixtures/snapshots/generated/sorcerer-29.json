@@ -158,7 +158,11 @@
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Shield, Forbidding Ward, Know the Way, Bullhorn] | rank 1: 4 [Alarm, Concordant Choir, Benediction] | rank 2: 4 [Marvelous Mount, Darkvision, Lucky Number] | rank 3: 4 [Holy Light, Bind Undead, Warding Aggression] | rank 4: 4 [Filter Air, Planar Tether, Sanguine Mist] | rank 5: 4 [Calcium Rain, Inevitable Disaster, Warshard Shot] | rank 6: 4 [Truesight, Scintillating Safeguard, Speak With Water] | rank 7: 4 [Regenerate, Deity's Strike, Incarnate Ancient Specter] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Voracious Gestalt, Sacred Covenant, Telepathic Demand] | rank 10: 1 [Tear the Veil]",
     "Unhampered Passage [primal; prepared; cha; proficiency 4] rank 4: 1 [Unfettered Movement]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

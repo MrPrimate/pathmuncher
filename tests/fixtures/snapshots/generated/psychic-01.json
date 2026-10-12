@@ -159,7 +159,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Daze, Read the Air, Light] | rank 1: 2 [Bane, Spirit Link] | rank 2: 2 [Darkness, Vomit Swarm] | rank 3: 2 [Dream Message, Bottomless Stomach] | rank 4: 2 [Outcast's Curse, Implement of Destruction] | rank 5: 2 [Mariner's Curse, Rip the Spirit] | rank 6: 2 [Vampiric Exsanguination, Cryostasis] | rank 7: 2 [Warp Mind, Visions of Danger] | rank 8: 2 [Quandary, Confusing Colors] | rank 9: 2 [Incarnate Draconic Legion, Resplendent Mansion] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": []
 }

@@ -156,7 +156,11 @@
     "Arcane Focus Tradition [arcane; focus; cha; proficiency 4]",
     "Sorcerer [arcane; spontaneous; cha; proficiency 4] rank 0: 5 [Detect Magic, Spout, Daze, Scatter Scree, Create Earthen Facsimile] | rank 1: 4 [Charm, Sleep, Tether] | rank 2: 4 [Metal Reverberation, Dispel Magic, Animated Assault] | rank 3: 4 [Wall of Radiance, Far Reach, Bind Undead] | rank 4: 4 [Containment, Clairvoyance, Bestial Curse] | rank 5: 4 [Scouting Eye, Weight of the World, Blister] | rank 6: 4 [Disintegrate, Awaken Entropy, Chain Lightning] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field] | rank 8: 4 [Quandary, Arctic Rift, Desiccate] | rank 9: 4 [Resplendent Mansion, Falling Stars, Remake Physiology] | rank 10: 1 [Fated Confrontation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Genie (Jaathoom): Blood Magic"
   ],

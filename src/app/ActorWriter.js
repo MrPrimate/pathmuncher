@@ -2,6 +2,7 @@
 import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
+import { Seasoning } from "./Seasoning.js";
 
 /**
  * Writing a processed import to the actor: which of its items the import replaces (and which were
@@ -149,6 +150,53 @@ export class ActorWriter {
     return this.#replaceableItems().filter((i) => !ownedByImport(i));
   }
 
+  static #spellKey(spell) {
+    return spell.system?.slug || Seasoning.slug(spell.name);
+  }
+
+  /**
+   * The spells the actor has marked as signature spells, which the import is about to replace:
+   * spellcasting entry name → spell slug → the rank it is known at. Pathbuilder's export doesn't say
+   * which spells are signature spells, so the marks made on the sheet are all there is to keep.
+   */
+  #signatureSpells(keepItemIds) {
+    const keep = new Set(keepItemIds);
+    const marks = new Map();
+    const marked = this.actor.itemTypes.spell.filter((spell) => spell.system.location?.signature && !keep.has(spell.id));
+    for (const spell of marked) {
+      const entry = this.actor.items.get(spell.system.location.value);
+      if (entry && !marks.has(entry.name)) marks.set(entry.name, new Map());
+      marks.get(entry?.name)?.set(ActorWriter.#spellKey(spell), spell.system.location.heightenedLevel ?? spell.system.level?.value);
+    }
+    return marks;
+  }
+
+  /**
+   * Marks the imported spells the actor had as signature spells (#signatureSpells) again: in the
+   * entry of the same name, the copy known at the same rank or else the lowest. Returns the names of
+   * the entries that have signature spells (the build has the Signature Spells feature) but none to
+   * mark, for the import notes.
+   */
+  #keepSignatureSpells(marks) {
+    const unmarked = [];
+    const signatureEntries = (this.pm.source.specials ?? []).includes("Signature Spells")
+      ? this.pm.source.spellCasters.filter((c) => c.spellcastingType === "spontaneous"
+        && [this.pm.source.class, this.pm.source.dualClass].includes(c.name)).map((c) => c.name)
+      : [];
+    for (const entry of this.result.casters) {
+      const entryMarks = marks.get(entry.name) ?? new Map();
+      if (entryMarks.size === 0 && signatureEntries.includes(entry.name)) unmarked.push(entry.name);
+      const spells = this.result.spells.filter((s) => s.system.location?.value === entry._id);
+      for (const [key, rank] of entryMarks) {
+        const copies = spells.filter((s) => ActorWriter.#spellKey(s) === key)
+          .sort((a, b) => (a.system.location.heightenedLevel ?? 0) - (b.system.location.heightenedLevel ?? 0));
+        const spell = copies.find((s) => s.system.location.heightenedLevel === rank) ?? copies[0];
+        if (spell) spell.system.location.signature = true;
+      }
+    }
+    return unmarked;
+  }
+
   async #removeDocumentsToBeUpdated(keepItemIds) {
     const keep = new Set(keepItemIds);
     const deleteIds = this.#replaceableItems()
@@ -281,6 +329,7 @@ export class ActorWriter {
     if (!this.processed) {
       throw new Error("Pathmuncher: updateActor called before processCharacter completed");
     }
+    if (this.options.addSpells) this.pm.unmarkedSignatureEntries = this.#keepSignatureSpells(this.#signatureSpells(keepItemIds));
     await this.#removeDocumentsToBeUpdated(keepItemIds);
 
     if (!this.options.addName) {

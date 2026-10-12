@@ -164,7 +164,11 @@
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Sigil, Guidance, Void Warp, Haunting Hymn] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link] | rank 2: 4 [Guiding Star, Sound Body, Watchdog] | rank 3: 4 [Chilling Darkness, Moonlight Ray, Soul Cutter] | rank 4: 4 [Whispers of the Void, Implement of Destruction, Pernicious Poltergeist] | rank 5: 4 [Breath of Life, Scouting Eye, Summon Fiend] | rank 6: 4 [Sacred Form, Demon Form, Repulsion] | rank 7: 4 [Deity's Strike, Incarnate Ancient Specter, Energy Aegis] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Weapon of Judgment, Foresight, Voracious Gestalt] | rank 10: 1 [Avatar]",
     "Thrown Voice [primal; prepared; cha; proficiency 4] rank 1: 1 [Ventriloquism]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Elemental (Air)",
     "Bloodline: Psychopomp: Blood Magic"

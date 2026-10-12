@@ -162,7 +162,11 @@
     "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Guidance, Phase Bolt, Read Aura, Know the Way, Summon Instrument] | rank 1: 3 [Déjà Vu, Phantasmal Minion, Groom Companion] | rank 2: 3 [Summoner's Visage, Sound Body, Disorienting Flash] | rank 3: 3 [Behold the Weave, Inertia Lock, Haste] | rank 4: 3 [Friends to Foes, Countless Eyes, Flicker] | rank 5: 3 [Glossolalia, Summon Entity, Speak with Stones] | rank 6: 3 [Wall of Force, Expunge Blood, Blanket of Stars] | rank 7: 3 [Retrocognition, Project Image, Mask of Terror] | rank 8: 3 [Confusing Colors, Holy Host, Unholy Army] | rank 9: 3 [Bilocation, Vampiric Revelry, Unfathomable Song] | rank 10: 1 [Nullify]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Bard"
+    ]
+  },
   "described": [
     "Composition Spells: Composition Cantrips"
   ],

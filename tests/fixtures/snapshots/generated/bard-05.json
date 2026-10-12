@@ -168,7 +168,11 @@
     "First World Adept [primal; prepared; cha; proficiency 4] rank 2: 2 [Invisibility, Revealing Light]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Bard"
+    ]
+  },
   "described": [
     "Composition Spells: Composition Cantrips"
   ],

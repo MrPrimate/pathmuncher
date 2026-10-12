@@ -159,7 +159,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Stabilize, Light, Glamorize, Protect Companion] | rank 1: 4 [Sanctuary, Infuse Vitality, Bane] | rank 2: 4 [Final Sacrifice, Noise Blast, Floating Harness] | rank 3: 4 [Roaring Applause, Fractious Echo, Show the Way] | rank 4: 4 [Unfettered Movement, Soothing Spring, Bloodspray Curse] | rank 5: 4 [Summon Monitor, Spiritual Guardian, Confusing Cry] | rank 6: 4 [Sacred Form, Demon Form, Repulsion] | rank 7: 4 [Angel Form, Execute, Divine Decree] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Incarnate Draconic Legion, Massacre, Wails of the Damned] | rank 10: 1 [Manifestation]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],

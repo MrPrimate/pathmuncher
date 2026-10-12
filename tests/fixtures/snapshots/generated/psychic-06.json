@@ -169,7 +169,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Figment, Approximate, Artistic Recollection] | rank 1: 2 [Mystic Armor, Devil's Horseshoe, Thoughtful Gift] | rank 2: 2 [Translate, Floating Harness, Enlarge] | rank 3: 2 [Soul Cutter, Slow, Rally Point] | rank 4: 2 [Bloodspray Curse, Luring Wail, Translocate] | rank 5: 2 [Blister, Imaginary Lockbox, Strange Geometry] | rank 6: 2 [Tentacular Innervation, Suspended Retribution, Collective Transposition] | rank 7: 2 [Time Beacon, Warp Mind, Momentary Recovery] | rank 8: 2 [Roar of Freedom, Disappearance, Quandary] | rank 9: 2 [Unfathomable Song, Incarnate Draconic Legion, Bilocation] | rank 10: 1 [Indestructibility, Shadow Army]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": []
 }

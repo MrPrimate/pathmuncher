@@ -154,7 +154,11 @@
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]",
     "Psychic [occult; spontaneous; cha; proficiency 4] rank 0: 3 [Daze, Protect Companion, Void Warp] | rank 1: 2 [Bane, Sleep] | rank 2: 2 [Darkness, Status] | rank 3: 2 [Clairaudience, Cup of Dust] | rank 4: 2 [Fly, Countless Eyes] | rank 5: 2 [Death Ward, Blood Feast] | rank 6: 2 [Spellwrack, Lure Dream] | rank 7: 2 [Retrocognition, Curse of the Spirit Orchestra] | rank 8: 2 [Unrelenting Observation, Holy Host] | rank 9: 2 [Divinity Leech, Foresight] | rank 10: 1"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Psychic"
+    ]
+  },
   "described": [],
   "prompts": []
 }

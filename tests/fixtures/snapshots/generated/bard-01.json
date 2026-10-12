@@ -158,7 +158,11 @@
     "Bard [occult; spontaneous; cha; proficiency 4] rank 0: 5 [Daze, Read the Air, Light, Warp Step, Shield] | rank 1: 3 [Bane, Spirit Link, Biting Words] | rank 2: 3 [Darkness, Vomit Swarm, Thundering Dominance] | rank 3: 3 [Dream Message, Bottomless Stomach, Time Pocket] | rank 4: 3 [Outcast's Curse, Implement of Destruction, Haunting Spirit] | rank 5: 3 [Mariner's Curse, Rip the Spirit, Horizon's Veil] | rank 6: 3 [Vampiric Exsanguination, Cryostasis, Zealous Conviction] | rank 7: 3 [Warp Mind, Visions of Danger, True Target] | rank 8: 3 [Quandary, Confusing Colors, Holy Host] | rank 9: 3 [Incarnate Draconic Legion, Resplendent Mansion, Phantasmagoria] | rank 10: 1 [Fated Confrontation]",
     "Occult Focus Tradition [occult; focus; cha; proficiency 4]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Bard"
+    ]
+  },
   "described": [
     "Composition Spells: Composition Cantrips"
   ],

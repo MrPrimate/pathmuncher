@@ -154,7 +154,11 @@
     "Primal Focus Tradition [primal; focus; cha; proficiency 4]",
     "Sorcerer [primal; spontaneous; cha; proficiency 4] rank 0: 5 [Spout, Sigil, Glamorize, Tame, Stabilize] | rank 1: 4 [Gust of Wind, Pummeling Rubble, Runic Body] | rank 2: 4 [Create Food, Expeditious Excavation, Summoner's Visage] | rank 3: 4 [Shadow Spy, Lightning Lasso, Cup of Dust] | rank 4: 4 [Luring Wail, Hydraulic Torrent, Tortoise and the Hare] | rank 5: 4 [Spiked Carapace, Blister, Crucible of Iron] | rank 6: 4 [Incarnate Wild Rose, Truesight, Blanket of Stars] | rank 7: 4 [Energy Aegis, Mask of Terror, Sunburst] | rank 8: 4 [Monstrosity Form, Metallic Meteorite Glyph, Migration] | rank 9: 4 [One with the Land, Implosion, Incarnate Draconic Legion] | rank 10: 1 [Indestructibility]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline: Nymph: Blood Magic"
   ],

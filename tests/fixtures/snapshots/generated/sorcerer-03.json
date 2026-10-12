@@ -159,7 +159,11 @@
     "Divine Focus Tradition [divine; focus; cha; proficiency 4]",
     "Sorcerer [divine; spontaneous; cha; proficiency 4] rank 0: 5 [Glamorize, Protect Companion, Sigil, Guidance] | rank 1: 4 [Schadenfreude, Fishing Spot, Spirit Link] | rank 2: 4 [Fear the Sun, Revealing Light, Deafness] | rank 3: 4 [Anointed Ground, Blindness, Web of Eyes] | rank 4: 4 [Vampiric Maiden, Holy Cascade, Filter Air] | rank 5: 4 [Unravel Existence, Rip the Spirit, Shadow Blast] | rank 6: 4 [Spirit Blast, Doom Mark, Awaken Entropy] | rank 7: 4 [Regenerate, Deity's Strike, Incarnate Ancient Specter] | rank 8: 4 [Incarnate Deific Herald, Canticle of Everlasting Grief, Stars of Another Sky] | rank 9: 4 [Weapon of Judgment, Foresight, Voracious Gestalt] | rank 10: 1 [Avatar]"
   ],
-  "report": {},
+  "report": {
+    "signature": [
+      "Sorcerer"
+    ]
+  },
   "described": [
     "Bloodline Spells: Blood Magic"
   ],
