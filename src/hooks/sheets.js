@@ -1,3 +1,4 @@
+import { EidolonBuilderApp } from "../app/EidolonBuilderApp.js";
 import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
 import CONSTANTS from "../constants.js";
 import utils from "../utils.js";
@@ -19,6 +20,15 @@ function label() {
  */
 export function registerSheetButton() {
   Hooks.on("getActorSheetHeaderButtons", (sheet, buttons) => {
+    // an eidolon's choices, which Pathbuilder's export leaves out
+    if (EidolonBuilderApp.isEidolon(sheet.actor)) {
+      buttons.unshift({
+        label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.EidolonBuilder.Open`),
+        class: "pathmuncher-eidolon",
+        icon: "fas fa-dragon",
+        onclick: () => EidolonBuilderApp.open(sheet.actor),
+      });
+    }
     if (!canImport(sheet.actor)) return;
     buttons.unshift({
       label: label(),
@@ -29,6 +39,14 @@ export function registerSheetButton() {
   });
 
   Hooks.on("getHeaderControlsActorSheetV2", (sheet, controls) => {
+    if (EidolonBuilderApp.isEidolon(sheet.actor)) {
+      controls.unshift({
+        label: `${CONSTANTS.FLAG_NAME}.Dialogs.EidolonBuilder.Open`,
+        icon: "fas fa-dragon",
+        action: "pathmuncherEidolon",
+        onClick: () => EidolonBuilderApp.open(sheet.actor),
+      });
+    }
     if (!canImport(sheet.actor)) return;
     controls.unshift({
       label: CONSTANTS.MODULE_FULL_NAME,

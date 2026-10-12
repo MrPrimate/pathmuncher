@@ -173,11 +173,13 @@
   ],
   "report": {
     "pet": [
-      "Eidolon"
+      "Eidolon (Energy Heart: cold)"
     ]
   },
   "described": [
     "Angel Eidolon: Angelic Mercy, Hallowed Strikes, Traveler's Aura"
   ],
-  "prompts": []
+  "prompts": [
+    "Ranged Combatant: Cold"
+  ]
 }

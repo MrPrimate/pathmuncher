@@ -170,12 +170,14 @@
   ],
   "report": {
     "pet": [
-      "Eidolon"
+      "Eidolon (Energy Heart: electricity)"
     ]
   },
   "described": [
     "Plant Eidolon: Growing Vines",
     "Tengu Feather Fan: Wave Fan"
   ],
-  "prompts": []
+  "prompts": [
+    "Ranged Combatant: Electricity"
+  ]
 }

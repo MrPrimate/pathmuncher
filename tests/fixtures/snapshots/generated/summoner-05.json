@@ -163,11 +163,13 @@
   ],
   "report": {
     "pet": [
-      "Eidolon"
+      "Eidolon (Energy Heart: electricity)"
     ]
   },
   "described": [
     "Construct Eidolon: Construct Heart, Reconfigured Evolution, Ultimate Reconfiguration"
   ],
-  "prompts": []
+  "prompts": [
+    "Ranged Combatant: Electricity"
+  ]
 }

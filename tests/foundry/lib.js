@@ -126,6 +126,8 @@
     const prompts = [];
     const hook = Hooks.on("renderApplicationV2", (app) => {
       if (!Array.isArray(app.choices) || typeof app.resolveSelection !== "function" || app.__pmtAnswered) return;
+      // a companion's prompts are pathmuncher's to answer (BFFBuilder)
+      if (app.item?.actor?.getFlag("pathmuncher", "master")) return;
       app.__pmtAnswered = true;
       const label = (c) => sluggify(game.i18n.localize(c.label));
       const match = tiers.map((names) => app.choices.find((c) => names.has(label(c)))).find(Boolean);
@@ -265,12 +267,17 @@
       report = dialog.element.querySelector(".window-content").innerText;
       setTimeout(() => dialog.element.querySelector("button[data-action='ok']")?.click(), 20);
     });
+    // the eidolon's choices (an application, not a dialog): kept as the import made them
+    const keepEidolon = Hooks.on("renderEidolonBuilderApp", (builder) => {
+      setTimeout(() => builder.element.querySelector("button[data-action='keep']")?.click(), 20);
+    });
     el.querySelector("button[type='submit']").click();
     await sleep(300);
     const started = Date.now();
     while (Date.now() - started < 240000 && app.rendered && app.importing) await sleep(250);
     await sleep(500);
     Hooks.off("renderDialogV2", closeReport);
+    Hooks.off("renderEidolonBuilderApp", keepEidolon);
     const state = {
       closed: !app.rendered,
       buttonDisabled: app.rendered ? app.element.querySelector("button[type='submit']").disabled : null,

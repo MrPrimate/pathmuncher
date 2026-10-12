@@ -21,11 +21,16 @@ Import characters from Pathbuilder (or Hephaistos 2E) to Foundry Pathfinder 2e/S
 
 This is inspired by the previous [pathbuilder2e-import](https://github.com/kobseryqum/foundry-pathbuilder2e-import) package, but is written afresh from the ground up, capturing some of my experience from [DDB Importer](https://github.com/MrPrimate/ddb-importer).
 
-To use this module the users must have the CREATE ACTOR ability, as it imports familiars and animal companions as their own actors and saves a copy of the character if an import fails part way.
+To use this module the users must have the CREATE ACTOR ability, as it imports familiars, animal companions and eidolons as their own actors and saves a copy of the character if an import fails part way.
 
-## Animal companions
+## Animal companions and eidolons
 
-With the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module active, a build's animal companions are imported as characters of their own, the way that module builds them: the animal as the ancestry, at the character's level, with Mature, Nimble or Savage and Specialized as Pathbuilder has them, and any barding. The first import asks which character each companion goes to: a new one, or a character no other player owns that is blank or made for a companion. Later imports update the same character, keeping anything added to it by hand. Without the module, companions are listed in the import notes.
+With the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module active, a build's animal companions and a summoner's eidolon are imported as characters of their own, the way that module builds them, at the character's level:
+
+- An animal companion has its animal as the ancestry, Mature, Nimble or Savage and Specialized as Pathbuilder has them, and any barding.
+- An eidolon has its type as the ancestry, the eidolon class's features for its level, and the eidolon versions of the summoner's evolution feats. Pathbuilder's export leaves out most of an eidolon's choices (its key attribute, size, attacks and attribute boosts), so once the eidolon is made the import opens the eidolon builder to make them: a choice for each, by section, beside the eidolon's stat block, which updates as choices change, and its evolution feats, described on hover. Choices left as the import made them are listed in the import notes to check. The builder can be opened again with the "Eidolon choices" button on the eidolon's sheet, and later imports keep the choices made.
+
+The first import asks which character each companion goes to: a new one, or a character no other player owns that is blank or made for a companion. Later imports update the same character, keeping anything added to it by hand. Without the module, companions and eidolons are listed in the import notes.
 
 ## Known Issues
 

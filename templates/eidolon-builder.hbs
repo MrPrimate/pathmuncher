@@ -1,0 +1,70 @@
+<div class="pathmuncher-eidolon-body">
+  <div class="pathmuncher-eidolon-choices">
+    <p class="hint">{{hint}}</p>
+    {{#each sections}}
+    <fieldset class="pathmuncher-eidolon-section" data-section="{{id}}">
+      <legend>{{label}}</legend>
+      {{#each items}}
+      <div class="pathmuncher-eidolon-item {{#if ../boosts}}boosts{{/if}}">
+        <span class="pathmuncher-eidolon-item-name">{{name}}</span>
+        <div class="pathmuncher-eidolon-item-choices">
+          {{#each choices}}
+          <label class="pathmuncher-eidolon-choice">
+            {{#unless ../../boosts}}<span>{{prompt}}</span>{{/unless}}
+            <select data-choice="{{key}}" aria-label="{{../name}}: {{prompt}}">
+              {{#if unanswered}}<option value="" selected>—</option>{{/if}}
+              {{#each options}}
+              <option value="{{index}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>
+              {{/each}}
+            </select>
+          </label>
+          {{#if note}}<p class="hint pathmuncher-eidolon-note">{{note}}</p>{{/if}}
+          {{/each}}
+        </div>
+      </div>
+      {{/each}}
+    </fieldset>
+    {{/each}}
+  </div>
+
+  <aside class="pathmuncher-eidolon-stats">
+    <header>
+      <h3>{{stats.name}}</h3>
+      <span class="pathmuncher-eidolon-level">{{localize "pathmuncher.Dialogs.EidolonBuilder.Level"}} {{stats.level}}</span>
+    </header>
+    <div class="pathmuncher-eidolon-traits">
+      <span class="tag size" {{#if stats.sizeSetBy}}data-tooltip="{{stats.sizeSetBy}}"{{/if}}>{{stats.size}}</span>
+      {{#each stats.traits}}<span class="tag">{{this}}</span>{{/each}}
+    </div>
+    <p><strong>{{localize "PF2E.PerceptionLabel"}}</strong>
+      {{stats.perception}}{{#if stats.senses.length}}; {{#each stats.senses}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}</p>
+    {{#if stats.skills.length}}
+    <p><strong>{{localize "PF2E.SkillsLabel"}}</strong>
+      {{#each stats.skills}}{{label}} {{value}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+    {{/if}}
+    <p class="pathmuncher-eidolon-attributes">
+      {{#each stats.attributes}}<span><strong>{{label}}</strong> {{value}}</span>{{/each}}
+    </p>
+    <hr>
+    <p><strong>{{localize "PF2E.ArmorClassShortLabel"}}</strong> {{stats.ac}};
+      {{#each stats.saves}}<strong>{{label}}</strong> {{value}}{{#unless @last}}, {{/unless}}{{/each}}</p>
+    <p><strong>{{localize "PF2E.HitPointsShortLabel"}}</strong> {{stats.hp}}</p>
+    {{#if stats.speed}}
+    <p><strong>{{localize "PF2E.Actor.Speed.Label"}}</strong> {{stats.speed}}</p>
+    {{/if}}
+    <hr>
+    {{#each stats.strikes}}
+    <p class="pathmuncher-eidolon-strike"><strong>{{label}}</strong> {{modifier}}, {{damage}}</p>
+    {{/each}}
+    {{#if stats.feats.length}}
+    <hr>
+    <h4>{{localize "pathmuncher.Dialogs.EidolonBuilder.Feats"}}</h4>
+    <ul class="pathmuncher-eidolon-feats">
+      {{#each stats.feats}}
+      <li data-tooltip="{{description}}">{{name}}
+        <span class="pathmuncher-eidolon-feat-level">{{#if taken}}{{localize "pathmuncher.Dialogs.EidolonBuilder.TakenAt"}} {{taken}}{{else if level}}{{localize "pathmuncher.Dialogs.EidolonBuilder.Level"}} {{level}}{{/if}}</span></li>
+      {{/each}}
+    </ul>
+    {{/if}}
+  </aside>
+</div>

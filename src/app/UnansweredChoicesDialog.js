@@ -24,8 +24,37 @@ function notes(entry) {
   return lines.map((line) => `<p class="hint pathmuncher-choice-note">${escape(line)}</p>`).join("");
 }
 
-function renderContent(unanswered) {
-  const rows = unanswered.map((entry) => {
+/** The localized label of a trait, whichever list it is in. */
+function traitLabel(trait) {
+  const lists = ["featTraits", "classTraits", "actionTraits", "ancestryTraits", "weaponTraits", "rarityTraits"];
+  const key = lists.map((list) => CONFIG.PF2E?.[list]?.[trait]).find(Boolean);
+  return key ? game.i18n.localize(key) : trait;
+}
+
+/**
+ * What the item asking is, to help choose: its category and level and traits, the Pathbuilder slot it
+ * was taken in, and its description, which scrolls when it is long.
+ */
+function details(entry, description) {
+  const info = entry.details;
+  if (!info) return "";
+  const format = (key, data) => game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.UnansweredChoices.${key}`, data);
+  const category = info.category
+    ? game.i18n.localize(CONFIG.PF2E?.featCategories?.[info.category] ?? info.category)
+    : game.i18n.localize(CONFIG.Item?.typeLabels?.[entry.item.type] ?? entry.item.type);
+  const kind = info.level ? format("Level", { kind: category, level: info.level }) : category;
+  const traits = [...(info.rarity && info.rarity !== "common" ? [info.rarity] : []), ...info.traits]
+    .map((t) => `<span class="pathmuncher-choice-trait">${escape(traitLabel(t))}</span>`).join("");
+  const slot = info.slot
+    ? `<p class="hint pathmuncher-choice-note">${escape(format("Slot", { slot: info.slot.type, level: info.slot.level ?? "?" }))}</p>`
+    : "";
+  return `<div class="pathmuncher-choice-meta"><span class="pathmuncher-choice-kind">${escape(kind)}</span>${traits}</div>
+    ${slot}
+    ${description ? `<div class="pathmuncher-choice-description">${description}</div>` : ""}`;
+}
+
+function renderContent(unanswered, descriptions = []) {
+  const rows = unanswered.map((entry, index) => {
     const tiles = entry.choices.map((choice) => tile({
       name: entry.id,
       value: choice.value,
@@ -45,8 +74,9 @@ function renderContent(unanswered) {
           <i class="fas fa-rotate-left" inert></i>
         </button>
       </legend>
-      ${entry.prompt ? `<p class="hint">${escape(entry.prompt)}</p>` : ""}
+      ${details(entry, descriptions[index])}
       ${notes(entry)}
+      ${entry.prompt ? `<p class="pathmuncher-choice-prompt">${escape(entry.prompt)}</p>` : ""}
       ${filter}
       <div class="pathmuncher-tiles pathmuncher-choice-tiles">${tiles}</div>
     </fieldset>`;
@@ -79,6 +109,9 @@ export class UnansweredChoicesDialog {
    * left unpicked is asked by the system during the import. Resolves to null if the user cancels.
    */
   static async choose(unanswered) {
+    // each item's description, its links and inline rolls made ready to show
+    const enrich = (html) => foundry.applications.ux.TextEditor.implementation.enrichHTML(html ?? "", { secrets: false });
+    const descriptions = await Promise.all(unanswered.map((entry) => (entry.details?.description ? enrich(entry.details.description) : "")));
     const onRender = (_event, dialog) => {
       const form = dialog.element.querySelector("form") ?? dialog.element;
 
@@ -114,7 +147,7 @@ export class UnansweredChoicesDialog {
       window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.UnansweredChoices.Title`, icon: "fas fa-list-check" },
       position: { width: 640 },
       classes: ["pathmuncher", "pathmuncher-unanswered-choices-dialog"],
-      content: renderContent(unanswered),
+      content: renderContent(unanswered, descriptions),
       rejectClose: false,
       render: onRender,
       buttons: [

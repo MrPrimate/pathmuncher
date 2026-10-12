@@ -69,4 +69,20 @@
     t.deepEqual(report.find((g) => g.type === "pet")?.names, ["Eidolon (Energy Heart: electricity)"], "the eidolon");
     t.ok(!(report.find((g) => g.type === "special")?.names ?? []).includes("electricity"), "the damage type is not unmatched");
   });
+
+  test("pets: Energy Heart's damage type is not taken by the summoner's Ranged Combatant", async (t) => {
+    // Pathbuilder lists the one damage type ("cold") for Energy Heart, and none for Ranged Combatant
+    const summoner = generated("summoner-02");
+    await pmt.useBuildVariants(t, summoner.build);
+    pmt.answerPrompts(t, summoner.build);
+    const asked = [];
+    const pm = await pmt.importBuild(await pmt.actor(t, "energy heart"), summoner, {
+      resolveUnansweredChoices: (unanswered) => {
+        asked.push(...unanswered.map((u) => u.item.name));
+        return {};
+      },
+    });
+    t.deepEqual(pm.getImportReport().find((g) => g.type === "pet")?.names, ["Eidolon (Energy Heart: cold)"], "noted with the eidolon");
+    t.ok(asked.includes("Ranged Combatant"), `Ranged Combatant's damage type is asked: ${asked.join(", ")}`);
+  });
 })();

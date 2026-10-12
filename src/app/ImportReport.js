@@ -118,7 +118,7 @@ export class ImportReport {
    * { type, label, names } for the categories that have any, in the order they are shown.
    */
   /** Report groups that are not a kind of item, with their own heading and hint (Dialogs.Report.<key>, <key>Hint). */
-  static REPORT_GROUPS = { described: "Described", rule: "Rules", pet: "Pets" };
+  static REPORT_GROUPS = { described: "Described", rule: "Rules", pet: "Pets", companionChoice: "CompanionChoices" };
 
   getImportReport() {
     const bad = (type, option, filter = () => true) => (option === null || this.options[option]
@@ -151,6 +151,7 @@ export class ImportReport {
       ["familiar", bad("familiar", "addFamiliars")],
       ["pet", this.unimportedPets()],
       ["companion", bad("companion", "addCompanions")],
+      ["companionChoice", bad("companionChoice", "addCompanions")],
       ["rule", bad("rule", null)],
     ];
     const labels = {
@@ -181,7 +182,7 @@ export class ImportReport {
     const pets = (this.source.pets ?? [])
       .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar" && !imported.includes(pet))
       .map((pet) => (pet.name ? `${pet.name} (${pet.type})` : pet.type));
-    if ([this.source.class, this.source.dualClass].includes("Summoner")) {
+    if ([this.source.class, this.source.dualClass].includes("Summoner") && !this.pm.eidolonImported) {
       const notes = this.pm.eidolonNotes ?? [];
       pets.push(notes.length > 0 ? `Eidolon (${notes.join(", ")})` : "Eidolon");
     }

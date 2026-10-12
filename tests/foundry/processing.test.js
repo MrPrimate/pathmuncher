@@ -324,6 +324,47 @@
     t.equal(selection(actor, "Surki Weapon Familiarity", "weapon"), "battle-axe", "weapon");
     t.equal(selection(actor, "Grand Metamorphosis", "evolution"), "digging-wedge", "evolution");
   });
+  test("processing: each choice asked comes with what its item is and where the build took it", async (t) => {
+    const exportJson = foundry.utils.deepClone(globalThis.__pmtGenerated["summoner-02"]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    let asked = [];
+    await pmt.importBuild(await pmt.actor(t, "choice details"), exportJson, {
+      resolveUnansweredChoices: (unanswered) => {
+        asked = unanswered;
+        return {};
+      },
+    });
+    const combatant = asked.find((u) => u.item.name === "Ranged Combatant");
+    t.ok(combatant, "Ranged Combatant asked");
+    const { level, category, slot } = combatant.details;
+    t.deepEqual({ level, category, slot }, { level: 2, category: "class", slot: { type: "Summoner Evolution Feat", level: 14 } }, "its level, and where it was taken");
+    t.ok(combatant.details.traits.includes("evolution"), "its traits");
+    t.ok(combatant.details.description.length > 0, "its description");
+
+    // the dialog shows them, the description in a box of its own
+    const { UnansweredChoicesDialog } = await import("/modules/pathmuncher/src/app/UnansweredChoicesDialog.js");
+    const shown = new Promise((resolve) => {
+      const hook = Hooks.on("renderDialogV2", (dialog) => {
+        if (!dialog.options.classes?.includes("pathmuncher-unanswered-choices-dialog")) return;
+        Hooks.off("renderDialogV2", hook);
+        const row = dialog.element.querySelector(".pathmuncher-unanswered");
+        resolve({
+          meta: row.querySelector(".pathmuncher-choice-meta")?.innerText ?? "",
+          slot: row.innerText.includes("Summoner Evolution Feat"),
+          description: row.querySelector(".pathmuncher-choice-description")?.innerText ?? "",
+        });
+        setTimeout(() => dialog.element.querySelector("button[data-action='cancel']")?.click(), 20);
+      });
+    });
+    const answered = UnansweredChoicesDialog.choose([combatant]);
+    const row = await shown;
+    await answered;
+    t.ok(row.meta.includes("2"), `the feat's level: ${row.meta}`);
+    t.ok(row.slot, "the Pathbuilder slot");
+    t.ok(row.description.length > 50, "the description");
+  });
+
   /** Each Assurance on the actor with the skill it took. */
   const assurances = (actor) => actor.items.filter((i) => i.slug === "assurance")
     .map((i) => ({ grantedBy: actor.items.get(i.flags.pf2e?.grantedBy?.id)?.name ?? null, skill: i.flags.pf2e?.rulesSelections?.assurance ?? null }));

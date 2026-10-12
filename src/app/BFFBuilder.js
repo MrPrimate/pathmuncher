@@ -4,13 +4,18 @@
 import CONSTANTS from "../constants.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
+import { CompanionChoices } from "./CompanionChoices.js";
 import { Seasoning } from "./Seasoning.js";
 
 /**
- * BFFBuilder (Best Friends Forever Builder): a build's animal companions, each a character of its own
- * built from the PF2e Companion Compendia module (pf2e-animal-companions). The companion's ancestry is
- * its animal (Wolf), which grants the module's Animal Companion class, and Mature, Nimble or Savage and
- * Specialized are feats on it.
+ * BFFBuilder (Best Friends Forever Builder): a build's animal companions and a summoner's eidolon, each
+ * a character of its own built from the PF2e Companion Compendia module (pf2e-animal-companions). An
+ * animal companion's ancestry is its animal (Wolf), which grants the module's Animal Companion class, and
+ * Mature, Nimble or Savage and Specialized are feats on it. An eidolon's ancestry is its type (Angel
+ * Eidolon), which grants the Eidolon class, whose features come as it levels; the summoner's evolution
+ * feats have versions for the eidolon. The choices its items make that the build doesn't (its size,
+ * attacks and boosts) are answered as the system asks for them (CompanionChoices), as is the size some
+ * animals ask for.
  *
  * A companion is linked to its master: flags.pathmuncher.companions on the master holds each
  * companion's actor by its key, and flags.pathmuncher.master on the companion points back. The next
@@ -36,25 +41,50 @@ export class BFFBuilder {
    * @param {Function} [options.resolveCompanionActor]  asked for a companion with no actor linked:
    *   ({ master, pet, name, candidates }) => { create: true } | { actor } | null to leave it out.
    *   Without it a new character is made.
+   * @param {Function} [options.reviewEidolon]  given the eidolon once it is built, to make its choices:
+   *   ({ eidolon, guessed }) => whether they were made. Those it makes aren't listed as guessed.
    */
-  constructor({ pathmuncher, master, resolveCompanionActor = null }) {
+  constructor({ pathmuncher, master, resolveCompanionActor = null, reviewEidolon = null }) {
     this.pathmuncher = pathmuncher;
     this.master = master;
     this.resolveCompanionActor = resolveCompanionActor;
+    this.reviewEidolon = reviewEidolon;
     // the pets made into companions, and what of them matched nothing
     this.imported = [];
     this.bad = [];
   }
 
-  /** The build's animal companions, each with its key: its type and place among the build's pets of that type. */
+  /**
+   * The build's animal companions, each with its key (its type and place among the build's pets of
+   * that type) and its ancestry: { pet, key, kind, ancestry: [pack, name] }.
+   */
   get companions() {
     const counts = {};
     return (this.pathmuncher.source.pets ?? [])
       .filter((pet) => pet.type === "Animal Companion")
       .map((pet) => {
         counts[pet.type] = (counts[pet.type] ?? -1) + 1;
-        return { pet, key: `${Seasoning.slug(pet.type)}-${counts[pet.type]}` };
+        return { pet, key: `${Seasoning.slug(pet.type)}-${counts[pet.type]}`, kind: "animal", ancestry: ["AC-Ancestries-and-Class", pet.animal] };
       });
+  }
+
+  /** A summoner's eidolon, as a companion: its type is the special the module has an eidolon for. */
+  async eidolon() {
+    const source = this.pathmuncher.source;
+    if (![source.class, source.dualClass].includes("Summoner")) return null;
+    const index = await BFFBuilder.pack("AC-Eidolons")?.getIndex() ?? [];
+    // an elemental's element is in its name ("Elemental Eidolon (Air)"), where the module has one for all
+    const named = (source.specials ?? []).map((s) => String(s).trim())
+      .flatMap((s) => [[s, null], [s.replace(/\s*\(([^)]*)\)$/, ""), s.match(/\(([^)]*)\)$/)?.[1]]])
+      .find(([s]) => index.some((i) => i.name === s));
+    if (!named) return null;
+    const [type, element] = named;
+    // a pet of the build's own, so the import notes know it was made
+    this.eidolonPet ??= { type: "Eidolon", animal: type };
+    return {
+      pet: this.eidolonPet, key: "eidolon-0", kind: "eidolon", ancestry: ["AC-Eidolons", type],
+      element: element ? element.toLowerCase() : null,
+    };
   }
 
   /** The name Pathbuilder gives the companion ("Fang - Savage Wolf" is Fang), or the master's animal's. */
@@ -217,33 +247,121 @@ export class BFFBuilder {
     return gear;
   }
 
-  /**
-   * Builds a companion on its actor. What an earlier import made, and an ancestry or class the actor
-   * had, are replaced; anything else on it (added by hand, effects) is kept.
-   */
-  async #build(actor, { pet, key }, ancestry) {
+  /** What the actor's items chose, by "<item slug>:<flag>", for the next build to choose again. */
+  static selections(actor) {
+    const selections = {};
+    for (const item of actor.items) {
+      const chosen = item.flags?.[game.system.id]?.rulesSelections ?? item.flags?.pf2e?.rulesSelections ?? {};
+      for (const [flag, value] of Object.entries(chosen)) selections[`${item.slug}:${flag}`] = value;
+    }
+    return selections;
+  }
+
+  /** Clears what an earlier import made on the actor, and an ancestry or class it had, and links it. */
+  async #clear(actor, key, level) {
     const replaced = actor.items.filter((i) => i.getFlag(CONSTANTS.FLAG_NAME, "imported") || ["ancestry", "class"].includes(i.type));
     if (replaced.length > 0) await actor.deleteEmbeddedDocuments("Item", replaced.map((i) => i.id));
     await actor.update({
-      "system.details.level.value": this.master.system.details.level.value,
+      "system.details.level.value": level,
       [`flags.${CONSTANTS.FLAG_NAME}.master`]: { uuid: this.master.uuid, key },
     });
-    // the ancestry first: it grants the class the feats build on
-    await actor.createEmbeddedDocuments("Item", [ancestry]);
-    const feats = await this.#feats(pet);
-    if (feats.length > 0) await actor.createEmbeddedDocuments("Item", feats);
-    // the size the feats grew it to picks the barding
-    const gear = await this.#gear(pet, actor);
-    if (gear.length > 0) await actor.createEmbeddedDocuments("Item", gear);
   }
 
-  /** Makes or updates each of the build's animal companions, and links it to the master. */
+  /**
+   * Answers the system's prompts for the choices of items created on the actor, until the returned
+   * function is called. Each is answered by choices.answer and closed before it is used.
+   */
+  static answerPrompts(actor, choices) {
+    const hook = Hooks.on("renderApplicationV2", (app) => {
+      if (!Array.isArray(app.choices) || typeof app.resolveSelection !== "function" || app.pathmuncherAnswered) return;
+      if (app.item?.actor?.id !== actor.id) return;
+      app.pathmuncherAnswered = true;
+      app.element?.style.setProperty("visibility", "hidden");
+      // the item's next unanswered ChoiceSet asking this, as the system asks them in order (it notes
+      // each as null until answered)
+      const chosen = app.item.flags?.pf2e?.rulesSelections ?? app.item.flags?.[game.system.id]?.rulesSelections ?? {};
+      const rule = (app.item._source?.system?.rules ?? []).find((r) => r.key === "ChoiceSet" && r.flag
+        && (chosen[r.flag] ?? null) === null && game.i18n.localize(r.prompt ?? "") === app.prompt);
+      const { choice } = choices.answer({ itemName: app.item.name, itemSlug: app.item.slug, flag: rule?.flag, choices: app.choices });
+      app.selection = choice ?? app.choices[0] ?? null;
+      setTimeout(() => app.close(), 0);
+    });
+    return () => Hooks.off("renderApplicationV2", hook);
+  }
+
+  /** The eidolon versions of the summoner's evolution feats ("Energy Heart" is "Energy Heart (CC)"). */
+  async #evolutionFeats() {
+    const feats = [];
+    for (const [name, , , level] of this.pathmuncher.source.feats ?? []) {
+      const feat = await BFFBuilder.#document("AC-Evolution-Feats", `${name} (CC)`);
+      // the level the summoner took it at, which the eidolon builder shows
+      if (feat) feats.push(foundry.utils.mergeObject(feat, { [`flags.${CONSTANTS.FLAG_NAME}.takenAt`]: level ?? null }));
+    }
+    return feats;
+  }
+
+  /**
+   * Builds an eidolon on its actor: its type at level 1, then its master's level, so the Eidolon
+   * class's features come as they do when it levels, then the evolution feats. The choices these ask
+   * for are answered as they come: the last build's, the build's, or a default noted to check.
+   */
+  async #buildEidolon(actor, { pet, key, element }, ancestry) {
+    // the damage types Pathbuilder lists for Energy Heart, as specials of their own ("cold")
+    const energyHeart = (this.pathmuncher.source.specials ?? [])
+      .map((s) => String(s).trim().toLowerCase()).filter((s) => this.pathmuncher.constructor.ENERGY_HEART_TYPES.includes(s));
+    const choices = new CompanionChoices({ previous: BFFBuilder.selections(actor), energyHeart, element });
+    await this.#clear(actor, key, 1);
+    const stop = BFFBuilder.answerPrompts(actor, choices);
+    try {
+      await actor.createEmbeddedDocuments("Item", [ancestry]);
+      await actor.update({ "system.details.level.value": this.master.system.details.level.value });
+      const feats = await this.#evolutionFeats();
+      if (feats.length > 0) await actor.createEmbeddedDocuments("Item", feats);
+    } finally {
+      stop();
+    }
+    // the user makes the choices, or they are listed to check
+    const reviewed = this.reviewEidolon ? await this.reviewEidolon({ eidolon: actor, guessed: choices.guessed }) : false;
+    if (!reviewed) this.#noteGuessed(actor, pet, choices);
+  }
+
+  /** Lists the choices made for a companion by default, for the import notes. */
+  #noteGuessed(actor, pet, choices) {
+    for (const { item, choice } of choices.guessed) {
+      this.bad.push({ pbName: `${item}: ${choice} (${actor.name})`, type: "companionChoice", details: { pet } });
+    }
+  }
+
+  /**
+   * Builds an animal companion on its actor. What an earlier import made, and an ancestry or class the
+   * actor had, are replaced; anything else on it (added by hand, effects) is kept.
+   */
+  async #build(actor, { pet, key }, ancestry) {
+    const choices = new CompanionChoices({ previous: BFFBuilder.selections(actor) });
+    await this.#clear(actor, key, this.master.system.details.level.value);
+    const stop = BFFBuilder.answerPrompts(actor, choices);
+    try {
+      // the ancestry first: it grants the class the feats build on
+      await actor.createEmbeddedDocuments("Item", [ancestry]);
+      const feats = await this.#feats(pet);
+      if (feats.length > 0) await actor.createEmbeddedDocuments("Item", feats);
+      // the size the feats grew it to picks the barding
+      const gear = await this.#gear(pet, actor);
+      if (gear.length > 0) await actor.createEmbeddedDocuments("Item", gear);
+    } finally {
+      stop();
+    }
+    this.#noteGuessed(actor, pet, choices);
+  }
+
+  /** Makes or updates each of the build's animal companions and its eidolon, and links each to the master. */
   async build() {
     const taken = [];
-    for (const companion of this.companions) {
+    const eidolon = await this.eidolon();
+    for (const companion of [...this.companions, ...(eidolon ? [eidolon] : [])]) {
       try {
-        // the animal as the module has it, before any actor is made for it
-        const ancestry = await BFFBuilder.#document("AC-Ancestries-and-Class", companion.pet.animal);
+        // the animal or eidolon as the module has it, before any actor is made for it
+        const ancestry = await BFFBuilder.#document(...companion.ancestry);
         if (ancestry?.type !== "ancestry") {
           this.#unmatched(companion.pet, companion.pet.animal);
           continue;
@@ -251,14 +369,19 @@ export class BFFBuilder {
         const actor = await this.#actorFor(companion, taken);
         if (!actor) continue;
         taken.push(actor.id);
-        await this.#build(actor, companion, ancestry);
+        if (companion.kind === "eidolon") await this.#buildEidolon(actor, companion, ancestry);
+        else await this.#build(actor, companion, ancestry);
         await this.master.setFlag(CONSTANTS.FLAG_NAME, `companions.${companion.key}`, actor.uuid);
         this.imported.push({ pet: companion.pet, actor });
+        if (companion.kind === "eidolon") this.pathmuncher.eidolonImported = true;
       } catch (error) {
         logger.error(`Unable to build companion ${companion.pet.name}`, { error, companion });
         this.#unmatched(companion.pet, companion.pet.animal, { error: error.message });
       }
     }
+    // the import notes: what was made is not listed as not imported, and what matched nothing is
+    this.pathmuncher.importedPets.push(...this.imported.map((c) => c.pet));
+    this.pathmuncher.bad.push(...this.bad);
     logger.debug("Companions", { imported: this.imported, bad: this.bad });
   }
 

@@ -1,6 +1,8 @@
 import { BFFBuilder } from "../app/BFFBuilder.js";
 import { CompendiumMatcher } from "../app/CompendiumMatcher.js";
 import { CompendiumSelector } from "../app/CompendiumSelector.js";
+import { EidolonBuilderApp } from "../app/EidolonBuilderApp.js";
+import { EidolonEditor } from "../app/EidolonEditor.js";
 import { ImportMemory } from "../app/ImportMemory.js";
 import { Pathmuncher } from "../app/Pathmuncher.js";
 import { PathmuncherImporter } from "../app/PathmuncherImporter.js";
@@ -16,6 +18,8 @@ import utils from "../utils.js";
 export function registerAPI() {
   game.modules.get(CONSTANTS.MODULE_NAME).api = {
     BFFBuilder,
+    EidolonBuilderApp,
+    EidolonEditor,
     ImportMemory,
     Pathmuncher,
     PathmuncherImporter,

@@ -120,6 +120,28 @@
         "AsBuilt": "Import as built",
         "Cancel": "Cancel import"
       },
+      "EidolonBuilder": {
+        "Title": "Pathmuncher | Eidolon",
+        "Hint": "Pathbuilder's export leaves out these choices for the eidolon. Make them here: the stat block shows the eidolon as it would be with them. Hover over an evolution feat for what it does.",
+        "Level": "Level",
+        "Feats": "Evolution feats",
+        "TakenAt": "taken at",
+        "SizeSetBy": "{item} makes the eidolon {size}, whatever size is picked here.",
+        "Reset": "Reset",
+        "Keep": "Keep as is",
+        "Build": "Build eidolon",
+        "Built": "{name}'s choices are made.",
+        "Failed": "The eidolon's choices could not be written: {error}",
+        "Open": "Eidolon choices",
+        "Sections": {
+          "type": "Type",
+          "attributes": "Attributes",
+          "attacks": "Attacks",
+          "boosts": "Attribute boosts",
+          "evolution": "Evolution feats",
+          "abilities": "Abilities"
+        }
+      },
       "Companion": {
         "Title": "Pathmuncher | Companion",
         "Content": "{pet} is {master}'s companion, and has no character of its own yet. Make a new character for it, or build it on one of these characters: they are blank or made for a companion, and no other player owns them.",
@@ -145,6 +167,8 @@
         "Title": "Pathmuncher | Choices to make",
         "Content": "The Pathbuilder export does not say what was chosen for these. Pick them now, or leave one unpicked and the system will ask for it during the import. Hover over an option for details.",
         "GrantedBy": "Granted by {item}.",
+        "Level": "{kind} {level}",
+        "Slot": "Pathbuilder slot: {slot}, level {level}.",
         "Taken": "Already chosen on another {item}: {list}. Those are not offered here.",
         "TakenFrom": "{choice} (from {source})",
         "Search": "Filter options",
@@ -182,7 +206,9 @@
         "Rules": "Rules to check",
         "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
         "Pets": "Pets not imported",
-        "PetsHint": "Pathmuncher imports familiars, and animal companions when the PF2e Companion Compendia module is active. Pathbuilder's export leaves out a summoner's eidolon. Create these from the build by hand.",
+        "PetsHint": "Pathmuncher imports familiars, and animal companions and a summoner's eidolon when the PF2e Companion Compendia module is active. Create these from the build by hand.",
+        "CompanionChoices": "Companion choices to check",
+        "CompanionChoicesHint": "Pathbuilder's export leaves out these choices for companions and eidolons, so the import made them. Change any that are wrong on the companion's items; the next import keeps them.",
         "ImportedAt": "Imported {date}."
       }
     },
@@ -223,7 +249,7 @@
         "adjustBlendedSlots": "Adjust for blended spell slots",
         "addFormulas": "Formulas",
         "addFamiliars": "Familiars",
-        "addCompanions": "Animal companions",
+        "addCompanions": "Companions and eidolons",
         "addEquipment": "Equipment",
         "addWeapons": "Weapons",
         "addArmor": "Armor and shields",

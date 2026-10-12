@@ -4,6 +4,7 @@ import utils from "../utils.js";
 import { AmmunitionDialog } from "./AmmunitionDialog.js";
 import { BFFBuilder } from "./BFFBuilder.js";
 import { CompanionDialog } from "./CompanionDialog.js";
+import { EidolonBuilderApp } from "./EidolonBuilderApp.js";
 import { DeityConflictDialog } from "./DeityConflictDialog.js";
 import { ImportMemory } from "./ImportMemory.js";
 import { ImportReport } from "./ImportReport.js";
@@ -195,6 +196,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       resolveUnansweredChoices: UnansweredChoicesDialog.choose,
       resolveAmmunition: AmmunitionDialog.choose,
       resolveCompanionActor: CompanionDialog.choose,
+      reviewEidolon: EidolonBuilderApp.review,
     }, { reuse });
     logger.debug("Pathmuncher options", options);
 
@@ -274,11 +276,13 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
       pathmuncher.bad.push(...petShop.unmatched);
     }
     if (options.addCompanions && BFFBuilder.active) {
-      const bff = new BFFBuilder({ pathmuncher, master: this.actor, resolveCompanionActor: options.resolveCompanionActor });
+      const bff = new BFFBuilder({
+        pathmuncher,
+        master: this.actor,
+        resolveCompanionActor: options.resolveCompanionActor,
+        reviewEidolon: options.reviewEidolon,
+      });
       await bff.build();
-      // the companions made are not listed as pets not imported; what of them matched nothing is
-      pathmuncher.importedPets = bff.imported.map((c) => c.pet);
-      pathmuncher.bad.push(...bff.bad);
     }
     await memory.save(pathmuncher, { source, report: pathmuncher.getImportReport() });
     logger.debug("Final import details", { actor: this.actor, pathmuncher, options });

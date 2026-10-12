@@ -78,6 +78,7 @@ export class Pathmuncher {
     this.eidolonNotes = [];
     // the build's pets made into companions (BFFBuilder), which the import notes don't list as not imported
     this.importedPets = [];
+    this.eidolonImported = false;
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};
@@ -589,7 +590,8 @@ export class Pathmuncher {
   /**
    * Specials that describe the summoner's eidolon, which is not imported: the damage type Energy Heart
    * takes ("electricity"), which Pathbuilder lists on its own. They are noted with the eidolon in the
-   * import notes (eidolonNotes) rather than listed as unmatched.
+   * import notes (eidolonNotes) rather than listed as unmatched. Pathbuilder lists no damage type for
+   * other evolution feats (Ranged Combatant), so with Energy Heart taken the damage type is its.
    */
   #settleEidolonSpecials() {
     if (!this.parsed.feats.some((f) => f.name === "Energy Heart")) return;
@@ -1085,7 +1087,7 @@ export class Pathmuncher {
 
   /**
    * The choices held back by #deferChoice, for the user to answer:
-   * [{ id, item: { name, img, type }, prompt, choices: [{ value, label, img, uuid }] }]
+   * [{ id, item: { name, img, type }, prompt, origin, taken, details, choices: [{ value, label, img, uuid }] }]
    */
   get unansweredChoiceList() {
     return this.unansweredChoices.map(({ id, document, ruleEntry, choices, taken }) => {
@@ -1101,9 +1103,27 @@ export class Pathmuncher {
         // where the item comes from (what granted it, or the item it is part of), and what other copies of it already chose
         origin: this.#resultItemName(document.flags?.[game.system.id]?.grantedBy?.id) ?? this.#resultItemName(document.system?.location),
         taken: takenNow.map(({ label, source }) => ({ label, source })),
+        // what the item is, and where the build took it, to help choose
+        details: this.#choiceDetails(document),
         choices: open.length > 0 ? open : choices,
       };
     });
+  }
+
+  /**
+   * What the choices dialog shows of an item asking a choice: its description, level, category and
+   * traits, and the Pathbuilder slot it was taken in and at what level ("Summoner Evolution Feat", 14).
+   */
+  #choiceDetails(document) {
+    const entry = [...this.parsed.feats, ...this.parsed.specials].find((e) => e.itemId === document._id);
+    return {
+      description: document.system?.description?.value ?? "",
+      level: document.system?.level?.value ?? null,
+      category: document.system?.category ?? null,
+      traits: document.system?.traits?.value ?? [],
+      rarity: document.system?.traits?.rarity ?? null,
+      slot: entry?.type ? { type: entry.type, level: entry.level ?? null } : null,
+    };
   }
 
   /** Sets the selections the user made ({ id: value }) as pf2e would; anything unanswered is asked by pf2e during the import. */
@@ -2117,9 +2137,10 @@ export class Pathmuncher {
 
     this.#setAbilityBoosts();
 
+    // before the feats, so no feat's choice takes Energy Heart's damage type (Ranged Combatant's)
+    this.#settleEidolonSpecials();
     this.statusUpdate(8, 12, "FeatureRec");
     await this.#processFeats();
-    this.#settleEidolonSpecials();
     this.statusUpdate(10, 12, "Equipment");
     if (!(await this.equipment.processEquipment())) return false;
     this.statusUpdate(11, 12, "Spells");

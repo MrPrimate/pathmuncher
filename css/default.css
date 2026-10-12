@@ -609,6 +609,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  /* the choices scroll, so the buttons stay on screen however many there are */
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  padding-right: 0.25rem;
 }
 
 .pathmuncher-unanswered-choices .hint {
@@ -650,6 +654,50 @@
   border: none;
   background: none;
   line-height: 1;
+}
+
+/* what the item asking is: its kind and level, traits, and description */
+.pathmuncher-choice-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--font-size-12);
+}
+
+.pathmuncher-choice-kind {
+  font-weight: bold;
+  margin-right: 0.25rem;
+}
+
+.pathmuncher-choice-trait {
+  padding: 0 0.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  text-transform: capitalize;
+}
+
+.pathmuncher-choice-description {
+  max-height: 8rem;
+  overflow-y: auto;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg-option, rgba(0, 0, 0, 0.05));
+  font-size: var(--font-size-13);
+}
+
+.pathmuncher-choice-description p {
+  margin: 0.25rem 0;
+}
+
+.pathmuncher-choice-description hr {
+  margin: 0.35rem 0;
+}
+
+.pathmuncher-choice-prompt {
+  margin: 0.25rem 0 0;
+  font-weight: bold;
 }
 
 .pathmuncher-choice-tiles {
@@ -771,5 +819,158 @@
 
 .pathmuncher-compendium-list option.missing {
   color: var(--color-text-subtle);
+  font-style: italic;
+}
+
+/* Eidolon builder: the choices beside the eidolon's stat block */
+.pathmuncher-eidolon-builder .window-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.pathmuncher-eidolon-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.pathmuncher-eidolon-builder .form-footer {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.pathmuncher-eidolon-builder .form-footer button {
+  flex: 1;
+}
+
+.pathmuncher-eidolon-choices,
+.pathmuncher-eidolon-stats {
+  overflow-y: auto;
+  padding: 0.75rem;
+  min-height: 0;
+}
+
+.pathmuncher-eidolon-section {
+  margin-bottom: 0.75rem;
+}
+
+.pathmuncher-eidolon-item {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.25rem 0;
+}
+
+.pathmuncher-eidolon-item + .pathmuncher-eidolon-item {
+  border-top: 1px solid var(--color-border-light-2, var(--color-border));
+}
+
+.pathmuncher-eidolon-item-name {
+  font-weight: bold;
+  padding-top: 0.3rem;
+}
+
+.pathmuncher-eidolon-item-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pathmuncher-eidolon-item.boosts {
+  grid-template-columns: 9rem minmax(0, 1fr);
+}
+
+.pathmuncher-eidolon-item.boosts .pathmuncher-eidolon-item-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pathmuncher-eidolon-choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pathmuncher-eidolon-item.boosts .pathmuncher-eidolon-choice {
+  display: block;
+}
+
+.pathmuncher-eidolon-choice select {
+  width: 100%;
+}
+
+.pathmuncher-eidolon-stats {
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg-option, rgba(0, 0, 0, 0.05));
+  font-size: var(--font-size-13);
+}
+
+.pathmuncher-eidolon-stats header {
+  border-bottom: 2px solid currentColor;
+  margin-bottom: 0.35rem;
+}
+
+.pathmuncher-eidolon-level {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.pathmuncher-eidolon-stats h3 {
+  margin: 0;
+  border: none;
+}
+
+.pathmuncher-eidolon-stats p {
+  margin: 0.2rem 0;
+}
+
+.pathmuncher-eidolon-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.pathmuncher-eidolon-traits .tag {
+  padding: 0 0.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  text-transform: capitalize;
+}
+
+.pathmuncher-eidolon-attributes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.6rem;
+}
+
+.pathmuncher-eidolon-stats h4 {
+  margin: 0.25rem 0;
+  border: none;
+}
+
+.pathmuncher-eidolon-feats {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.pathmuncher-eidolon-feats li {
+  cursor: help;
+}
+
+.pathmuncher-eidolon-feat-level {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-12);
+}
+
+.pathmuncher-eidolon-note {
+  margin: 0;
   font-style: italic;
 }

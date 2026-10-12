@@ -130,7 +130,7 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - With re-use on, a choice answered last time isn't asked again; with it off, it is.
   - How ammunition is shared out is asked each time.
   - The importer's re-use box and notes button appear only once there is a last import.
-- `companions.test.js`: animal companions made with the PF2e Companion Compendia module
+- `companions.test.js`: animal companions and eidolons made with the PF2e Companion Compendia module
   (`BFFBuilder`), registered only in a world where that module is active.
   - A companion is a character with its animal, level, advancement feats and barding, linked to its
     master, made without prompts.
@@ -138,6 +138,15 @@ CDP_PORT=9222 FVTT_URL=http://127.0.0.1:30000 FVTT_USER=Gamemaster npm run test:
   - A companion goes to the character picked for it; only characters no other player owns, that are
     blank or made for a companion, are offered.
   - An animal the module doesn't have is reported, with no character made.
+  - A summoner's eidolon is a character with its type, class features and the eidolon versions of the
+    evolution feats. Every choice its items ask for is made without a prompt: the build's (Energy
+    Heart's damage type, an elemental's element) or a default listed in the import notes. A second
+    import keeps the choices and guesses nothing.
+  - The eidolon builder (`EidolonEditor`, `EidolonBuilderApp`): a preview with other choices leaves the
+    eidolon alone, a level's boosts are all different, and building writes the choices (the granted
+    boost becoming the one picked), which the next import keeps. The window updates its stat block as
+    a choice changes and builds; the importer opens it once the eidolon is made, and choices made in it
+    aren't listed to check.
 - `rename-targets.test.js`: every target in the rename tables (`src/data/features.js`,
   `equipment.js` and `spells.js`) is in the compendiums the importer searches. See
   [After a system update](#after-a-system-update).
