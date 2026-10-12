@@ -2,14 +2,60 @@
 
 /* ------------------------------------------------------------------ importer */
 
+/* every Pathmuncher window fits the screen, and what doesn't fit scrolls */
+.application.pathmuncher {
+  max-height: calc(100vh - 1rem);
+}
+
+.application.pathmuncher > .window-content {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* in a dialog, the content scrolls and the buttons stay below it */
+.application.dialog.pathmuncher > .window-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.application.dialog.pathmuncher .dialog-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.application.dialog.pathmuncher .dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.application.dialog.pathmuncher .form-footer {
+  flex: 0 0 auto;
+}
+
+/* the importer's form scrolls, and the import button below it stays in view */
+
 .pathmuncher-importer .window-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 0.75rem 1rem 0.5rem;
 }
 
 .pathmuncher-importer-body {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pathmuncher-importer .form-footer {
+  flex: 0 0 auto;
 }
 
 .pathmuncher-target {
@@ -609,10 +655,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  /* the choices scroll, so the buttons stay on screen however many there are */
-  max-height: calc(100vh - 12rem);
-  overflow-y: auto;
-  padding-right: 0.25rem;
 }
 
 .pathmuncher-unanswered-choices .hint {

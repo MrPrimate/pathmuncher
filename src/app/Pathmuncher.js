@@ -18,6 +18,7 @@ import { EquipmentBuilder } from "./EquipmentBuilder.js";
 import { EvaluationActor } from "./EvaluationActor.js";
 import { FeatureNames } from "./FeatureNames.js";
 import { ImportReport } from "./ImportReport.js";
+import { ImportReportDialog } from "./ImportReportDialog.js";
 import { ParsedEntry } from "./ParsedEntry.js";
 import { CompendiumQueries, Pf2eRules } from "./Pf2eRules.js";
 import { Seasoning } from "./Seasoning.js";
@@ -222,9 +223,11 @@ export class Pathmuncher {
     return this.report.getImportReport();
   }
 
-  /** See ImportReport.postImportCheck. */
+  /** Says how the import went, showing its notes if it has any (ImportReportDialog). */
   async postImportCheck() {
-    return this.report.postImportCheck();
+    const report = this.getImportReport();
+    logger.debug("Post import report", { report, focusPool: this.result.focusPool });
+    return ImportReportDialog.postImportCheck(report);
   }
 
   // ---------------------------------------------------------------- the rules engine and the import
@@ -320,11 +323,9 @@ export class Pathmuncher {
   // the pf2e system has no dual class variant, so only the primary class is imported
   #warnDualClass() {
     if (!this.source.dualClass) return;
-    logger.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`, {
-      class: this.source.class,
-      dualClass: this.source.dualClass,
-    });
-    ui.notifications.warn(`Imported character is dual class. Pathmuncher does not support dual class characters, please check the system macros`);
+    const message = game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Notifications.DualClass`);
+    logger.warn(message, { class: this.source.class, dualClass: this.source.dualClass });
+    ui.notifications.warn(message);
   }
 
   /** The core items a build names. If no compendium has one, the user can supply it (options.resolveMissingCore). */

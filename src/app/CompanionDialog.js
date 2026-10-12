@@ -1,5 +1,5 @@
 import CONSTANTS from "../constants.js";
-import { escape, tile } from "./ChoiceTiles.js";
+import { render } from "./Templates.js";
 
 const { DialogV2 } = foundry.applications.api;
 
@@ -16,12 +16,13 @@ export class CompanionDialog {
    * @returns {Promise<{create: true}|{actor: Actor}|null>}  null to leave the companion out
    */
   static async choose({ master, pet, name, candidates }) {
-    const tiles = [
-      tile({ name: "companion", value: "", label: format("New", { name }), icon: "fas fa-user-plus" }),
-      ...candidates.map((actor) => tile({ name: "companion", value: actor.id, label: actor.name, img: actor.img })),
-    ].join("");
-    const content = `<p class="hint">${escape(format("Content", { master: master.name, pet: pet.name ?? pet.animal }))}</p>
-      <div class="pathmuncher-tiles pathmuncher-companion-tiles">${tiles}</div>`;
+    const content = await render("companion", {
+      content: format("Content", { master: master.name, pet: pet.name ?? pet.animal }),
+      tiles: [
+        { name: "companion", value: "", label: format("New", { name }), icon: "fas fa-user-plus" },
+        ...candidates.map((actor) => ({ name: "companion", value: actor.id, label: actor.name, img: actor.img })),
+      ],
+    });
 
     return DialogV2.wait({
       window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.Companion.Title`, icon: "fas fa-paw" },

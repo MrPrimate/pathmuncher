@@ -6,7 +6,7 @@ import {
   deityFonts,
   deitySanctifications,
 } from "./DeityChoices.js";
-import { clip, escape, tile } from "./ChoiceTiles.js";
+import { clip, render } from "./Templates.js";
 
 const { DialogV2 } = foundry.applications.api;
 
@@ -79,8 +79,7 @@ function deityTooltip(deity) {
     [game.i18n.localize("PF2E.Item.Deity.Sanctification.Label"), sanctificationText(deity)],
     [game.i18n.localize("PF2E.Item.Deity.FavoredWeapons.Label"), (deity.system?.weapons ?? []).map(weaponLabel).join(", ")],
   ].filter(([, value]) => value);
-  return `<div class="pathmuncher-deity-tooltip"><strong>${escape(deity.name)}</strong>
-    <dl>${rows.map(([label, value]) => `<dt>${escape(label)}</dt><dd>${escape(value)}</dd>`).join("")}</dl></div>`;
+  return render("tooltip", { cssClass: "pathmuncher-deity-tooltip", title: deity.name, rows: rows.map(([label, value]) => ({ label, value })) });
 }
 
 /** What the conflicting choice is and why the deity does not allow it. */
@@ -94,116 +93,84 @@ function conflictText(conflict, deity) {
   }
 }
 
-/** The replacements the deity allows for a conflicting choice, as tiles. */
-function conflictOptions(conflict, { deity, choices, causes }) {
+/** The replacements the deity allows for a conflicting choice, as tiles (their tooltips rendered). */
+async function conflictOptions(conflict, { deity, choices, causes }) {
+  const tooltip = (title, text) => render("tooltip", { title, paragraphs: [text] });
   switch (conflict.kind) {
     case "domain": {
       // the build's other domains that the deity allows stay as they are
       const kept = new Set(choices.domains.map((d) => d.slug));
-      return deityDomains(deity, choices.alternateDomains)
-        .filter((slug) => !kept.has(slug) && !slug.endsWith("-apocryphal"))
-        .map((slug) => ({
-          value: slug,
-          label: domainLabel(slug),
-          icon: `fas ${DOMAIN_ICONS[slug] ?? "fa-circle-nodes"}`,
-          tooltip: `<strong>${escape(domainLabel(slug))}</strong><p>${escape(domainDescription(slug))}</p>`,
-          special: choiceSpecial("domain", slug),
-        }));
+      const slugs = deityDomains(deity, choices.alternateDomains).filter((slug) => !kept.has(slug) && !slug.endsWith("-apocryphal"));
+      return Promise.all(slugs.map(async (slug) => ({
+        value: slug,
+        label: domainLabel(slug),
+        icon: `fas ${DOMAIN_ICONS[slug] ?? "fa-circle-nodes"}`,
+        tooltip: await tooltip(domainLabel(slug), domainDescription(slug)),
+        special: choiceSpecial("domain", slug),
+      })));
     }
     case "font":
-      return deityFonts(deity).map((font) => ({
+      return Promise.all(deityFonts(deity).map(async (font) => ({
         value: font,
         label: fontLabel(font),
         img: FONT_IMAGES[font],
-        tooltip: `<p>${escape(local(`FontHint.${font}`))}</p>`,
+        tooltip: await tooltip(null, local(`FontHint.${font}`)),
         special: choiceSpecial("font", font),
-      }));
+      })));
     case "sanctification":
-      return deitySanctifications(deity).map((value) => ({
+      return Promise.all(deitySanctifications(deity).map(async (value) => ({
         value,
         label: sanctificationLabel(value),
         icon: SANCTIFICATION_ICONS[value],
-        tooltip: `<p>${escape(local(`SanctificationHint.${value}`))}</p>`,
+        tooltip: await tooltip(null, local(`SanctificationHint.${value}`)),
         special: choiceSpecial("sanctification", value),
-      }));
+      })));
     case "cause":
-      return causes.map((cause) => ({
+      return Promise.all(causes.map(async (cause) => ({
         value: cause.uuid,
         label: cause.name,
         img: cause.img,
-        tooltip: `<strong>${escape(cause.name)}</strong><p>${escape(clip(cause.description))}</p>`,
+        tooltip: await tooltip(cause.name, clip(cause.description)),
         special: choiceSpecial("cause", cause.value, cause.name),
-      }));
+      })));
     default:
       return [];
   }
 }
 
-function deityTile(deity) {
-  return tile({
+/** A deity as a tile, its tooltip saying what it allows. */
+async function deityTile(deity) {
+  return {
     name: "deity",
     value: deity.uuid,
     label: deity.name,
     img: deity.img,
-    tooltip: deityTooltip(deity),
-    data: `data-search="${escape(deity.name.toLowerCase())}"`,
-  });
+    tooltip: await deityTooltip(deity),
+    search: deity.name.toLowerCase(),
+  };
 }
 
-function renderContent(conflict) {
+/** The dialog's content: the conflicts, then the two ways of settling them. */
+async function renderContent(conflict) {
   const { deity, conflicts, deities } = conflict;
-  const picks = conflicts.map((c, index) => {
-    const options = conflictOptions(c, conflict);
-    const tiles = options.length
-      ? options.map((option) => tile({ ...option, name: `pick-${index}` })).join("")
-      : `<p class="hint">${escape(local("NoOptions"))}</p>`;
+  const picks = await Promise.all(conflicts.map(async (c, index) => {
+    const options = await conflictOptions(c, conflict);
     const choice = { cause: c.name, sanctification: sanctificationLabel(c.value) }[c.kind] ?? c.special;
-    return `<fieldset class="pathmuncher-deity-pick" data-special="${escape(c.special)}" data-index="${index}">
-      <legend>${escape(format(`Replace.${c.kind}`, { choice }))}</legend>
-      <div class="pathmuncher-tiles">${tiles}</div>
-    </fieldset>`;
-  }).join("");
-
-  const deityTiles = deities.map(deityTile).join("");
-
-  return `<div class="pathmuncher-deity-conflict">
-    <header class="pathmuncher-deity-current" data-tooltip-html="${escape(deityTooltip(deity))}">
-      <img src="${escape(deity.img)}" alt="">
-      <div>
-        <span class="pathmuncher-deity-label">${escape(local("BuiltWith"))}</span>
-        <span class="pathmuncher-deity-name">${escape(deity.name)}</span>
-      </div>
-    </header>
-    <p class="hint">${escape(local("Content"))}</p>
-    <ul class="pathmuncher-deity-conflicts">
-      ${conflicts.map((c) => `<li><i class="fas fa-triangle-exclamation" inert></i> ${escape(conflictText(c, deity))}</li>`).join("")}
-    </ul>
-
-    <section class="pathmuncher-deity-route" data-route="choices">
-      <label class="pathmuncher-deity-route-header">
-        <input type="radio" name="route" value="choices">
-        <span><strong>${escape(format("KeepDeity", { deity: deity.name }))}</strong>
-        <span class="hint">${escape(local("KeepDeityHint"))}</span></span>
-      </label>
-      ${picks}
-    </section>
-
-    <section class="pathmuncher-deity-route" data-route="deity">
-      <label class="pathmuncher-deity-route-header">
-        <input type="radio" name="route" value="deity">
-        <span><strong>${escape(local("KeepChoices"))}</strong>
-        <span class="hint">${escape(format("KeepChoicesHint", { count: deities.length }))}</span></span>
-      </label>
-      <input type="search" class="pathmuncher-deity-search" placeholder="${escape(local("Search"))}" aria-label="${escape(local("Search"))}"
-        ${deities.length ? "" : "hidden"}>
-      <div class="pathmuncher-tiles pathmuncher-deity-tiles">${deityTiles}</div>
-      <p class="hint pathmuncher-deity-none" ${deities.length ? "hidden" : ""}>${escape(local("NoDeities"))}</p>
-      <button type="button" class="pathmuncher-drop-zone">
-        <i class="fas fa-arrow-down-to-bracket" inert></i>
-        <span>${escape(local("Drop"))}</span>
-      </button>
-    </section>
-  </div>`;
+    return {
+      special: c.special,
+      index,
+      legend: format(`Replace.${c.kind}`, { choice }),
+      options: options.map((option) => ({ ...option, name: `pick-${index}` })),
+    };
+  }));
+  return render("deityConflict", {
+    deity: { name: deity.name, img: deity.img, tooltip: await deityTooltip(deity) },
+    conflicts: conflicts.map((c) => conflictText(c, deity)),
+    keepDeity: format("KeepDeity", { deity: deity.name }),
+    keepChoicesHint: format("KeepChoicesHint", { count: deities.length }),
+    picks,
+    deities: await Promise.all(deities.map(deityTile)),
+  });
 }
 
 export class DeityConflictDialog {
@@ -299,7 +266,7 @@ export class DeityConflictDialog {
         const tiles = form.querySelector(".pathmuncher-deity-tiles");
         let input = [...tiles.querySelectorAll('input[name="deity"]')].find((i) => i.value === item.uuid);
         if (!input) {
-          tiles.insertAdjacentHTML("afterbegin", deityTile({ name: item.name, img: item.img, uuid: item.uuid, system: item.system }));
+          tiles.insertAdjacentHTML("afterbegin", await render("choiceTile", await deityTile({ name: item.name, img: item.img, uuid: item.uuid, system: item.system })));
           input = tiles.querySelector('input[name="deity"]');
           form.querySelector(".pathmuncher-deity-none").hidden = true;
         }
@@ -316,7 +283,7 @@ export class DeityConflictDialog {
       window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.DeityConflict.Title`, icon: "fas fa-place-of-worship" },
       position: { width: 640 },
       classes: ["pathmuncher", "pathmuncher-deity-conflict-dialog"],
-      content: renderContent(conflict),
+      content: await renderContent(conflict),
       rejectClose: false,
       render: onRender,
       buttons: [

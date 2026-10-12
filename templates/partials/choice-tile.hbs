@@ -1,0 +1,5 @@
+<label class="pathmuncher-tile" {{#if tooltip}}data-tooltip-html="{{tooltip}}"{{/if}} {{#if search}}data-search="{{search}}"{{/if}} {{#if uuid}}data-uuid="{{uuid}}"{{/if}}>
+  <input type="radio" name="{{name}}" value="{{value}}" {{#if special}}data-special="{{special}}"{{/if}}>
+  {{#if img}}<img src="{{img}}" alt="" loading="lazy">{{else}}<i class="{{icon}}" inert></i>{{/if}}
+  <span>{{label}}</span>
+</label>

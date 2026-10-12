@@ -7,8 +7,9 @@ import { CompanionDialog } from "./CompanionDialog.js";
 import { EidolonBuilderApp } from "./EidolonBuilderApp.js";
 import { DeityConflictDialog } from "./DeityConflictDialog.js";
 import { ImportMemory } from "./ImportMemory.js";
-import { ImportReport } from "./ImportReport.js";
+import { ImportReportDialog } from "./ImportReportDialog.js";
 import { Pathmuncher } from "./Pathmuncher.js";
+import { render } from "./Templates.js";
 import { PetShop } from "./PetShop.js";
 import { UnansweredChoicesDialog } from "./UnansweredChoicesDialog.js";
 
@@ -136,7 +137,7 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
 
   static async #onShowLastReport() {
     const memory = new ImportMemory(this.actor);
-    if (memory.lastReport) await ImportReport.show(memory.lastReport, { importedAt: memory.lastImportedAt });
+    if (memory.lastReport) await ImportReportDialog.show(memory.lastReport, { importedAt: memory.lastImportedAt });
   }
 
   static #onSetSource(_event, target) {
@@ -327,17 +328,9 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
    * Asks which hand-added items to keep. Resolves to the ids to keep, or null if the user cancels.
    */
   static async #chooseItemsToKeep(items) {
-    const escape = foundry.utils.escapeHTML;
-    const rows = items
-      .map((item) => `<label class="pathmuncher-keep-item">
-        <input type="checkbox" name="keep" value="${item.id}" checked>
-        <img src="${escape(item.img)}" alt="">
-        <span class="pathmuncher-keep-name">${escape(item.name)}</span>
-        <span class="pathmuncher-keep-type">${escape(game.i18n.localize(`TYPES.Item.${item.type}`))}</span>
-      </label>`)
-      .join("");
-    const content = `<p class="hint">${game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Content`)}</p>
-      <div class="pathmuncher-keep-items">${rows}</div>`;
+    const content = await render("keepItems", {
+      items: items.map((item) => ({ id: item.id, img: item.img, name: item.name, type: game.i18n.localize(`TYPES.Item.${item.type}`) })),
+    });
 
     const result = await DialogV2.wait({
       window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.KeepItems.Title`, icon: "fas fa-hand-holding" },
@@ -369,23 +362,16 @@ export class PathmuncherImporter extends HandlebarsApplicationMixin(ApplicationV
    * Anything left empty is skipped and reported as before.
    */
   static async #chooseMissingCore(missing) {
-    const escape = foundry.utils.escapeHTML;
-    const local = (key) => game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.${key}`);
     const chosen = {};
-    const rows = missing
-      .map((m) => `<div class="pathmuncher-missing-core-row">
-        <span class="pathmuncher-missing-core-name">
-          <span class="pathmuncher-missing-core-type">${escape(game.i18n.localize(`TYPES.Item.${m.itemType}`))}</span>
-          ${escape(m.name)}
-        </span>
-        <button type="button" class="pathmuncher-drop-zone" data-target="${m.target}">
-          <i class="fas fa-arrow-down-to-bracket" inert></i>
-          <span>${escape(game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Drop`, { type: game.i18n.localize(`TYPES.Item.${m.itemType}`) }))}</span>
-        </button>
-      </div>`)
-      .join("");
-    const content = `<p class="hint">${local("Content")}</p>
-      <div class="pathmuncher-missing-core">${rows}</div>`;
+    const typeName = (m) => game.i18n.localize(`TYPES.Item.${m.itemType}`);
+    const content = await render("missingCore", {
+      missing: missing.map((m) => ({
+        target: m.target,
+        name: m.name,
+        type: typeName(m),
+        drop: game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.MissingCore.Drop`, { type: typeName(m) }),
+      })),
+    });
 
     // fills a drop zone with the item dropped on it, if it is the right type
     const onDrop = async (event, zone, lookup) => {

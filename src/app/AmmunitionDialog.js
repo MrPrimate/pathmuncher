@@ -1,5 +1,5 @@
 import CONSTANTS from "../constants.js";
-import { escape } from "./ChoiceTiles.js";
+import { render } from "./Templates.js";
 
 const { DialogV2 } = foundry.applications.api;
 
@@ -11,51 +11,6 @@ const ADDED_QUANTITY = 10;
 
 const quantity = (stack) => Math.max(0, Math.floor(Number(stack.querySelector("input").value) || 0));
 
-/** A stack of ammunition: the build's entry it comes from (none if added here), its name and how many. */
-const stackHtml = ({ source = "", name, qty }) => `
-  <div class="pathmuncher-ammo-stack" draggable="true" data-source="${escape(source)}">
-    <i class="fas fa-grip-vertical" inert></i>
-    <span class="pathmuncher-ammo-name">${escape(name)}</span>
-    <input type="number" min="1" step="1" value="${escape(qty)}" aria-label="${escape(local("Quantity"))}">
-    <button type="button" data-ammo-action="split" data-tooltip="${escape(local("Split"))}" aria-label="${escape(local("Split"))}">
-      <i class="fas fa-scissors" inert></i>
-    </button>
-    <button type="button" data-ammo-action="remove" data-tooltip="${escape(local("Remove"))}" aria-label="${escape(local("Remove"))}">
-      <i class="fas fa-trash" inert></i>
-    </button>
-  </div>`;
-
-/** Where a stack can go: a weapon's ammunition, or the stacks not given to any (target ""). */
-const zoneHtml = ({ target = "", header, stacks = "" }) => `
-  <section class="pathmuncher-ammo-zone" data-target="${escape(target)}">
-    <header>${header}</header>
-    <div class="pathmuncher-ammo-stacks" data-empty="${escape(local("Drop"))}">${stacks}</div>
-  </section>`;
-
-function renderContent({ stacks, targets }) {
-  const unassigned = zoneHtml({
-    header: `<i class="fas fa-box-open" inert></i><strong>${escape(local("Unassigned"))}</strong>`,
-    stacks: stacks.map((s) => stackHtml({ source: s.id, name: s.name, qty: s.qty })).join(""),
-  });
-  const weapons = targets.map((target) => zoneHtml({
-    target: target.id,
-    header: `<img src="${escape(target.weapons[0]?.img ?? target.img)}" alt="">
-      <span class="pathmuncher-ammo-target">
-        <strong>${escape(target.weapons.map((w) => w.name).join(", "))}</strong>
-        <span class="hint">${escape(format("Takes", { ammo: target.name }))}</span>
-      </span>
-      <span class="pathmuncher-ammo-total"></span>
-      <button type="button" data-ammo-action="add" data-tooltip="${escape(local("Add"))}" aria-label="${escape(local("Add"))}">
-        <i class="fas fa-plus" inert></i>
-      </button>`,
-  })).join("");
-  return `<div class="pathmuncher-ammunition">
-    <p class="hint">${escape(local("Content"))}</p>
-    ${unassigned}
-    <div class="pathmuncher-ammo-weapons">${weapons}</div>
-  </div>`;
-}
-
 export class AmmunitionDialog {
 
   /**
@@ -66,6 +21,8 @@ export class AmmunitionDialog {
    * one added here), target, qty }] for the stacks given to a weapon, or null if the user cancels.
    */
   static async choose({ stacks, targets }) {
+    // a stack added by hand, ready to add at once
+    const addedStack = await render("ammoStack", { source: "", name: local("Added"), qty: ADDED_QUANTITY });
     const onRender = (_event, dialog) => {
       const root = dialog.element.querySelector(".pathmuncher-ammunition");
       let dragged = null;
@@ -98,8 +55,7 @@ export class AmmunitionDialog {
             stack.remove();
             break;
           case "add":
-            button.closest(".pathmuncher-ammo-zone").querySelector(".pathmuncher-ammo-stacks")
-              .insertAdjacentHTML("beforeend", stackHtml({ name: local("Added"), qty: ADDED_QUANTITY }));
+            button.closest(".pathmuncher-ammo-zone").querySelector(".pathmuncher-ammo-stacks").insertAdjacentHTML("beforeend", addedStack);
             break;
           // no default
         }
@@ -156,7 +112,15 @@ export class AmmunitionDialog {
       window: { title: `${CONSTANTS.FLAG_NAME}.Dialogs.Ammunition.Title`, icon: "fas fa-person-rifle" },
       position: { width: 640 },
       classes: ["pathmuncher", "pathmuncher-ammunition-dialog"],
-      content: renderContent({ stacks, targets }),
+      content: await render("ammunition", {
+        stacks: stacks.map((s) => ({ source: s.id, name: s.name, qty: s.qty })),
+        targets: targets.map((target) => ({
+          id: target.id,
+          img: target.weapons[0]?.img ?? target.img,
+          weapons: target.weapons.map((w) => w.name).join(", "),
+          takes: format("Takes", { ammo: target.name }),
+        })),
+      }),
       rejectClose: false,
       render: onRender,
       buttons: [

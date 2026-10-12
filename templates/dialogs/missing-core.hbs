@@ -1,0 +1,15 @@
+<p class="hint">{{localize "pathmuncher.Dialogs.MissingCore.Content"}}</p>
+<div class="pathmuncher-missing-core">
+  {{#each missing}}
+  <div class="pathmuncher-missing-core-row">
+    <span class="pathmuncher-missing-core-name">
+      <span class="pathmuncher-missing-core-type">{{type}}</span>
+      {{name}}
+    </span>
+    <button type="button" class="pathmuncher-drop-zone" data-target="{{target}}">
+      <i class="fas fa-arrow-down-to-bracket" inert></i>
+      <span>{{drop}}</span>
+    </button>
+  </div>
+  {{/each}}
+</div>

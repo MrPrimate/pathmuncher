@@ -1,0 +1,11 @@
+<p class="hint">{{localize "pathmuncher.Dialogs.KeepItems.Content"}}</p>
+<div class="pathmuncher-keep-items">
+  {{#each items}}
+  <label class="pathmuncher-keep-item">
+    <input type="checkbox" name="keep" value="{{id}}" checked>
+    <img src="{{img}}" alt="">
+    <span class="pathmuncher-keep-name">{{name}}</span>
+    <span class="pathmuncher-keep-type">{{type}}</span>
+  </label>
+  {{/each}}
+</div>

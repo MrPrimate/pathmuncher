@@ -1,0 +1,23 @@
+<div class="pathmuncher-unanswered-choices">
+  <p class="hint">{{localize "pathmuncher.Dialogs.UnansweredChoices.Content"}}</p>
+  {{#each entries}}
+  <fieldset class="pathmuncher-unanswered" data-id="{{id}}">
+    <legend>
+      <img src="{{img}}" alt="">
+      <span>{{name}}</span>
+      <button type="button" class="pathmuncher-choice-clear" data-tooltip="{{localize "pathmuncher.Dialogs.UnansweredChoices.Clear"}}" aria-label="{{localize "pathmuncher.Dialogs.UnansweredChoices.Clear"}}" hidden>
+        <i class="fas fa-rotate-left" inert></i>
+      </button>
+    </legend>
+    {{#if details}}
+    <div class="pathmuncher-choice-meta"><span class="pathmuncher-choice-kind">{{details.kind}}</span>{{#each details.traits}}<span class="pathmuncher-choice-trait">{{this}}</span>{{/each}}</div>
+    {{#if details.slot}}<p class="hint pathmuncher-choice-note">{{details.slot}}</p>{{/if}}
+    {{#if details.description}}<div class="pathmuncher-choice-description">{{{details.description}}}</div>{{/if}}
+    {{/if}}
+    {{#each notes}}<p class="hint pathmuncher-choice-note">{{this}}</p>{{/each}}
+    {{#if prompt}}<p class="pathmuncher-choice-prompt">{{prompt}}</p>{{/if}}
+    {{#if filter}}<input type="search" class="pathmuncher-choice-search" placeholder="{{localize "pathmuncher.Dialogs.UnansweredChoices.Search"}}" aria-label="{{localize "pathmuncher.Dialogs.UnansweredChoices.Search"}}">{{/if}}
+    <div class="pathmuncher-tiles pathmuncher-choice-tiles">{{#each tiles}}{{> "pathmuncher.choice-tile"}}{{/each}}</div>
+  </fieldset>
+  {{/each}}
+</div>

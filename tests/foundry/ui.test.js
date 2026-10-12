@@ -5,6 +5,18 @@
   const api = () => game.modules.get("pathmuncher").api;
   const fixture = (name) => foundry.utils.deepClone(pmt.fixtures[name]);
 
+  test("ui: the importer fits the screen, its form scrolling with the import button below it", async (t) => {
+    const actor = await pmt.actor(t, "ui fits");
+    const app = await pmt.openImporter(actor);
+    t.cleanup(() => app.close());
+    const style = (selector) => getComputedStyle(selector ? app.element.querySelector(selector) : app.element);
+    t.ok(style().maxHeight !== "none", `the window is no taller than the screen: ${style().maxHeight}`);
+    t.equal(style(".pathmuncher-importer-body").overflowY, "auto", "the form scrolls");
+    const body = app.element.querySelector(".pathmuncher-importer-body").getBoundingClientRect();
+    const button = app.element.querySelector("button[type='submit']").getBoundingClientRect();
+    t.ok(button.top >= body.bottom - 1, "the import button is below the form, not in it");
+  });
+
   test("ui: the character sheet has a Pathmuncher button that opens the importer once", async (t) => {
     const actor = await pmt.actor(t, "sheet button");
     await actor.sheet.render(true);

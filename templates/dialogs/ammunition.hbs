@@ -1,0 +1,25 @@
+<div class="pathmuncher-ammunition">
+  <p class="hint">{{localize "pathmuncher.Dialogs.Ammunition.Content"}}</p>
+  <section class="pathmuncher-ammo-zone" data-target="">
+    <header><i class="fas fa-box-open" inert></i><strong>{{localize "pathmuncher.Dialogs.Ammunition.Unassigned"}}</strong></header>
+    <div class="pathmuncher-ammo-stacks" data-empty="{{localize "pathmuncher.Dialogs.Ammunition.Drop"}}">{{#each stacks}}{{> "pathmuncher.ammo-stack"}}{{/each}}</div>
+  </section>
+  <div class="pathmuncher-ammo-weapons">
+    {{#each targets}}
+    <section class="pathmuncher-ammo-zone" data-target="{{id}}">
+      <header>
+        <img src="{{img}}" alt="">
+        <span class="pathmuncher-ammo-target">
+          <strong>{{weapons}}</strong>
+          <span class="hint">{{takes}}</span>
+        </span>
+        <span class="pathmuncher-ammo-total"></span>
+        <button type="button" data-ammo-action="add" data-tooltip="{{localize "pathmuncher.Dialogs.Ammunition.Add"}}" aria-label="{{localize "pathmuncher.Dialogs.Ammunition.Add"}}">
+          <i class="fas fa-plus" inert></i>
+        </button>
+      </header>
+      <div class="pathmuncher-ammo-stacks" data-empty="{{localize "pathmuncher.Dialogs.Ammunition.Drop"}}"></div>
+    </section>
+    {{/each}}
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<div class="pathmuncher-ammo-stack" draggable="true" data-source="{{source}}">
+  <i class="fas fa-grip-vertical" inert></i>
+  <span class="pathmuncher-ammo-name">{{name}}</span>
+  <input type="number" min="1" step="1" value="{{qty}}" aria-label="{{localize "pathmuncher.Dialogs.Ammunition.Quantity"}}">
+  <button type="button" data-ammo-action="split" data-tooltip="{{localize "pathmuncher.Dialogs.Ammunition.Split"}}" aria-label="{{localize "pathmuncher.Dialogs.Ammunition.Split"}}">
+    <i class="fas fa-scissors" inert></i>
+  </button>
+  <button type="button" data-ammo-action="remove" data-tooltip="{{localize "pathmuncher.Dialogs.Ammunition.Remove"}}" aria-label="{{localize "pathmuncher.Dialogs.Ammunition.Remove"}}">
+    <i class="fas fa-trash" inert></i>
+  </button>
+</div>

@@ -1,4 +1,5 @@
 import { Pf2eRules } from "./app/Pf2eRules.js";
+import { registerTemplates } from "./app/Templates.js";
 import { registerAPI } from "./hooks/api.js";
 import { registerSettings, processActiveGM } from "./hooks/settings.js";
 import { registerSheetButton } from "./hooks/sheets.js";
@@ -6,6 +7,7 @@ import utils from "./utils.js";
 
 Hooks.once("init", () => {
   registerSettings();
+  registerTemplates();
 });
 
 Hooks.once("ready", async () => {

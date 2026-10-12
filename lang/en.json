@@ -201,15 +201,35 @@
       "Report": {
         "Title": "Pathmuncher | Import notes",
         "Intro": "Pathmuncher could not match these to a Foundry item. They may be named differently in the compendiums, so try a manual search. Specials are Pathbuilder notes that may be a choice already made on another item, or need nothing in Foundry.",
-        "Described": "Part of another feature",
-        "DescribedHint": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
-        "Rules": "Rules to check",
-        "RulesHint": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
-        "Pets": "Pets not imported",
-        "PetsHint": "Pathmuncher imports familiars, and animal companions and a summoner's eidolon when the PF2e Companion Compendia module is active. Create these from the build by hand.",
-        "CompanionChoices": "Companion choices to check",
-        "CompanionChoicesHint": "Pathbuilder's export leaves out these choices for companions and eidolons, so the import made them. Change any that are wrong on the companion's items; the next import keeps them.",
-        "ImportedAt": "Imported {date}."
+        "ImportedAt": "Imported {date}.",
+        "Groups": {
+          "class": "Class",
+          "ancestry": "Ancestry",
+          "heritage": "Heritage",
+          "background": "Background",
+          "deity": "Deity",
+          "feat": "Feats",
+          "special": "Specials",
+          "described": "Part of another feature",
+          "equipment": "Equipment",
+          "weapon": "Weapons",
+          "armor": "Armor",
+          "spellcasting": "Spellcasting",
+          "spell": "Spells",
+          "ritual": "Rituals",
+          "formula": "Formulas",
+          "familiar": "Familiars",
+          "pet": "Pets not imported",
+          "companion": "Companions",
+          "companionChoice": "Companion choices to check",
+          "rule": "Rules to check"
+        },
+        "Hints": {
+          "described": "Pathbuilder lists these on their own. In Foundry they are a section of the feature shown: hover over a name to read it, or click the feature to open it.",
+          "rule": "Pathmuncher could not work out these items' choices or granted items from the build, so Foundry applied the rules itself. Check each item for anything it asked about or added. Where the build chose an option Foundry doesn't offer, the build's choice is shown in brackets.",
+          "pet": "Pathmuncher imports familiars, and animal companions and a summoner's eidolon when the PF2e Companion Compendia module is active. Create these from the build by hand.",
+          "companionChoice": "Pathbuilder's export leaves out these choices for companions and eidolons, so the import made them. Change any that are wrong on the companion's items; the next import keeps them."
+        }
       }
     },
     "Importer": {
@@ -271,7 +291,8 @@
     "Notifications": {
       "CreateActorPermission": "Pathmuncher requires the CREATE ACTOR permission for your user.",
       "CreateFolderError": "User {userName} lacks permission to create Folder {folderName}. Enable the setting or create it manually.",
-      "SystemChanged": "Pathmuncher cannot find parts of the system it uses to work out choices from a Pathbuilder build, possibly after an update to {version}. Imports will still run, but the system will ask for more choices. Check for a Pathmuncher update."
+      "SystemChanged": "Pathmuncher cannot find parts of the system it uses to work out choices from a Pathbuilder build, possibly after an update to {version}. Imports will still run, but the system will ask for more choices. Check for a Pathmuncher update.",
+      "DualClass": "This character is dual class. Foundry's Pathfinder 2e system has no dual class rules, so only the first class is imported: add the second class's features by hand."
     },
     "Labels": {
       "PreImportBackup": "pre-import backup",
@@ -299,7 +320,6 @@
       "FeatureRec": "Feature Reconciliation",
       "Familiar": "Familiar",
       "Familiars": "Familiars",
-      "Companions": "Companions",
       "Finished": "Finished",
       "Cancel": "Cancel",
       "Computing": "Computing",

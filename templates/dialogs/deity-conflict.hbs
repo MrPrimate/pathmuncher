@@ -1,0 +1,45 @@
+<div class="pathmuncher-deity-conflict">
+  <header class="pathmuncher-deity-current" data-tooltip-html="{{deity.tooltip}}">
+    <img src="{{deity.img}}" alt="">
+    <div>
+      <span class="pathmuncher-deity-label">{{localize "pathmuncher.Dialogs.DeityConflict.BuiltWith"}}</span>
+      <span class="pathmuncher-deity-name">{{deity.name}}</span>
+    </div>
+  </header>
+  <p class="hint">{{localize "pathmuncher.Dialogs.DeityConflict.Content"}}</p>
+  <ul class="pathmuncher-deity-conflicts">
+    {{#each conflicts}}<li><i class="fas fa-triangle-exclamation" inert></i> {{this}}</li>{{/each}}
+  </ul>
+
+  <section class="pathmuncher-deity-route" data-route="choices">
+    <label class="pathmuncher-deity-route-header">
+      <input type="radio" name="route" value="choices">
+      <span><strong>{{keepDeity}}</strong>
+      <span class="hint">{{localize "pathmuncher.Dialogs.DeityConflict.KeepDeityHint"}}</span></span>
+    </label>
+    {{#each picks}}
+    <fieldset class="pathmuncher-deity-pick" data-special="{{special}}" data-index="{{index}}">
+      <legend>{{legend}}</legend>
+      <div class="pathmuncher-tiles">
+        {{#each options}}{{> "pathmuncher.choice-tile"}}{{else}}<p class="hint">{{localize "pathmuncher.Dialogs.DeityConflict.NoOptions"}}</p>{{/each}}
+      </div>
+    </fieldset>
+    {{/each}}
+  </section>
+
+  <section class="pathmuncher-deity-route" data-route="deity">
+    <label class="pathmuncher-deity-route-header">
+      <input type="radio" name="route" value="deity">
+      <span><strong>{{localize "pathmuncher.Dialogs.DeityConflict.KeepChoices"}}</strong>
+      <span class="hint">{{keepChoicesHint}}</span></span>
+    </label>
+    <input type="search" class="pathmuncher-deity-search" placeholder="{{localize "pathmuncher.Dialogs.DeityConflict.Search"}}" aria-label="{{localize "pathmuncher.Dialogs.DeityConflict.Search"}}"
+      {{#unless deities.length}}hidden{{/unless}}>
+    <div class="pathmuncher-tiles pathmuncher-deity-tiles">{{#each deities}}{{> "pathmuncher.choice-tile"}}{{/each}}</div>
+    <p class="hint pathmuncher-deity-none" {{#if deities.length}}hidden{{/if}}>{{localize "pathmuncher.Dialogs.DeityConflict.NoDeities"}}</p>
+    <button type="button" class="pathmuncher-drop-zone">
+      <i class="fas fa-arrow-down-to-bracket" inert></i>
+      <span>{{localize "pathmuncher.Dialogs.DeityConflict.Drop"}}</span>
+    </button>
+  </section>
+</div>

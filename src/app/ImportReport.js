@@ -1,6 +1,5 @@
 /* eslint-disable no-continue */
 import { BAD_IGNORE_FEATURES, remasterTermNames } from "../data/features.js";
-import logger from "../logger.js";
 import { ParsedEntry } from "./ParsedEntry.js";
 import { Seasoning } from "./Seasoning.js";
 
@@ -117,9 +116,6 @@ export class ImportReport {
    * What the import could not match, by category, for the post-import report: an array of
    * { type, label, names } for the categories that have any, in the order they are shown.
    */
-  /** Report groups that are not a kind of item, with their own heading and hint (Dialogs.Report.<key>, <key>Hint). */
-  static REPORT_GROUPS = { described: "Described", rule: "Rules", pet: "Pets", companionChoice: "CompanionChoices" };
-
   getImportReport() {
     const bad = (type, option, filter = () => true) => (option === null || this.options[option]
       ? this.bad.filter((b) => b.type === type && filter(b)).map((b) => b.pbName)
@@ -154,18 +150,11 @@ export class ImportReport {
       ["companionChoice", bad("companionChoice", "addCompanions")],
       ["rule", bad("rule", null)],
     ];
-    const labels = {
-      class: "Class", ancestry: "Ancestry", heritage: "Heritage", background: "Background", deity: "Deity",
-      feat: "Feats", special: "Specials", equipment: "Equipment", weapon: "Weapons", armor: "Armor",
-      spellcasting: "Spellcasting", spell: "Spells", ritual: "Rituals", formula: "Formulas", familiar: "Familiars",
-      companion: "Companions",
-    };
     return groups
       .map(([type, names]) => ({
         type,
-        label: game.i18n.localize(ImportReport.REPORT_GROUPS[type]
-          ? `pathmuncher.Dialogs.Report.${ImportReport.REPORT_GROUPS[type]}`
-          : `pathmuncher.Labels.${labels[type]}`),
+        // each group's heading, and its hint if it has one (ImportReportDialog), are Dialogs.Report.Groups.<type> and Hints.<type>
+        label: game.i18n.localize(`pathmuncher.Dialogs.Report.Groups.${type}`),
         names: [...new Set(names)],
         ...(type === "described" && { origins: described }),
       }))
@@ -187,54 +176,6 @@ export class ImportReport {
       pets.push(notes.length > 0 ? `Eidolon (${notes.join(", ")})` : "Eidolon");
     }
     return pets;
-  }
-
-  async postImportCheck() {
-    const report = this.getImportReport();
-    logger.debug("Post import report", { report, focusPool: this.result.focusPool });
-
-    if (report.length === 0) {
-      ui.notifications.info(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedSuccess"));
-      return;
-    }
-
-    ui.notifications.warn(game.i18n.localize("pathmuncher.Dialogs.Pathmuncher.CompletedWithNotes"));
-    await ImportReport.show(report);
-  }
-
-  /**
-   * Shows import notes (getImportReport), from this import or kept from an earlier one (ImportMemory).
-   * importedAt, when given, says when the import was made.
-   */
-  static async show(report, { importedAt = null } = {}) {
-    const escape = foundry.utils.escapeHTML;
-    const { enrichHTML } = foundry.applications.ux.TextEditor.implementation;
-    const clip = (text, length = 400) => (text.length <= length ? text : `${text.slice(0, text.lastIndexOf(" ", length))} …`);
-    // specials another feature describes: a link to the feature, and each special's section on hover
-    const originList = async (origins) => (await Promise.all(origins.map(async (origin) => `<li class="pathmuncher-report-origin">
-        ${await enrichHTML(`@UUID[${origin.uuid}]{${origin.name}}`)}
-        <ul>${origin.specials.map((s) => `<li class="pathmuncher-report-described" data-tooltip="${escape(clip(s.text))}">${escape(s.name)}</li>`).join("")}</ul>
-      </li>`))).join("");
-    const hint = (group) => (ImportReport.REPORT_GROUPS[group.type]
-      ? `<p class="hint">${game.i18n.localize(`pathmuncher.Dialogs.Report.${ImportReport.REPORT_GROUPS[group.type]}Hint`)}</p>`
-      : "");
-    const groupBody = async (group) => (group.origins
-      ? `${hint(group)}<ul>${await originList(group.origins)}</ul>`
-      : `${hint(group)}<ul>${group.names.map((name) => `<li>${escape(name)}</li>`).join("")}</ul>`);
-    const sections = (await Promise.all(report.map(async (group) => `<section class="pathmuncher-report-group">
-        <h4>${escape(group.label)} <span class="pathmuncher-report-count">${group.names.length}</span></h4>
-        ${await groupBody(group)}
-      </section>`))).join("");
-    await foundry.applications.api.DialogV2.prompt({
-      window: { title: "pathmuncher.Dialogs.Report.Title", icon: "fas fa-clipboard-list" },
-      classes: ["pathmuncher", "pathmuncher-report"],
-      position: { width: 480 },
-      content: `${importedAt ? `<p class="hint">${escape(game.i18n.format("pathmuncher.Dialogs.Report.ImportedAt", { date: new Date(importedAt).toLocaleString() }))}</p>` : ""}
-        <p class="hint">${game.i18n.localize("pathmuncher.Dialogs.Report.Intro")}</p>
-        <div class="pathmuncher-report-groups">${sections}</div>`,
-      ok: { label: "pathmuncher.Labels.Finished", icon: "fas fa-check" },
-      rejectClose: false,
-    });
   }
 
 }

@@ -1,0 +1,22 @@
+{{#if importedAt}}<p class="hint">{{importedAt}}</p>{{/if}}
+<p class="hint">{{localize "pathmuncher.Dialogs.Report.Intro"}}</p>
+<div class="pathmuncher-report-groups">
+  {{#each groups}}
+  <section class="pathmuncher-report-group">
+    <h4>{{label}} <span class="pathmuncher-report-count">{{count}}</span></h4>
+    {{#if hint}}<p class="hint">{{hint}}</p>{{/if}}
+    <ul>
+      {{#if origins}}
+      {{#each origins}}
+      <li class="pathmuncher-report-origin">
+        {{{link}}}
+        <ul>{{#each specials}}<li class="pathmuncher-report-described" data-tooltip="{{text}}">{{name}}</li>{{/each}}</ul>
+      </li>
+      {{/each}}
+      {{else}}
+      {{#each names}}<li>{{this}}</li>{{/each}}
+      {{/if}}
+    </ul>
+  </section>
+  {{/each}}
+</div>

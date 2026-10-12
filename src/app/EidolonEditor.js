@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
-import { clip } from "./ChoiceTiles.js";
 import { Seasoning } from "./Seasoning.js";
+import { clip } from "./Templates.js";
 
 /**
  * The choices an eidolon's items make (PF2e Companion Compendia), and what the eidolon would be with
