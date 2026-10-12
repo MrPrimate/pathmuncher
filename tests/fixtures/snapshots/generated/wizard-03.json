@@ -116,11 +116,18 @@
     "spell: Appeal to Authority [in Arcane Focus Tradition; rank 1]",
     "spell: Bilocation [in Wizard; rank 9]",
     "spell: Blazing Dive [in Wizard; rank 3]",
+    "spell: Blood Vendetta [in Wizard; rank 2]",
     "spell: Cataclysm [in Wizard; rank 10]",
+    "spell: Command [in Wizard; rank 1]",
+    "spell: Confusion [in Wizard; rank 4]",
+    "spell: Contingency [in Wizard; rank 7]",
+    "spell: Daze [in Wizard; rank 0]",
     "spell: Detect Magic [in Caster Arcane Sense; rank 0]",
     "spell: Disappearance [in Wizard; rank 8]",
+    "spell: Dream Council [in Wizard; rank 8]",
     "spell: Eclipse Burst [in Wizard; rank 7]",
     "spell: Embed Message [in Wizard; rank 2]",
+    "spell: Enthrall [in Wizard; rank 3]",
     "spell: Explosive Barrage [in Wizard; rank 6]",
     "spell: Fear the Sun [in Wizard; rank 2]",
     "spell: Final Sacrifice [in Wizard; rank 2]",
@@ -135,12 +142,15 @@
     "spell: Message [in Wizard; rank 0]",
     "spell: Mountain Resilience [in Wizard; rank 4]",
     "spell: Musical Accompaniment [in Wizard; rank 0]",
+    "spell: Never Mind [in Wizard; rank 6]",
     "spell: Quicken Time [in Wizard; rank 5]",
     "spell: Roar of Freedom [in Wizard; rank 8]",
     "spell: Skeleton Army [in Wizard; rank 6]",
     "spell: Stars of Another Sky [in Wizard; rank 8]",
+    "spell: Subconscious Suggestion [in Wizard; rank 5]",
     "spell: Summon Construct [in Wizard; rank 1]",
     "spell: Tailwind [in Wizard; rank 1]",
+    "spell: Telepathic Demand [in Wizard; rank 9]",
     "spell: Time Pocket [in Wizard; rank 3]",
     "spell: Time Sense [in Wizard; rank 0]",
     "spell: True Target [in Wizard; rank 7]",
@@ -159,7 +169,7 @@
   "spellcasting": [
     "Arcane Focus Tradition [arcane; focus; int; proficiency 4]",
     "Caster Arcane Sense [arcane; prepared; cha; proficiency 4] rank 0: 1 [Detect Magic]",
-    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Musical Accompaniment, Message, Time Sense, Light, Warp Step, -] | rank 1: 4 [Summon Construct, Invisible Item, Tailwind, -] | rank 2: 4 [Final Sacrifice, Fear the Sun, Embed Message, -] | rank 3: 4 [Blazing Dive, Time Pocket, Inertia Lock, -] | rank 4: 4 [Mountain Resilience, Living Terrain, Wall of Fire, -] | rank 5: 4 [Quicken Time, Horizon's Veil, Wall of Ice, -] | rank 6: 4 [Skeleton Army, Vibrant Pattern, Explosive Barrage, -] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, -] | rank 8: 4 [Stars of Another Sky, Roar of Freedom, Disappearance, -] | rank 9: 4 [Bilocation, Incarnate Draconic Legion, Foresight, -] | rank 10: 1 [Cataclysm]"
+    "Wizard [arcane; prepared; int; proficiency 4] rank 0: 6 [Musical Accompaniment, Message, Time Sense, Light, Warp Step, Daze] | rank 1: 4 [Summon Construct, Invisible Item, Tailwind, Command] | rank 2: 4 [Final Sacrifice, Fear the Sun, Embed Message, Blood Vendetta] | rank 3: 4 [Blazing Dive, Time Pocket, Inertia Lock, Enthrall] | rank 4: 4 [Mountain Resilience, Living Terrain, Wall of Fire, Confusion] | rank 5: 4 [Quicken Time, Horizon's Veil, Wall of Ice, Subconscious Suggestion] | rank 6: 4 [Skeleton Army, Vibrant Pattern, Explosive Barrage, Never Mind] | rank 7: 4 [True Target, Eclipse Burst, Infinitesimal Collapse Field, Contingency] | rank 8: 4 [Stars of Another Sky, Roar of Freedom, Disappearance, Dream Council] | rank 9: 4 [Bilocation, Incarnate Draconic Legion, Foresight, Telepathic Demand] | rank 10: 1 [Cataclysm]"
   ],
   "report": {
     "special": [

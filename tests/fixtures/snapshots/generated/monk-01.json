@@ -125,13 +125,7 @@
     "Adamantine Mantra [primal; prepared; cha; proficiency 1] rank 5: 1 [Blessing of Defiance]",
     "Transcend the Azimuth [primal; prepared; cha; proficiency 1] rank 7: 1 [Cosmic Form]"
   ],
-  "report": {
-    "special": [
-      "Reflex"
-    ]
-  },
+  "report": {},
   "described": [],
-  "prompts": [
-    "Third Path to Perfection: Fortitude"
-  ]
+  "prompts": []
 }

@@ -37,17 +37,22 @@ get two builds.
 - Choices that depend on a deity follow pf2e's deity data: a cleric's font, domains, favored weapon
   and sanctification, and a champion's cause (an unholy cause takes Abadar). Pathbuilder offers every
   option for each and checks none of them.
+- Other choices Pathbuilder does not check follow the rules too: a commander's tactics are of the
+  tier each slot allows (basic for Tactics, then expert, master and legendary for the Tactician
+  features), and a monk's Third Path to Perfection takes a save an earlier path chose.
 - Skill choices of feats (Assurance, Automatic Knowledge) take a skill the build is trained in.
 - Spells fill every slot, repertoire and innate choice, from common spells of the right tradition and
   rank. An animist's apparitions are chosen and give it its apparition spells. Most spellbook
   casters (wizard, witch, magus, necromancer) export their spells as `prepared` with an empty
-  spellbook (`spells`), which Pathbuilder allows. Seven have a spellbook and other kinds of
-  preparation:
+  spellbook (`spells`), which Pathbuilder allows. A wizard that prepares spells prepares one of
+  its school's curriculum spells in each school slot (wizard-12's school has no 9th-rank curriculum
+  spell, so that slot is empty; wizard-15's school has no curriculum). Seven have a spellbook and
+  other kinds of preparation:
 
   | Build | Spellbook and preparations |
   | --- | --- |
-  | wizard-01 | the prepared spells and two more per rank; a curriculum spell in each school slot |
-  | wizard-04 | the same, with a spell prepared twice at rank 3 and that spell heightened into a rank 5 slot |
+  | wizard-01 | the prepared spells and two more per rank |
+  | wizard-04 | the same, with a spell prepared twice at rank 3 and that spell heightened into a rank 5 slot; the curriculum spells are in the spellbook |
   | wizard-08 | a spellbook and nothing prepared |
   | witch-02, witch-05 | the familiar's spells: the prepared ones and two more per rank (witch-05 prepares one twice) |
   | magus-02 | the prepared spells and two more per rank |

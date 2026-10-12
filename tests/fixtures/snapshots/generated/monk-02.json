@@ -116,13 +116,7 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {
-    "special": [
-      "Fortitude"
-    ]
-  },
+  "report": {},
   "described": [],
-  "prompts": [
-    "Third Path to Perfection: Reflex"
-  ]
+  "prompts": []
 }
