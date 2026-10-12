@@ -10,8 +10,9 @@ function canImport(actor) {
   return !utils.setting("RESTRICT_TO_TRUSTED") || game.user.isTrusted;
 }
 
-function label() {
-  return utils.setting("DISPLAY_TITLE") ? CONSTANTS.MODULE_FULL_NAME : "";
+/** A header button's label, left empty (icon only) unless the Display Title setting is on. */
+function label(text) {
+  return utils.setting("DISPLAY_TITLE") ? text : "";
 }
 
 /**
@@ -23,15 +24,17 @@ export function registerSheetButton() {
     // an eidolon's choices, which Pathbuilder's export leaves out
     if (EidolonBuilderApp.isEidolon(sheet.actor)) {
       buttons.unshift({
-        label: game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.EidolonBuilder.Open`),
+        label: label(game.i18n.localize(`${CONSTANTS.FLAG_NAME}.Dialogs.EidolonBuilder.Open`)),
         class: "pathmuncher-eidolon",
         icon: "fas fa-dragon",
         onclick: () => EidolonBuilderApp.open(sheet.actor),
       });
+      // the eidolon builder replaces the importer button on an eidolon's sheet
+      return;
     }
     if (!canImport(sheet.actor)) return;
     buttons.unshift({
-      label: label(),
+      label: label(CONSTANTS.MODULE_FULL_NAME),
       class: "pathmuncher-open",
       icon: "fas fa-teeth-open",
       onclick: () => PathmuncherImporter.open(sheet.actor),
@@ -46,6 +49,7 @@ export function registerSheetButton() {
         action: "pathmuncherEidolon",
         onClick: () => EidolonBuilderApp.open(sheet.actor),
       });
+      return;
     }
     if (!canImport(sheet.actor)) return;
     controls.unshift({

@@ -177,9 +177,9 @@
   });
 
   test("processing: a skill choice the proficiencies cannot settle is still prompted", async (t) => {
-    // with both skills trained, which one the class granted is ambiguous
+    // with neither skill trained, nothing says which one the class granted
     const exportJson = fixture("477013-fighter4-archer");
-    exportJson.build.proficiencies.acrobatics = 2;
+    exportJson.build.proficiencies.athletics = 0;
     await pmt.useBuildVariants(t, exportJson.build);
     const prompts = pmt.answerPrompts(t, exportJson.build);
     const actor = await pmt.actor(t, "class skill ambiguous");
@@ -324,6 +324,55 @@
     t.equal(selection(actor, "Surki Weapon Familiarity", "weapon"), "battle-axe", "weapon");
     t.equal(selection(actor, "Grand Metamorphosis", "evolution"), "digging-wedge", "evolution");
   });
+  // imports a generated build, answering nothing, and returns the actor and the names of the items asked about
+  const importGenerated = async (t, name) => {
+    const exportJson = foundry.utils.deepClone(globalThis.__pmtGenerated[name]);
+    await pmt.useBuildVariants(t, exportJson.build);
+    const prompts = pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, `choices ${name}`);
+    const asked = [];
+    await pmt.importBuild(actor, exportJson, {
+      resolveUnansweredChoices: (unanswered) => {
+        asked.push(...unanswered.map((u) => u.item.name));
+        return {};
+      },
+    });
+    return { actor, asked, prompts: prompts.map((p) => p.item) };
+  };
+
+  test("processing: a choice that only trains a skill takes a skill the build has trained", async (t) => {
+    // the Fighter's class skill is Acrobatics or Athletics, and this build has both trained; the
+    // Mastermind's racket offers four skills to train, three of them trained. Any one gives the same character.
+    for (const [name, item, flag, offered] of [
+      ["fighter-01", "Fighter", "fighterSkill", ["acrobatics", "athletics"]],
+      ["rogue-02", "Mastermind", "mastermind", null],
+    ]) {
+      const { actor, asked, prompts } = await importGenerated(t, name);
+      t.deepEqual([...asked, ...prompts].filter((n) => n === item), [], `${name}: ${item} not asked`);
+      const picked = selection(actor, item, flag);
+      t.ok(picked && (!offered || offered.includes(picked)), `${name}: ${item} ${flag} is ${JSON.stringify(picked)}`);
+    }
+  });
+
+  test("processing: a choice Pathbuilder records by its option's label is answered", async (t) => {
+    // Boost Modulation's damage types are listed as specials named for the labels, "Ignition (Fire)"
+    const { actor, asked, prompts } = await importGenerated(t, "inventor-02");
+    t.deepEqual([...asked, ...prompts].filter((n) => n === "Boost Modulation"), [], "not asked");
+    const picked = actor.items.find((i) => i.name.startsWith("Boost Modulation"))?.flags.pf2e.rulesSelections ?? {};
+    t.deepEqual([picked.boostModulationFirst, picked.boostModulationSecond].sort(), ["acid", "fire"], "fire and acid");
+  });
+
+  test("processing: a special listed again after its feat can answer a choice", async (t) => {
+    // an automaton's Lesser Augmentation enhances its Magical Resistance feat, and Pathbuilder
+    // lists "Magical Resistance" again for it, after the ancestry feat of that name
+    const { actor, asked, prompts } = await importGenerated(t, "gunslinger-04");
+    t.deepEqual([...asked, ...prompts].filter((n) => n === "Lesser Augmentation"), [], "not asked");
+    const augmentation = actor.items.find((i) => i.name.startsWith("Lesser Augmentation"));
+    t.equal(augmentation?.name, "Lesser Augmentation (Magical Resistance)", "the enhancement chosen");
+    t.equal(augmentation?.flags.pf2e.rulesSelections.lesserAugmentation, "all", "its extra resistances");
+    t.ok(actor.items.some((i) => i.name.startsWith("Magical Resistance")), "the feat is still there");
+  });
+
   test("processing: each choice asked comes with what its item is and where the build took it", async (t) => {
     const exportJson = foundry.utils.deepClone(globalThis.__pmtGenerated["summoner-02"]);
     await pmt.useBuildVariants(t, exportJson.build);

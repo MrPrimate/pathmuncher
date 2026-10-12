@@ -98,7 +98,7 @@
     "feat: Light Armor Mastery [in Rogue; level 19]",
     "feat: Master Strike [in Rogue; level 19]",
     "feat: Master Tricks [in Rogue; level 13]",
-    "feat: Mastermind [level 1; granted by Rogue's Racket; mastermind=system.skills.religion.rank]",
+    "feat: Mastermind [level 1; granted by Rogue's Racket; mastermind=system.skills.arcana.rank]",
     "feat: Nimble Dodge [slot class-1; level 1; taken 1]",
     "feat: Perception Legend [in Rogue; level 13]",
     "feat: Perception Mastery [in Rogue; level 7]",
@@ -143,7 +143,6 @@
   "report": {},
   "described": [],
   "prompts": [
-    "Mastermind: Religion",
     "Terrain Stalker: Rubble (guessed)"
   ]
 }

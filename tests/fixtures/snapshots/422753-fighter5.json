@@ -63,7 +63,7 @@
     "ancestry: Kholo",
     "armor: Full Plate [qty 1; worn]",
     "background: Farmhand",
-    "class: Fighter [fighterSkill=athletics]",
+    "class: Fighter [fighterSkill=acrobatics]",
     "feat: Additional Lore [level 1; taken 1; granted by Kholo Lore]",
     "feat: Additional Lore [slot skill-2; level 1; taken 2]",
     "feat: Armor Proficiency (Heavy) [slot general-3; level 1; taken 3; armorProficiency=heavy]",
@@ -100,7 +100,6 @@
   "report": {},
   "described": [],
   "prompts": [
-    "Fighter: Athletics",
     "Barrow's Edge: Grant me a new item. (guessed)",
     "Exemplar Dedication: Strength (guessed)",
     "Fighter Weapon Mastery: Axe (guessed)"

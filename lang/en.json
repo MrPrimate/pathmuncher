@@ -4,7 +4,7 @@
     "Settings": {
       "DisplayTitle": {
         "Name": "Display name in actor header?",
-        "Hint": "If unchecked will only display icon for Pathmuncher in the actors header bar."
+        "Hint": "If unchecked will only display the icons for Pathmuncher and the eidolon builder in the actors header bar."
       },
       "Reset": {
         "Title": "Reset settings to default",
@@ -132,7 +132,7 @@
         "Build": "Build eidolon",
         "Built": "{name}'s choices are made.",
         "Failed": "The eidolon's choices could not be written: {error}",
-        "Open": "Eidolon choices",
+        "Open": "Build",
         "Sections": {
           "type": "Type",
           "attributes": "Attributes",

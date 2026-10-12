@@ -136,11 +136,6 @@
   ],
   "spellcasting": [],
   "report": {},
-  "described": [
-    "Offensive Boost (Saws (Slashing)): Ignition (Fire), Vitriol (Acid)"
-  ],
-  "prompts": [
-    "Boost Modulation: Ignition (Fire)",
-    "Boost Modulation: Vitriol (Acid)"
-  ]
+  "described": [],
+  "prompts": []
 }

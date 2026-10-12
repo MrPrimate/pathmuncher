@@ -92,6 +92,8 @@ export class Pathmuncher {
     this.failedFeatureItems = {};
     // the Pathbuilder entries each item's choices have taken, so its next choice takes another
     this.choiceClaims = {};
+    // repeated specials used as a choice's answer (#repeatedSpecial)
+    this.usedRepeats = new Set();
     // a Kineticist's gate thresholds, from the build (kineticGatePlan), once looked at
     this.gatePlan = null;
     this.autoFeats = [];
@@ -736,6 +738,16 @@ export class Pathmuncher {
     }
   }
 
+  /**
+   * A special Pathbuilder lists again after a feat of the same name, not yet used to answer a choice. It
+   * can be a choice's answer rather than a repeat: an automaton's Lesser Augmentation enhances its
+   * Magical Resistance feat, and Pathbuilder lists "Magical Resistance" again for that.
+   */
+  #repeatedSpecial(key) {
+    return this.parsed.specials.find((s) => s.reason === "repeats an awarded feat" && !this.usedRepeats.has(s)
+      && Seasoning.slug(s.originalName ?? s.name) === key) ?? null;
+  }
+
   /** What a choice is called for matching: its value, or its label when the value is data (a dragon's). */
   static #choiceKey(choice) {
     return utils.isString(choice.value) ? choice.value : Seasoning.slug(game.i18n.localize(choice.label ?? ""));
@@ -746,21 +758,27 @@ export class Pathmuncher {
     for (const choice of choices) {
       // the option by its own name or another Pathbuilder records it under; Dragonblood's dragon only by its bare name
       const bare = bareDragonName(document.name, game.i18n.localize(choice.label ?? ""));
+      // its label too: Pathbuilder records Boost Modulation's damage types as "Ignition (Fire)", the value being "fire"
+      const label = Seasoning.slug(game.i18n.localize(choice.label ?? ""));
       const keys = bare
         ? [Seasoning.slug(bare)]
-        : [Pathmuncher.#choiceKey(choice), ...choiceAliases(document.name, choice).map((a) => Seasoning.slug(a))];
+        : [Pathmuncher.#choiceKey(choice), ...choiceAliases(document.name, choice).map((a) => Seasoning.slug(a)), ...(label ? [label] : [])]
+          .filter((key, index, all) => key && all.indexOf(key) === index);
       const found = keys.map((key) => ({ key, featMatch: this.#findAllFeatureMatch(document, key, { ignoreAdded: true, isChoiceMatch: true }) }))
-        .find((m) => m.featMatch);
+        .find((m) => m.featMatch)
+        ?? keys.map((key) => ({ key, repeat: this.#repeatedSpecial(key) })).find((m) => m.repeat);
       if (found) {
         matches.push({
-          rank: found.featMatch.rank,
+          rank: (found.featMatch ?? found.repeat).rank,
           choice,
           key: found.key,
+          repeat: found.repeat ?? null,
         });
       }
     }
     if (matches.length > 0) {
       const match = Pathmuncher.#getLowestChoiceRank(matches);
+      if (match.repeat) this.usedRepeats.add(match.repeat);
       const featMatch = this.#findAllFeatureMatch(document, match.key, { ignoreAdded: true, isChoiceMatch: true });
       if (featMatch instanceof ParsedEntry) {
         featMatch.settle(ParsedEntry.STATUS.CHOSEN, { itemId: document._id, reason: `a choice on ${document.name}` });
@@ -774,11 +792,25 @@ export class Pathmuncher {
   }
 
   /**
-   * A choice between skills (e.g. the Fighter's Acrobatics or Athletics) that the build answers:
-   * exactly one of the offered skills is trained in its proficiencies. Pathbuilder does not export
-   * the choice itself, only its effect.
+   * Whether all a choice does is make the skill picked trained (the Fighter's Acrobatics or Athletics,
+   * Mastermind's skill): every rule reading it raises that skill's rank to trained at most. Then any
+   * offered skill the build has trained gives the same character, its ranks being the build's.
    */
-  #skillChoiceFromProficiencies(choices) {
+  static #onlyTrainsSkill(document, flag) {
+    const reads = (document.system?.rules ?? []).filter((r) => r.key !== "ChoiceSet" && JSON.stringify(r).includes(`rulesSelections.${flag}`));
+    // the rank of the skill picked ("system.skills.{item|...}.rank"), or the path picked (Mastermind's options are paths)
+    const trainsPick = (path) => (/\.rank$/).test(path) || path === `{item|flags.system.rulesSelections.${flag}}`;
+    return reads.length > 0 && reads.every((r) => r.key === "ActiveEffectLike" && ["upgrade", "override"].includes(r.mode)
+      && Number(r.value) <= 1 && trainsPick(String(r.path ?? "")));
+  }
+
+  /**
+   * A choice between skills (e.g. the Fighter's Acrobatics or Athletics) that the build answers:
+   * exactly one of the offered skills is trained in its proficiencies, or, for a choice that only
+   * trains the skill, any of those trained. Pathbuilder does not export the choice itself, only its
+   * effect.
+   */
+  #skillChoiceFromProficiencies(choices, document = null, choiceSet = null) {
     const skills = Object.keys(CONFIG.PF2E?.skills ?? {});
     // a choice's value is the skill ("athletics") or the path it trains ("system.skills.nature.rank", Mastermind)
     const skillOf = (choice) => (utils.isString(choice.value)
@@ -786,7 +818,9 @@ export class Pathmuncher {
       : undefined);
     if (choices.length < 2 || !choices.every((c) => skillOf(c))) return undefined;
     const trained = choices.filter((c) => (this.source.proficiencies?.[skillOf(c)] ?? 0) > 0);
-    if (trained.length !== 1) return undefined;
+    const anyWillDo = trained.length > 1 && document && choiceSet
+      && Pathmuncher.#onlyTrainsSkill(document, Pathmuncher.#ruleFlag(document, choiceSet));
+    if (trained.length !== 1 && !anyWillDo) return undefined;
     trained[0].nouuid = true;
     return trained[0];
   }
@@ -977,7 +1011,7 @@ export class Pathmuncher {
    */
   #answerFromBuildState(document, choiceSet, choices) {
     const answers = [
-      ["the build's proficiencies", () => this.#skillChoiceFromProficiencies(choices)],
+      ["the build's proficiencies", () => this.#skillChoiceFromProficiencies(choices, document, choiceSet)],
       ["the build's cause", () => this.#sanctificationFromBuild(document, choiceSet, choices)],
       ["the build's inventory", () => this.#choiceFromCarriedItems(choiceSet, choices)],
       ["the last import", () => this.#lastImportAnswer(document, choiceSet, choices)],
@@ -1912,76 +1946,52 @@ export class Pathmuncher {
     });
   }
 
-  // eslint-disable-next-line complexity
-  async #generateFeatItems(type,
-    {
-      levelCap = 20, typeFilter = null, excludeChild = false, excludeParents = false, excludeStandard = false,
-      specialsOnly = false,
-    } = {},
-  ) {
-    logger.debug(`Generate feat items for ${type} with level cap "${levelCap}" and filter "${typeFilter}"`);
-
-    for (const featArray of specialsOnly ? [this.parsed.specials] : [this.parsed.feats, this.parsed.specials]) {
-      for (const pBFeat of featArray) {
-        logger.verbose(`Checking if ${pBFeat.name} needs processing`, pBFeat);
-        if (pBFeat.added) continue;
-        // Pathbuilder repeats awarded feats in specials (Beast Trainer's Train Animal): one item for both
-        const addedFeat = pBFeat.sourceType === "specials"
-          && this.parsed.feats.find((f) => f.added && f.addedId && f.name === pBFeat.name);
-        if (addedFeat) {
-          pBFeat.settle(addedFeat.status, { itemId: addedFeat.itemId, reason: "repeats an awarded feat" });
-          continue;
-        }
-        if (Number.isInteger(levelCap) && (pBFeat.level ?? 20) > levelCap) continue;
-        if (utils.isString(levelCap) && pBFeat.level !== levelCap) continue;
-        if (typeFilter && pBFeat.type !== typeFilter) continue;
-        if (excludeChild && pBFeat.isChild === true) continue;
-        if (excludeParents && pBFeat.isParent === true) continue;
-        if (excludeStandard && pBFeat.isStandard === true) continue;
-        logger.debug(`Generating feature for ${pBFeat.name}`, pBFeat);
-        if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeatCloned: foundry.utils.deepClone(pBFeat), pBFeat, this: this });
-
-        const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
-        if (pBFeat.extra) {
-          logger.verbose(`Generate Feat Item Rename for ${pBFeat.name} with ${pBFeat.extra}`, pBFeat);
-        }
-        const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
-        if (!indexMatch) {
-          logger.debug(`Unable to match feat ${displayName}`, {
-            displayName,
-            name: pBFeat.name,
-            extra: pBFeat.extra,
-            pBFeat,
-            type,
-          });
-          pBFeat.unmatched(`no ${type} compendium entry`);
-          continue;
-        }
-        const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
-        // a feat a feature already added is included, unless the build took it again in a slot of its
-        // own: a feat taken more than once (Raised by Belief's Assurance and a skill feat Assurance)
-        const ownCopy = Pathmuncher.#pickedInSlot(pBFeat) && Pathmuncher.#repeatable(doc);
-        if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`) && !ownCopy) {
-          logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
-          pBFeat.settle(ParsedEntry.STATUS.INCLUDED, { reason: "already added by a feature" });
-          continue;
-        }
-
-        const docData = doc.toObject();
-        docData._id = foundry.utils.randomID();
-        pBFeat.settle(ParsedEntry.STATUS.CREATED, { itemId: docData._id });
-
-        this.#generateFoundryFeatLocation(docData, pBFeat);
-        this.result.feats.push(docData);
-        const options = {
-          originType: typeFilter,
-          applyFeatLocation: false,
-          choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
-          levelCap,
-        };
-        await this.addGrantedItems(docData, options);
-      }
+  /**
+   * Settles the specials that repeat a feat already added: Pathbuilder lists some awarded feats again
+   * in specials (Beast Trainer's Train Animal), and the one item stands for both.
+   */
+  #settleRepeatedSpecials() {
+    for (const special of this.parsed.specials) {
+      if (special.added || special.sourceType !== "specials") continue;
+      const addedFeat = this.parsed.feats.find((f) => f.added && f.addedId && f.name === special.name);
+      if (addedFeat) special.settle(addedFeat.status, { itemId: addedFeat.itemId, reason: "repeats an awarded feat" });
     }
+  }
+
+  /** Makes the item for a feat or special from a compendium of the type, if it has one. */
+  async #generateFeatItem(pBFeat, { type, originType = null, levelCap = 20 }) {
+    logger.debug(`Generating feature for ${pBFeat.name} from ${type}`, pBFeat);
+    if (this.devMode) logger.error(`Generating feature for ${pBFeat.name}`, { pBFeatCloned: foundry.utils.deepClone(pBFeat), pBFeat, this: this });
+
+    const indexMatch = this.#findInPackIndexes(type, [pBFeat.name, pBFeat.originalName]);
+    const displayName = pBFeat.extra ? Pathmuncher.adjustDocumentName(pBFeat.name, pBFeat.extra) : pBFeat.name;
+    if (!indexMatch) {
+      logger.debug(`Unable to match feat ${displayName}`, { displayName, name: pBFeat.name, extra: pBFeat.extra, pBFeat, type });
+      pBFeat.unmatched(`no ${type} compendium entry`);
+      return;
+    }
+    const doc = await indexMatch.pack.getDocument(indexMatch.i._id);
+    // a feat a feature already added is included, unless the build took it again in a slot of its
+    // own: a feat taken more than once (Raised by Belief's Assurance and a skill feat Assurance)
+    const ownCopy = Pathmuncher.#pickedInSlot(pBFeat) && Pathmuncher.#repeatable(doc);
+    if (this.autoAddedFeatureIds.has(`${indexMatch.i._id}${indexMatch.i.type}`) && !ownCopy) {
+      logger.debug("Feat included in class features auto add", { displayName, pBFeat, type });
+      pBFeat.settle(ParsedEntry.STATUS.INCLUDED, { reason: "already added by a feature" });
+      return;
+    }
+
+    const docData = doc.toObject();
+    docData._id = foundry.utils.randomID();
+    pBFeat.settle(ParsedEntry.STATUS.CREATED, { itemId: docData._id });
+
+    this.#generateFoundryFeatLocation(docData, pBFeat);
+    this.result.feats.push(docData);
+    await this.addGrantedItems(docData, {
+      originType,
+      applyFeatLocation: false,
+      choiceHint: pBFeat.extra && pBFeat.extra !== "" ? pBFeat.extra : null,
+      levelCap,
+    });
   }
 
   async #generateLores() {
@@ -2046,48 +2056,86 @@ export class Pathmuncher {
     await Promise.all([...ids].map(([pack, packIds]) => pack.getDocuments({ _id__in: [...packIds] })));
   }
 
+  /** The feat types Pathbuilder has slots for, in the order a level's slots are filled. */
+  static #SLOT_TYPES = ["Ancestry Feat", "Skill Feat", "Class Feat", "Mythic Feat", "Destiny Mythic Feat", "General Feat", "Archetype Feat"];
+
+  /**
+   * The order the build's feats and specials are made in, so that a feat comes before the feats it
+   * may grant or choose and can claim them:
+   * - a mythic calling, from the class features;
+   * - the feats taken in a slot, level by level as the character levels up, then the features among
+   *   the rest;
+   * - then again with the feats that have choices of their own (a dedication's), then the features;
+   * - each slot type's choices (a dedication's feats), at any level;
+   * - then everything else: feats, features, and the specials that are actions.
+   * Each step is an entry and the compendium type to look in, or something to do between them. An
+   * entry is looked for in each compendium type once, the first time it comes up.
+   */
+  #featSchedule() {
+    const steps = [];
+    const entries = [...this.parsed.feats, ...this.parsed.specials];
+    const standard = (e) => e.isChild !== true && e.isParent !== true;
+    const notChild = (e) => e.isChild !== true;
+    // the level a slot's feat is made at: a calling's at the first, one Pathbuilder gives no level at 20
+    const levelOf = (e) => ((e.level ?? 20) > 1 ? e.level ?? 20 : 1);
+    const add = (group, type, list, { originType = null, levelCap = 20 } = {}) => {
+      steps.push(...list.map((entry) => ({ group, entry, type, originType, levelCap })));
+    };
+    const run = (group, fn) => steps.push({ group, run: fn });
+    const bySlot = (pass, filter, types, levelUp = false) => {
+      for (let level = 1; level <= this.characterLevel; level++) {
+        if (levelUp) {
+          run(`level ${level}`, async () => {
+            foundry.utils.setProperty(this.result.character, "system.details.level.value", level);
+            if (level > 1) await this.#processGrantedLookupItemsAtLevel("class", level);
+          });
+        }
+        for (const type of types) {
+          const slotted = entries.filter((e) => filter(e) && e.type === type && levelOf(e) === level);
+          add(`${pass} ${level} ${type}`, "feats", slotted, { originType: type, levelCap: level });
+        }
+      }
+    };
+    const slotTypes = Pathmuncher.#SLOT_TYPES;
+    const nonMythic = slotTypes.filter((type) => !type.includes("Mythic"));
+
+    const callings = entries.filter((e) => e.type === "Mythic Feat" && e.level === "calling");
+    add("calling", "classFeatures", callings, { originType: "Mythic Feat", levelCap: "calling" });
+    bySlot("standard", standard, slotTypes, true);
+    add("standard features", "ancestryFeatures", entries.filter(standard));
+    bySlot("parents", notChild, nonMythic);
+    add("parent features", "ancestryFeatures", entries.filter(notChild));
+    for (const type of nonMythic) add(`children ${type}`, "feats", entries.filter((e) => e.type === type), { originType: type });
+    run("skills", () => this.#setSkills());
+    run("feats status", () => this.statusUpdate(1, 5, "Feats"));
+    add("feats", "feats", entries);
+    run("features status", () => this.statusUpdate(2, 5, "Feats"));
+    add("features", "ancestryFeatures", entries);
+    // specials that are actions a feature gives without granting the item (e.g. Manifest Soulforged Armament)
+    add("actions", "actions", this.parsed.specials);
+    run("done", () => this.statusUpdate(3, 5, "Feats"));
+
+    const looked = new Map();
+    return steps.filter(({ entry, type }) => {
+      if (!entry) return true;
+      if (!looked.has(entry)) looked.set(entry, new Set());
+      if (looked.get(entry).has(type)) return false;
+      looked.get(entry).add(type);
+      return true;
+    });
+  }
+
   async #processFeats() {
     this.#sortParsedFeats();
     await this.#prefetchFeatDocuments();
-    await this.#generateFeatItems("classFeatures", { typeFilter: "Mythic Feat", levelCap: "calling" });
-    // pre pass for standard items
-    for (let i = 1; i <= this.characterLevel; i++) {
-      foundry.utils.setProperty(this.result.character, "system.details.level.value", i);
-      if (i > 1) await this.#processGrantedLookupItemsAtLevel("class", i);
-      await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Destiny Mythic Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true, excludeParents: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat", levelCap: i, excludeChild: true, excludeParents: true });
+    let group = null;
+    for (const step of this.#featSchedule()) {
+      // a special repeating a feat is settled before it is looked for, and once each group of steps is done
+      if (step.group !== group || step.entry?.sourceType === "specials") this.#settleRepeatedSpecials();
+      group = step.group;
+      if (step.run) await step.run();
+      else if (!step.entry.added) await this.#generateFeatItem(step.entry, step);
     }
-    await this.#generateFeatItems("ancestryFeatures", { excludeChild: true, excludeParents: true });
-    // prepass for non-child items
-    for (let i = 1; i <= this.characterLevel; i++) {
-      await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat", levelCap: i, excludeChild: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Skill Feat", levelCap: i, excludeChild: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Class Feat", levelCap: i, excludeChild: true });
-      await this.#generateFeatItems("feats", { typeFilter: "General Feat", levelCap: i, excludeChild: true });
-      await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat", levelCap: i, excludeChild: true });
-    }
-    await this.#generateFeatItems("ancestryFeatures", { excludeChild: true });
-
-    await this.#generateFeatItems("feats", { typeFilter: "Ancestry Feat" });
-    await this.#generateFeatItems("feats", { typeFilter: "Skill Feat" });
-    await this.#generateFeatItems("feats", { typeFilter: "Class Feat" });
-    await this.#generateFeatItems("feats", { typeFilter: "General Feat" });
-    await this.#generateFeatItems("feats", { typeFilter: "Archetype Feat" });
-
-    this.#setSkills();
-    // final pass, include all
-    this.statusUpdate(1, 5, "Feats");
-    await this.#generateFeatItems("feats");
-    this.statusUpdate(2, 5, "Feats");
-    await this.#generateFeatItems("ancestryFeatures");
-    // specials that are actions a feature gives without granting the item (e.g. Manifest Soulforged Armament)
-    await this.#generateFeatItems("actions", { specialsOnly: true });
-    this.statusUpdate(3, 5, "Feats");
   }
 
   /**

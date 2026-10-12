@@ -72,7 +72,7 @@
     "feat: Armor Proficiency (Heavy) [slot general-3; level 1; taken 3; armorProficiency=heavy]",
     "feat: Battle Medicine [in Field Medic; level 1]",
     "feat: Bonded Animal [slot skill-12; level 2; taken 12]",
-    "feat: Boost Modulation [slot class-14; level 12; taken 14; boostModulation=cold; boostModulationFirst=bludgeoning; boostModulationSecond=piercing]",
+    "feat: Boost Modulation [slot class-14; level 12; taken 14; boostModulation=cold; boostModulationFirst=piercing; boostModulationSecond=bludgeoning]",
     "feat: Breakthrough Innovation [in Inventor; level 7; breakthroughModification=Compendium.pf2e.classfeatures.Item.y62b9R6RUBbkZECA]",
     "feat: Canny Acumen (Will) [slot general-19; level 1; taken 19; cannyAcumen=system.saves.will.rank]",
     "feat: Churning Mind [in Inventor; level 11]",
@@ -144,16 +144,12 @@
     "Splendid Illusion [primal; prepared; cha; proficiency 1] rank 6: 1 [Illusory Scene]"
   ],
   "report": {},
-  "described": [
-    "Offensive Boost (Chill (Cold)): Momentum (Bludgeoning), Spike (Piercing)"
-  ],
+  "described": [],
   "prompts": [
     "Weapon Innovation: Adze (guessed)",
     "Weapon Innovation: Advanced Design (guessed)",
     "Breakthrough Innovation: Manifold Alloy (guessed)",
     "Virtuosic Performer: Acting (guessed)",
-    "Boost Modulation: Momentum (Bludgeoning)",
-    "Boost Modulation: Spike (Piercing)",
     "Revolutionary Innovation: Rune Capacity (guessed)"
   ]
 }
