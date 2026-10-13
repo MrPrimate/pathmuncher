@@ -1,43 +1,50 @@
 # Next up
 
-- An inventor's construct companion is imported when the PF2e Companion Compendia module is active, as a character of its own like an animal companion: the module's Prototype Construct at its master's level, with the module's Advanced, Incredible and Paragon Construct for the feats the inventor took, Megaton Strike when the construct is the innovation, and the innovation's modifications. Pathbuilder's export has no pet for a construct, so it is named after its master, and the system asks its few choices (its size, an attack's damage type, Projectile Launcher's damage type) on the first import; later imports give the same answers.
-- A multiclass summoner's eidolon (Summoner Dedication) is imported like a summoner's, with the module's Summoner Dedication Adjustment and the evolution feats taken through Basic or Advanced Synergy.
-- Evolution feats whose eidolon version the module names differently reach the eidolon: Eidolon's Trample (the module's Trample) and Eidolon's Retort (the module's Eidolon's Opportunity). A summoner's ancestry feat of an evolution feat's name, such as a centaur's Trample, no longer gives the eidolon that evolution feat.
-- Signature spells: Pathbuilder's export doesn't say which spells are a bard's, oracle's, psychic's, sorcerer's or summoner's signature spells, so the import notes now list the spellcasting entry under "Signature spells to choose", to mark on the character sheet. A later import marks the same spells again instead of clearing them.
-- The warning for a dual class character now says what happens (only the first class is imported) and can be translated, as can every heading in the import notes. The dialogs' layouts moved into templates, so they can be restyled or translated without touching the code.
-- On smaller screens the importer and Pathmuncher's other windows fit the screen: what doesn't fit scrolls, and the Import button and other buttons stay in view.
-- The Choices to make window shows more to decide by: each item's description (scrolling when long), its kind, level and traits, and the Pathbuilder slot and level it was taken at. The list scrolls when there are many choices, so the buttons stay on screen.
-- More choices are answered from the build rather than asked: a choice that only trains a skill (a Fighter's Acrobatics or Athletics, a Rogue's Mastermind racket, a Runesmith's or Waning Moon Sarangay's skill) takes a skill the build has trained when several offered are, as any of them makes the same character; Boost Modulation's damage types, which Pathbuilder records by their labels ("Ignition (Fire)"); and an automaton's Lesser Augmentation, whose enhancement Pathbuilder lists under the name of the feat it enhances (Magical Resistance).
-- A summoner's Energy Heart damage type is no longer given to Ranged Combatant, whose damage type Pathbuilder doesn't record and is now asked for.
-- Animal companions and a summoner's eidolon are imported when the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module is active, each as a character of its own built from that module at its master's level. An animal companion gets its animal, Mature, Nimble or Savage, Specialized with its specializations, and barding. An eidolon gets its type (an elemental its element), the eidolon class's features, and the eidolon versions of the summoner's evolution feats with Energy Heart's damage type; the choices Pathbuilder's export leaves out (key attribute, size, attacks, attribute boosts) are made in an eidolon builder that opens once the eidolon is made, with the eidolon's stat block beside them updating as choices change; it can be opened again from the eidolon's sheet. Choices left as the import made them are listed in the import notes to check. The first import asks whether to make a new character for each or build it on a character no other player owns; it is then linked to its master, and later imports update it, keeping its choices and anything added to it by hand. A new "Companions and eidolons" import option turns this off.
-- An import now keeps the Pathbuilder build, its import notes and the answers you gave on the actor. The next import offers "Re-use import answers from the last import?" (ticked by default): the choices you answered (in the choices dialog or when the system asked), the deity, items dropped in for missing ones, and which hand-added items to keep are given again where the same question comes up, and only new questions are asked. "Last import notes" in the importer shows the last import's notes again.
-- Choices are now worked out without creating temporary actors.
-- The temp-folder settings have been removed.
-- Players without permission to delete actors can now import.
-- Imports are faster and produce much less console output.
-- Imports take about half as long again. Feats are created in a few batches rather than one at a time, the build's feats and spells are fetched from the compendiums together rather than one by one, and choices that offer "any feat matching ..." no longer rebuild the whole compendium each time they are looked at.
-- A feat taken more than once that the build picks in a slot of its own, such as a skill feat Assurance, is no longer merged with a copy a background or feature grants (Raised by Belief's Assurance). Each keeps its own skill, and a copy the build doesn't settle is asked about with the skills other copies already have left out.
-- Familiar abilities Pathbuilder names with their option, such as Damage Avoidance (Reflex) or Fast Movement (Land), are imported with that option. Familiar abilities that match nothing are listed in the import notes, as are animal companions and other pets, which are not imported.
-- Fewer Pathbuilder notes are listed as unmatched, and some choices are no longer asked or guessed: a thaumaturge's Perception Expertise (pf2e's Perception Mastery), the implements its Implement Adept, Second Adept and Implement Paragon take, a magus's studious spells (now added to the spellbook), the eidolon abilities each eidolon describes, the dragon a Dragonblood heritage names, an automaton's Extra Resistances, and the tradition a feat's innate spells use. A summoner's eidolon, which Pathbuilder's export leaves out, is listed in the import notes, with its Energy Heart damage type.
-- A prepared caster's prepared spells are imported even when Pathbuilder's export leaves them out of the spellbook.
-- When the build makes a choice with an option the system doesn't offer (a Driver's Assurance in Piloting Lore, where pf2e's Assurance takes skills only), the choice isn't asked about. The item is listed under the import notes' rules to check, with the build's choice.
-- The languages a character's ancestry gives are no longer added again as languages of its own.
-- "True Seeing" is imported as the remastered Truesight.
-- Pathbuilder lets a cleric or champion pick domains, a divine font or a sanctification (or a cause needing one) that their deity does not allow. The importer now spots this and asks: keep the deity and pick choices it allows, or keep the choices and pick (or drop in) a deity that allows them all.
-- If Foundry's rule code fails on one item's choice or granted item, the import carries on. Foundry applies that rule itself when the item is created, and the import notes list the item under "Rules to check".
-- An Adventurer's Pack no longer stops a Starfinder 2e import. SF2e has no backpack to hold it, so it is listed in the import notes instead.
+Pathmuncher has been largely rewritten for Foundry v14 and the current PF2e and SF2e systems.
+
+## New
+
+- Animal companions, eidolons (including Summoner Dedication's) and inventors' construct companions are imported as characters of their own when the [PF2e Companion Compendia](https://foundryvtt.com/packages/pf2e-animal-companions) module is active, and updated by later imports.
+- An eidolon builder for the choices Pathbuilder doesn't export, with a live stat block. It opens after the import and from the eidolon's sheet.
+- A new importer screen: import by Pathbuilder export ID, pasted JSON or a JSON file.
+- Import notes list what didn't come across, grouped by kind, with choices to check and signature spells to mark. "Last import notes" shows them again.
+- Re-imports remember your answers and only ask new questions.
+- Choices the build doesn't settle are asked together, with each item's description, before the character changes.
+- Items you added by hand can be kept when re-importing.
+- Items missing from the compendiums can be replaced by dropping in your own.
+- When a cleric's or champion's choices don't fit their deity, you choose how to fix it.
+- Firearm ammunition can be shared out between guns.
+- Signature spells marked on the sheet are kept on re-import.
+
+## Improvements
+
+- Imports are much faster, with far less console output.
+- Many more choices are taken from the build instead of asked or guessed, including skill choices, Kineticist gates and impulses, sanctifications, and choices made by granted feats.
+- Around 400 more Pathbuilder names match compendium entries, including Starfinder 2e.
+- Familiar abilities keep their chosen option.
+- Prepared spells missing from the spellbook are imported, and a magus's studious spells are added.
+- Starfinder 2e batteries and chem tanks keep their charges, and precious-material ammunition keeps its material.
+- Fewer entries are wrongly listed as unmatched.
+- Windows fit smaller screens.
+- Players who can't delete actors can now import.
+- GMs are warned if a system update affects how choices are worked out.
+
+## Bug fixes
+
+- A failed download or bad JSON no longer wipes the character, and a backup is saved if an import fails part way.
+- Feats taken more than once, such as Assurance, no longer merge or repeat an option.
+- Ammunition is replaced on re-import instead of duplicated.
+- Ancestry languages are no longer added twice.
+- A champion's sanctification now applies its holy or unholy trait.
+- Energy Heart's damage type is no longer given to Ranged Combatant.
+- An Adventurer's Pack no longer stops a Starfinder 2e import.
 - The Verbose log level no longer breaks imports.
-- Choices the Pathbuilder export doesn't record are guessed where the build settles them: a weapon or other item the character carries exactly one of the options for (Surki Weapon Familiarity, an Exemplar's ikon), and a champion's sanctification from their cause. The rest are asked together, once the build is read and before the character changes. Any left unpicked are still asked by the system.
-- A champion's sanctification is saved where the system reads it, so the holy or unholy trait is applied.
-- If a system update changes the parts of the system Pathmuncher uses to work out choices, GMs see a warning when the world loads. Imports still run, with the system asking for those choices.
-- Choices an item makes for the feat it grants are kept: Farmhand's Athletics for its Assurance, an Exemplar epithet's damage type for Energized Spark, Runtsage's adopted ancestry, a Kineticist gate's element for its junction. These were lost, guessed or asked again.
-- A feat taken more than once, such as Assurance, never repeats an option another copy already has. When the build doesn't settle which option, the choices dialog says what granted the feat and which options the other copies took, and offers only the rest.
-- A Kineticist's gates are imported as built: the element each Expand the Portal takes and the junction it chooses for that element, which were often guessed or put on the wrong element. A single gate's own Impulse junction is no longer listed as unmatched.
-- A Kineticist's impulses go to the gate, fork or threshold that chose them in Pathbuilder. Before, they could swap between thresholds, be taken from a class feat slot, or be guessed when the build already had them.
-- Pathbuilder lists firearm ammunition once ("Bullets (10 rounds)"), but in Foundry each gun takes its own rounds. If the build has one kind of gun, the bullets become that gun's rounds. With several, a dialog lets you drag the ammunition onto each gun, split a stack between guns, and add more.
-- Ammunition (arrows, bolts, rounds) is now replaced on re-import like other equipment, rather than kept alongside the new copy.
-- Starfinder 2e batteries and chem tanks are imported as one battery or tank holding the charges Pathbuilder lists. Before, a full commercial battery came in as 10 batteries. Projectile ammo made of a precious material (silver, cold iron, ...) keeps its material and name.
-- Around 400 more Pathbuilder names now match their compendium entries. These are mostly names Pathbuilder gives without a god, place or people ("Sword Duelist Dedication" is Aldori Duelist Dedication, "Station Local" is Absalom Local), along with spelling differences and item families named in another pattern ("Wand of Hawthorn (2nd-rank Spell)", "Spacious Pouch II", "Photon (Tactical)"). This covers Starfinder 2e backgrounds, heritages, feats and items too.
+- An item whose rules fail no longer stops the import.
+
+## Removed
+
+- Support for Foundry versions before v14.
+- The temp-folder settings.
 
 # 1.6.2
 
