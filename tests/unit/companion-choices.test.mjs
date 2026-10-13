@@ -36,4 +36,16 @@ describe("CompanionChoices", () => {
     assert.ok(guessed);
     assert.deepEqual(choices.guessed, [{ item: "Horse", choice: "Medium" }]);
   });
+
+  it("without defaults, leaves a choice to ask unless the last import answered it", () => {
+    const size = [{ label: "Medium", value: "med" }, { label: "Small", value: "sm" }];
+    const ask = new CompanionChoices({ guess: false });
+    assert.deepEqual(ask.answer({ itemName: "Prototype Construct", itemSlug: "prototype-construct", flag: "companionSize", choices: size }),
+      { choice: null, guessed: false, ask: true });
+    assert.deepEqual(ask.guessed, []);
+    const again = new CompanionChoices({ guess: false, previous: { "prototype-construct:companionSize": "sm" } });
+    const { choice, guessed } = again.answer({ itemName: "Prototype Construct", itemSlug: "prototype-construct", flag: "companionSize", choices: size });
+    assert.equal(choice.value, "sm");
+    assert.ok(!guessed);
+  });
 });

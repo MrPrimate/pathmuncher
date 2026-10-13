@@ -162,6 +162,59 @@
     t.ok(eidolon.system.traits.value.includes("earth"), "with the element's trait");
   });
 
+  test("companions: evolution feats the module names differently, and not an ancestry feat of the same name", async (t) => {
+    const renamed = await importWithCompanions(t, generated("summoner-17"), "eidolon renamed feats");
+    const [eidolon] = companionsOf(renamed.actor);
+    t.ok(eidolon.items.some((i) => i.name === "Trample (CC)"), "Eidolon's Trample");
+    t.ok(eidolon.items.some((i) => i.name === "Eidolon's Opportunity (CC)"), "Eidolon's Retort");
+    // a centaur's Trample is an ancestry feat
+    const centaur = await importWithCompanions(t, generated("summoner-08"), "eidolon centaur");
+    const [dragon] = companionsOf(centaur.actor);
+    t.ok(dragon && !dragon.items.some((i) => i.name === "Trample (CC)"), "not the centaur's Trample");
+  });
+
+  test("companions: a Summoner Dedication's eidolon, with the module's adjustment and the feat Basic Synergy gives", async (t) => {
+    const { pm, actor, bff } = await importWithCompanions(t, generated("barbarian-03"), "eidolon dedication");
+    const [eidolon] = companionsOf(actor);
+    t.equal(eidolon?.ancestry?.name, "Beast Eidolon", "its type");
+    t.equal(eidolon.level, actor.level, "at its summoner's level");
+    t.ok(eidolon.items.some((i) => i.name === "Summoner Dedication Adjustment (CC)"), "the multiclass adjustment");
+    t.ok(eidolon.items.some((i) => i.name === "Advanced Weaponry (CC)"), "Advanced Weaponry, from Basic Synergy");
+    t.deepEqual(bff.bad.filter((b) => b.type === "companion"), [], "nothing unmatched");
+    t.equal(pm.getImportReport().find((g) => g.type === "pet"), undefined, "not listed as not imported");
+  });
+
+  test("companions: a construct innovation's companion, advanced and modified as built", async (t) => {
+    const { pm, actor, bff, companionPrompts } = await importWithCompanions(t, generated("inventor-02"), "construct made");
+    const [construct] = companionsOf(actor);
+    t.ok(construct, "a construct companion");
+    // Pathbuilder exports no name for it
+    t.equal(construct.name, `${actor.name}'s Prototype Construct`, "named after its master");
+    t.equal(construct.ancestry?.name, "Prototype Construct", "the module's construct");
+    t.equal(construct.class?.name, "Construct Companion", "the construct companion class");
+    t.equal(construct.level, actor.level, "at its master's level");
+    // by slug: a feat whose choice is made is named for it ("Advanced Construct (CC) (Medium)")
+    const slugs = construct.itemTypes.feat.map((i) => i.slug).sort();
+    const built = ["unarmed-strike-1", "unarmed-strike-2", "advanced-construct-cc", "incredible-construct-cc",
+      "paragon-construct-cc", "projectile-launcher", "durable-construction", "flight-chassis"].sort();
+    t.deepEqual(slugs, built, "its attacks, advancement and modifications, each once");
+    // Pathbuilder's export has none of its choices, so the first import asks them
+    const asked = companionPrompts.map((p) => p.item.replace(/ \(.*\)$/, "")).sort();
+    t.deepEqual(asked, ["Advanced Construct", "Projectile Launcher", "Prototype Construct", "Unarmed Strike 2"], "its choices asked");
+    t.deepEqual(bff.bad.filter((b) => b.type === "companion"), [], "nothing unmatched");
+    t.equal(actor.getFlag("pathmuncher", "companions")?.["construct-companion-0"], construct.uuid, "linked from its master");
+    const report = pm.getImportReport();
+    t.equal(report.find((g) => g.type === "pet"), undefined, "not listed as not imported");
+    t.equal(report.find((g) => g.type === "companionChoice"), undefined, "nothing guessed");
+
+    // the next import gives the same answers without asking
+    const sorted = (a) => Object.entries(BFFBuilder().selections(a)).sort(([x], [y]) => x.localeCompare(y));
+    const before = sorted(construct);
+    const again = await importWithCompanions(t, generated("inventor-02"), "", { actor });
+    t.deepEqual(again.companionPrompts.map((p) => p.item), [], "nothing asked again");
+    t.deepEqual(sorted(construct), before, "the same answers");
+  });
+
   const api = () => game.modules.get("pathmuncher").api;
   const choiceIn = (choices, itemName, flag) => choices.find((c) => c.itemName === itemName && c.flag === flag);
   const option = (choice, label) => choice.options.find((o) => o.label === label);

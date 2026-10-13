@@ -36,20 +36,21 @@
       "deception": 1,
       "diplomacy": 0,
       "intimidation": 1,
-      "medicine": 0,
+      "medicine": 1,
       "nature": 4,
       "occultism": 0,
       "performance": 4,
       "religion": 0,
       "society": 0,
       "stealth": 1,
-      "survival": 0,
+      "survival": 1,
       "thievery": 1
     },
     "languages": [
       "common",
       "draconic",
       "dwarven",
+      "fey",
       "gnomish",
       "goblin"
     ],
@@ -57,14 +58,18 @@
     "focus": 0
   },
   "items": [
+    "action: Manifest Eidolon [granted by Eidolon]",
     "action: Quick-Tempered [granted by Quick-Tempered]",
     "action: Rage [granted by Rage]",
     "ancestry: Goblin",
     "background: Warrior",
     "class: Barbarian",
+    "feat: Advanced Weaponry [level 1; taken 6; granted by Basic Synergy]",
     "feat: Annihilating Swing [slot class-20; level 20; taken 20]",
     "feat: Armor Assist [slot skill-4; level 1; taken 4]",
     "feat: Armor Mastery [in Barbarian; level 19]",
+    "feat: Basic Synergy [slot class-6; level 4; taken 6; basicSynergy=Compendium.pf2e.feats-srd.Item.kFpVgcqREAfDmjXp]",
+    "feat: Beast Eidolon [level 1; taken 2; granted by Eidolon]",
     "feat: Bonded Animal [slot skill-12; level 2; taken 12]",
     "feat: Brutality [in Barbarian; level 5]",
     "feat: Burn It! [slot ancestry-1; level 1; taken 1]",
@@ -74,6 +79,7 @@
     "feat: Distracting Performance [slot skill-16; level 2; taken 16]",
     "feat: Dragon Instinct [level 1; granted by Instinct; dragon={\"damageType\":\"bludgeoning\",\"dragonType\":\"adamantine\",\"tradition\":\"primal\"}]",
     "feat: Dubious Knowledge [slot skill-14; level 1; taken 14]",
+    "feat: Eidolon [level 1; taken 2; granted by Summoner Dedication; eidolon=Compendium.pf2e.classfeatures.Item.xeD5nNnQAlaowGwR]",
     "feat: Experienced Professional [slot skill-6; level 1; taken 6]",
     "feat: Express Rider [slot skill-8; level 1; taken 8]",
     "feat: Fascinating Performance [slot skill-2; level 1; taken 2]",
@@ -85,7 +91,6 @@
     "feat: Indomitable Will [in Barbarian; level 15]",
     "feat: Instinct [in Barbarian; level 1; instinct=Compendium.pf2e.classfeatures.Item.VDot7CDcXElxmkkz]",
     "feat: Intimidating Glare [in Warrior; level 1]",
-    "feat: Intimidating Strike [slot class-2; level 2; taken 2]",
     "feat: Juggernaut [in Barbarian; level 7]",
     "feat: Keen Follower [slot general-7; level 3; taken 7]",
     "feat: Medium Armor Expertise [in Barbarian; level 13]",
@@ -106,7 +111,7 @@
     "feat: Scouring Rage [slot class-10; level 6; taken 10]",
     "feat: Shattering Blows [slot class-16; level 16; taken 16]",
     "feat: Silencing Strike [slot class-12; level 10; taken 12]",
-    "feat: Swipe [slot class-6; level 4; taken 6]",
+    "feat: Summoner Dedication [slot class-2; level 2; taken 2]",
     "feat: Towering Transformation [slot class-14; level 14; taken 14]",
     "feat: Unified Theory [slot skill-18; level 15; taken 18]",
     "feat: Untrained Improvisation [slot general-19; level 3; taken 19]",
@@ -122,7 +127,11 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {},
+  "report": {
+    "pet": [
+      "Eidolon"
+    ]
+  },
   "described": [
     "Dragon Instinct: Dragon Instinct Raging Resistance, Dragon Instinct Specialization Ability"
   ],

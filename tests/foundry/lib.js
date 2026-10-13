@@ -124,10 +124,7 @@
       Object.entries(build.proficiencies ?? {}).filter(([, v]) => v > 0).map(([k]) => k),
     ].map((names) => new Set(names.filter(Boolean).map(sluggify)));
     const prompts = [];
-    const hook = Hooks.on("renderApplicationV2", (app) => {
-      if (!Array.isArray(app.choices) || typeof app.resolveSelection !== "function" || app.__pmtAnswered) return;
-      // a companion's prompts are pathmuncher's to answer (BFFBuilder)
-      if (app.item?.actor?.getFlag("pathmuncher", "master")) return;
+    const answer = (app) => {
       app.__pmtAnswered = true;
       const label = (c) => sluggify(game.i18n.localize(c.label));
       const match = tiers.map((names) => app.choices.find((c) => names.has(label(c)))).find(Boolean);
@@ -135,6 +132,18 @@
       prompts.push({ item: app.item?.name, prompt: game.i18n.localize(app.prompt ?? ""), picked: pick && game.i18n.localize(pick.label), matched: !!match });
       app.selection = pick;
       setTimeout(() => app.close(), 20);
+    };
+    const hook = Hooks.on("renderApplicationV2", (app) => {
+      if (!Array.isArray(app.choices) || typeof app.resolveSelection !== "function" || app.__pmtAnswered) return;
+      // a companion's prompts are pathmuncher's to answer (BFFBuilder), but for those it leaves to the
+      // user (a construct's), which its hook has marked by the next tick
+      if (app.item?.actor?.getFlag("pathmuncher", "master")) {
+        setTimeout(() => {
+          if (app.pathmuncherAsks && !app.__pmtAnswered) answer(app);
+        }, 0);
+        return;
+      }
+      answer(app);
     });
     ctx.cleanup(() => Hooks.off("renderApplicationV2", hook));
     return prompts;

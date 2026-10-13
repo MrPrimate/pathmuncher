@@ -80,6 +80,7 @@ export class Pathmuncher {
     // the build's pets made into companions (BFFBuilder), which the import notes don't list as not imported
     this.importedPets = [];
     this.eidolonImported = false;
+    this.constructImported = false;
     this.autoAddedFeatureIds = new Set();
     this.autoAddedFeatureItems = {};
     this.promptRules = {};

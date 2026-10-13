@@ -57,7 +57,7 @@ get two builds.
   | witch-02, witch-05 | the familiar's spells: the prepared ones and two more per rank (witch-05 prepares one twice) |
   | magus-02 | the prepared spells and two more per rank |
   | necromancer-02 | the same, with a rank 3 spell heightened into a rank 5 slot |
-- Pets were set up in the paid app for nine builds:
+- Pets were set up in the paid app for eleven builds:
 
   | Build | Pet |
   | --- | --- |
@@ -69,9 +69,14 @@ get two builds.
   | druid-01 | animal order companion: a savage wolf "Fang" with Mature, Incredible and Specialized Companion (Tracker) |
   | ranger-02 | Animal Companion added: a nimble bird "Kestrel" with the same feats (Ambusher) and light barding |
   | champion-02 | Faithful Steed added: a young horse "Bastion" |
+  | inventor-02 | construct innovation: Advanced Construct Companion, Incredible Construct Companion and Paragon Companion taken, with the modifications Projectile Launcher, Durable Construction and Flight Chassis |
+  | barbarian-03 | Summoner Dedication added: a beast eidolon, with Basic Synergy taking Advanced Weaponry |
 
   The other builds keep Pathbuilder's defaults: their familiars have no abilities. Pathbuilder's
-  export has no eidolon data at all (`pets` stays empty for a summoner).
+  export has no eidolon or construct data at all (`pets` stays empty for a summoner or an inventor):
+  an eidolon is only its type among the specials ("Beast Eidolon"), and a construct only the
+  innovation, its modifications (`inventorMods`) and the feats that advance it. Pathbuilder doesn't
+  export a construct's name either.
 - No Free Archetype: the free web app will not open those builds.
 
 `kineticist-07.json` to `kineticist-14.json` (Pathbuilder characters `PMTK K1` to `PMTK K8`) test

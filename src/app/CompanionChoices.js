@@ -3,7 +3,8 @@
  * leaves out: a companion's size, and an eidolon's key attribute, attacks, attribute boosts and
  * Transcendence increase, and the damage of an evolution feat. Each answer is the last import's where
  * the companion had one, what the build says (Energy Heart's damage type), or a default, which is noted
- * as guessed for the import notes.
+ * as guessed for the import notes. Without defaults (a construct's few choices) the rest are left for
+ * the system to ask.
  */
 export class CompanionChoices {
 
@@ -15,9 +16,11 @@ export class CompanionChoices {
    * @param {object} [options.previous]     the eidolon's earlier answers, by "<item slug>:<flag>"
    * @param {string[]} [options.energyHeart]  the damage types the build's Energy Heart takes
    * @param {string} [options.element]        an elemental eidolon's element ("air")
+   * @param {boolean} [options.guess]         whether to answer a choice neither settles with a default
    */
-  constructor({ previous = {}, energyHeart = [], element = null } = {}) {
+  constructor({ previous = {}, energyHeart = [], element = null, guess = true } = {}) {
     this.previous = previous;
+    this.guess = guess;
     this.energyHeart = energyHeart;
     this.element = element;
     // the key attribute, once chosen, which boosts and Transcendence favour
@@ -60,18 +63,25 @@ export class CompanionChoices {
     return null;
   }
 
+  /** Notes the key attribute and the attributes boosted, which later boosts follow. */
+  #remember(itemSlug, flag, choice) {
+    if (flag === "eidolonKAS" && choice?.value?.type) this.keyAttribute = choice.value.type.slice(0, 3);
+    if ((/^abilityBoost/).test(flag ?? "") && choice) (this.boosted[itemSlug] ??= []).push(CompanionChoices.attribute(choice));
+  }
+
   /**
    * The choice to make for one of an item's ChoiceSets: { choice, guessed }. A choice the build or the
-   * last import settles is not guessed; a default is.
+   * last import settles is not guessed; a default is. Without defaults, a choice neither settles is
+   * { choice: null, ask: true }, for the system to ask.
    */
   answer({ itemName, itemSlug, flag, choices }) {
     const earlier = this.previous[`${itemSlug}:${flag}`];
     const previous = earlier === undefined ? null : choices.find((c) => CompanionChoices.#same(c.value, earlier));
     const settled = this.#fromBuild(itemSlug, flag, choices);
     const fromBuild = settled?.fromBuild ? choices.find((c) => c.value === settled.value) : null;
+    if (!previous && !fromBuild && !this.guess) return { choice: null, guessed: false, ask: true };
     const choice = previous ?? fromBuild ?? (settled?.fromBuild ? null : settled) ?? choices[0];
-    if (flag === "eidolonKAS" && choice?.value?.type) this.keyAttribute = choice.value.type.slice(0, 3);
-    if ((/^abilityBoost/).test(flag ?? "") && choice) (this.boosted[itemSlug] ??= []).push(CompanionChoices.attribute(choice));
+    this.#remember(itemSlug, flag, choice);
     const guessed = !previous && !fromBuild;
     if (guessed && choice) this.guessed.push({ item: itemName, choice: game.i18n.localize(choice.label) });
     return { choice, guessed };

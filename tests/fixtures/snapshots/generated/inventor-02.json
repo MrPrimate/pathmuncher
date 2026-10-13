@@ -64,6 +64,7 @@
     "class: Inventor",
     "condition: Quickened [granted by Full Automation]",
     "equipment: Head Gem [granted by Head Gem; qty 1; worn]",
+    "feat: Advanced Construct Companion [slot class-4; level 4; taken 4]",
     "feat: Anvil's Hardness [in Inventor; level 17]",
     "feat: Boost Modulation [slot class-16; level 12; taken 16; boostModulation=fire; boostModulationFirst=fire; boostModulationSecond=acid]",
     "feat: Breakthrough Innovation [in Inventor; level 7; breakthroughModification=null]",
@@ -83,9 +84,9 @@
     "feat: Folk Healer [slot ancestry-1; level 1; taken 1]",
     "feat: Full Automation [slot class-20; level 20; taken 20]",
     "feat: Greater Weapon Specialization [in Inventor; level 15]",
-    "feat: Guardian Lion Roar [slot class-8; level 8; taken 8]",
     "feat: Head Gem [in Sarangay; level 1]",
     "feat: Horns (Sarangay) [in Sarangay; level 1]",
+    "feat: Incredible Construct Companion [slot class-8; level 8; taken 8]",
     "feat: Incredible Initiative [slot general-19; level 1; taken 19]",
     "feat: Infinite Invention [in Inventor; level 19]",
     "feat: Innovation [in Inventor; level 1; innovation=Compendium.pf2e.classfeatures.Item.o70O2FysDd7BS9e0]",
@@ -102,10 +103,10 @@
     "feat: Medium Armor Expertise [in Inventor; level 11]",
     "feat: Medium Armor Mastery [in Inventor; level 19]",
     "feat: Megavolt [slot class-6; level 6; taken 6]",
-    "feat: No! No! I Created You! [slot class-4; level 1; taken 4]",
     "feat: Offensive Boost (Saws (Slashing)) [in Inventor; level 9; offensiveBoostDamage=slashing]",
     "feat: Overdrive Ally [slot class-12; level 8; taken 12]",
     "feat: Overdrive [in Inventor; level 1]",
+    "feat: Paragon Companion [slot class-14; level 14; taken 14]",
     "feat: Paralyzing Jewel [slot ancestry-9; level 9; taken 9]",
     "feat: Peerless Inventor [in Inventor; level 1]",
     "feat: Perception Expertise [in Inventor; level 13]",
@@ -123,7 +124,6 @@
     "feat: Slippery Secrets [slot skill-10; level 7; taken 10]",
     "feat: Swift Sneak [slot skill-8; level 7; taken 8]",
     "feat: Tamper [slot class-1; level 1; taken 1]",
-    "feat: Unstable Redundancies [slot class-14; level 14; taken 14]",
     "feat: Untrained Improvisation [slot general-3; level 3; taken 3]",
     "feat: Weapon Proficiency [slot general-11; level 1; taken 11]",
     "feat: Weapon Specialization [in Inventor; level 7]",
@@ -135,7 +135,11 @@
     "treasure: Silver Pieces [qty 0; worn]"
   ],
   "spellcasting": [],
-  "report": {},
+  "report": {
+    "pet": [
+      "Construct Companion"
+    ]
+  },
   "described": [],
   "prompts": []
 }

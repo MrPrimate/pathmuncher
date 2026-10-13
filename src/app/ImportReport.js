@@ -1,5 +1,6 @@
 /* eslint-disable no-continue */
 import { BAD_IGNORE_FEATURES, remasterTermNames } from "../data/features.js";
+import { BFFBuilder } from "./BFFBuilder.js";
 import { ParsedEntry } from "./ParsedEntry.js";
 import { Seasoning } from "./Seasoning.js";
 
@@ -165,18 +166,20 @@ export class ImportReport {
 
   /**
    * The build's pets other than familiars that were not imported (animal companions without the
-   * companion module, mounts): "<name> (<type>)"; and a summoner's eidolon, which Pathbuilder's
-   * export leaves out, with what the build says of it ("Eidolon (Energy Heart: electricity)").
+   * companion module): "<name> (<type>)"; and an eidolon or construct companion not imported, which
+   * Pathbuilder's export has no pet for, an eidolon with what the build says of it ("Eidolon (Energy
+   * Heart: electricity)").
    */
   unimportedPets() {
     const imported = this.pm.importedPets ?? [];
     const pets = (this.source.pets ?? [])
       .filter((pet) => pet.type && pet.type.toLowerCase() !== "familiar" && !imported.includes(pet))
       .map((pet) => (pet.name ? `${pet.name} (${pet.type})` : pet.type));
-    if ([this.source.class, this.source.dualClass].includes("Summoner") && !this.pm.eidolonImported) {
+    if (BFFBuilder.hasEidolon(this.source) && !this.pm.eidolonImported) {
       const notes = this.pm.eidolonNotes ?? [];
       pets.push(notes.length > 0 ? `Eidolon (${notes.join(", ")})` : "Eidolon");
     }
+    if (BFFBuilder.hasConstruct(this.source) && !this.pm.constructImported) pets.push("Construct Companion");
     return pets;
   }
 
