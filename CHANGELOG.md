@@ -1,5 +1,7 @@
 # Next up
 
+# 2.0.0
+
 Pathmuncher has been largely rewritten for Foundry v14 and the current PF2e and SF2e systems.
 
 ## New
