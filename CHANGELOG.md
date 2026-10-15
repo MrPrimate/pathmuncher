@@ -1,5 +1,7 @@
 # Next up
 
+# 2.0.1
+
 - Fix: importing a character with a mythic calling failed when the world had mythic rules enabled.
 - A focus spell a feat gives "of your main casting tradition" (Wildspell Dedication's Spellsurge), which Pathbuilder lists under no tradition, is imported with the class's focus spells. A character without a spellcasting class is asked which of their traditions it is, with the other choices the build doesn't settle; the answer is remembered for the next import.
 
