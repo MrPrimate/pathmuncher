@@ -82,6 +82,15 @@
       prompts: [],
       knownGaps: [],
     },
+    "mythic-sorcerer12": {
+      unmatchedSpecials: [],
+      // as in generated/sorcerer-01, the build it was made from: the background's Assurance, and the
+      // second bloodline, which the "Genie (Marid)" special doesn't settle
+      prompts: ["Assurance", "Crossblooded Evolution"],
+      knownGaps: [
+        "feat in bonus feats: Student of the Canon [Awarded Feat 1] (expected null)",
+      ],
+    },
     "jack-necromancer9": {
       // the others are sections of Basic Undead Benefits and Necromancer Spellcasting; Thralls has no item
       // and is ignored

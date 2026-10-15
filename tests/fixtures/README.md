@@ -12,6 +12,7 @@ reuses ids, so the ones taken from issues are not necessarily the characters fir
 | `345816-guardian3.json` | Minotaur Guardian 3 | Custom Mixed Heritage; partial boost breakdown; shield; Free Archetype | issue #6 |
 | `422753-fighter5.json` | Kholo Fighter 5 | Free Archetype; Exemplar Dedication with ikon choices | issue #13 |
 | `477013-fighter4-archer.json` | Human Fighter 4 | Built for these tests on Pathbuilder 2e Web v110, core books only, 2026-10-07. No Free Archetype: Archer Dedication and Quick Shot taken in class slots; Natural Ambition (parent) granting Exacting Strike (child); Skilled Human's skill choice; Assurance (Athletics); Battle Medicine in a general slot | built |
+| `mythic-sorcerer12.json` | Goblin Sorcerer 12 | Mythic rules: Acrobat's Calling (only in specials, with the Rewrite Fate it grants), mythic feats at 2 to 10 including Mythic Magic (its own spellcasting entry, left empty: Pathbuilder offers no spells for it) and a destiny (Wildspell Dedication, with Spellsurge under an unassigned focus tradition) at 12 | built in Pathbuilder 2e Web v111, 2026-10-14, from `generated/sorcerer-01` at level 12 with Show Mythic options on |
 | `jack-necromancer9.json` | Skeleton Necromancer 9 | Grim Fascination's choice only in specials, under Pathbuilder's name ("Bone Fascination" for pf2e's "Bone"); spellbook spells prepared in higher slots (Fear at rank 3); Veil, a remastered name; Free Archetype | Jack, 2026-10-07 (no export id) |
 
 ## Generated builds (`generated/`)
@@ -140,6 +141,12 @@ From `477013-fighter4-archer` (built to check) and the others:
   - a UUID for a Custom Feat Choice (an extra, bonus feat)
 - **Child choices** (`"childChoice"`, e.g. the class feat Natural Ambition grants) carry the parent's
   label as a prefix: "Natural Ambition Class FeatHuman Feat 1".
+- **Mythic** (from `mythic-sorcerer12`):
+  - The calling is only in `specials` ("Acrobat's Calling"), next to the "Rewrite Fate" it grants.
+  - Mythic feats are `"Mythic Feat"`, labelled "Mythic Feat N" at every even level. The destiny at 12
+    is `"Destiny Mythic Feat"`, labelled "Mythic Feat 12".
+  - pf2e only has the mythic feat group, and the calling's slot (`mythic-calling`), when its Mythic
+    setting is on; `pmt.useBuildVariants` turns it on for a mythic build.
 - **Some choices are only in `specials`**, such as Skilled Human's skill ("Medicine").
 - **Some are not exported at all**, only their effect, such as the Fighter's class skill (Athletics)
   in `proficiencies`.

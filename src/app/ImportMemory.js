@@ -7,7 +7,8 @@ import logger from "../logger.js";
  * them again rather than ask. The answers are keyed by what was asked, so each still applies when the
  * same question comes up and is ignored when it doesn't:
  *  - choices: a choice the build doesn't settle, by Pathmuncher's key for it, answered in the choices
- *    dialog or by the system when the item was created
+ *    dialog or by the system when the item was created (or pathmuncher's own, such as the tradition of
+ *    a focus spell "of your main casting tradition")
  *  - deity: the answer to a deity that doesn't allow the build's choices
  *  - core: an item dropped in for a class, ancestry, heritage or background no compendium has
  *  - keep: the items added by hand that were kept
@@ -121,8 +122,12 @@ export class ImportMemory {
    */
   #choiceAnswers(pathmuncher) {
     const answers = {};
-    for (const { key, documentId, flag } of pathmuncher.openChoices ?? []) {
-      const value = this.actor.items.get(documentId)?.flags?.[game.system.id]?.rulesSelections?.[flag];
+    for (const open of pathmuncher.openChoices ?? []) {
+      const { key, documentId, flag } = open;
+      // a choice of pathmuncher's own (Pathmuncher#askChoice) holds its answer
+      const value = Object.hasOwn(open, "answer")
+        ? open.answer
+        : this.actor.items.get(documentId)?.flags?.[game.system.id]?.rulesSelections?.[flag];
       if (value !== undefined && value !== null) answers[key] = foundry.utils.deepClone(value);
     }
     return answers;

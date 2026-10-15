@@ -292,7 +292,8 @@ export class Pathmuncher {
     if (location && !this.usedLocations.has(location)) {
       document.system.location = location;
       // as the system records when a feat is dropped into a slot
-      foundry.utils.setProperty(document, "system.level.taken", parseInt(location.split("-").pop(), 10));
+      const taken = Seasoning.getFeatLocationLevel(location);
+      if (taken !== null) foundry.utils.setProperty(document, "system.level.taken", taken);
       this.usedLocations.add(location);
     }
   }
@@ -1113,6 +1114,34 @@ export class Pathmuncher {
     return true;
   }
 
+  /**
+   * Asks a choice of pathmuncher's own, not an item rule's (which tradition Wildspell Dedication's
+   * focus spell is of), with the choices the build doesn't settle. The last import's answer for its
+   * key is given again if it is still an option; otherwise it is held back for the choices dialog.
+   * apply(value) is called with the answer, or unanswered() if none is given. key: the same on the
+   * next import of the build; document: the item it is about, whose description the dialog shows;
+   * choices: [{ value, label, img }]. Whether it is (or will be) answered: false when it can't be asked.
+   */
+  askChoice({ key, document, prompt, choices, apply, unanswered = () => null }) {
+    const open = { key, answer: undefined };
+    this.openChoices.push(open);
+    const answer = (value) => {
+      open.answer = value;
+      apply(value);
+    };
+    const last = Object.hasOwn(this.options.choiceAnswers ?? {}, key)
+      ? choices.find((c) => c.value === this.options.choiceAnswers[key])
+      : undefined;
+    if (last) {
+      answer(last.value);
+      return true;
+    }
+    if (!this.options.resolveUnansweredChoices) return false;
+    this.unansweredChoices.push({ id: foundry.utils.randomID(), document, prompt, choices, taken: [], apply: answer, unanswered });
+    logger.debug(`Asking a choice for ${document.name}`, { key, choices });
+    return true;
+  }
+
   /** The item a choice names, for its description: its value, or for slugs (a weapon's) the equipment of that name. */
   #choiceUuid(ruleEntry, value, label) {
     if (Pathmuncher.isUuid(value)) return value;
@@ -1126,16 +1155,16 @@ export class Pathmuncher {
    * [{ id, item: { name, img, type }, prompt, origin, taken, details, choices: [{ value, label, img, uuid }] }]
    */
   get unansweredChoiceList() {
-    return this.unansweredChoices.map(({ id, document, ruleEntry, choices, taken }) => {
+    return this.unansweredChoices.map(({ id, document, ruleEntry, prompt, choices, taken }) => {
       // what the other copies chose, now that every copy is in the result: a copy read after this
       // choice was held back (the build's own Assurance after Raised by Belief's) is left out too
-      const takenNow = [...taken, ...this.#takenElsewhere(document, ruleEntry, choices)]
+      const takenNow = [...taken, ...(ruleEntry ? this.#takenElsewhere(document, ruleEntry, choices) : [])]
         .filter((t, i, all) => all.findIndex((o) => o.value === t.value) === i);
       const open = choices.filter((c) => !takenNow.some((t) => t.value === c.value));
       return {
         id,
         item: { name: document.name, img: document.img, type: document.type },
-        prompt: utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : "",
+        prompt: prompt ?? (utils.isString(ruleEntry.prompt) ? game.i18n.localize(ruleEntry.prompt) : ""),
         // where the item comes from (what granted it, or the item it is part of), and what other copies of it already chose
         origin: this.#resultItemName(document.flags?.[game.system.id]?.grantedBy?.id) ?? this.#resultItemName(document.system?.location),
         taken: takenNow.map(({ label, source }) => ({ label, source })),
@@ -1168,6 +1197,12 @@ export class Pathmuncher {
     const picked = new Set();
     for (const entry of this.unansweredChoices) {
       const choice = entry.choices.find((c) => c.value === answers[entry.id]);
+      // a choice of pathmuncher's own (askChoice)
+      if (entry.apply) {
+        if (choice) entry.apply(choice.value);
+        else entry.unanswered();
+        continue;
+      }
       if (!choice) continue;
       const key = `${entry.document.system.slug ?? entry.document.name}|${entry.flag}|${choice.value}`;
       if (picked.has(key)) continue;

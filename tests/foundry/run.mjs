@@ -77,7 +77,7 @@ await sleep(3000);
 if (!(await waitReady())) {
   await evaluate(`(() => {
     const user = ${JSON.stringify(FVTT_USER)};
-    const select = document.querySelector("select[name=userid]");
+    const select = document.querySelector("select[name=userid], select[name=userId]");
     if (select) select.value = [...select.options].find((o) => o.textContent.trim() === user)?.value;
     else document.querySelector("#join-username").value = user;
     const form = (select ?? document.querySelector("#join-username")).closest("form");

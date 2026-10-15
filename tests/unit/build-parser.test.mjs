@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { BuildParser } from "../../src/app/BuildParser.js";
 import { FeatureNames } from "../../src/app/FeatureNames.js";
 import { ParsedEntry } from "../../src/app/ParsedEntry.js";
+import { Seasoning } from "../../src/app/Seasoning.js";
 
 const fixtureDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../fixtures/pathbuilder");
 const exports = [fixtureDir, path.join(fixtureDir, "generated"), path.join(fixtureDir, "edge")].flatMap((dir) => fs.readdirSync(dir)
@@ -50,4 +51,30 @@ describe("BuildParser", () => {
       }
     });
   }
+});
+
+describe("BuildParser with the mythic rules", () => {
+  const build = BuildParser.getBuildFromJson(JSON.parse(fs.readFileSync(path.join(fixtureDir, "mythic-sorcerer12.json"), "utf8")));
+  const parsed = parse(build);
+  const location = (entry) => Seasoning.getFoundryFeatLocation(entry, { className: build.class });
+
+  it("makes the calling, a special, a mythic feat for the calling's slot", () => {
+    const calling = parsed.specials.find((s) => s.name === "Acrobat's Calling");
+    assert.equal(calling.type, "Mythic Feat");
+    assert.equal(calling.level, "calling");
+    assert.equal(location(calling), "mythic-calling");
+    assert.equal(Seasoning.getFeatLocationLevel(location(calling)), null);
+  });
+
+  it("puts mythic feats and the destiny in the mythic slots, taken at the slot's level", () => {
+    const mythic = parsed.feats.filter((f) => ["Mythic Feat", "Destiny Mythic Feat"].includes(f.type));
+    assert.deepEqual(mythic.map((f) => [f.originalName, location(f), Seasoning.getFeatLocationLevel(location(f))]), [
+      ["Ears that Hear the Truth", "mythic-2", 2],
+      ["Godspeed", "mythic-4", 4],
+      ["Divert Destiny", "mythic-6", 6],
+      ["Mythic Magic", "mythic-8", 8],
+      ["Mythic Strike", "mythic-10", 10],
+      ["Wildspell Dedication", "mythic-12", 12],
+    ]);
+  });
 });

@@ -171,6 +171,7 @@
         "Slot": "Pathbuilder slot: {slot}, level {level}.",
         "Taken": "Already chosen on another {item}: {list}. Those are not offered here.",
         "TakenFrom": "{choice} (from {source})",
+        "MainTradition": "Which of your traditions is {spell} of? The feat gives it your main casting tradition, and the build has no spellcasting class to say which.",
         "Search": "Filter options",
         "Clear": "Clear this choice",
         "Import": "Import",

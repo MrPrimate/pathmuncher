@@ -10,6 +10,7 @@
     "314710-gunslinger1": [],
     "422753-fighter5": [],
     "477013-fighter4-archer": [],
+    "mythic-sorcerer12": [],
   };
 
   for (const [name, known] of Object.entries(KNOWN_DIFFERENCES)) {

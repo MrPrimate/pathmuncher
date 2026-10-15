@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
+import CONSTANTS from "../constants.js";
 import { spellRename } from "../data/spells.js";
 import logger from "../logger.js";
 import utils from "../utils.js";
@@ -394,6 +395,98 @@ export class SpellBuilder {
     }
   }
 
+  static TRADITIONS = ["arcane", "divine", "occult", "primal"];
+
+  /**
+   * The build's spellcasting traditions, each with the casting attribute and proficiency a focus
+   * spell of it is cast with: its focus spells' where it has them, else its spellcasting's (not
+   * innate if it can be helped, the best proficiency first). The class's tradition is `main`.
+   */
+  #castingTraditions() {
+    const casters = (this.source.spellCasters ?? [])
+      .filter((c) => SpellBuilder.TRADITIONS.includes(c.magicTradition))
+      .sort((a, b) => Number(!!a.innate) - Number(!!b.innate) || (b.proficiency ?? 0) - (a.proficiency ?? 0));
+    const traditions = new Map();
+    for (const tradition of SpellBuilder.TRADITIONS) {
+      const [ability, focus] = Object.entries(this.source.focus?.[tradition] ?? {})[0] ?? [];
+      if (ability) traditions.set(tradition, { tradition, ability, proficiency: focus.proficiency ?? 0 });
+    }
+    for (const caster of casters) {
+      if (!traditions.has(caster.magicTradition)) {
+        traditions.set(caster.magicTradition, { tradition: caster.magicTradition, ability: caster.ability, proficiency: caster.proficiency ?? 0 });
+      }
+    }
+    const main = casters.find((c) => c.name === this.source.class && !c.innate)?.magicTradition ?? null;
+    return { main, traditions: [...traditions.values()] };
+  }
+
+  /** Adds a focus spell to the build's focus spells of a tradition, so it is imported with them. */
+  #addFocusSpell(spell, cantrip, { tradition, ability, proficiency }) {
+    const focus = foundry.utils.getProperty(this.source, `focus.${tradition}.${ability}`)
+      ?? { abilityBonus: 0, proficiency, itemBonus: 0, focusCantrips: [], focusSpells: [] };
+    focus[cantrip ? "focusCantrips" : "focusSpells"] = [...(focus[cantrip ? "focusCantrips" : "focusSpells"] ?? []), spell];
+    foundry.utils.setProperty(this.source, `focus.${tradition}.${ability}`, focus);
+  }
+
+  /**
+   * The focus spells Pathbuilder lists under no tradition (focus.Unassigned) that a feat grants "of
+   * your main casting tradition" (Wildspell Dedication's Spellsurge). They take the class's tradition;
+   * without one, the character's tradition, or one of them chosen with the other choices the build
+   * doesn't settle (the answer remembered for the next import). With none, any tradition is offered.
+   */
+  async #placeMainTraditionSpells() {
+    const unassigned = foundry.utils.getProperty(this.source, "focus.Unassigned.General");
+    if (!unassigned) return;
+    const { main, traditions } = this.#castingTraditions();
+    for (const cantrip of [true, false]) {
+      const list = cantrip ? "focusCantrips" : "focusSpells";
+      for (const spell of [...(unassigned[list] ?? [])]) {
+        const { spellName, indexMatch } = this.#spellMatch(spell);
+        const feat = this.result.feats.find((f) => {
+          const description = f.system?.description?.value ?? "";
+          return (/main casting tradition/i).test(description)
+            && ((indexMatch && description.includes(indexMatch.i._id)) || description.toLowerCase().includes(spellName.toLowerCase()));
+        });
+        if (!feat) continue;
+        unassigned[list] = unassigned[list].filter((s) => s !== spell);
+
+        const options = traditions.length > 0
+          ? traditions
+          : SpellBuilder.TRADITIONS.map((tradition) => ({ tradition, ability: this.source.keyability, proficiency: 0 }));
+        const chosen = options.find((o) => o.tradition === main) ?? (options.length === 1 ? options[0] : null);
+        logger.debug(`${spell} is of the main casting tradition`, { feat: feat.name, main, options, chosen });
+        if (chosen) {
+          this.#addFocusSpell(spell, cantrip, chosen);
+          continue;
+        }
+
+        // asked: the spell is made now, and placed once the tradition is chosen
+        const itemData = await this.#loadSpell(spell, null, { spell, mainTradition: true });
+        if (!itemData) continue;
+        const unplaced = () => this.bad.push({ pbName: `${spell} (${feat.name})`, type: "spell", details: { reason: "no tradition chosen", options } });
+        const asked = this.pm.askChoice({
+          key: `${Seasoning.slug(feat.name)}>${Seasoning.slug(spellName)}#tradition`,
+          document: feat,
+          prompt: game.i18n.format(`${CONSTANTS.FLAG_NAME}.Dialogs.UnansweredChoices.MainTradition`, { spell: itemData.name }),
+          choices: options.map((o) => ({
+            value: o.tradition,
+            label: game.i18n.localize(CONFIG.PF2E?.magicTraditions?.[o.tradition] ?? utils.capitalize(o.tradition)),
+            img: itemData.img,
+          })),
+          apply: (value) => {
+            const option = options.find((o) => o.tradition === value);
+            const instance = this.result.casters.find((c) => c.system.prepared?.value === "focus" && c.system.tradition?.value === value)
+              ?? this.#generateFocusSpellCaster(option.proficiency, option.ability, value);
+            itemData.system.location.value = instance._id;
+            this.result.spells.push(itemData);
+          },
+          unanswered: unplaced,
+        });
+        if (!asked) unplaced();
+      }
+    }
+  }
+
   async processSpells() {
     await this.#prefetchSpells();
     for (const caster of this.source.spellCasters) {
@@ -422,6 +515,7 @@ export class SpellBuilder {
     }
 
     await this.#addStudiousSpells();
+    await this.#placeMainTraditionSpells();
 
     if (this.parsed.feats.some((f) => f.name === "Initiate Warden")) {
       const spellData = foundry.utils.getProperty(this.source, "focus.Unassigned.General");

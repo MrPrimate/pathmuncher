@@ -567,4 +567,76 @@
     cancelled.source = game.modules.get("pathmuncher").api.Pathmuncher.getBuildFromJson(withBullets());
     t.equal(await cancelled.processCharacter(), false, "cancelled");
   });
+
+  // Wildspell Dedication gives Spellsurge "of your main casting tradition"; Pathbuilder lists it under
+  // no tradition (focus.Unassigned)
+  const WILDSPELL_KEY = "wildspell-dedication>spellsurge#tradition";
+  const spellsurgeEntry = (actor) => actor.items.get(actor.itemTypes.spell.find((s) => s.slug === "spellsurge")?.system.location.value);
+  /** The mythic sorcerer with its spellcasting not the class's, so it has no main casting tradition. */
+  const withoutClassCasting = ({ mythicMagic = true } = {}) => {
+    const exportJson = fixture("mythic-sorcerer12");
+    const { build } = exportJson;
+    build.spellCasters.find((c) => c.name === "Sorcerer").name = "PMTEST Spellcasting";
+    if (!mythicMagic) build.spellCasters = build.spellCasters.filter((c) => c.name !== "Mythic Magic");
+    return exportJson;
+  };
+  /** Answers the choices dialog's main tradition question with answer, noting what it offered. */
+  const answerTradition = (answer, asked) => (unanswered) => {
+    const entry = unanswered.find((e) => e.item.name === "Wildspell Dedication");
+    if (entry) asked.push(entry.choices.map((c) => c.value));
+    return entry && answer ? { [entry.id]: answer } : {};
+  };
+
+  test("processing: a focus spell of the main casting tradition is of the class's tradition", async (t) => {
+    const exportJson = fixture("mythic-sorcerer12");
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "main tradition class");
+    const asked = [];
+
+    await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices: answerTradition(null, asked) });
+
+    t.deepEqual(asked, [], "not asked");
+    t.equal(spellsurgeEntry(actor)?.name, "Occult Focus Tradition", "Spellsurge with the sorcerer's focus spells");
+    t.equal(actor.itemTypes.spellcastingEntry.filter((e) => e.system.prepared.value === "focus").length, 1, "focus entries");
+  });
+
+  test("processing: without a class tradition, the main casting tradition is asked and remembered", async (t) => {
+    const exportJson = withoutClassCasting();
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "main tradition asked");
+    const asked = [];
+
+    const pm = await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices: answerTradition("arcane", asked) });
+
+    t.deepEqual(asked, [["occult", "arcane"]], "the build's traditions offered");
+    const entry = spellsurgeEntry(actor);
+    t.deepEqual([entry?.system.tradition.value, entry?.system.prepared.value, entry?.system.ability.value], ["arcane", "focus", "cha"], "Spellsurge's entry");
+    t.equal(pm.openChoices.find((c) => c.key === WILDSPELL_KEY)?.answer, "arcane", "answer kept for the next import");
+
+    // the next import gives the answer again
+    const again = [];
+    await pmt.importBuild(actor, withoutClassCasting(), { choiceAnswers: { [WILDSPELL_KEY]: "occult" }, resolveUnansweredChoices: answerTradition(null, again) });
+    t.deepEqual(again, [], "not asked again");
+    t.equal(spellsurgeEntry(actor)?.system.tradition.value, "occult", "the remembered tradition");
+  });
+
+  test("processing: a main casting tradition left unchosen is reported, and a single tradition isn't asked", async (t) => {
+    const exportJson = withoutClassCasting();
+    await pmt.useBuildVariants(t, exportJson.build);
+    pmt.answerPrompts(t, exportJson.build);
+    const actor = await pmt.actor(t, "main tradition skipped");
+
+    const pm = await pmt.importBuild(actor, exportJson, { resolveUnansweredChoices: answerTradition(null, []) });
+
+    t.equal(spellsurgeEntry(actor), undefined, "Spellsurge not imported");
+    t.deepEqual(pm.getImportReport().find((g) => g.type === "spell")?.names, ["Spellsurge (Wildspell Dedication)"], "reported");
+
+    const single = withoutClassCasting({ mythicMagic: false });
+    const asked = [];
+    await pmt.importBuild(actor, single, { resolveUnansweredChoices: answerTradition("occult", asked) });
+    t.deepEqual(asked, [], "one tradition: not asked");
+    t.equal(spellsurgeEntry(actor)?.name, "Occult Focus Tradition", "the build's only tradition");
+  });
 })();

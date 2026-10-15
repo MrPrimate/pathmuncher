@@ -158,6 +158,15 @@ export class Seasoning {
       ?? Seasoning.#featLocationFromType(type, level, { freeArchetype });
   }
 
+  /**
+   * The level of a feat slot ("class-4" is 4), or null for a slot with none: the mythic calling's
+   * ("mythic-calling") is not tied to a level.
+   */
+  static getFeatLocationLevel(location) {
+    const level = (/^.+-(\d+)$/).exec(location ?? "")?.[1];
+    return level ? Number(level) : null;
+  }
+
   static #featLocationFromLabel(label, type, { className, freeArchetype }) {
     const match = label.match(/^(.+?) (?:Feat )?(\d+)$/);
     if (!match) return null;

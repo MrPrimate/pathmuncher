@@ -1,0 +1,568 @@
+{
+  "success": true,
+  "build": {
+    "name": "PMT Mythic Sorcerer",
+    "class": "Sorcerer",
+    "dualClass": null,
+    "level": 12,
+    "xp": 0,
+    "ancestry": "Goblin",
+    "heritage": "Charhide Goblin",
+    "background": "Raised by Belief [PlaceHolder]",
+    "alignment": "N",
+    "gender": "Not set",
+    "age": "Not set",
+    "deity": "Not set",
+    "size": 1,
+    "sizeName": "Small",
+    "keyability": "cha",
+    "languages": [
+      "Draconic",
+      "Dwarven"
+    ],
+    "rituals": [],
+    "resistances": [
+      "fire 6"
+    ],
+    "inventorMods": [],
+    "abilities": {
+      "str": 18,
+      "dex": 14,
+      "con": 16,
+      "int": 12,
+      "wis": 12,
+      "cha": 19,
+      "breakdown": {
+        "ancestryFree": [],
+        "ancestryBoosts": [
+          "Dex",
+          "Cha"
+        ],
+        "ancestryFlaws": [
+          "Wis"
+        ],
+        "backgroundBoosts": [
+          "Str",
+          "Str"
+        ],
+        "classBoosts": [
+          "Cha"
+        ],
+        "mapLevelledBoosts": {
+          "1": [
+            "Cha",
+            "Con",
+            "Dex",
+            "Wis"
+          ],
+          "5": [
+            "Cha",
+            "Con",
+            "Wis",
+            "Str"
+          ],
+          "10": [
+            "Cha",
+            "Con",
+            "Str",
+            "Int"
+          ]
+        }
+      }
+    },
+    "attributes": {
+      "ancestryhp": 6,
+      "classhp": 6,
+      "bonushp": 0,
+      "bonushpPerLevel": 0,
+      "speed": 25,
+      "speedBonus": 0
+    },
+    "proficiencies": {
+      "classDC": 2,
+      "perception": 4,
+      "fortitude": 4,
+      "reflex": 4,
+      "will": 4,
+      "heavy": 0,
+      "medium": 0,
+      "light": 2,
+      "unarmored": 2,
+      "advanced": 0,
+      "martial": 0,
+      "simple": 4,
+      "unarmed": 4,
+      "castingArcane": 0,
+      "castingDivine": 0,
+      "castingOccult": 4,
+      "castingPrimal": 0,
+      "acrobatics": 6,
+      "arcana": 0,
+      "athletics": 0,
+      "crafting": 0,
+      "deception": 0,
+      "diplomacy": 0,
+      "intimidation": 2,
+      "medicine": 6,
+      "nature": 0,
+      "occultism": 2,
+      "performance": 0,
+      "religion": 2,
+      "society": 0,
+      "stealth": 0,
+      "survival": 4,
+      "thievery": 2,
+      "piloting": 0,
+      "computers": 0
+    },
+    "mods": {},
+    "feats": [
+      [
+        "Student of the Canon",
+        null,
+        "Awarded Feat",
+        1
+      ],
+      [
+        "Charhide Goblin",
+        null,
+        "Heritage",
+        1,
+        "Heritage Feat",
+        "standardChoice",
+        null
+      ],
+      [
+        "Very Sneaky",
+        null,
+        "Ancestry Feat",
+        1,
+        "Goblin Feat 1",
+        "standardChoice",
+        null
+      ],
+      [
+        "Steady Balance",
+        null,
+        "Skill Feat",
+        2,
+        "Skill Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Cantrip Expansion",
+        null,
+        "Class Feat",
+        2,
+        "Sorcerer Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Ears that Hear the Truth",
+        null,
+        "Mythic Feat",
+        2,
+        "Mythic Feat 2",
+        "standardChoice",
+        null
+      ],
+      [
+        "Armor Proficiency",
+        null,
+        "General Feat",
+        3,
+        "General Feat 3",
+        "standardChoice",
+        null
+      ],
+      [
+        "Forensic Acumen",
+        null,
+        "Skill Feat",
+        4,
+        "Skill Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Split Shot",
+        null,
+        "Class Feat",
+        4,
+        "Sorcerer Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "Godspeed",
+        null,
+        "Mythic Feat",
+        4,
+        "Mythic Feat 4",
+        "standardChoice",
+        null
+      ],
+      [
+        "City Scavenger",
+        null,
+        "Ancestry Feat",
+        5,
+        "Goblin Feat 5",
+        "standardChoice",
+        null
+      ],
+      [
+        "Tumbling Teamwork",
+        null,
+        "Skill Feat",
+        6,
+        "Skill Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Bespell Strikes",
+        null,
+        "Class Feat",
+        6,
+        "Sorcerer Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Divert Destiny",
+        null,
+        "Mythic Feat",
+        6,
+        "Mythic Feat 6",
+        "standardChoice",
+        null
+      ],
+      [
+        "Keen Follower",
+        null,
+        "General Feat",
+        7,
+        "General Feat 7",
+        "standardChoice",
+        null
+      ],
+      [
+        "Kip Up",
+        null,
+        "Skill Feat",
+        8,
+        "Skill Feat 8",
+        "standardChoice",
+        null
+      ],
+      [
+        "Crossblooded Evolution",
+        null,
+        "Class Feat",
+        8,
+        "Sorcerer Feat 8",
+        "standardChoice",
+        null
+      ],
+      [
+        "Mythic Magic",
+        null,
+        "Mythic Feat",
+        8,
+        "Mythic Feat 8",
+        "standardChoice",
+        null
+      ],
+      [
+        "Vandal",
+        null,
+        "Ancestry Feat",
+        9,
+        "Goblin Feat 9",
+        "standardChoice",
+        null
+      ],
+      [
+        "Advanced First Aid",
+        null,
+        "Skill Feat",
+        10,
+        "Skill Feat 10",
+        "standardChoice",
+        null
+      ],
+      [
+        "Spell Relay",
+        null,
+        "Class Feat",
+        10,
+        "Sorcerer Feat 10",
+        "standardChoice",
+        null
+      ],
+      [
+        "Mythic Strike",
+        null,
+        "Mythic Feat",
+        10,
+        "Mythic Feat 10",
+        "standardChoice",
+        null
+      ],
+      [
+        "Incredible Investiture",
+        null,
+        "General Feat",
+        11,
+        "General Feat 11",
+        "standardChoice",
+        null
+      ],
+      [
+        "Quick Squeeze",
+        null,
+        "Skill Feat",
+        12,
+        "Skill Feat 12",
+        "standardChoice",
+        null
+      ],
+      [
+        "Bloodline Focus",
+        null,
+        "Class Feat",
+        12,
+        "Sorcerer Feat 12",
+        "standardChoice",
+        null
+      ],
+      [
+        "Wildspell Dedication",
+        null,
+        "Destiny Mythic Feat",
+        12,
+        "Mythic Feat 12",
+        "standardChoice",
+        null
+      ]
+    ],
+    "specials": [
+      "Bloodline: Aberrant",
+      "Sorcerous Potency",
+      "Blood Magic",
+      "Sorcerer Spellcasting",
+      "Darkvision",
+      "Rewrite Fate",
+      "Acrobat's Calling",
+      "Signature Spells",
+      "Magical Fortitude",
+      "Expert Spellcaster",
+      "Genie (Marid)",
+      "Charisma",
+      "Reflex Expertise",
+      "Perception Expertise",
+      "Weapon Expertise",
+      "Charhide Goblin"
+    ],
+    "lores": [
+      [
+        "None",
+        2
+      ]
+    ],
+    "equipmentContainers": {},
+    "equipment": [],
+    "specificProficiencies": {
+      "trained": [],
+      "expert": [],
+      "master": [],
+      "legendary": []
+    },
+    "weapons": [],
+    "money": {
+      "cp": 0,
+      "sp": 0,
+      "gp": 15,
+      "pp": 0
+    },
+    "armor": [],
+    "spellCasters": [
+      {
+        "name": "Sorcerer",
+        "magicTradition": "occult",
+        "spellcastingType": "spontaneous",
+        "ability": "cha",
+        "proficiency": 4,
+        "focusPoints": 0,
+        "innate": false,
+        "perDay": [
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": [
+              "Daze",
+              "Read the Air",
+              "Light",
+              "Warp Step",
+              "Shield"
+            ]
+          },
+          {
+            "spellLevel": 1,
+            "list": [
+              "Bane",
+              "Spirit Link",
+              "Biting Words"
+            ]
+          },
+          {
+            "spellLevel": 2,
+            "list": [
+              "Darkness",
+              "Vomit Swarm",
+              "Thundering Dominance"
+            ]
+          },
+          {
+            "spellLevel": 3,
+            "list": [
+              "Dream Message",
+              "Bottomless Stomach",
+              "Time Pocket"
+            ]
+          },
+          {
+            "spellLevel": 4,
+            "list": [
+              "Outcast's Curse",
+              "Implement of Destruction",
+              "Haunting Spirit"
+            ]
+          },
+          {
+            "spellLevel": 5,
+            "list": [
+              "Mariner's Curse",
+              "Rip the Spirit",
+              "Horizon's Veil"
+            ]
+          },
+          {
+            "spellLevel": 6,
+            "list": [
+              "Vampiric Exsanguination",
+              "Cryostasis",
+              "Zealous Conviction"
+            ]
+          }
+        ],
+        "prepared": [],
+        "blendedSpells": []
+      },
+      {
+        "name": "Mythic Magic",
+        "magicTradition": "arcane",
+        "spellcastingType": "spontaneous",
+        "ability": "cha",
+        "proficiency": 0,
+        "focusPoints": 0,
+        "innate": false,
+        "perDay": [
+          0,
+          0,
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spells": [
+          {
+            "spellLevel": 0,
+            "list": []
+          },
+          {
+            "spellLevel": 1,
+            "list": []
+          },
+          {
+            "spellLevel": 2,
+            "list": []
+          },
+          {
+            "spellLevel": 3,
+            "list": []
+          },
+          {
+            "spellLevel": 4,
+            "list": []
+          },
+          {
+            "spellLevel": 5,
+            "list": []
+          },
+          {
+            "spellLevel": 6,
+            "list": []
+          }
+        ],
+        "prepared": [],
+        "blendedSpells": []
+      }
+    ],
+    "focusPoints": 2,
+    "focus": {
+      "occult": {
+        "cha": {
+          "abilityBonus": 4,
+          "proficiency": 4,
+          "itemBonus": 0,
+          "focusCantrips": [],
+          "focusSpells": [
+            "Tentacular Limbs"
+          ]
+        }
+      },
+      "Unassigned": {
+        "General": {
+          "abilityBonus": 0,
+          "proficiency": 0,
+          "itemBonus": 0,
+          "focusCantrips": [],
+          "focusSpells": [
+            "Spellsurge"
+          ]
+        }
+      }
+    },
+    "formula": [],
+    "acTotal": {
+      "acProfBonus": 14,
+      "acAbilityBonus": 2,
+      "acItemBonus": 0,
+      "acTotal": 26,
+      "shieldBonus": null
+    },
+    "pets": [],
+    "familiars": []
+  }
+}

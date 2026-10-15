@@ -93,6 +93,10 @@
     return actor;
   };
 
+  /** Whether a Pathbuilder build uses the mythic rules: a calling, or feats in mythic slots. */
+  pmt.isMythicBuild = (build) => (build.specials ?? []).some((s) => (/ Calling$/).test(s))
+    || (build.feats ?? []).some((f) => ["Mythic Feat", "Destiny Mythic Feat"].includes(f[2]));
+
   /** Sets the system's variant rules a Pathbuilder build was made with; restored after the test. */
   pmt.useBuildVariants = async (ctx, build) => {
     const { freeArchetype: fa, gradualBoosts: gradual } = api().Pathmuncher.detectVariants(build);
@@ -103,6 +107,11 @@
     };
     await game.settings.set(system, "freeArchetypeVariant", fa);
     await game.settings.set(system, "gradualBoostsVariant", gradual);
+    // pf2e's mythic setting adds the mythic feat group, with the calling's slot
+    if (game.settings.settings.has(`${system}.mythic`)) {
+      before.mythic = game.settings.get(system, "mythic");
+      await game.settings.set(system, "mythic", pmt.isMythicBuild(build) ? "enabled" : "disabled");
+    }
     ctx.cleanup(async () => {
       for (const [key, value] of Object.entries(before)) await game.settings.set(system, key, value);
     });
@@ -312,7 +321,8 @@
   /**
    * Which feat group and slot Pathbuilder put a feat in, from its slot label (feat[4]) and type, or
    * null for feats that come from somewhere else (child choices, awarded and heritage feats).
-   * Labels: "Magus Feat 2", "Elf Feat 1", "Skill Feat 2", "General Feat 3", "Free Archetype 2".
+   * Labels: "Magus Feat 2", "Elf Feat 1", "Skill Feat 2", "General Feat 3", "Free Archetype 2",
+   * "Mythic Feat 2" (a destiny's too, "Mythic Feat 12").
    */
   pmt.pathbuilderSlot = ([, , type, level, label, choice]) => {
     if (!label || choice === "childChoice" || ["Awarded Feat", "Heritage"].includes(type)) return null;
@@ -321,6 +331,7 @@
     if ((/^Free Archetype/).test(label)) return { groupId: "archetype", slotId: `archetype-${n}` };
     if ((/^Skill Feat/).test(label)) return { groupId: "skill", slotId: `skill-${n}` };
     if ((/^General Feat/).test(label)) return { groupId: "general", slotId: `general-${n}` };
+    if ((/^Mythic Feat/).test(label)) return { groupId: "mythic", slotId: `mythic-${n}` };
     if (type === "Ancestry Feat") return { groupId: "ancestry", slotId: `ancestry-${n}` };
     return { groupId: "class", slotId: `class-${n}` };
   };
@@ -334,7 +345,9 @@
   pmt.buildByHand = async (actor, build) => {
     const missing = [];
     await actor.update({ "system.details.level.value": build.level });
-    for (const [type, name] of [["ancestry", build.ancestry], ["heritage", build.heritage], ["background", build.background], ["class", build.class]]) {
+    // "Raised by Belief [PlaceHolder]": content Pathbuilder hasn't finished, under pf2e's name
+    const background = build.background?.replace(/\s*\[Placeholder\]$/i, "");
+    for (const [type, name] of [["ancestry", build.ancestry], ["heritage", build.heritage], ["background", background], ["class", build.class]]) {
       const doc = await pmt.findCompendiumItem(type, name);
       if (doc) await actor.createEmbeddedDocuments("Item", [doc.toObject()]);
       else missing.push(`${type}: ${name}`);
@@ -362,7 +375,7 @@
       .filter((f) => f.system.location === actor.class?.id)
       .map((f) => `${f.slug} @${f.system.level.value}`).sort(),
     slots: actor.itemTypes.feat
-      .filter((f) => (/^(ancestry|class|skill|general|archetype)-\d+$/).test(f.system.location ?? ""))
+      .filter((f) => (/^(ancestry|class|skill|general|archetype|mythic)-\d+$/).test(f.system.location ?? ""))
       .map((f) => `${f.system.location}: ${f.slug} taken ${f.system.level.taken}`).sort(),
   });
 
@@ -593,6 +606,7 @@
       if (t.startsWith("skill")) return "skill";
       if (t.startsWith("general")) return "general";
       if (t.startsWith("archetype")) return fa ? "archetype" : "class";
+      if (t.endsWith("mythic feat")) return "mythic";
       if (t.endsWith("feat") && t !== "awarded feat") return "class";
       return null;
     };
@@ -615,6 +629,13 @@
       else if (expected && group !== expected) problems.push(`feat in ${group} group: ${name} [${type} ${level}] (expected ${expected})`);
     }
 
+    // a mythic calling is only in the specials ("Acrobat's Calling"), and goes in the calling's slot
+    for (const name of (build.specials ?? []).filter((s) => (/ Calling$/).test(s))) {
+      const calling = [...variants(name)].map((v) => feats.get(v)).find(Boolean);
+      if (!calling) problems.push(`calling missing: ${name}`);
+      else if (calling.system.location !== "mythic-calling") problems.push(`calling ${name} in ${calling.system.location ?? null} (expected mythic-calling)`);
+    }
+
     // what the system itself would record: class features at the level the class grants them,
     // slotted feats taken at their slot's level
     const classGrants = new Map(Object.values(actor.class?.system.items ?? {}).map((g) => [g.uuid, g.level]));
@@ -623,7 +644,7 @@
       if (f.system.location === actor.class?.id && grantLevel !== undefined && f.system.level.value !== grantLevel) {
         problems.push(`class feature ${f.name}: level ${f.system.level.value} (class grants it at ${grantLevel})`);
       }
-      const slotLevel = Number(String(f.system.location ?? "").match(/^(?:ancestry|class|skill|general|archetype)-(\d+)$/)?.[1]);
+      const slotLevel = Number(String(f.system.location ?? "").match(/^(?:ancestry|class|skill|general|archetype|mythic)-(\d+)$/)?.[1]);
       if (slotLevel && f.system.level.taken !== slotLevel) {
         problems.push(`feat ${f.name} in ${f.system.location}: taken at ${f.system.level.taken ?? null}`);
       }

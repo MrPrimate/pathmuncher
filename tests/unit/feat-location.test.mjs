@@ -58,6 +58,18 @@ describe("Seasoning.getFoundryFeatLocation for exports without labels", () => {
   });
 });
 
+describe("Seasoning.getFeatLocationLevel", () => {
+  it("reads the level from the slot", () => {
+    assert.equal(Seasoning.getFeatLocationLevel("class-4"), 4);
+    assert.equal(Seasoning.getFeatLocationLevel("mythic-12"), 12);
+  });
+
+  it("gives no level for the mythic calling's slot", () => {
+    assert.equal(Seasoning.getFeatLocationLevel("mythic-calling"), null);
+    assert.equal(Seasoning.getFeatLocationLevel(null), null);
+  });
+});
+
 describe("Pathmuncher.detectVariants", () => {
   it("reads Free Archetype and gradual boosts from the export", () => {
     assert.deepEqual(Pathmuncher.detectVariants(fixture("315329-magus9").build), { freeArchetype: true, gradualBoosts: true });
